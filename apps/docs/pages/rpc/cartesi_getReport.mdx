@@ -1,0 +1,18 @@
+# cartesi_getReport
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data: output } = await client.request("cartesi_getReport", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    report_index: "0x2A",
+});
+```
+
+## Return Type
+
+```ts twoslash
+import { type Report } from "@cartesi/rpc";
+```
