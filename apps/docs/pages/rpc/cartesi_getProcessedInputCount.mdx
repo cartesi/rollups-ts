@@ -1,0 +1,17 @@
+# cartesi_getProcessedInputCount
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const processedInputCount = await client.request("cartesi_getProcessedInputCount", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+});
+```
+
+## Return Type
+
+```ts twoslash
+import { type GetProcessedInputCountReturnType } from "@cartesi/rpc";
+```

@@ -1,0 +1,25 @@
+# cartesi_listApplications
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data, pagination } = await client.request("cartesi_listApplications", {
+    limit: 50,
+    offset: 0,
+});
+```
+
+## Return Type
+
+The `data` is an array of `Application`:
+
+```ts twoslash
+import {
+    type Application,
+    type ListApplicationsReturnType,
+} from "@cartesi/rpc";
+```
+
+For more information about pagination refer to the [pagination section](/rpc#pagination).
