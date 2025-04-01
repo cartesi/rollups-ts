@@ -4,8 +4,9 @@
     "private": true,
     "description": "Documentation for the project",
     "scripts": {
-        "dev": "vocs dev",
         "build": "vocs build",
+        "clean": "vocs clean",
+        "dev": "vocs dev",
         "preview": "vocs preview"
     },
     "dependencies": {
@@ -15,10 +16,11 @@
     },
     "devDependencies": {
         "@cartesi/rpc": "workspace:*",
+        "@cartesi/viem": "workspace:*",
         "@types/node": "^22.14.0",
         "@types/react": "^19.1.0",
-        "typescript": "5.8.2",
-        "viem": "^2.25.0"
+        "typescript": "5.8.3",
+        "viem": "^2.26.0"
     },
     "engines": {
         "node": ">=22"

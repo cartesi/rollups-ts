@@ -25,6 +25,9 @@
         "dev": "tsup --watch",
         "prepack": "run-s build"
     },
+    "publishConfig": {
+        "access": "public"
+    },
     "dependencies": {
         "json-rpc-2.0": "^1.7.0"
     },
