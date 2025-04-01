@@ -1,11 +1,14 @@
-import { defineConfig } from "vocs";
+import { Config, defineConfig } from "vocs";
 
-export default defineConfig({
+const config: Config = defineConfig({
     rootDir: ".",
     title: "Cartesi",
     description: "Documentation for Cartesi TypeScript libraries",
     baseUrl: "https://cartesi.github.io",
     basePath: "/rollups-ts",
+    vite: {
+        base: "/rollups-ts",
+    },
     logoUrl: "https://cartesi.io/favicon.svg",
     editLink: {
         pattern:
@@ -18,6 +21,109 @@ export default defineConfig({
             link: "/",
         },
         {
+            text: "Viem Extension",
+            items: [
+                {
+                    text: "Introduction",
+                    link: "/viem",
+                },
+                {
+                    text: "Public L1 Actions",
+                    collapsed: true,
+                    items: [
+                        {
+                            text: "estimateAddInputGas",
+                            link: "/viem/estimateAddInputGas",
+                        },
+                        {
+                            text: "estimateDepositEtherGas",
+                            link: "/viem/estimateDepositEtherGas",
+                        },
+                        {
+                            text: "estimateDepositERC20TokenGas",
+                            link: "/viem/estimateDepositERC20TokenGas",
+                        },
+                        {
+                            text: "estimateDepositERC721TokenGas",
+                            link: "/viem/estimateDepositERC721TokenGas",
+                        },
+                        {
+                            text: "estimateDepositSingleERC1155TokenGas",
+                            link: "/viem/estimateDepositSingleERC1155TokenGas",
+                        },
+                        {
+                            text: "estimateDepositBatchERC1155TokenGas",
+                            link: "/viem/estimateDepositBatchERC1155TokenGas",
+                        },
+                        {
+                            text: "estimateExecuteOutputGas",
+                            link: "/viem/estimateExecuteOutputGas",
+                        },
+                        {
+                            text: "validateOutput",
+                            link: "/viem/validateOutput",
+                        },
+                    ],
+                },
+                {
+                    text: "Wallet L1 Actions",
+                    collapsed: true,
+                    items: [
+                        { text: "addInput", link: "/viem/addInput" },
+                        { text: "depositEther", link: "/viem/depositEther" },
+                        {
+                            text: "depositERC20Tokens",
+                            link: "/viem/depositERC20Tokens",
+                        },
+                        {
+                            text: "depositERC721Token",
+                            link: "/viem/depositERC721Token",
+                        },
+                        {
+                            text: "depositSingleERC1155Token",
+                            link: "/viem/depositSingleERC1155Token",
+                        },
+                        {
+                            text: "depositBatchERC1155Token",
+                            link: "/viem/depositBatchERC1155Token",
+                        },
+                        { text: "executeOutput", link: "/viem/executeOutput" },
+                    ],
+                },
+                {
+                    text: "Public L2 Actions",
+                    collapsed: true,
+                    items: [
+                        {
+                            text: "listApplications",
+                            link: "/viem/listApplications",
+                        },
+                        {
+                            text: "getApplication",
+                            link: "/viem/getApplication",
+                        },
+                        { text: "listEpochs", link: "/viem/listEpochs" },
+                        { text: "getEpoch", link: "/viem/getEpoch" },
+                        { text: "listInputs", link: "/viem/listInputs" },
+                        { text: "getInput", link: "/viem/getInput" },
+                        { text: "listOutputs", link: "/viem/listOutputs" },
+                        { text: "getOutput", link: "/viem/getOutput" },
+                        { text: "listReports", link: "/viem/listReports" },
+                        { text: "getReport", link: "/viem/getReport" },
+                        {
+                            text: "getProcessedInputCount",
+                            link: "/viem/getProcessedInputCount",
+                        },
+                        {
+                            text: "getLastAcceptedEpoch",
+                            link: "/viem/getLastAcceptedEpoch",
+                        },
+                        { text: "waitForInput", link: "viem/waitForInput" },
+                    ],
+                },
+            ],
+        },
+        {
             text: "RPC Client",
             items: [
                 {
@@ -26,6 +132,7 @@ export default defineConfig({
                 },
                 {
                     text: "API",
+                    collapsed: true,
                     items: [
                         {
                             text: "createClient",
@@ -35,6 +142,7 @@ export default defineConfig({
                 },
                 {
                     text: "Methods",
+                    collapsed: true,
                     items: [
                         {
                             text: "cartesi_listApplications",
@@ -90,3 +198,5 @@ export default defineConfig({
         },
     ],
 });
+
+export default config;
