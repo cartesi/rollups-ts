@@ -1,0 +1,8 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@cartesi/docs": "0.0.0"
+  },
+  "changesets": []
+}
