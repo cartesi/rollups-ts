@@ -1,0 +1,25 @@
+{
+    "name": "@cartesi/docs",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Documentation for the project",
+    "scripts": {
+        "dev": "vocs dev",
+        "build": "vocs build",
+        "preview": "vocs preview"
+    },
+    "dependencies": {
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
+        "vocs": "latest"
+    },
+    "devDependencies": {
+        "@types/node": "^22.14.0",
+        "@types/react": "^19.1.0",
+        "typescript": "5.8.2",
+        "viem": "^2.25.0"
+    },
+    "engines": {
+        "node": ">=22"
+    }
+}
