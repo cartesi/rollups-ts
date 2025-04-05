@@ -14,6 +14,7 @@
         "vocs": "latest"
     },
     "devDependencies": {
+        "@cartesi/rpc": "workspace:*",
         "@types/node": "^22.14.0",
         "@types/react": "^19.1.0",
         "typescript": "5.8.2",

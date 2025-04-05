@@ -1,0 +1,25 @@
+{
+    "name": "@cartesi/rpc",
+    "version": "1.0.0",
+    "description": "Cartesi JSON-RPC Client",
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist/**"
+    ],
+    "scripts": {
+        "build": "tsup",
+        "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+        "dev": "tsup --watch",
+        "prepack": "run-s build"
+    },
+    "dependencies": {
+        "json-rpc-2.0": "^1.7.0"
+    },
+    "devDependencies": {
+        "npm-run-all": "^4.1.5",
+        "tsup": "^8.4.0",
+        "typescript": "^5.8.2"
+    }
+}
