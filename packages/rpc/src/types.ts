@@ -3,6 +3,13 @@ export type PaginationParams = {
     offset?: number;
 };
 
+export type Address = `0x${string}`;
+export type Hash = `0x${string}`;
+export type Hex = `0x${string}`;
+export type UnsignedInteger = `0x${string}`;
+export type Date = string;
+export type Duration = string;
+
 export type Pagination = {
     total_count: number;
     limit: number;
@@ -29,138 +36,146 @@ export type InputStatus =
     | "TIME_LIMIT_EXCEEDED"
     | "PAYLOAD_LENGTH_LIMIT_EXCEEDED";
 
-export type GetApplicationParams = { application: string };
+export type GetApplicationParams = { application: string | Address };
 
 export type GetApplicationReturnType = {
     name: string;
-    iapplication_address: string;
-    iconsensus_address: string;
-    iinputbox_address: string;
-    template_hash: string;
-    template_uri: string;
-    epoch_length: number;
-    data_availability: string;
-    state: string;
+    iapplication_address: Address;
+    iconsensus_address: Address;
+    iinputbox_address: Address;
+    template_hash: Hash;
+    epoch_length: UnsignedInteger;
+    data_availability: Hex;
+    state: "ENABLED" | "DISABLED" | "INOPERABLE";
     reason: string | null;
-    iinputbox_block: string;
-    last_input_check_block: string;
-    last_output_check_block: string;
-    processed_inputs: number;
-    created_at: string;
-    updated_at: string;
+    iinputbox_block: UnsignedInteger;
+    last_input_check_block: UnsignedInteger;
+    last_output_check_block: UnsignedInteger;
+    processed_inputs: UnsignedInteger;
+    created_at: Date;
+    updated_at: Date;
     execution_parameters: {
         snapshot_policy: "NONE" | "EACH_INPUT" | "EACH_EPOCH";
-        snapshot_retention: number;
-        advance_inc_cycles: number;
-        advance_max_cycles: number;
-        inspect_inc_cycles: number;
-        inspect_max_cycles: number;
-        advance_inc_deadline: number;
-        advance_max_deadline: number;
-        inspect_inc_deadline: number;
-        inspect_max_deadline: number;
-        load_deadline: number;
-        store_deadline: number;
-        fast_deadline: number;
+        advance_inc_cycles: UnsignedInteger;
+        advance_max_cycles: UnsignedInteger;
+        inspect_inc_cycles: UnsignedInteger;
+        inspect_max_cycles: UnsignedInteger;
+        advance_inc_deadline: Duration;
+        advance_max_deadline: Duration;
+        inspect_inc_deadline: Duration;
+        inspect_max_deadline: Duration;
+        load_deadline: Duration;
+        store_deadline: Duration;
+        fast_deadline: Duration;
         max_concurrent_inspects: number;
-        created_at: string;
-        updated_at: string;
+        created_at: Date;
+        updated_at: Date;
     };
 };
 
-export type GetEpochParams = { application: string; epoch_index: string };
+export type GetEpochParams = {
+    application: string | Address;
+    epoch_index: UnsignedInteger;
+};
 
 export type GetEpochReturnType = {
-    index: string;
-    first_block: string;
-    last_block: string;
-    claim_hash: string;
-    claim_transaction_hash: string;
+    index: UnsignedInteger;
+    first_block: UnsignedInteger;
+    last_block: UnsignedInteger;
+    claim_hash: Hash;
+    claim_transaction_hash: Hash;
     status: EpochStatus;
-    virtual_index: string;
-    created_at: string;
-    updated_at: string;
+    virtual_index: UnsignedInteger;
+    created_at: Date;
+    updated_at: Date;
 };
 
-export type GetInputParams = {
-    application: string;
-    input_index: string;
-};
-
-export type GetInputReturnType = {
-    epoch_index: string;
-    index: string;
-    block_number: string;
-    raw_data: string;
-    decoded_data: {
-        chain_id: string;
-        application_contract: string;
-        sender: string;
-        block_number: string;
-        block_timestamp: string;
-        prev_randao: string;
-        index: string;
-        payload: string;
-    };
-    status: InputStatus;
-    machine_hash: string;
-    outputs_hash: string;
-    transaction_reference: string;
-    created_at: string;
-    updated_at: string;
-};
-
-export type GetLastAcceptedEpochParams = { application: string };
+export type GetLastAcceptedEpochParams = { application: string | Address };
 
 export type GetLastAcceptedEpochReturnType = GetEpochReturnType;
 
+export type GetInputParams = {
+    application: string | Address;
+    input_index: UnsignedInteger;
+};
+
+export type GetInputReturnType = {
+    epoch_index: UnsignedInteger;
+    index: UnsignedInteger;
+    block_number: UnsignedInteger;
+    raw_data: Hex;
+    decoded_data: {
+        chain_id: string;
+        application_contract: Address;
+        sender: Address;
+        block_number: UnsignedInteger;
+        block_timestamp: UnsignedInteger;
+        prev_randao: string;
+        index: UnsignedInteger;
+        payload: Hex;
+    };
+    status: InputStatus;
+    machine_hash: Hash;
+    outputs_hash: Hash;
+    transaction_reference: Hex;
+    created_at: Date;
+    updated_at: Date;
+};
+
 export type GetOutputParams = {
-    application: string;
-    output_index: string;
+    application: string | Address;
+    output_index: UnsignedInteger;
 };
 
 export type GetOutputReturnType = {
-    input_index: string;
-    index: string;
-    raw_data: string;
+    epoch_index: UnsignedInteger;
+    input_index: UnsignedInteger;
+    index: UnsignedInteger;
+    raw_data: Hex;
     decoded_data:
         | {
-              index: number;
+              index: UnsignedInteger;
               type: string;
-              payload: string;
+              payload: Hex;
           }
         | {
-              index: number;
+              index: UnsignedInteger;
               type: string;
-              destination: string;
+              destination: Address;
               value: string;
-              payload: string;
+              payload: Hex;
           }
         | {
-              index: number;
+              index: UnsignedInteger;
               type: string;
-              destination: string;
-              payload: string;
+              destination: Address;
+              payload: Hex;
           };
-    hash: string;
-    output_hashes_siblings: string[];
-    execution_transaction_hash: string;
-    created_at: string;
-    updated_at: string;
+    hash: Hash;
+    output_hashes_siblings: Hash[];
+    execution_transaction_hash: Hash;
+    created_at: Date;
+    updated_at: Date;
 };
 
-export type GetProcessedInputCountParams = { application: string };
+export type GetProcessedInputCountParams = { application: string | Address };
 
-export type GetProcessedInputCountReturnType = { processed_inputs: number };
+export type GetProcessedInputCountReturnType = {
+    processed_inputs: UnsignedInteger;
+};
 
-export type GetReportParams = { application: string; report_index: string };
+export type GetReportParams = {
+    application: string | Address;
+    report_index: UnsignedInteger;
+};
 
 export type GetReportReturnType = {
-    input_index: string;
-    index: string;
-    raw_data: string;
-    created_at: string;
-    updated_at: string;
+    epoch_index: UnsignedInteger;
+    input_index: UnsignedInteger;
+    index: UnsignedInteger;
+    raw_data: Hex;
+    created_at: Date;
+    updated_at: Date;
 };
 
 export type ListApplicationsParams = PaginationParams;
@@ -171,7 +186,7 @@ export type ListApplicationsReturnType = {
 };
 
 export type ListEpochsParams = PaginationParams & {
-    application: string;
+    application: string | Address;
     status?: EpochStatus;
 };
 
@@ -181,9 +196,9 @@ export type ListEpochsReturnType = {
 };
 
 export type ListInputsParams = PaginationParams & {
-    application: string;
-    epoch_index?: string;
-    sender?: string;
+    application: string | Address;
+    epoch_index?: UnsignedInteger;
+    sender?: Address;
 };
 
 export type ListInputsReturnType = {
@@ -192,11 +207,11 @@ export type ListInputsReturnType = {
 };
 
 export type ListOutputsParams = PaginationParams & {
-    application: string;
-    epoch_index?: string;
-    input_index?: string;
-    output_type?: string;
-    voucher_address?: string;
+    application: string | Address;
+    epoch_index?: UnsignedInteger;
+    input_index?: UnsignedInteger;
+    output_type?: UnsignedInteger;
+    voucher_address?: Address;
 };
 
 export type ListOutputsReturnType = {
@@ -205,9 +220,9 @@ export type ListOutputsReturnType = {
 };
 
 export type ListReportsParams = PaginationParams & {
-    application: string;
-    epoch_index?: string;
-    input_index?: string;
+    application: string | Address;
+    epoch_index?: UnsignedInteger;
+    input_index?: UnsignedInteger;
 };
 
 export type ListReportsReturnType = {
