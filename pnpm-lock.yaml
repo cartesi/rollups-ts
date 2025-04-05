@@ -34,6 +34,9 @@ importers:
         specifier: latest
         version: 1.0.11(@types/node@22.14.0)(@types/react@19.1.0)(acorn@8.14.1)(jiti@2.4.2)(lightningcss@1.29.3)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(rollup@4.39.0)(typescript@5.8.2)(yaml@2.7.1)
     devDependencies:
+      '@cartesi/rpc':
+        specifier: workspace:*
+        version: link:../../packages/rpc
       '@types/node':
         specifier: ^22.14.0
         version: 22.14.0
