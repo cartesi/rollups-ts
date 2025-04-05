@@ -6,7 +6,7 @@ import {
     type GetReportReturnType as GetReportReturnTypeRpc,
     type Pagination as PaginationRpc,
 } from "@cartesi/rpc";
-import { getAddress, Hash, Hex, hexToBigInt } from "viem";
+import { getAddress, Hex, hexToBigInt } from "viem";
 import {
     GetApplicationReturnType,
     GetEpochReturnType,
@@ -32,40 +32,37 @@ export const applicationConverter = (
         applicationAddress: getAddress(application.iapplication_address),
         consensusAddress: getAddress(application.iconsensus_address),
         inputBoxAddress: getAddress(application.iinputbox_address),
-        templateHash: application.template_hash as Hash,
-        templateUri: application.template_uri,
-        epochLength: application.epoch_length,
-        dataAvailability: application.data_availability as Hex,
+        templateHash: application.template_hash,
+        epochLength: hexToBigInt(application.epoch_length),
+        dataAvailability: application.data_availability,
         state: application.state,
         reason: application.reason,
-        inputBoxBlock: hexToBigInt(application.iinputbox_block as Hex),
-        lastInputCheckBlock: hexToBigInt(
-            application.last_input_check_block as Hex,
-        ),
-        lastOutputCheckBlock: hexToBigInt(
-            application.last_output_check_block as Hex,
-        ),
-        processedInputs: application.processed_inputs,
+        inputBoxBlock: hexToBigInt(application.iinputbox_block),
+        lastInputCheckBlock: hexToBigInt(application.last_input_check_block),
+        lastOutputCheckBlock: hexToBigInt(application.last_output_check_block),
+        processedInputs: hexToBigInt(application.processed_inputs),
         createdAt: new Date(application.created_at),
         updatedAt: new Date(application.updated_at),
         executionParameters: {
             snapshotPolicy: application.execution_parameters.snapshot_policy,
-            snapshotRetention:
-                application.execution_parameters.snapshot_retention,
-            advanceIncCycles:
+            advanceIncCycles: hexToBigInt(
                 application.execution_parameters.advance_inc_cycles,
-            advanceMaxCycles:
+            ),
+            advanceMaxCycles: hexToBigInt(
                 application.execution_parameters.advance_max_cycles,
-            inspectIncCycles:
+            ),
+            inspectIncCycles: hexToBigInt(
                 application.execution_parameters.inspect_inc_cycles,
-            inspectMaxCycles:
+            ),
+            inspectMaxCycles: hexToBigInt(
                 application.execution_parameters.inspect_max_cycles,
+            ),
             advanceIncDeadline:
                 application.execution_parameters.advance_inc_deadline,
             advanceMaxDeadline:
                 application.execution_parameters.advance_max_deadline,
-            inspectIncDeadeline:
-                application.execution_parameters.inspect_inc_deadeline,
+            inspectIncDeadline:
+                application.execution_parameters.inspect_inc_deadline,
             inspectMaxDeadline:
                 application.execution_parameters.inspect_max_deadline,
             loadDeadline: application.execution_parameters.load_deadline,
@@ -83,13 +80,13 @@ export const epochConverter = (
     epoch: GetEpochReturnTypeRpc,
 ): GetEpochReturnType => {
     return {
-        index: hexToBigInt(epoch.index as Hex),
-        firstBlock: hexToBigInt(epoch.first_block as Hex),
-        lastBlock: hexToBigInt(epoch.last_block as Hex),
-        claimHash: epoch.claim_hash as Hash,
-        claimTransactionHash: epoch.claim_transaction_hash as Hash,
+        index: hexToBigInt(epoch.index),
+        firstBlock: hexToBigInt(epoch.first_block),
+        lastBlock: hexToBigInt(epoch.last_block),
+        claimHash: epoch.claim_hash,
+        claimTransactionHash: epoch.claim_transaction_hash,
         status: epoch.status,
-        virtualIndex: hexToBigInt(epoch.virtual_index as Hex),
+        virtualIndex: hexToBigInt(epoch.virtual_index),
         createdAt: new Date(epoch.created_at),
         updatedAt: new Date(epoch.updated_at),
     };
@@ -99,28 +96,26 @@ export const inputConverter = (
     input: GetInputReturnTypeRpc,
 ): GetInputReturnType => {
     return {
-        epochIndex: hexToBigInt(input.epoch_index as Hex),
-        index: hexToBigInt(input.index as Hex),
-        blockNumber: hexToBigInt(input.block_number as Hex),
-        rawData: input.raw_data as Hex,
+        epochIndex: hexToBigInt(input.epoch_index),
+        index: hexToBigInt(input.index),
+        blockNumber: hexToBigInt(input.block_number),
+        rawData: input.raw_data,
         decodedData: {
             chainId: hexToBigInt(input.decoded_data.chain_id as Hex),
             applicationContract: getAddress(
                 input.decoded_data.application_contract,
             ),
             sender: getAddress(input.decoded_data.sender),
-            blockNumber: hexToBigInt(input.decoded_data.block_number as Hex),
-            blockTimestamp: hexToBigInt(
-                input.decoded_data.block_timestamp as Hex,
-            ),
+            blockNumber: hexToBigInt(input.decoded_data.block_number),
+            blockTimestamp: hexToBigInt(input.decoded_data.block_timestamp),
             prevRandao: hexToBigInt(input.decoded_data.prev_randao as Hex),
-            index: hexToBigInt(input.decoded_data.index as Hex),
-            payload: input.decoded_data.payload as Hex,
+            index: hexToBigInt(input.decoded_data.index),
+            payload: input.decoded_data.payload,
         },
         status: input.status,
-        machineHash: input.machine_hash as Hash,
-        outputsHash: input.outputs_hash as Hash,
-        transactionReference: input.transaction_reference as Hash,
+        machineHash: input.machine_hash,
+        outputsHash: input.outputs_hash,
+        transactionReference: input.transaction_reference,
         createdAt: new Date(input.created_at),
         updatedAt: new Date(input.updated_at),
     };
@@ -130,19 +125,17 @@ export const outputConverter = (
     output: GetOutputReturnTypeRpc,
 ): GetOutputReturnType => {
     return {
-        inputIndex: hexToBigInt(output.input_index as Hex),
-        index: hexToBigInt(output.index as Hex),
-        rawData: output.raw_data as Hex,
+        inputIndex: hexToBigInt(output.input_index),
+        index: hexToBigInt(output.index),
+        rawData: output.raw_data,
         decodedData: {
-            index: output.decoded_data.index,
+            index: hexToBigInt(output.decoded_data.index),
             type: output.decoded_data.type,
-            payload: output.decoded_data.payload as Hex,
+            payload: output.decoded_data.payload,
         },
-        hash: output.hash as Hash,
-        outputHashesSiblings: output.output_hashes_siblings.map(
-            (hash) => hash as Hash,
-        ),
-        executionTransactionHash: output.execution_transaction_hash as Hash,
+        hash: output.hash,
+        outputHashesSiblings: output.output_hashes_siblings,
+        executionTransactionHash: output.execution_transaction_hash,
         createdAt: new Date(output.created_at),
         updatedAt: new Date(output.updated_at),
     };
@@ -152,9 +145,9 @@ export const reportConverter = (
     report: GetReportReturnTypeRpc,
 ): GetReportReturnType => {
     return {
-        inputIndex: hexToBigInt(report.input_index as Hex),
-        index: hexToBigInt(report.index as Hex),
-        rawData: report.raw_data as Hex,
+        inputIndex: hexToBigInt(report.input_index),
+        index: hexToBigInt(report.index),
+        rawData: report.raw_data,
         createdAt: new Date(report.created_at),
         updatedAt: new Date(report.updated_at),
     };

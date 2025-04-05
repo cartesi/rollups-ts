@@ -1,5 +1,5 @@
-import DataAvailability from "@cartesi/rollups/out/DataAvailability.sol/DataAvailability.json" assert { type: "json" };
-import IApplication from "@cartesi/rollups/out/IApplication.sol/IApplication.json" assert { type: "json" };
+import DataAvailability from "@cartesi/rollups/out/DataAvailability.sol/DataAvailability.json" with { type: "json" };
+import IApplication from "@cartesi/rollups/out/IApplication.sol/IApplication.json" with { type: "json" };
 import { defineConfig, Plugin } from "@wagmi/cli";
 import { readdirSync, readFileSync } from "fs";
 import path from "path";

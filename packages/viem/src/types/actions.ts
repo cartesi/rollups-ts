@@ -34,36 +34,34 @@ export type InputStatus =
 export type GetApplicationParams = { application: Address | string };
 
 export type GetApplicationReturnType = {
-    name: Address | string;
+    name: string;
     applicationAddress: Address;
     consensusAddress: Address;
     inputBoxAddress: Address;
     templateHash: Hash;
-    templateUri: string;
-    epochLength: number;
+    epochLength: bigint;
     dataAvailability: Hex;
     state: string;
     reason: string | null;
     inputBoxBlock: bigint;
     lastInputCheckBlock: bigint;
     lastOutputCheckBlock: bigint;
-    processedInputs: number;
+    processedInputs: bigint;
     createdAt: Date;
     updatedAt: Date;
     executionParameters: {
         snapshotPolicy: "NONE" | "EACH_INPUT" | "EACH_EPOCH";
-        snapshotRetention: number;
-        advanceIncCycles: number;
-        advanceMaxCycles: number;
-        inspectIncCycles: number;
-        inspectMaxCycles: number;
-        advanceIncDeadline: number;
-        advanceMaxDeadline: number;
-        inspectIncDeadeline: number;
-        inspectMaxDeadline: number;
-        loadDeadline: number;
-        storeDeadline: number;
-        fastDeadline: number;
+        advanceIncCycles: bigint;
+        advanceMaxCycles: bigint;
+        inspectIncCycles: bigint;
+        inspectMaxCycles: bigint;
+        advanceIncDeadline: string;
+        advanceMaxDeadline: string;
+        inspectIncDeadline: string;
+        inspectMaxDeadline: string;
+        loadDeadline: string;
+        storeDeadline: string;
+        fastDeadline: string;
         maxConcurrentInspects: number;
         createdAt: Date;
         updatedAt: Date;
@@ -130,19 +128,19 @@ export type GetOutputReturnType = {
     rawData: Hex;
     decodedData:
         | {
-              index: number;
+              index: bigint;
               type: string;
               payload: Hex;
           }
         | {
-              index: number;
+              index: bigint;
               type: string;
               destination: Address;
               value: bigint;
               payload: Hex;
           }
         | {
-              index: number;
+              index: bigint;
               type: string;
               destination: Address;
               payload: Hex;
@@ -156,7 +154,7 @@ export type GetOutputReturnType = {
 
 export type GetProcessedInputCountParams = { application: Address | string };
 
-export type GetProcessedInputCountReturnType = number;
+export type GetProcessedInputCountReturnType = bigint;
 
 export type GetReportParams = {
     application: Address | string;
@@ -203,7 +201,7 @@ export type ListOutputsParams = PaginationParams & {
     application: Address | string;
     epochIndex?: bigint;
     inputIndex?: bigint;
-    outputType?: string;
+    outputType?: Hex;
     voucherAddress?: Address;
 };
 

@@ -1,4 +1,4 @@
-import { Transport } from "viem";
+import { hexToBigInt, Transport } from "viem";
 import { CartesiPublicClient } from "../clients/createCartesiPublicClient";
 import {
     type GetProcessedInputCountParams,
@@ -13,5 +13,5 @@ export const getProcessedInputCount = async (
         method: "cartesi_getProcessedInputCount",
         params,
     });
-    return processed_inputs;
+    return hexToBigInt(processed_inputs);
 };
