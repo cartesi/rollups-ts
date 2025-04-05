@@ -42,10 +42,10 @@ export default defineConfig({
                         },
                         {
                             text: "cartesi_listInputs",
-                            link: "/rpc/cartesi_listApplications",
+                            link: "/rpc/cartesi_listInputs",
                         },
                         {
-                            text: "cartesi_listOutput",
+                            text: "cartesi_listOutputs",
                             link: "/rpc/cartesi_listOutputs",
                         },
                         {
