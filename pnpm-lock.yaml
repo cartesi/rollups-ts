@@ -44,8 +44,8 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
       viem:
-        specifier: ^2.25.0
-        version: 2.25.0(typescript@5.8.2)
+        specifier: ^2.26.0
+        version: 2.26.0(typescript@5.8.2)
 
 packages:
 
@@ -2980,8 +2980,8 @@ packages:
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
 
-  viem@2.25.0:
-    resolution: {integrity: sha512-TtFgfQkZOfb642s8+i+h27dRhBfZV//WWOkZ9saoS1Ml8kipj9RiOiDaSmAUly1rhq9kbnYhni1xVtb195XVGA==}
+  viem@2.26.0:
+    resolution: {integrity: sha512-Osht20EySRAcfMhCGAJaWuaREXM7y9vDloLvUTXuAfFq7JNGM5+o1wsE4LXw1KpRBrBliIAJjM+c2wMtMEvlCQ==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
@@ -6556,7 +6556,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.2
 
-  viem@2.25.0(typescript@5.8.2):
+  viem@2.26.0(typescript@5.8.2):
     dependencies:
       '@noble/curves': 1.8.1
       '@noble/hashes': 1.7.1
