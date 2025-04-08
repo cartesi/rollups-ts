@@ -7,7 +7,9 @@
     "@cartesi/viem": "1.0.0"
   },
   "changesets": [
+    "early-walls-exist",
     "easy-games-leave",
-    "green-mangos-argue"
+    "green-mangos-argue",
+    "twelve-ears-pump"
   ]
 }
