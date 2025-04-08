@@ -1,0 +1,60 @@
+{
+    "name": "@cartesi/wagmi",
+    "description": "Cartesi rollups react hooks",
+    "version": "1.0.0",
+    "dependencies": {
+        "@cartesi/viem": "workspace:*",
+        "@tanstack/react-query": "^5.72.2",
+        "react": "^19.1.0",
+        "viem": "^2.26.0",
+        "wagmi": "^2.14.16"
+    },
+    "devDependencies": {
+        "@cartesi/rollups": "^2.0.0-rc.17",
+        "@types/node": "^22.5.0",
+        "@types/react": "^19.1.0",
+        "@usecannon/cli": "^2.21.5",
+        "@wagmi/cli": "^2.1.15",
+        "@wagmi/core": "^2.16.7",
+        "npm-run-all": "^4.1.5",
+        "ts-node": "^10.9.2",
+        "tsup": "^8.2.4",
+        "typescript": "^5.5.3",
+        "vitest": "^3.1.1"
+    },
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "require": "./dist/index.cjs"
+            }
+        }
+    },
+    "peerDependencies": {
+        "react": "^19.0.0",
+        "viem": "^2.0.0",
+        "wagmi": "^2.0.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "run-s codegen compile",
+        "codegen": "run-s codegen:cannon codegen:wagmi",
+        "codegen:cannon": "cannon inspect cartesi-rollups:2.0.0-rc.17 --write-deployments ./deployment",
+        "codegen:wagmi": "wagmi generate",
+        "compile": "tsup",
+        "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+        "dev": "tsup --watch",
+        "lint": "eslint",
+        "prepack": "run-s build"
+    }
+}
