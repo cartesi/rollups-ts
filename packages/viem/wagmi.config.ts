@@ -61,7 +61,7 @@ const cannonDeployments = (config: CannonOptions): Plugin => {
     };
 };
 
-export default defineConfig({
+const config: ReturnType<typeof defineConfig> = defineConfig({
     out: "src/rollups.ts",
     contracts: [
         {
@@ -75,3 +75,5 @@ export default defineConfig({
     ],
     plugins: [cannonDeployments({ directory: "deployment" })],
 });
+
+export default config;
