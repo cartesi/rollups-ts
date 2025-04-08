@@ -2,7 +2,12 @@
   "mode": "pre",
   "tag": "alpha",
   "initialVersions": {
-    "@cartesi/docs": "0.0.0"
+    "@cartesi/docs": "0.0.0",
+    "@cartesi/rpc": "1.0.0",
+    "@cartesi/viem": "1.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "easy-games-leave",
+    "green-mangos-argue"
+  ]
 }
