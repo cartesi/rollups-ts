@@ -36,7 +36,7 @@ Once epochs are finalized executable outputs that were generated within that epo
 
 ## Inputs
 
-Inputs are "transactions" that are address to an application and fed into the application Cartesi machine, making it transition from state A to state B.
+Inputs are "transactions" that are addressed to an application and fed into the application Cartesi machine, making it transition from state A to state B.
 Inputs are either sent directly to the application base layer InputBox smart contract, or to an alternative data availability solution.
 
 Cartesi is working on integrations with [Espresso](http://espressosys.com) and [Avail](https://www.availproject.org).
@@ -48,13 +48,13 @@ There are two basic types of outputs: notices and vouchers.
 
 Notices are information only data with attached proofs that can be used on the base layer to prove some fact stated by the Cartesi rollup application.
 
-Vouchers represent not only information but executable actions that can be performed on the base layer, through the execution of any function of any smart contract.
+Vouchers represent not only information but executable actions that can be performed on the base layer, through the execution of any function of any smart contract, or simply an ETH transfer.
 
 Both notices and vouchers proofs are generated at the end of an epoch.
 
 ## Reports
 
-Reports are pieces of information that has no attached proofs.
+Reports are pieces of information with no attached proof.
 
 ## State changes
 
@@ -64,7 +64,7 @@ These can be used for example by polling mechanisms to detect application state 
 ## Pagination
 
 All the list methods, [cartesi_listApplications](/rpc/cartesi_listApplications), [cartesi_listEpochs](/rpc/cartesi_listEpochs), [cartesi_listInputs](/rpc/cartesi_listInputs), [cartesi_listOutputs](/rpc/cartesi_listOutputs) and [cartesi_listReports](/rpc/cartesi_listReports), are paginated.
-They all receive a `limit` and a `offset` number param in the request, and return a `pagination` object in the return, in addition to a `data` array of entity objects.
+They all receive a `limit` and an `offset` number param in the request, and return a `pagination` object in the return, in addition to a `data` array of entity objects.
 
 ```ts
 type Pagination = {
