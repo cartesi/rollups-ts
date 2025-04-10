@@ -58,7 +58,7 @@ export type GetApplicationReturnType = {
     epochLength: bigint;
     dataAvailability: DataAvailability;
     state: string;
-    reason: string | null;
+    reason?: string | null;
     inputBoxBlock: bigint;
     lastInputCheckBlock: bigint;
     lastOutputCheckBlock: bigint;
