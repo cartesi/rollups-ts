@@ -1,5 +1,5 @@
-import { Transport } from "viem";
-import { CartesiPublicClient } from "../clients/createCartesiPublicClient.js";
+import { Client, Transport } from "viem";
+import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import {
     type GetLastAcceptedEpochParams,
     type GetLastAcceptedEpochReturnType,
@@ -7,7 +7,7 @@ import {
 import { epochConverter } from "../types/converter.js";
 
 export const getLastAcceptedEpoch = async (
-    client: CartesiPublicClient<Transport>,
+    client: Client<Transport, undefined, undefined, PublicCartesiRpcSchema>,
     params: GetLastAcceptedEpochParams,
 ): Promise<GetLastAcceptedEpochReturnType> => {
     const { data: epoch } = await client.request({

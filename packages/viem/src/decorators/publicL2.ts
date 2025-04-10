@@ -24,7 +24,7 @@ import {
     type ListReportsParams as ListReportsParamsRpc,
     type ListReportsReturnType as ListReportsReturnTypeRpc,
 } from "@cartesi/rpc";
-import { Transport } from "viem";
+import { Client, Transport } from "viem";
 import {
     getApplication,
     getEpoch,
@@ -40,7 +40,6 @@ import {
     listReports,
     waitForInput,
 } from "../actions/index.js";
-import { CartesiPublicClient } from "../clients/createCartesiPublicClient.js";
 import {
     type GetApplicationParams,
     type GetApplicationReturnType,
@@ -164,7 +163,12 @@ export type PublicActionsL2 = {
 export const publicActionsL2 =
     () =>
     <TTransport extends Transport>(
-        client: CartesiPublicClient<TTransport>,
+        client: Client<
+            TTransport,
+            undefined,
+            undefined,
+            PublicCartesiRpcSchema
+        >,
     ): PublicActionsL2 => ({
         listApplications: (params) => listApplications(client, params ?? {}),
         getApplication: (params) => getApplication(client, params),

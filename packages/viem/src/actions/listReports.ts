@@ -1,5 +1,5 @@
-import { numberToHex, Transport } from "viem";
-import { CartesiPublicClient } from "../clients/createCartesiPublicClient.js";
+import { Client, numberToHex, Transport } from "viem";
+import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import {
     type ListReportsParams,
     type ListReportsReturnType,
@@ -7,7 +7,7 @@ import {
 import { paginationConverter, reportConverter } from "../types/converter.js";
 
 export const listReports = async (
-    client: CartesiPublicClient<Transport>,
+    client: Client<Transport, undefined, undefined, PublicCartesiRpcSchema>,
     params: ListReportsParams,
 ): Promise<ListReportsReturnType> => {
     const reports = await client.request({

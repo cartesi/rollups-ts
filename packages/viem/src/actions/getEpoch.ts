@@ -1,5 +1,5 @@
-import { numberToHex, Transport } from "viem";
-import { CartesiPublicClient } from "../clients/createCartesiPublicClient.js";
+import { Client, numberToHex, Transport } from "viem";
+import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import {
     type GetEpochParams,
     type GetEpochReturnType,
@@ -7,7 +7,7 @@ import {
 import { epochConverter } from "../types/converter.js";
 
 export const getEpoch = async (
-    client: CartesiPublicClient<Transport>,
+    client: Client<Transport, undefined, undefined, PublicCartesiRpcSchema>,
     params: GetEpochParams,
 ): Promise<GetEpochReturnType> => {
     const { data: epoch } = await client.request({

@@ -1,5 +1,5 @@
-import { Transport } from "viem";
-import { CartesiPublicClient } from "../clients/createCartesiPublicClient.js";
+import { Client, Transport } from "viem";
+import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import {
     type GetApplicationParams,
     type GetApplicationReturnType,
@@ -7,7 +7,7 @@ import {
 import { applicationConverter } from "../types/converter.js";
 
 export const getApplication = async (
-    client: CartesiPublicClient<Transport>,
+    client: Client<Transport, undefined, undefined, PublicCartesiRpcSchema>,
     params: GetApplicationParams,
 ): Promise<GetApplicationReturnType> => {
     const { data: application } = await client.request({

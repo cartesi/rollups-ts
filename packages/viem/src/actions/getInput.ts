@@ -1,5 +1,5 @@
-import { numberToHex, Transport } from "viem";
-import { CartesiPublicClient } from "../clients/createCartesiPublicClient.js";
+import { Client, numberToHex, Transport } from "viem";
+import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import {
     type GetInputParams,
     type GetInputReturnType,
@@ -7,7 +7,7 @@ import {
 import { inputConverter } from "../types/converter.js";
 
 export const getInput = async (
-    client: CartesiPublicClient<Transport>,
+    client: Client<Transport, undefined, undefined, PublicCartesiRpcSchema>,
     params: GetInputParams,
 ): Promise<GetInputReturnType> => {
     const { data: input } = await client.request({
