@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.2
+
+### Patch Changes
+
+- f4caca5: fix output typings
+
 ## 2.0.0-alpha.1
 
 ### Patch Changes

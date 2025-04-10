@@ -1,7 +1,7 @@
 {
     "name": "@cartesi/viem",
     "description": "Cartesi viem extension",
-    "version": "2.0.0-alpha.2",
+    "version": "2.0.0-alpha.3",
     "dependencies": {
         "@cartesi/rpc": "workspace:*",
         "p-retry": "^6.2.1",
