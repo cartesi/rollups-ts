@@ -51,7 +51,7 @@ export type Application = {
     epoch_length: HexNumber;
     data_availability: Hex;
     state: "ENABLED" | "DISABLED" | "INOPERABLE";
-    reason: string | null;
+    reason?: string | null;
     iinputbox_block: HexNumber;
     last_input_check_block: HexNumber;
     last_output_check_block: HexNumber;
