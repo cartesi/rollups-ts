@@ -17,6 +17,8 @@
     "devDependencies": {
         "@cartesi/rpc": "workspace:*",
         "@cartesi/viem": "workspace:*",
+        "@cartesi/wagmi": "workspace:*",
+        "@tanstack/react-query": "^5.72.2",
         "@types/node": "^22.14.0",
         "@types/react": "^19.1.0",
         "typescript": "5.8.3",

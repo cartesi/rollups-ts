@@ -124,6 +124,15 @@ const config: Config = defineConfig({
             ],
         },
         {
+            text: "React Hooks",
+            items: [
+                {
+                    text: "Introduction",
+                    link: "/wagmi",
+                },
+            ],
+        },
+        {
             text: "RPC Client",
             items: [
                 {

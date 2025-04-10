@@ -40,6 +40,12 @@ importers:
       '@cartesi/viem':
         specifier: workspace:*
         version: link:../../packages/viem
+      '@cartesi/wagmi':
+        specifier: workspace:*
+        version: link:../../packages/wagmi
+      '@tanstack/react-query':
+        specifier: ^5.72.2
+        version: 5.72.2(react@19.1.0)
       '@types/node':
         specifier: ^22.14.0
         version: 22.14.0
@@ -5557,9 +5563,6 @@ packages:
       typescript:
         optional: true
 
-  web-solc@0.5.1:
-    resolution: {integrity: sha512-Z/hBplZq1+4i4bYeIeD9N3vP1BLUBXpSDa4h0Ipm2Z2cHv7x7DtZ2zFb0E1L1VZo4BF+OJGVtGlT+nTUXGgncQ==}
-
   webextension-polyfill@0.10.0:
     resolution: {integrity: sha512-c5s35LgVa5tFaHhrZDnr3FpQpjj1BB+RXhLTYUxGqBVN460HkbM8TBtEqdXWbpTKfzwCcjAZVF7zXCYSKtcp9g==}
 
@@ -7869,9 +7872,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@usecannon/web-solc@0.5.1':
-    dependencies:
-      web-solc: 0.5.1
+  '@usecannon/web-solc@0.5.1': {}
 
   '@vanilla-extract/babel-plugin-debug-ids@1.2.0':
     dependencies:
@@ -12580,10 +12581,6 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
-
-  web-solc@0.5.1:
-    dependencies:
-      semver: 7.7.1
 
   webextension-polyfill@0.10.0: {}
 
