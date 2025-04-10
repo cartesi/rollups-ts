@@ -1,5 +1,11 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.1
+
+### Patch Changes
+
+- f6eff04: fix packaging
+
 ## 2.0.0-alpha.0
 
 ### Major Changes
