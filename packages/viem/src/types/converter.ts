@@ -9,13 +9,7 @@ import type {
     Report as ReportRpc,
     Voucher as VoucherRpc,
 } from "@cartesi/rpc";
-import {
-    type Hex,
-    getAbiItem,
-    getAddress,
-    hexToBigInt,
-    toFunctionSelector,
-} from "viem";
+import { type Hex, decodeFunctionData, getAddress, hexToBigInt } from "viem";
 import { dataAvailabilityAbi } from "../rollups.js";
 import type {
     Application,
@@ -38,21 +32,28 @@ export const paginationConverter = (pagination: PaginationRpc): Pagination => {
     };
 };
 
-const parseDataAvailability = (selector: Hex): DataAvailability => {
-    switch (selector) {
-        case toFunctionSelector(
-            getAbiItem({ abi: dataAvailabilityAbi, name: "InputBox" }),
-        ):
-            return "InputBox";
-        case toFunctionSelector(
-            getAbiItem({
-                abi: dataAvailabilityAbi,
-                name: "InputBoxAndEspresso",
-            }),
-        ):
-            return "InputBoxAndEspresso";
-        default:
-            throw new Error(`Unknown data availability: ${selector}`);
+const parseDataAvailability = (data: Hex): DataAvailability => {
+    const { functionName, args } = decodeFunctionData({
+        abi: dataAvailabilityAbi,
+        data,
+    });
+    switch (functionName) {
+        case "InputBox": {
+            const [inputBoxAddress] = args;
+            return {
+                type: functionName,
+                inputBoxAddress,
+            };
+        }
+        case "InputBoxAndEspresso": {
+            const [inputBoxAddress, fromBlock, namespaceId] = args;
+            return {
+                type: functionName,
+                inputBoxAddress: getAddress(inputBoxAddress),
+                fromBlock,
+                namespaceId,
+            };
+        }
     }
 };
 

@@ -33,7 +33,21 @@ export type InputStatus =
     | "TIME_LIMIT_EXCEEDED"
     | "PAYLOAD_LENGTH_LIMIT_EXCEEDED";
 
-export type DataAvailability = "InputBox" | "InputBoxAndEspresso";
+export type DataAvailabilityInputBox = {
+    type: "InputBox";
+    inputBoxAddress: Address;
+};
+
+export type DataAvailabilityInputBoxAndEspresso = {
+    type: "InputBoxAndEspresso";
+    inputBoxAddress: Address;
+    fromBlock: bigint;
+    namespaceId: number;
+};
+
+export type DataAvailability =
+    | DataAvailabilityInputBox
+    | DataAvailabilityInputBoxAndEspresso;
 
 export type GetApplicationParams = { application: Address | string };
 
