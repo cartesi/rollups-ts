@@ -6,7 +6,13 @@ import {
     Report,
     type Pagination as PaginationRpc,
 } from "@cartesi/rpc";
-import { decodeFunctionData, getAddress, Hex, hexToBigInt } from "viem";
+import {
+    getAbiItem,
+    getAddress,
+    Hex,
+    hexToBigInt,
+    toFunctionSelector,
+} from "viem";
 import { dataAvailabilityAbi } from "../rollups.js";
 import {
     DataAvailability,
@@ -26,28 +32,21 @@ export const paginationConverter = (pagination: PaginationRpc): Pagination => {
     };
 };
 
-const parseDataAvailability = (data: Hex): DataAvailability => {
-    const { functionName, args } = decodeFunctionData({
-        abi: dataAvailabilityAbi,
-        data,
-    });
-    switch (functionName) {
-        case "InputBox": {
-            const [inputBoxAddress] = args;
-            return {
-                type: functionName,
-                inputBoxAddress,
-            };
-        }
-        case "InputBoxAndEspresso": {
-            const [inputBoxAddress, fromBlock, namespaceId] = args;
-            return {
-                type: functionName,
-                inputBoxAddress: getAddress(inputBoxAddress),
-                fromBlock,
-                namespaceId,
-            };
-        }
+const parseDataAvailability = (selector: Hex): DataAvailability => {
+    switch (selector) {
+        case toFunctionSelector(
+            getAbiItem({ abi: dataAvailabilityAbi, name: "InputBox" }),
+        ):
+            return "InputBox";
+        case toFunctionSelector(
+            getAbiItem({
+                abi: dataAvailabilityAbi,
+                name: "InputBoxAndEspresso",
+            }),
+        ):
+            return "InputBoxAndEspresso";
+        default:
+            throw new Error(`Unknown data availability: ${selector}`);
     }
 };
 
