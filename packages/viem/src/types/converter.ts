@@ -84,17 +84,27 @@ export const applicationConverter = (
             inspectMaxCycles: hexToBigInt(
                 application.execution_parameters.inspect_max_cycles,
             ),
-            advanceIncDeadline:
+            advanceIncDeadline: hexToBigInt(
                 application.execution_parameters.advance_inc_deadline,
-            advanceMaxDeadline:
+            ),
+            advanceMaxDeadline: hexToBigInt(
                 application.execution_parameters.advance_max_deadline,
-            inspectIncDeadline:
+            ),
+            inspectIncDeadline: hexToBigInt(
                 application.execution_parameters.inspect_inc_deadline,
-            inspectMaxDeadline:
+            ),
+            inspectMaxDeadline: hexToBigInt(
                 application.execution_parameters.inspect_max_deadline,
-            loadDeadline: application.execution_parameters.load_deadline,
-            storeDeadline: application.execution_parameters.store_deadline,
-            fastDeadline: application.execution_parameters.fast_deadline,
+            ),
+            loadDeadline: hexToBigInt(
+                application.execution_parameters.load_deadline,
+            ),
+            storeDeadline: hexToBigInt(
+                application.execution_parameters.store_deadline,
+            ),
+            fastDeadline: hexToBigInt(
+                application.execution_parameters.fast_deadline,
+            ),
             maxConcurrentInspects:
                 application.execution_parameters.max_concurrent_inspects,
             createdAt: new Date(application.execution_parameters.created_at),
