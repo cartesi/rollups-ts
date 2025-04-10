@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.3
+
+### Patch Changes
+
+- f4caca5: fix output typings
+- Updated dependencies [f4caca5]
+    - @cartesi/rpc@2.0.0-alpha.2
+
 ## 2.0.0-alpha.2
 
 ### Patch Changes
