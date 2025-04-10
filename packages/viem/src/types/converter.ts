@@ -1,9 +1,12 @@
 import {
     Application,
+    DelegateCallVoucher as DelegateCallVoucherRpc,
     Epoch,
     Input,
+    Notice as NoticeRpc,
     Output,
     Report,
+    Voucher as VoucherRpc,
     type Pagination as PaginationRpc,
 } from "@cartesi/rpc";
 import {
@@ -16,12 +19,15 @@ import {
 import { dataAvailabilityAbi } from "../rollups.js";
 import {
     DataAvailability,
+    DelegateCallVoucher,
     GetApplicationReturnType,
     GetEpochReturnType,
     GetInputReturnType,
     GetOutputReturnType,
     GetReportReturnType,
+    Notice,
     Pagination,
+    Voucher,
 } from "./actions.js";
 
 export const paginationConverter = (pagination: PaginationRpc): Pagination => {
@@ -153,16 +159,41 @@ export const inputConverter = (input: Input): GetInputReturnType => {
     };
 };
 
+const parseOutputDecodedData = (
+    output: NoticeRpc | VoucherRpc | DelegateCallVoucherRpc,
+): Notice | Voucher | DelegateCallVoucher => {
+    switch (output.type) {
+        case "Notice": {
+            return {
+                type: "Notice",
+                payload: output.payload,
+            };
+        }
+        case "Voucher": {
+            return {
+                type: "Voucher",
+                payload: output.payload,
+                destination: getAddress(output.destination),
+                value: hexToBigInt(output.value),
+            };
+        }
+        case "DelegateCallVoucher": {
+            return {
+                type: "DelegateCallVoucher",
+                payload: output.payload,
+                destination: getAddress(output.destination),
+            };
+        }
+    }
+};
+
 export const outputConverter = (output: Output): GetOutputReturnType => {
     return {
+        epochIndex: hexToBigInt(output.epoch_index),
         inputIndex: hexToBigInt(output.input_index),
         index: hexToBigInt(output.index),
         rawData: output.raw_data,
-        decodedData: {
-            index: hexToBigInt(output.decoded_data.index),
-            type: output.decoded_data.type,
-            payload: output.decoded_data.payload,
-        },
+        decodedData: parseOutputDecodedData(output.decoded_data),
         hash: output.hash,
         outputHashesSiblings: output.output_hashes_siblings,
         executionTransactionHash: output.execution_transaction_hash,

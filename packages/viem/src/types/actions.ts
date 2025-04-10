@@ -124,32 +124,33 @@ export type GetOutputParams = {
     outputIndex: bigint;
 };
 
+export type Notice = {
+    type: "Notice";
+    payload: Hex;
+};
+
+export type Voucher = {
+    type: "Voucher";
+    destination: Address;
+    value: bigint;
+    payload: Hex;
+};
+
+export type DelegateCallVoucher = {
+    type: "DelegateCallVoucher";
+    destination: Address;
+    payload: Hex;
+};
+
 export type GetOutputReturnType = {
+    epochIndex: bigint;
     inputIndex: bigint;
     index: bigint;
     rawData: Hex;
-    decodedData:
-        | {
-              index: bigint;
-              type: string;
-              payload: Hex;
-          }
-        | {
-              index: bigint;
-              type: string;
-              destination: Address;
-              value: bigint;
-              payload: Hex;
-          }
-        | {
-              index: bigint;
-              type: string;
-              destination: Address;
-              payload: Hex;
-          };
+    decodedData: Notice | Voucher | DelegateCallVoucher;
     hash: Hash;
     outputHashesSiblings: Hash[];
-    executionTransactionHash: Hash;
+    executionTransactionHash: Hash | null;
     createdAt: Date;
     updatedAt: Date;
 };

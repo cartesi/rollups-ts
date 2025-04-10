@@ -146,22 +146,19 @@ export type GetOutputParams = {
 };
 
 export type Notice = {
-    index: HexNumber;
-    type: string;
+    type: "Notice";
     payload: Hex;
 };
 
 export type Voucher = {
-    index: HexNumber;
-    type: string;
+    type: "Voucher";
     destination: Address;
-    value: string;
+    value: HexNumber;
     payload: Hex;
 };
 
 export type DelegateCallVoucher = {
-    index: HexNumber;
-    type: string;
+    type: "DelegateCallVoucher";
     destination: Address;
     payload: Hex;
 };
@@ -174,7 +171,7 @@ export type Output = {
     decoded_data: Notice | Voucher | DelegateCallVoucher;
     hash: Hash;
     output_hashes_siblings: Hash[];
-    execution_transaction_hash: Hash;
+    execution_transaction_hash: Hash | null;
     created_at: DateTime;
     updated_at: DateTime;
 };
