@@ -8,7 +8,6 @@ export type Hash = `0x${string}`;
 export type Hex = `0x${string}`;
 export type HexNumber = `0x${string}`;
 export type DateTime = string;
-export type Duration = string;
 
 export type Pagination = {
     total_count: number;
@@ -65,13 +64,13 @@ export type Application = {
         advance_max_cycles: HexNumber;
         inspect_inc_cycles: HexNumber;
         inspect_max_cycles: HexNumber;
-        advance_inc_deadline: Duration;
-        advance_max_deadline: Duration;
-        inspect_inc_deadline: Duration;
-        inspect_max_deadline: Duration;
-        load_deadline: Duration;
-        store_deadline: Duration;
-        fast_deadline: Duration;
+        advance_inc_deadline: HexNumber;
+        advance_max_deadline: HexNumber;
+        inspect_inc_deadline: HexNumber;
+        inspect_max_deadline: HexNumber;
+        load_deadline: HexNumber;
+        store_deadline: HexNumber;
+        fast_deadline: HexNumber;
         max_concurrent_inspects: number;
         created_at: DateTime;
         updated_at: DateTime;
