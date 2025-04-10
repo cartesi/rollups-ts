@@ -1,5 +1,12 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.1
+
+### Patch Changes
+
+- 1dbff18: fix execution_parameters fields types
+- 2d39391: make reason optional
+
 ## 2.0.0-alpha.0
 
 ### Major Changes

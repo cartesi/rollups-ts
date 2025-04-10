@@ -7,9 +7,16 @@
     "@cartesi/viem": "1.0.0"
   },
   "changesets": [
+    "big-yaks-roll",
     "early-walls-exist",
+    "easy-apes-sip",
     "easy-games-leave",
+    "free-lines-nail",
     "green-mangos-argue",
+    "honest-bobcats-guess",
+    "hungry-meals-shave",
+    "plain-towns-glow",
+    "tiny-taxes-sort",
     "twelve-ears-pump"
   ]
 }
