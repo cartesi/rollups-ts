@@ -1,5 +1,5 @@
 import { Hash, Hex } from "viem";
-import { type GetOutputReturnType } from "./actions.js";
+import { type Output } from "./actions.js";
 
 type OutputValidityProof = {
     outputIndex: bigint;
@@ -8,7 +8,7 @@ type OutputValidityProof = {
 
 type ExecuteOutputArgs = [Hex, OutputValidityProof];
 
-export const toEVM = (output: GetOutputReturnType): ExecuteOutputArgs => {
+export const toEVM = (output: Output): ExecuteOutputArgs => {
     const { index: outputIndex, outputHashesSiblings, rawData } = output;
     if (!outputHashesSiblings) {
         throw new Error("Output has no proof");

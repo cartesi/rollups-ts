@@ -1,11 +1,11 @@
 import {
-    Application,
+    Application as ApplicationRpc,
     DelegateCallVoucher as DelegateCallVoucherRpc,
-    Epoch,
-    Input,
+    Epoch as EpochRpc,
+    Input as InputRpc,
     Notice as NoticeRpc,
-    Output,
-    Report,
+    Output as OutputRpc,
+    Report as ReportRpc,
     Voucher as VoucherRpc,
     type Pagination as PaginationRpc,
 } from "@cartesi/rpc";
@@ -18,15 +18,15 @@ import {
 } from "viem";
 import { dataAvailabilityAbi } from "../rollups.js";
 import {
+    Application,
     DataAvailability,
     DelegateCallVoucher,
-    GetApplicationReturnType,
-    GetEpochReturnType,
-    GetInputReturnType,
-    GetOutputReturnType,
-    GetReportReturnType,
+    Epoch,
+    Input,
     Notice,
+    Output,
     Pagination,
+    Report,
     Voucher,
 } from "./actions.js";
 
@@ -57,8 +57,8 @@ const parseDataAvailability = (selector: Hex): DataAvailability => {
 };
 
 export const applicationConverter = (
-    application: Application,
-): GetApplicationReturnType => {
+    application: ApplicationRpc,
+): Application => {
     return {
         name: application.name,
         applicationAddress: getAddress(application.iapplication_address),
@@ -118,7 +118,7 @@ export const applicationConverter = (
     };
 };
 
-export const epochConverter = (epoch: Epoch): GetEpochReturnType => {
+export const epochConverter = (epoch: EpochRpc): Epoch => {
     return {
         index: hexToBigInt(epoch.index),
         firstBlock: hexToBigInt(epoch.first_block),
@@ -132,7 +132,7 @@ export const epochConverter = (epoch: Epoch): GetEpochReturnType => {
     };
 };
 
-export const inputConverter = (input: Input): GetInputReturnType => {
+export const inputConverter = (input: InputRpc): Input => {
     return {
         epochIndex: hexToBigInt(input.epoch_index),
         index: hexToBigInt(input.index),
@@ -187,7 +187,7 @@ const parseOutputDecodedData = (
     }
 };
 
-export const outputConverter = (output: Output): GetOutputReturnType => {
+export const outputConverter = (output: OutputRpc): Output => {
     return {
         epochIndex: hexToBigInt(output.epoch_index),
         inputIndex: hexToBigInt(output.input_index),
@@ -202,7 +202,7 @@ export const outputConverter = (output: Output): GetOutputReturnType => {
     };
 };
 
-export const reportConverter = (report: Report): GetReportReturnType => {
+export const reportConverter = (report: ReportRpc): Report => {
     return {
         inputIndex: hexToBigInt(report.input_index),
         index: hexToBigInt(report.index),
