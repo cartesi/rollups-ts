@@ -1,5 +1,11 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.2
+
+### Patch Changes
+
+- 59b3ef8: add missing export of useEpochs
+
 ## 2.0.0-alpha.1
 
 ### Patch Changes
