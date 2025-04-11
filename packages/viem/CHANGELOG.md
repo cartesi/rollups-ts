@@ -1,5 +1,11 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.4
+
+### Patch Changes
+
+- 2cefdee: adding some types
+
 ## 2.0.0-alpha.3
 
 ### Patch Changes
