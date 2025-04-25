@@ -5,8 +5,8 @@ import {
     type GetEpochReturnType as GetEpochReturnTypeRpc,
     type GetInputParams as GetInputParamsRpc,
     type GetInputReturnType as GetInputReturnTypeRpc,
-    type GetLastAcceptedEpochParams as GetLastAcceptedEpochParamsRpc,
-    type GetLastAcceptedEpochReturnType as GetLastAcceptedEpochReturnTypeRpc,
+    type GetLastAcceptedEpochIndexParams as GetLastAcceptedEpochIndexParamsRpc,
+    type GetLastAcceptedEpochIndexReturnType as GetLastAcceptedEpochIndexReturnTypeRpc,
     type GetOutputParams as GetOutputParamsRpc,
     type GetOutputReturnType as GetOutputReturnTypeRpc,
     type GetProcessedInputCountParams as GetProcessedInputCountParamsRpc,
@@ -29,7 +29,7 @@ import {
     getApplication,
     getEpoch,
     getInput,
-    getLastAcceptedEpoch,
+    getLastAcceptedEpochIndex,
     getOutput,
     getProcessedInputCount,
     getReport,
@@ -47,8 +47,8 @@ import {
     type GetEpochReturnType,
     type GetInputParams,
     type GetInputReturnType,
-    type GetLastAcceptedEpochParams,
-    type GetLastAcceptedEpochReturnType,
+    type GetLastAcceptedEpochIndexParams,
+    type GetLastAcceptedEpochIndexReturnType,
     type GetOutputParams,
     type GetOutputReturnType,
     type GetProcessedInputCountParams,
@@ -91,9 +91,9 @@ export type PublicCartesiRpcSchema = [
         ReturnType: GetEpochReturnTypeRpc;
     },
     {
-        Method: "cartesi_getLastAcceptedEpoch";
-        Parameters: GetLastAcceptedEpochParamsRpc;
-        ReturnType: GetLastAcceptedEpochReturnTypeRpc;
+        Method: "cartesi_getLastAcceptedEpochIndex";
+        Parameters: GetLastAcceptedEpochIndexParamsRpc;
+        ReturnType: GetLastAcceptedEpochIndexReturnTypeRpc;
     },
     {
         Method: "cartesi_listInputs";
@@ -152,9 +152,9 @@ export type PublicActionsL2 = {
     getProcessedInputCount: (
         params: GetProcessedInputCountParams,
     ) => Promise<GetProcessedInputCountReturnType>;
-    getLastAcceptedEpoch: (
-        params: GetLastAcceptedEpochParams,
-    ) => Promise<GetLastAcceptedEpochReturnType>;
+    getLastAcceptedEpochIndex: (
+        params: GetLastAcceptedEpochIndexParams,
+    ) => Promise<GetLastAcceptedEpochIndexReturnType>;
     waitForInput: (
         params: WaitForInputParams,
     ) => Promise<WaitForInputReturnType>;
@@ -182,6 +182,7 @@ export const publicActionsL2 =
         getReport: (params) => getReport(client, params),
         getProcessedInputCount: (params) =>
             getProcessedInputCount(client, params),
-        getLastAcceptedEpoch: (params) => getLastAcceptedEpoch(client, params),
+        getLastAcceptedEpochIndex: (params) =>
+            getLastAcceptedEpochIndex(client, params),
         waitForInput: (params) => waitForInput(client, params),
     });

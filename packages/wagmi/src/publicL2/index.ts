@@ -5,7 +5,7 @@ export { useEpoch } from "./useEpoch.js";
 export { useEpochs } from "./useEpochs.js";
 export { useInput } from "./useInput.js";
 export { useInputs } from "./useInputs.js";
-export { useLastAcceptedEpoch } from "./useLastAcceptedEpoch.js";
+export { useLastAcceptedEpochIndex } from "./useLastAcceptedEpochIndex.js";
 export { useOutput } from "./useOutput.js";
 export { useOutputs } from "./useOutputs.js";
 export { useProcessedInputCount } from "./useProcessedInputCount.js";

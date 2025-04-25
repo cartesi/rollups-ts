@@ -5,8 +5,8 @@ import {
     GetEpochReturnType,
     GetInputParams,
     GetInputReturnType,
-    GetLastAcceptedEpochParams,
-    GetLastAcceptedEpochReturnType,
+    GetLastAcceptedEpochIndexParams,
+    GetLastAcceptedEpochIndexReturnType,
     GetOutputParams,
     GetOutputReturnType,
     GetProcessedInputCountParams,
@@ -34,9 +34,9 @@ export type Methods = {
     ): GetApplicationReturnType;
     cartesi_listEpochs(params: ListEpochsParams): ListEpochsReturnType;
     cartesi_getEpoch(params: GetEpochParams): GetEpochReturnType;
-    cartesi_getLastAcceptedEpoch(
-        params: GetLastAcceptedEpochParams,
-    ): GetLastAcceptedEpochReturnType;
+    cartesi_getLastAcceptedEpochIndex(
+        params: GetLastAcceptedEpochIndexParams,
+    ): GetLastAcceptedEpochIndexReturnType;
     cartesi_listInputs(params: ListInputsParams): ListInputsReturnType;
     cartesi_getInput(params: GetInputParams): GetInputReturnType;
     cartesi_getProcessedInputCount(

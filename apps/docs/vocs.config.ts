@@ -115,8 +115,8 @@ const config: Config = defineConfig({
                             link: "/viem/getProcessedInputCount",
                         },
                         {
-                            text: "getLastAcceptedEpoch",
-                            link: "/viem/getLastAcceptedEpoch",
+                            text: "getLastAcceptedEpochIndex",
+                            link: "/viem/getLastAcceptedEpochIndex",
                         },
                         { text: "waitForInput", link: "viem/waitForInput" },
                     ],
@@ -182,8 +182,8 @@ const config: Config = defineConfig({
                             link: "/rpc/cartesi_getEpoch",
                         },
                         {
-                            text: "cartesi_getLastAcceptedEpoch",
-                            link: "/rpc/cartesi_getLastAcceptedEpoch",
+                            text: "cartesi_getLastAcceptedEpochIndex",
+                            link: "/rpc/cartesi_getLastAcceptedEpochIndex",
                         },
                         {
                             text: "cartesi_getInput",
