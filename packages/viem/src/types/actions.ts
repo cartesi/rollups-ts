@@ -115,10 +115,12 @@ export type Input = {
     createdAt: Date;
     updatedAt: Date;
 };
-export type GetInputReturnType = Input;
-export type GetLastAcceptedEpochParams = { application: Address | string };
 
-export type GetLastAcceptedEpochReturnType = Epoch;
+export type GetInputReturnType = Input;
+
+export type GetLastAcceptedEpochIndexParams = { application: Address | string };
+
+export type GetLastAcceptedEpochIndexReturnType = bigint;
 
 export type GetOutputParams = {
     application: Address | string;

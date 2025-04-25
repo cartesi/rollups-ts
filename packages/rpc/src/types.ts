@@ -102,10 +102,10 @@ export type GetEpochReturnType = {
     data: Epoch;
 };
 
-export type GetLastAcceptedEpochParams = { application: string | Address };
+export type GetLastAcceptedEpochIndexParams = { application: string | Address };
 
-export type GetLastAcceptedEpochReturnType = {
-    data: Epoch;
+export type GetLastAcceptedEpochIndexReturnType = {
+    data: HexNumber;
 };
 
 export type GetInputParams = {
