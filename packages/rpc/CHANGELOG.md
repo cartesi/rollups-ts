@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.4
+
+### Patch Changes
+
+- 967147d: fix type of output_type
+
 ## 2.0.0-alpha.3
 
 ### Patch Changes

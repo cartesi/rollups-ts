@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.6
+
+### Patch Changes
+
+- 7bc3da2: type for OutputType
+- Updated dependencies [967147d]
+    - @cartesi/rpc@2.0.0-alpha.4
+
 ## 2.0.0-alpha.5
 
 ### Patch Changes
