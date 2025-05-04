@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.3
+
+### Patch Changes
+
+- c0f29cb: replace LastAcceptedEpoch with LastAcceptedEpochIndex
+
 ## 2.0.0-alpha.2
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.4
+
+### Patch Changes
+
+- de269ed: optional fields for hooks
+- c0f29cb: replace LastAcceptedEpoch with LastAcceptedEpochIndex
+- Updated dependencies [c0f29cb]
+    - @cartesi/viem@2.0.0-alpha.5
+
 ## 2.0.0-alpha.3
 
 ### Patch Changes

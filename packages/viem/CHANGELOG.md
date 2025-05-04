@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.5
+
+### Patch Changes
+
+- c0f29cb: replace LastAcceptedEpoch with LastAcceptedEpochIndex
+- Updated dependencies [c0f29cb]
+    - @cartesi/rpc@2.0.0-alpha.3
+
 ## 2.0.0-alpha.4
 
 ### Patch Changes

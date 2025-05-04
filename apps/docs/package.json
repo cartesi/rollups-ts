@@ -1,6 +1,6 @@
 {
     "name": "@cartesi/docs",
-    "version": "0.0.0",
+    "version": "0.0.1-alpha.0",
     "private": true,
     "description": "Documentation for the project",
     "scripts": {
