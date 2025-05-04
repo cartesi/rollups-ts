@@ -1,15 +1,52 @@
-import { Client, numberToHex, Transport } from "viem";
-import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import {
+    Client,
+    getAbiItem,
+    Hex,
+    numberToHex,
+    toFunctionSelector,
+    type Transport,
+} from "viem";
+import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
+import { outputsAbi } from "../rollups.js";
+import {
+    OutputType,
     type ListOutputsParams,
     type ListOutputsReturnType,
 } from "../types/actions.js";
 import { outputConverter, paginationConverter } from "../types/converter.js";
 
+const toOutputType = (outputType?: OutputType): Hex | undefined => {
+    switch (outputType) {
+        case "Notice":
+            return toFunctionSelector(
+                getAbiItem({
+                    abi: outputsAbi,
+                    name: "Notice",
+                }),
+            );
+        case "Voucher":
+            return toFunctionSelector(
+                getAbiItem({
+                    abi: outputsAbi,
+                    name: "Voucher",
+                }),
+            );
+        case "DelegateCallVoucher":
+            return toFunctionSelector(
+                getAbiItem({
+                    abi: outputsAbi,
+                    name: "DelegateCallVoucher",
+                }),
+            );
+    }
+    return undefined;
+};
+
 export const listOutputs = async (
     client: Client<Transport, undefined, undefined, PublicCartesiRpcSchema>,
     params: ListOutputsParams,
 ): Promise<ListOutputsReturnType> => {
+    const output_type = toOutputType(params.outputType);
     const outputs = await client.request({
         method: "cartesi_listOutputs",
         params: {
@@ -20,7 +57,7 @@ export const listOutputs = async (
             input_index: params.inputIndex
                 ? numberToHex(params.inputIndex)
                 : undefined,
-            output_type: params.outputType,
+            output_type,
             voucher_address: params.voucherAddress,
             limit: params.limit,
             offset: params.offset,

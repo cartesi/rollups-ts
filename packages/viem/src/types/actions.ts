@@ -1,4 +1,6 @@
+import { ExtractAbiFunctionNames } from "abitype";
 import { Address, Hash, Hex } from "viem";
+import { outputsAbi } from "../rollups";
 
 export type PaginationParams = {
     limit?: number;
@@ -203,11 +205,13 @@ export type ListInputsReturnType = {
     pagination: Pagination;
 };
 
+export type OutputType = ExtractAbiFunctionNames<typeof outputsAbi>;
+
 export type ListOutputsParams = PaginationParams & {
     application: Address | string;
     epochIndex?: bigint;
     inputIndex?: bigint;
-    outputType?: Hex;
+    outputType?: OutputType;
     voucherAddress?: Address;
 };
 

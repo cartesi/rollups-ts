@@ -80,6 +80,9 @@ importers:
       '@cartesi/rpc':
         specifier: workspace:*
         version: link:../rpc
+      abitype:
+        specifier: ^1.0.8
+        version: 1.0.8(typescript@5.8.3)(zod@3.24.2)
       p-retry:
         specifier: ^6.2.1
         version: 6.2.1

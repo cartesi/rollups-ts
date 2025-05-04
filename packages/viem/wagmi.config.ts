@@ -1,5 +1,6 @@
 import DataAvailability from "@cartesi/rollups/out/DataAvailability.sol/DataAvailability.json" with { type: "json" };
 import IApplication from "@cartesi/rollups/out/IApplication.sol/IApplication.json" with { type: "json" };
+import Outputs from "@cartesi/rollups/out/Outputs.sol/Outputs.json" with { type: "json" };
 import { defineConfig, Plugin } from "@wagmi/cli";
 import { readdirSync, readFileSync } from "fs";
 import path from "path";
@@ -71,6 +72,10 @@ const config: ReturnType<typeof defineConfig> = defineConfig({
         {
             abi: IApplication.abi as Abi,
             name: "IApplication",
+        },
+        {
+            abi: Outputs.abi as Abi,
+            name: "Outputs",
         },
     ],
     plugins: [cannonDeployments({ directory: "deployment" })],
