@@ -227,7 +227,7 @@ export type ListOutputsParams = PaginationParams & {
     application: string | Address;
     epoch_index?: HexNumber;
     input_index?: HexNumber;
-    output_type?: HexNumber;
+    output_type?: Hex;
     voucher_address?: Address;
 };
 
