@@ -1,15 +1,34 @@
-import { GetProcessedInputCountParams } from "@cartesi/viem";
-import { useQuery } from "@tanstack/react-query";
+import {
+    CartesiPublicClient,
+    GetProcessedInputCountParams,
+} from "@cartesi/viem";
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 
-export const useProcessedInputCount = (
+const processedInputCountOptions = (
+    client: CartesiPublicClient,
     params: Partial<GetProcessedInputCountParams>,
+) =>
+    queryOptions({
+        queryKey: ["processedInputCount", params],
+        queryFn: params.application
+            ? () =>
+                  client.getProcessedInputCount({
+                      application: params.application!,
+                  })
+            : skipToken,
+    });
+
+export const useProcessedInputCount = (
+    params: Partial<GetProcessedInputCountParams> &
+        Omit<
+            ReturnType<typeof processedInputCountOptions>,
+            "queryKey" | "queryFn"
+        >,
 ) => {
     const client = useCartesiClient();
     return useQuery({
-        queryKey: ["processedInputCount", params],
-        queryFn: () =>
-            client.getProcessedInputCount({ application: params.application! }),
-        enabled: !!params.application,
+        ...params,
+        ...processedInputCountOptions(client, params),
     });
 };

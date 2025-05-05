@@ -1,16 +1,30 @@
-import { type GetOutputParams } from "@cartesi/viem";
-import { useQuery } from "@tanstack/react-query";
+import { CartesiPublicClient, type GetOutputParams } from "@cartesi/viem";
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 
-export const useOutput = (params: Partial<GetOutputParams>) => {
+const outputOptions = (
+    client: CartesiPublicClient,
+    params: Partial<GetOutputParams>,
+) =>
+    queryOptions({
+        queryKey: ["output", params],
+        queryFn:
+            params.application && params.outputIndex
+                ? () =>
+                      client.getOutput({
+                          application: params.application!,
+                          outputIndex: params.outputIndex!,
+                      })
+                : skipToken,
+    });
+
+export const useOutput = (
+    params: Partial<GetOutputParams> &
+        Omit<ReturnType<typeof outputOptions>, "queryKey" | "queryFn">,
+) => {
     const client = useCartesiClient();
     return useQuery({
-        queryKey: ["output", params],
-        queryFn: () =>
-            client.getOutput({
-                application: params.application!,
-                outputIndex: params.outputIndex!,
-            }),
-        enabled: !!params.application && !!params.outputIndex,
+        ...outputOptions(client, params),
+        ...params,
     });
 };
