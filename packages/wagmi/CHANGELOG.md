@@ -1,5 +1,11 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.6
+
+### Patch Changes
+
+- 3ac3cfe: exposing @tanstack/react-query options to hooks
+
 ## 2.0.0-alpha.5
 
 ### Patch Changes
