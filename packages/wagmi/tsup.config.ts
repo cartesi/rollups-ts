@@ -1,11 +1,11 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-    entry: ["src/index.ts"],
-    external: ["react"],
-    format: ["cjs", "esm"],
-    dts: true,
-    sourcemap: true,
     clean: true,
+    dts: true,
+    entry: ["src/index.ts"],
+    external: ["@tanstack/react-query", "react", "viem", "wagmi"],
+    format: ["cjs", "esm"],
     minify: true,
+    sourcemap: true,
 });

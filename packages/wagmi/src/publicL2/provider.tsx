@@ -1,6 +1,5 @@
 import { CartesiPublicClient, createCartesiPublicClient } from "@cartesi/viem";
-import { QueryClient } from "@tanstack/react-query";
-import { createContext, ReactNode, useContext, useMemo } from "react";
+import { createContext, type ReactNode, useContext, useMemo } from "react";
 import { http } from "viem";
 
 interface CartesiProviderProps {
@@ -16,12 +15,6 @@ export const CartesiProvider = ({ children, rpcUrl }: CartesiProviderProps) => {
             transport: http(rpcUrl),
         });
     }, [rpcUrl]);
-
-    const queryClient = new QueryClient({
-        defaultOptions: {
-            queries: {},
-        },
-    });
 
     return (
         <CartesiContext.Provider value={client}>

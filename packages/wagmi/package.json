@@ -3,24 +3,18 @@
     "description": "Cartesi rollups react hooks",
     "version": "2.0.0-alpha.6",
     "dependencies": {
-        "@cartesi/viem": "workspace:*",
-        "@tanstack/react-query": "^5.72.2",
-        "react": "^19.1.0",
-        "viem": "^2.26.0",
-        "wagmi": "^2.14.16"
+        "@cartesi/viem": "workspace:*"
     },
     "devDependencies": {
         "@cartesi/rollups": "^2.0.0-rc.17",
-        "@types/node": "^22.5.0",
-        "@types/react": "^19.1.0",
-        "@usecannon/cli": "^2.21.5",
-        "@wagmi/cli": "^2.1.15",
-        "@wagmi/core": "^2.16.7",
+        "@types/node": "^22.15.7",
+        "@types/react": "^19.1.2",
+        "@usecannon/cli": "^2.22.0",
+        "@wagmi/cli": "^2.3.0",
         "npm-run-all": "^4.1.5",
         "ts-node": "^10.9.2",
         "tsup": "^8.2.4",
-        "typescript": "^5.5.3",
-        "vitest": "^3.1.1"
+        "typescript": "^5.5.3"
     },
     "type": "module",
     "main": "./dist/index.cjs",
@@ -39,6 +33,7 @@
         }
     },
     "peerDependencies": {
+        "@tanstack/react-query": "^5.0.0",
         "react": "^19.0.0",
         "viem": "^2.0.0",
         "wagmi": "^2.0.0"
