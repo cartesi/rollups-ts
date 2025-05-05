@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.7
+
+### Patch Changes
+
+- 871fb13: fix packaging and bump dependencies
+- Updated dependencies [871fb13]
+    - @cartesi/rpc@2.0.0-alpha.5
+
 ## 2.0.0-alpha.6
 
 ### Patch Changes
