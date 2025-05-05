@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.5
+
+### Patch Changes
+
+- 871fb13: fix packaging and bump dependencies
+
 ## 2.0.0-alpha.4
 
 ### Patch Changes
