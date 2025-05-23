@@ -1,4 +1,4 @@
-import { Application, Output } from "@cartesi/rpc";
+import type { Application, Output } from "@cartesi/rpc";
 import { getAddress, hexToBigInt } from "viem";
 import { describe, expect, it } from "vitest";
 import {
