@@ -1,23 +1,23 @@
-import {
+import type {
     Application as ApplicationRpc,
     DelegateCallVoucher as DelegateCallVoucherRpc,
     Epoch as EpochRpc,
     Input as InputRpc,
     Notice as NoticeRpc,
     Output as OutputRpc,
+    Pagination as PaginationRpc,
     Report as ReportRpc,
     Voucher as VoucherRpc,
-    type Pagination as PaginationRpc,
 } from "@cartesi/rpc";
 import {
+    type Hex,
     getAbiItem,
     getAddress,
-    Hex,
     hexToBigInt,
     toFunctionSelector,
 } from "viem";
 import { dataAvailabilityAbi } from "../rollups.js";
-import {
+import type {
     Application,
     DataAvailability,
     DelegateCallVoucher,

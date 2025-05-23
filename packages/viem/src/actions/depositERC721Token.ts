@@ -1,4 +1,4 @@
-import {
+import type {
     Account,
     Address,
     Chain,
@@ -16,15 +16,15 @@ import {
 } from "viem";
 import { writeContract } from "viem/actions";
 import { erc721PortalAbi, erc721PortalAddress } from "../rollups.js";
-import {
+import type {
     ErrorType,
     GetAccountParameter,
     UnionEvaluate,
 } from "../types/utils.js";
 import {
+    type EstimateDepositERC721TokenGasErrorType,
+    type EstimateDepositERC721TokenGasParameters,
     estimateDepositERC721TokenGas,
-    EstimateDepositERC721TokenGasErrorType,
-    EstimateDepositERC721TokenGasParameters,
 } from "./estimateDepositERC721TokenGas.js";
 
 export type DepositERC721TokenParameters<

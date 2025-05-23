@@ -1,9 +1,6 @@
-import { Client, numberToHex, Transport } from "viem";
-import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
-import {
-    type GetOutputParams,
-    type GetOutputReturnType,
-} from "../types/actions.js";
+import { type Client, type Transport, numberToHex } from "viem";
+import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
+import type { GetOutputParams, GetOutputReturnType } from "../types/actions.js";
 import { outputConverter } from "../types/converter.js";
 
 export const getOutput = async (

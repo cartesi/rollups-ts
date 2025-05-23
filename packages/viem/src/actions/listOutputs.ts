@@ -1,17 +1,11 @@
-import {
-    Client,
-    getAbiItem,
-    Hex,
-    numberToHex,
-    toFunctionSelector,
-    type Transport,
-} from "viem";
-import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
+import type { Client, Hex, Transport } from "viem";
+import { getAbiItem, numberToHex, toFunctionSelector } from "viem";
+import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import { outputsAbi } from "../rollups.js";
-import {
+import type {
+    ListOutputsParams,
+    ListOutputsReturnType,
     OutputType,
-    type ListOutputsParams,
-    type ListOutputsReturnType,
 } from "../types/actions.js";
 import { outputConverter, paginationConverter } from "../types/converter.js";
 

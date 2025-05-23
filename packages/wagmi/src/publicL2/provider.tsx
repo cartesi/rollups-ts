@@ -1,5 +1,8 @@
-import { CartesiPublicClient, createCartesiPublicClient } from "@cartesi/viem";
-import { createContext, type ReactNode, useContext, useMemo } from "react";
+import {
+    type CartesiPublicClient,
+    createCartesiPublicClient,
+} from "@cartesi/viem";
+import { type ReactNode, createContext, useContext, useMemo } from "react";
 import { http } from "viem";
 
 interface CartesiProviderProps {

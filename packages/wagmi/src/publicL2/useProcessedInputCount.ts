@@ -1,4 +1,4 @@
-import {
+import type {
     CartesiPublicClient,
     GetProcessedInputCountParams,
 } from "@cartesi/viem";
@@ -14,7 +14,7 @@ const processedInputCountOptions = (
         queryFn: params.application
             ? () =>
                   client.getProcessedInputCount({
-                      application: params.application!,
+                      application: params.application as string,
                   })
             : skipToken,
     });

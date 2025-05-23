@@ -1,8 +1,8 @@
-import { Client, Transport } from "viem";
-import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
-import {
-    type ListEpochsParams,
-    type ListEpochsReturnType,
+import type { Client, Transport } from "viem";
+import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
+import type {
+    ListEpochsParams,
+    ListEpochsReturnType,
 } from "../types/actions.js";
 import { epochConverter, paginationConverter } from "../types/converter.js";
 

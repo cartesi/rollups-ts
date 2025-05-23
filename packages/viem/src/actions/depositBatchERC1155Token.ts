@@ -1,4 +1,4 @@
-import {
+import type {
     Account,
     Address,
     Chain,
@@ -16,15 +16,15 @@ import {
 } from "viem";
 import { writeContract } from "viem/actions";
 import { erc1155BatchPortalAbi, erc1155BatchPortalAddress } from "../rollups";
-import {
+import type {
     ErrorType,
     GetAccountParameter,
     UnionEvaluate,
 } from "../types/utils.js";
 import {
+    type EstimateDepositBatchERC1155TokenGasErrorType,
+    type EstimateDepositBatchERC1155TokenGasParameters,
     estimateDepositBatchERC1155TokenGas,
-    EstimateDepositBatchERC1155TokenGasErrorType,
-    EstimateDepositBatchERC1155TokenGasParameters,
 } from "./estimateDepositBatchERC1155TokenGas.js";
 
 export type DepositBatchERC1155TokenParameters<

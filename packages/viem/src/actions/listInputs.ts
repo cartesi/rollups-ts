@@ -1,8 +1,8 @@
-import { Client, numberToHex, Transport } from "viem";
-import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
-import {
-    type ListInputsParams,
-    type ListInputsReturnType,
+import { type Client, type Transport, numberToHex } from "viem";
+import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
+import type {
+    ListInputsParams,
+    ListInputsReturnType,
 } from "../types/actions.js";
 import { inputConverter, paginationConverter } from "../types/converter.js";
 

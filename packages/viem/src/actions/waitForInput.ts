@@ -1,9 +1,9 @@
 import pRetry, { AbortError } from "p-retry";
-import { Client, numberToHex, Transport } from "viem";
-import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
-import {
-    type WaitForInputParams,
-    type WaitForInputReturnType,
+import { type Client, type Transport, numberToHex } from "viem";
+import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
+import type {
+    WaitForInputParams,
+    WaitForInputReturnType,
 } from "../types/actions.js";
 import { inputConverter } from "../types/converter.js";
 

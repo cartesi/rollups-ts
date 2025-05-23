@@ -1,12 +1,5 @@
-import { Account, Chain, Client } from "viem";
+import type { Account, Chain, Client } from "viem";
 import {
-    addInput,
-    depositBatchERC1155Token,
-    depositERC20Tokens,
-    depositERC721Token,
-    depositEther,
-    depositSingleERC1155Token,
-    executeOutput,
     type AddInputParameters,
     type AddInputReturnType,
     type DepositBatchERC1155TokenParameters,
@@ -21,6 +14,13 @@ import {
     type DepositSingleERC1155TokenReturnType,
     type ExecuteOutputParameters,
     type ExecuteOutputReturnType,
+    addInput,
+    depositBatchERC1155Token,
+    depositERC20Tokens,
+    depositERC721Token,
+    depositEther,
+    depositSingleERC1155Token,
+    executeOutput,
 } from "../actions/index.js";
 
 export type WalletActionsL1<

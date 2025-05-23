@@ -1,4 +1,4 @@
-import {
+import type {
     Account,
     Address,
     Chain,
@@ -14,7 +14,7 @@ import {
 } from "viem";
 import { estimateContractGas } from "viem/actions";
 import { inputBoxAbi, inputBoxAddress } from "../rollups.js";
-import {
+import type {
     ErrorType,
     GetAccountParameter,
     UnionEvaluate,

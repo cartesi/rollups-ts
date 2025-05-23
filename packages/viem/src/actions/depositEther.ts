@@ -1,4 +1,4 @@
-import {
+import type {
     Account,
     Address,
     Chain,
@@ -16,15 +16,15 @@ import {
 } from "viem";
 import { writeContract } from "viem/actions";
 import { etherPortalAbi, etherPortalAddress } from "../rollups.js";
-import {
+import type {
     ErrorType,
     GetAccountParameter,
     UnionEvaluate,
 } from "../types/utils.js";
 import {
+    type EstimateDepositEtherGasErrorType,
+    type EstimateDepositEtherGasParameters,
     estimateDepositEtherGas,
-    EstimateDepositEtherGasErrorType,
-    EstimateDepositEtherGasParameters,
 } from "./estimateDepositEtherGas.js";
 
 export type DepositEtherParameters<

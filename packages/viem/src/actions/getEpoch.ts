@@ -1,9 +1,6 @@
-import { Client, numberToHex, Transport } from "viem";
-import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
-import {
-    type GetEpochParams,
-    type GetEpochReturnType,
-} from "../types/actions.js";
+import { type Client, type Transport, numberToHex } from "viem";
+import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
+import type { GetEpochParams, GetEpochReturnType } from "../types/actions.js";
 import { epochConverter } from "../types/converter.js";
 
 export const getEpoch = async (

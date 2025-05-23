@@ -1,8 +1,8 @@
-import { Client, hexToBigInt, Transport } from "viem";
-import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
-import {
-    type GetLastAcceptedEpochIndexParams,
-    type GetLastAcceptedEpochIndexReturnType,
+import { type Client, type Transport, hexToBigInt } from "viem";
+import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
+import type {
+    GetLastAcceptedEpochIndexParams,
+    GetLastAcceptedEpochIndexReturnType,
 } from "../types/actions.js";
 
 export const getLastAcceptedEpochIndex = async (

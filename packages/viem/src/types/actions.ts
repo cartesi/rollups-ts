@@ -1,6 +1,6 @@
-import { ExtractAbiFunctionNames } from "abitype";
-import { Address, Hash, Hex } from "viem";
-import { outputsAbi } from "../rollups";
+import type { ExtractAbiFunctionNames } from "abitype";
+import type { Address, Hash, Hex } from "viem";
+import type { outputsAbi } from "../rollups";
 
 export type PaginationParams = {
     limit?: number;

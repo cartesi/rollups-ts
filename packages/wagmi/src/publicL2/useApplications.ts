@@ -1,6 +1,6 @@
-import {
+import type {
     CartesiPublicClient,
-    type ListApplicationsParams,
+    ListApplicationsParams,
 } from "@cartesi/viem";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";

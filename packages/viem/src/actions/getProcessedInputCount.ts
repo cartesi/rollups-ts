@@ -1,8 +1,8 @@
-import { Client, hexToBigInt, Transport } from "viem";
-import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
-import {
-    type GetProcessedInputCountParams,
-    type GetProcessedInputCountReturnType,
+import { type Client, type Transport, hexToBigInt } from "viem";
+import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
+import type {
+    GetProcessedInputCountParams,
+    GetProcessedInputCountReturnType,
 } from "../types/actions.js";
 
 export const getProcessedInputCount = async (

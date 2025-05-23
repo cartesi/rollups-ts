@@ -1,4 +1,4 @@
-import { CartesiPublicClient, type GetApplicationParams } from "@cartesi/viem";
+import type { CartesiPublicClient, GetApplicationParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 
@@ -9,7 +9,10 @@ const applicationOptions = (
     queryOptions({
         queryKey: ["application", params],
         queryFn: params.application
-            ? () => client.getApplication({ application: params.application! })
+            ? () =>
+                  client.getApplication({
+                      application: params.application as string,
+                  })
             : skipToken,
     });
 

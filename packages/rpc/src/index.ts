@@ -1,5 +1,5 @@
-import { JSONRPCClient, TypedJSONRPCClient } from "json-rpc-2.0";
-import { Methods } from "./methods.js";
+import { JSONRPCClient, type TypedJSONRPCClient } from "json-rpc-2.0";
+import type { Methods } from "./methods.js";
 
 export * from "./types.js";
 
@@ -16,7 +16,7 @@ export const createClient = (options: ClientOptions): CartesiClient => {
         // setup auth headers, if token is provided
         const headers: HeadersInit = { "content-type": "application/json" };
         if (token) {
-            headers["authorization"] = `Bearer ${token}`;
+            headers.authorization = `Bearer ${token}`;
         }
 
         fetch(uri, {
@@ -28,7 +28,8 @@ export const createClient = (options: ClientOptions): CartesiClient => {
                 return response
                     .json()
                     .then((jsonRPCResponse) => client.receive(jsonRPCResponse));
-            } else if (jsonRPCRequest.id !== undefined) {
+            }
+            if (jsonRPCRequest.id !== undefined) {
                 return Promise.reject(new Error(response.statusText));
             }
         });

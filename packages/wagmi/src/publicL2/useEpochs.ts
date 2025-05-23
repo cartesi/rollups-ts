@@ -1,4 +1,4 @@
-import { CartesiPublicClient, type ListEpochsParams } from "@cartesi/viem";
+import type { CartesiPublicClient, ListEpochsParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 
@@ -11,7 +11,7 @@ const epochsOptions = (
         queryFn: params.application
             ? () =>
                   client.listEpochs({
-                      application: params.application!,
+                      application: params.application as string,
                       ...params,
                   })
             : skipToken,

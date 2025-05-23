@@ -1,8 +1,8 @@
-import { Client, Transport } from "viem";
-import { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
-import {
-    type GetApplicationParams,
-    type GetApplicationReturnType,
+import type { Client, Transport } from "viem";
+import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
+import type {
+    GetApplicationParams,
+    GetApplicationReturnType,
 } from "../types/actions.js";
 import { applicationConverter } from "../types/converter.js";
 

@@ -1,4 +1,4 @@
-import {
+import type {
     Account,
     Address,
     Chain,
@@ -19,15 +19,15 @@ import {
     erc1155SinglePortalAbi,
     erc1155SinglePortalAddress,
 } from "../rollups.js";
-import {
+import type {
     ErrorType,
     GetAccountParameter,
     UnionEvaluate,
 } from "../types/utils.js";
 import {
+    type EstimateDepositSingleERC1155TokenGasErrorType,
+    type EstimateDepositSingleERC1155TokenGasParameters,
     estimateDepositSingleERC1155TokenGas,
-    EstimateDepositSingleERC1155TokenGasErrorType,
-    EstimateDepositSingleERC1155TokenGasParameters,
 } from "./estimateDepositSingleERC1155TokenGas.js";
 
 export type DepositSingleERC1155TokenParameters<

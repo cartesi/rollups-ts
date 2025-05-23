@@ -1,4 +1,4 @@
-import {
+import type {
     Account,
     Address,
     Chain,
@@ -17,7 +17,7 @@ import {
     erc1155BatchPortalAbi,
     erc1155BatchPortalAddress,
 } from "../rollups.js";
-import {
+import type {
     ErrorType,
     GetAccountParameter,
     UnionEvaluate,

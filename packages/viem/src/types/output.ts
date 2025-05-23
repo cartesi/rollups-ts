@@ -1,6 +1,9 @@
-import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from "abitype";
-import { iApplicationAbi } from "../rollups.js";
-import { type Output } from "./actions.js";
+import type {
+    AbiParametersToPrimitiveTypes,
+    ExtractAbiFunction,
+} from "abitype";
+import type { iApplicationAbi } from "../rollups.js";
+import type { Output } from "./actions.js";
 
 type ExecuteOutputArgs = AbiParametersToPrimitiveTypes<
     ExtractAbiFunction<typeof iApplicationAbi, "executeOutput">["inputs"]

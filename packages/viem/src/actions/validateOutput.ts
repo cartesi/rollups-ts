@@ -1,4 +1,4 @@
-import {
+import type {
     Account,
     Address,
     Chain,
@@ -9,7 +9,7 @@ import {
 } from "viem";
 import { readContract } from "viem/actions";
 import { iApplicationAbi } from "../rollups.js";
-import { type GetOutputReturnType } from "../types/actions.js";
+import type { GetOutputReturnType } from "../types/actions.js";
 import { toEVM } from "../types/output.js";
 
 export type ValidateOutputParameters<

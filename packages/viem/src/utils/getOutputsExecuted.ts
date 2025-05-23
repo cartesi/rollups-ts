@@ -1,7 +1,7 @@
 import {
-    ContractEventArgsFromTopics,
+    type ContractEventArgsFromTopics,
+    type TransactionReceipt,
     parseEventLogs,
-    TransactionReceipt,
 } from "viem";
 import { iApplicationAbi } from "../rollups.js";
 

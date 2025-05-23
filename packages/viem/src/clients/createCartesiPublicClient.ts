@@ -1,7 +1,12 @@
-import { ClientConfig, createClient, Prettify, Transport } from "viem";
 import {
+    type ClientConfig,
+    type Prettify,
+    type Transport,
+    createClient,
+} from "viem";
+import {
+    type PublicCartesiRpcSchema,
     publicActionsL2,
-    PublicCartesiRpcSchema,
 } from "../decorators/publicL2.js";
 
 // Define a simpler type that doesn't use the generic parameters for account

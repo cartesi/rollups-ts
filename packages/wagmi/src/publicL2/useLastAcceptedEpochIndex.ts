@@ -1,4 +1,4 @@
-import {
+import type {
     CartesiPublicClient,
     GetLastAcceptedEpochIndexParams,
 } from "@cartesi/viem";
@@ -14,7 +14,7 @@ const lastAcceptedEpochIndexOptions = (
         queryFn: params.application
             ? () =>
                   client.getLastAcceptedEpochIndex({
-                      application: params.application!,
+                      application: params.application as string,
                   })
             : skipToken,
     });

@@ -1,5 +1,5 @@
-import { Account, Address } from "viem";
-import { Prettify } from "viem/chains";
+import type { Account, Address } from "viem";
+import type { Prettify } from "viem/chains";
 
 // missing imports from viem library
 export type GetAccountParameter<
