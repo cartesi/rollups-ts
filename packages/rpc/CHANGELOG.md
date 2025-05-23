@@ -1,5 +1,12 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.6
+
+### Patch Changes
+
+- 715df3f: bump dependencies
+- 7e06ba6: lint
+
 ## 2.0.0-alpha.5
 
 ### Patch Changes

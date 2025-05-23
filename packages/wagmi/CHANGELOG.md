@@ -1,5 +1,16 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.8
+
+### Patch Changes
+
+- 715df3f: bump dependencies
+- 7e06ba6: lint
+- 68d9724: fix query keys, which must be serializable
+- Updated dependencies [715df3f]
+- Updated dependencies [7e06ba6]
+    - @cartesi/viem@2.0.0-alpha.8
+
 ## 2.0.0-alpha.7
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.8
+
+### Patch Changes
+
+- 715df3f: bump dependencies
+- 7e06ba6: lint
+- Updated dependencies [715df3f]
+- Updated dependencies [7e06ba6]
+    - @cartesi/rpc@2.0.0-alpha.6
+
 ## 2.0.0-alpha.7
 
 ### Patch Changes
