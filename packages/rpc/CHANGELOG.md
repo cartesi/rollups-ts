@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.7
+
+### Patch Changes
+
+- 7ce81ae: fix output type: output_hashes_siblings is nullable
+
 ## 2.0.0-alpha.6
 
 ### Patch Changes

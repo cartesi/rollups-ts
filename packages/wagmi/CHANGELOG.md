@@ -1,5 +1,12 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.9
+
+### Patch Changes
+
+- Updated dependencies [7ce81ae]
+    - @cartesi/viem@2.0.0-alpha.9
+
 ## 2.0.0-alpha.8
 
 ### Patch Changes
