@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.9
+
+### Patch Changes
+
+- 7ce81ae: fix output type: output_hashes_siblings is nullable
+- Updated dependencies [7ce81ae]
+    - @cartesi/rpc@2.0.0-alpha.7
+
 ## 2.0.0-alpha.8
 
 ### Patch Changes
