@@ -170,7 +170,7 @@ export type Output = {
     raw_data: Hex;
     decoded_data: Notice | Voucher | DelegateCallVoucher;
     hash: Hash;
-    output_hashes_siblings: Hash[];
+    output_hashes_siblings: Hash[] | null;
     execution_transaction_hash: Hash | null;
     created_at: DateTime;
     updated_at: DateTime;

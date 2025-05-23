@@ -154,7 +154,7 @@ export type Output = {
     rawData: Hex;
     decodedData: Notice | Voucher | DelegateCallVoucher;
     hash: Hash;
-    outputHashesSiblings: Hash[];
+    outputHashesSiblings: Hash[] | null;
     executionTransactionHash: Hash | null;
     createdAt: Date;
     updatedAt: Date;
