@@ -7,13 +7,13 @@
     },
     "devDependencies": {
         "@cartesi/rollups": "^2.0.0-rc.17",
-        "@types/node": "^22.15.7",
-        "@types/react": "^19.1.2",
-        "@usecannon/cli": "^2.22.0",
-        "@wagmi/cli": "^2.3.0",
+        "@types/node": "^22.15.21",
+        "@types/react": "^19.1.5",
+        "@usecannon/cli": "^2.23.0",
+        "@wagmi/cli": "^2.3.1",
         "npm-run-all": "^4.1.5",
         "ts-node": "^10.9.2",
-        "tsup": "^8.2.4",
+        "tsup": "^8.5.0",
         "typescript": "^5.5.3"
     },
     "type": "module",
