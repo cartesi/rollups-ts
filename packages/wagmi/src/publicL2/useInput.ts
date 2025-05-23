@@ -1,4 +1,4 @@
-import { CartesiPublicClient, type GetInputParams } from "@cartesi/viem";
+import type { CartesiPublicClient, GetInputParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 
@@ -7,13 +7,16 @@ const inputOptions = (
     params: Partial<GetInputParams>,
 ) =>
     queryOptions({
-        queryKey: ["input", params],
+        queryKey: [
+            "input",
+            { ...params, inputIndex: params.inputIndex?.toString() },
+        ],
         queryFn:
             params.application && params.inputIndex
                 ? () =>
                       client.getInput({
-                          application: params.application!,
-                          inputIndex: params.inputIndex!,
+                          application: params.application as string,
+                          inputIndex: params.inputIndex as bigint,
                       })
                 : skipToken,
     });

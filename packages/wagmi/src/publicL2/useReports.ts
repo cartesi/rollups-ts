@@ -1,4 +1,4 @@
-import { CartesiPublicClient, type ListReportsParams } from "@cartesi/viem";
+import type { CartesiPublicClient, ListReportsParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 
@@ -7,11 +7,18 @@ const reportsOptions = (
     params: Partial<ListReportsParams>,
 ) =>
     queryOptions({
-        queryKey: ["reports", params],
+        queryKey: [
+            "reports",
+            {
+                ...params,
+                epochIndex: params.epochIndex?.toString(),
+                inputIndex: params.inputIndex?.toString(),
+            },
+        ],
         queryFn: params.application
             ? () =>
                   client.listReports({
-                      application: params.application!,
+                      application: params.application as string,
                       ...params,
                   })
             : skipToken,
