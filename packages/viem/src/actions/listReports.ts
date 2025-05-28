@@ -14,12 +14,14 @@ export const listReports = async (
         method: "cartesi_listReports",
         params: {
             application: params.application,
-            epoch_index: params.epochIndex
-                ? numberToHex(params.epochIndex)
-                : undefined,
-            input_index: params.inputIndex
-                ? numberToHex(params.inputIndex)
-                : undefined,
+            epoch_index:
+                params.epochIndex !== undefined
+                    ? numberToHex(params.epochIndex)
+                    : undefined,
+            input_index:
+                params.inputIndex !== undefined
+                    ? numberToHex(params.inputIndex)
+                    : undefined,
             limit: params.limit,
             offset: params.offset,
         },

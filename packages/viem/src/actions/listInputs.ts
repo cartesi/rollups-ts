@@ -14,9 +14,10 @@ export const listInputs = async (
         method: "cartesi_listInputs",
         params: {
             application: params.application,
-            epoch_index: params.epochIndex
-                ? numberToHex(params.epochIndex)
-                : undefined,
+            epoch_index:
+                params.epochIndex !== undefined
+                    ? numberToHex(params.epochIndex)
+                    : undefined,
             sender: params.sender,
             limit: params.limit,
             offset: params.offset,
