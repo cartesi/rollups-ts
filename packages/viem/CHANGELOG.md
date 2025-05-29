@@ -1,5 +1,11 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.10
+
+### Patch Changes
+
+- aaf61ca: fix queries with optional fields
+
 ## 2.0.0-alpha.9
 
 ### Patch Changes
