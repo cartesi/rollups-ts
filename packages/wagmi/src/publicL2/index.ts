@@ -11,3 +11,4 @@ export { useOutputs } from "./useOutputs.js";
 export { useProcessedInputCount } from "./useProcessedInputCount.js";
 export { useReport } from "./useReport.js";
 export { useReports } from "./useReports.js";
+export { useWaitForInput } from "./useWaitForInput.js";
