@@ -1,5 +1,13 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.10
+
+### Patch Changes
+
+- 4cda2df: add useWaitForInput hook
+- Updated dependencies [aaf61ca]
+    - @cartesi/viem@2.0.0-alpha.10
+
 ## 2.0.0-alpha.9
 
 ### Patch Changes
