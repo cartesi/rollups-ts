@@ -12,17 +12,17 @@
     "dependencies": {
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
-        "vocs": "latest"
+        "vocs": "^1.0.12"
     },
     "devDependencies": {
         "@cartesi/rpc": "workspace:*",
         "@cartesi/viem": "workspace:*",
         "@cartesi/wagmi": "workspace:*",
-        "@tanstack/react-query": "^5.76.2",
-        "@types/node": "^22.15.21",
-        "@types/react": "^19.1.5",
+        "@tanstack/react-query": "^5.79.0",
+        "@types/node": "catalog:",
+        "@types/react": "^19.1.6",
         "typescript": "5.8.3",
-        "viem": "^2.30.0"
+        "viem": "catalog:"
     },
     "engines": {
         "node": ">=22"
