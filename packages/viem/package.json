@@ -8,7 +8,7 @@
         "p-retry": "^6.2.1"
     },
     "devDependencies": {
-        "@cartesi/rollups": "^2.0.0-rc.17",
+        "@cartesi/rollups": "^2.0.0",
         "@types/node": "^22.15.21",
         "@usecannon/cli": "^2.23.0",
         "@wagmi/cli": "^2.3.1",
@@ -63,7 +63,7 @@
     "scripts": {
         "build": "run-s codegen compile",
         "codegen": "run-s codegen:cannon codegen:wagmi",
-        "codegen:cannon": "cannon inspect cartesi-rollups:2.0.0-rc.17 --write-deployments ./deployment",
+        "codegen:cannon": "cannon inspect cartesi-rollups:2.0.0 --write-deployments ./deployment",
         "codegen:wagmi": "wagmi generate",
         "compile": "tsup",
         "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
