@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.11
+
+### Patch Changes
+
+- e63018a: bump rollups-contracts to 2.0.0
+- 7a88f7e: bump dependencies
+- 3ff8e20: fix files in package
+
 ## 2.0.0-alpha.10
 
 ### Patch Changes
