@@ -8,6 +8,7 @@
     "@cartesi/wagmi": "1.0.0"
   },
   "changesets": [
+    "big-rings-roll",
     "big-yaks-roll",
     "cold-meals-wait",
     "crazy-singers-make",
@@ -31,8 +32,10 @@
     "quiet-lamps-help",
     "social-pillows-tie",
     "sour-years-say",
+    "tender-places-help",
     "tiny-taxes-sort",
     "twelve-ears-pump",
+    "upset-chefs-lie",
     "vast-birds-lick",
     "weak-tables-feel",
     "witty-lizards-relate"
