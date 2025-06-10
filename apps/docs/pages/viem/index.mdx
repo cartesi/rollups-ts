@@ -14,12 +14,12 @@ There is also a method to execute outputs (vouchers).
 
 ```ts twoslash
 import { walletActionsL1 } from "@cartesi/viem";
+import { cartesi } from "@cartesi/viem/chains";
 import { createWalletClient, http } from "viem";
-import { cannon } from "viem/chains";
 
 // create wallet client with extra L1 actions
 const walletClient = createWalletClient({
-    chain: cannon,
+    chain: cartesi,
     transport: http(),
 }).extend(walletActionsL1()); // [!code hl]
 
@@ -37,12 +37,12 @@ This includes gas estimation methods for all wallet L1 actions, and also the `va
 
 ```ts twoslash
 import { publicActionsL1 } from "@cartesi/viem";
+import { cartesi } from "@cartesi/viem/chains";
 import { createPublicClient, http } from "viem";
-import { cannon } from "viem/chains";
 
 // create public client with extra L1 actions
 const publicClient = createPublicClient({
-    chain: cannon,
+    chain: cartesi,
     transport: http(),
 }).extend(publicActionsL1()); // [!code hl]
 

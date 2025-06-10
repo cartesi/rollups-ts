@@ -3,11 +3,11 @@ import {
     publicActionsL1,
     walletActionsL1,
 } from "@cartesi/viem";
+import { cartesi } from "@cartesi/viem/chains";
 import { createPublicClient, createWalletClient, http } from "viem";
-import { cannon } from "viem/chains";
 
 const main = async () => {
-    const chain = cannon;
+    const chain = cartesi;
 
     // create public client with extra L1 actions
     const publicClient = createPublicClient({

@@ -3,6 +3,7 @@ import {
     getInputsAdded,
     walletActionsL1,
 } from "@cartesi/viem";
+import { cartesi } from "@cartesi/viem/chains";
 import {
     createPublicClient,
     createWalletClient,
@@ -10,10 +11,9 @@ import {
     stringToHex,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { cannon } from "viem/chains";
 
 async function main() {
-    const chain = cannon;
+    const chain = cartesi;
     const account = privateKeyToAccount(
         "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     );
