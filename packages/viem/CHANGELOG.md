@@ -1,5 +1,11 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.12
+
+### Patch Changes
+
+- 4946810: add dataAvailability info
+
 ## 2.0.0-alpha.11
 
 ### Patch Changes
