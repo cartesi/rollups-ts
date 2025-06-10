@@ -33,6 +33,16 @@
                 "require": "./dist/index.cjs"
             }
         },
+        "./abi": {
+            "import": {
+                "types": "./dist/rollups.d.ts",
+                "import": "./dist/rollups.js"
+            },
+            "require": {
+                "types": "./dist/rollups.d.cts",
+                "require": "./dist/rollups.cjs"
+            }
+        },
         "./actions": {
             "import": {
                 "types": "./dist/actions/index.d.ts",
@@ -43,14 +53,14 @@
                 "require": "./dist/actions/index.cjs"
             }
         },
-        "./abi": {
+        "./chains": {
             "import": {
-                "types": "./dist/rollups.d.ts",
-                "import": "./dist/rollups.js"
+                "types": "./dist/chains.d.ts",
+                "import": "./dist/chains.js"
             },
             "require": {
-                "types": "./dist/rollups.d.cts",
-                "require": "./dist/rollups.cjs"
+                "types": "./dist/chains.d.cts",
+                "require": "./dist/chains.cjs"
             }
         }
     },
