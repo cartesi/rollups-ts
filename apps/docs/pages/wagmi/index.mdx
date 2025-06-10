@@ -37,7 +37,7 @@ function App() {
   return (
     // Provide the client to your App
     <QueryClientProvider client={queryClient}>
-      <CartesiProvider rpcUrl="http://localhost:8080/rpc">
+      <CartesiProvider rpcUrl="http://127.0.0.1:6751/rpc">
         <Home />
       </CartesiProvider>
     </QueryClientProvider>
