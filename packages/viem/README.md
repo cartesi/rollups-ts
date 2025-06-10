@@ -78,7 +78,7 @@ async function main() {
 
     // create extended public client to L2 with RPC url
     const publicClientL2 = createCartesiPublicClient({
-        transport: http("http://localhost:8080/rpc"),
+        transport: http("http://127.0.0.1:6751/rpc"),
     });
 
     // create extended wallet client to chain default url
