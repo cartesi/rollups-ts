@@ -1,8 +1,13 @@
 packages:
-    - "apps/*"
-    - "packages/*"
-
+    - apps/*
+    - packages/*
 catalog:
     "@types/node": ^24.0.3
     "@types/react": ^19.1.8
     viem: ^2.31.3
+onlyBuiltDependencies:
+    - bufferutil
+    - esbuild
+    - keccak
+    - protobufjs
+    - utf-8-validate
