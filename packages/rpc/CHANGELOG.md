@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.8
+
+### Patch Changes
+
+- 5e00d57: fix module resolution
+
 ## 2.0.0-alpha.7
 
 ### Patch Changes

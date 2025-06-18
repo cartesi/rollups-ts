@@ -8,6 +8,7 @@
     "@cartesi/wagmi": "1.0.0"
   },
   "changesets": [
+    "angry-horses-cheat",
     "big-rings-roll",
     "big-yaks-roll",
     "cold-meals-wait",
@@ -17,8 +18,10 @@
     "early-walls-exist",
     "easy-apes-sip",
     "easy-games-leave",
+    "every-bees-sink",
     "fancy-moose-pick",
     "free-lines-nail",
+    "fresh-turkeys-send",
     "green-mangos-argue",
     "honest-bobcats-guess",
     "hungry-meals-shave",
@@ -34,6 +37,7 @@
     "sour-years-say",
     "tender-places-help",
     "tiny-taxes-sort",
+    "true-cycles-prove",
     "twelve-ears-pump",
     "upset-chefs-lie",
     "vast-birds-lick",

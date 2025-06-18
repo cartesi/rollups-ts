@@ -1,5 +1,15 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.12
+
+### Patch Changes
+
+- 9b3fa22: Bump dependencies
+- Updated dependencies [a6a79d7]
+- Updated dependencies [4946810]
+- Updated dependencies [9b3fa22]
+    - @cartesi/viem@2.0.0-alpha.12
+
 ## 2.0.0-alpha.11
 
 ### Patch Changes
