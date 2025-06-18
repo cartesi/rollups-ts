@@ -20,7 +20,7 @@
         "@cartesi/wagmi": "workspace:*",
         "@tanstack/react-query": "^5.79.0",
         "@types/node": "catalog:",
-        "@types/react": "^19.1.6",
+        "@types/react": "catalog:",
         "typescript": "5.8.3",
         "viem": "catalog:"
     },
