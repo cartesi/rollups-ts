@@ -6,9 +6,9 @@
         "@cartesi/viem": "workspace:*"
     },
     "devDependencies": {
-        "@cartesi/rollups": "^2.0.0",
+        "@cartesi/rollups": "^2.0.1",
         "@types/node": "catalog:",
-        "@types/react": "^19.1.6",
+        "@types/react": "catalog:",
         "@usecannon/cli": "^2.23.0",
         "@wagmi/cli": "^2.3.1",
         "npm-run-all": "^4.1.5",
