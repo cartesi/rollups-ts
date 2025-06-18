@@ -1,5 +1,15 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.12
+
+### Patch Changes
+
+- a6a79d7: definition of cartesi chain
+- 4946810: add dataAvailability info
+- 9b3fa22: Bump dependencies
+- Updated dependencies [5e00d57]
+    - @cartesi/rpc@2.0.0-alpha.8
+
 ## 2.0.0-alpha.11
 
 ### Patch Changes
