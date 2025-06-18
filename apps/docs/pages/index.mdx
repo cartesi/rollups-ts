@@ -6,18 +6,7 @@ Cartesi provides some TypeScript libraries that helps users to develop Cartesi a
 
 Viem extension library that provides L1 public actions and L1 wallet actions related to Cartesi smart contracts infrastructure, and L2 public actions related to the Cartesi Rollups v2 [JSON-RPC API](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/cartesi/rollups-node/refs/tags/v2.0.0-alpha.3/internal/jsonrpc/jsonrpc-discover.json&uiSchema[appBar][ui:title]=Cartesi&uiSchema[appBar][ui:logoUrl]=https://cartesi.io/favicon.svg&uiSchema[appBar][ui:transports]=false&uiSchema[appBar][ui:input]=false&uiSchema[appBar][ui:edit]=false&uiSchema[appBar][ui:examplesDropdown]=false&uiSchema[appBar][ui:splitView]=false).
 
-```ts twoslash
-// [!include ~/snippets/viem/createClients.ts]
-```
-
 ## @cartesi/rpc
 
 This library provides a typed JSON-RPC client for the Cartesi Rollups v2 [JSON-RPC API](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/cartesi/rollups-node/refs/tags/v2.0.0-alpha.3/internal/jsonrpc/jsonrpc-discover.json&uiSchema[appBar][ui:title]=Cartesi&uiSchema[appBar][ui:logoUrl]=https://cartesi.io/favicon.svg&uiSchema[appBar][ui:transports]=false&uiSchema[appBar][ui:input]=false&uiSchema[appBar][ui:edit]=false&uiSchema[appBar][ui:examplesDropdown]=false&uiSchema[appBar][ui:splitView]=false).
 
-```ts twoslash
-// [!include ~/snippets/rpc/createClient.ts]
-
-// @noErrors
-const result = await client.request("
-    //                               ^|
-```
