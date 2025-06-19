@@ -240,3 +240,11 @@ export type ListReportsParams = PaginationParams & {
 };
 
 export type ListReportsReturnType = PaginatedReturnType<Report>;
+
+export type GetChainIdReturnType = {
+    data: string;
+};
+
+export type GetNodeVersionReturnType = {
+    data: string;
+};

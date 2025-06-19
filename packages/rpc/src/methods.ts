@@ -1,12 +1,14 @@
 import type {
     GetApplicationParams,
     GetApplicationReturnType,
+    GetChainIdReturnType,
     GetEpochParams,
     GetEpochReturnType,
     GetInputParams,
     GetInputReturnType,
     GetLastAcceptedEpochIndexParams,
     GetLastAcceptedEpochIndexReturnType,
+    GetNodeVersionReturnType,
     GetOutputParams,
     GetOutputReturnType,
     GetProcessedInputCountParams,
@@ -46,4 +48,6 @@ export type Methods = {
     cartesi_getOutput(params: GetOutputParams): GetOutputReturnType;
     cartesi_listReports(params: ListReportsParams): ListReportsReturnType;
     cartesi_getReport(params: GetReportParams): GetReportReturnType;
+    cartesi_getChainId(): GetChainIdReturnType;
+    cartesi_getNodeVersion(): GetNodeVersionReturnType;
 };
