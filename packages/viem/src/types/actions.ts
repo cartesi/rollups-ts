@@ -1,5 +1,6 @@
 import type { ExtractAbiFunctionNames } from "abitype";
 import type { Address, Hash, Hex } from "viem";
+
 import type { outputsAbi } from "../rollups";
 
 export type PaginationParams = {
@@ -86,6 +87,10 @@ export type Application = {
     };
 };
 export type GetApplicationReturnType = Application;
+
+export type GetChainIdReturnType = number;
+
+export type GetNodeVersionReturnType = string;
 
 export type GetEpochParams = {
     application: Address | string;

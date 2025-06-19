@@ -69,9 +69,11 @@ export {
     type ExecuteOutputReturnType,
 } from "./executeOutput.js";
 export { getApplication } from "./getApplication.js";
+export { getChainId } from "./getChainId.js";
 export { getEpoch } from "./getEpoch.js";
 export { getInput } from "./getInput.js";
 export { getLastAcceptedEpochIndex } from "./getLastAcceptedEpochIndex.js";
+export { getNodeVersion } from "./getNodeVersion.js";
 export { getOutput } from "./getOutput.js";
 export { getProcessedInputCount } from "./getProcessedInputCount.js";
 export { getReport } from "./getReport.js";

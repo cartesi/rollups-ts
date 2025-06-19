@@ -1,12 +1,14 @@
 import type {
     GetApplicationParams as GetApplicationParamsRpc,
     GetApplicationReturnType as GetApplicationReturnTypeRpc,
+    GetChainIdReturnType as GetChainIdReturnTypeRpc,
     GetEpochParams as GetEpochParamsRpc,
     GetEpochReturnType as GetEpochReturnTypeRpc,
     GetInputParams as GetInputParamsRpc,
     GetInputReturnType as GetInputReturnTypeRpc,
     GetLastAcceptedEpochIndexParams as GetLastAcceptedEpochIndexParamsRpc,
     GetLastAcceptedEpochIndexReturnType as GetLastAcceptedEpochIndexReturnTypeRpc,
+    GetNodeVersionReturnType as GetNodeVersionReturnTypeRpc,
     GetOutputParams as GetOutputParamsRpc,
     GetOutputReturnType as GetOutputReturnTypeRpc,
     GetProcessedInputCountParams as GetProcessedInputCountParamsRpc,
@@ -25,11 +27,14 @@ import type {
     ListReportsReturnType as ListReportsReturnTypeRpc,
 } from "@cartesi/rpc";
 import type { Client, Transport } from "viem";
+
 import {
     getApplication,
+    getChainId,
     getEpoch,
     getInput,
     getLastAcceptedEpochIndex,
+    getNodeVersion,
     getOutput,
     getProcessedInputCount,
     getReport,
@@ -43,12 +48,14 @@ import {
 import type {
     GetApplicationParams,
     GetApplicationReturnType,
+    GetChainIdReturnType,
     GetEpochParams,
     GetEpochReturnType,
     GetInputParams,
     GetInputReturnType,
     GetLastAcceptedEpochIndexParams,
     GetLastAcceptedEpochIndexReturnType,
+    GetNodeVersionReturnType,
     GetOutputParams,
     GetOutputReturnType,
     GetProcessedInputCountParams,
@@ -130,6 +137,14 @@ export type PublicCartesiRpcSchema = [
         Parameters: GetReportParamsRpc;
         ReturnType: GetReportReturnTypeRpc;
     },
+    {
+        Method: "cartesi_getChainId";
+        ReturnType: GetChainIdReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_getNodeVersion";
+        ReturnType: GetNodeVersionReturnTypeRpc;
+    },
 ];
 
 export type PublicActionsL2 = {
@@ -144,7 +159,9 @@ export type PublicActionsL2 = {
     getApplication: (
         params: GetApplicationParams,
     ) => Promise<GetApplicationReturnType>;
+    getChainId: () => Promise<GetChainIdReturnType>;
     getEpoch: (params: GetEpochParams) => Promise<GetEpochReturnType>;
+    getNodeVersion: () => Promise<GetNodeVersionReturnType>;
     getInput: (params: GetInputParams) => Promise<GetInputReturnType>;
     getOutput: (params: GetOutputParams) => Promise<GetOutputReturnType>;
     getReport: (params: GetReportParams) => Promise<GetReportReturnType>;
@@ -174,6 +191,8 @@ export const publicActionsL2 =
         getApplication: (params) => getApplication(client, params),
         listEpochs: (params) => listEpochs(client, params),
         getEpoch: (params) => getEpoch(client, params),
+        getChainId: () => getChainId(client),
+        getNodeVersion: () => getNodeVersion(client),
         listInputs: (params) => listInputs(client, params),
         getInput: (params) => getInput(client, params),
         listOutputs: (params) => listOutputs(client, params),
