@@ -1,11 +1,13 @@
 export { CartesiProvider, useCartesiClient } from "./provider.js";
 export { useApplication } from "./useApplication.js";
 export { useApplications } from "./useApplications.js";
+export { useChainId } from "./useChainId.js";
 export { useEpoch } from "./useEpoch.js";
 export { useEpochs } from "./useEpochs.js";
 export { useInput } from "./useInput.js";
 export { useInputs } from "./useInputs.js";
 export { useLastAcceptedEpochIndex } from "./useLastAcceptedEpochIndex.js";
+export { useNodeVersion } from "./useNodeVersion.js";
 export { useOutput } from "./useOutput.js";
 export { useOutputs } from "./useOutputs.js";
 export { useProcessedInputCount } from "./useProcessedInputCount.js";
