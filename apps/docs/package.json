@@ -17,7 +17,7 @@
         "@types/node": "^22.14.0",
         "@types/react": "^19.1.0",
         "typescript": "5.8.2",
-        "viem": "^2.25.0"
+        "viem": "^2.31.7"
     },
     "engines": {
         "node": ">=22"
