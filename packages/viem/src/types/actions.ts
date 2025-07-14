@@ -6,6 +6,7 @@ import type { outputsAbi } from "../rollups";
 export type PaginationParams = {
     limit?: number;
     offset?: number;
+    descending?: boolean;
 };
 
 export type Pagination = {

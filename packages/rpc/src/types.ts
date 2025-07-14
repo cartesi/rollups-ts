@@ -1,6 +1,7 @@
 export type PaginationParams = {
     limit?: number;
     offset?: number;
+    descending?: boolean;
 };
 
 export type Address = `0x${string}`;
