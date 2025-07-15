@@ -1,5 +1,34 @@
 # getInput
 
-:::note
-TODO
-:::
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/viem";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const input = await publicClientL2.getInput({
+  application: "0x...",
+  inputIndex: 1n,
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { GetInputParams } from "@cartesi/viem";
+// {
+//   application: Address | string;
+//   inputIndex: bigint;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetInputReturnType, Input } from "@cartesi/viem";
+// GetInputReturnType = Input;
+```

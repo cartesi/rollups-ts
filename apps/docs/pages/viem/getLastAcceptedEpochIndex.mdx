@@ -1,5 +1,32 @@
 # getLastAcceptedEpochIndex
 
-:::note
-TODO
-:::
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/viem";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const lastAcceptedEpochIndex = await publicClientL2.getLastAcceptedEpochIndex({
+  application: "0x...",
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { GetLastAcceptedEpochIndexParams } from "@cartesi/viem";
+// {
+//   application: Address | string;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetLastAcceptedEpochIndexReturnType } from "@cartesi/viem";
+// GetLastAcceptedEpochIndexReturnType = bigint;
+```

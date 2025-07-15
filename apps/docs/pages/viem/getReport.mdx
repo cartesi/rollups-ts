@@ -1,5 +1,34 @@
 # getReport
 
-:::note
-TODO
-:::
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/viem";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const report = await publicClientL2.getReport({
+  application: "0x...",
+  reportIndex: 1n,
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { GetReportParams } from "@cartesi/viem";
+// {
+//   application: Address | string;
+//   reportIndex: bigint;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetReportReturnType, Report } from "@cartesi/viem";
+// GetReportReturnType = Report;
+```

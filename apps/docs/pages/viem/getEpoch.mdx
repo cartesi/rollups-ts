@@ -1,5 +1,34 @@
 # getEpoch
 
-:::note
-TODO
-:::
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/viem";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const epoch = await publicClientL2.getEpoch({
+  application: "0x...",
+  epochIndex: 1n,
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { GetEpochParams } from "@cartesi/viem";
+// {
+//   application: Address | string;
+//   epochIndex: bigint;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetEpochReturnType, Epoch } from "@cartesi/viem";
+// GetEpochReturnType = Epoch;
+```

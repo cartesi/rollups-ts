@@ -1,5 +1,34 @@
 # getOutput
 
-:::note
-TODO
-:::
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/viem";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const output = await publicClientL2.getOutput({
+  application: "0x...",
+  outputIndex: 1n,
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { GetOutputParams } from "@cartesi/viem";
+// {
+//   application: Address | string;
+//   outputIndex: bigint;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetOutputReturnType, Output } from "@cartesi/viem";
+// GetOutputReturnType = Output;
+```

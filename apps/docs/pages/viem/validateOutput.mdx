@@ -1,5 +1,33 @@
 # validateOutput
 
-:::note
-TODO
-:::
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/viem";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const isValid = await publicClientL2.validateOutput({
+  application: "0x...",
+  output: {/* Output object */},
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { ValidateOutputParams } from "@cartesi/viem";
+// {
+//   application: Address | string;
+//   output: Output;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+// boolean
+```

@@ -1,5 +1,42 @@
 # listEpochs
 
-:::note
-TODO
-:::
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/viem";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const { data, pagination } = await publicClientL2.listEpochs({
+  application: "0x...",
+  limit: 10,
+  offset: 0,
+  // status (optional)
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { ListEpochsParams } from "@cartesi/viem";
+// {
+//   application: Address | string;
+//   status?: EpochStatus;
+//   limit?: number;
+//   offset?: number;
+//   descending?: boolean;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { ListEpochsReturnType, Epoch, Pagination } from "@cartesi/viem";
+// ListEpochsReturnType = {
+//   data: Epoch[];
+//   pagination: Pagination;
+// }
+```

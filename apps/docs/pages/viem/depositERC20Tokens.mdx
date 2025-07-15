@@ -1,5 +1,46 @@
 # depositERC20Tokens
 
-:::note
-TODO
-:::
+## Usage
+
+```ts twoslash
+import { http, parseUnits } from "viem";
+import { createWalletClient } from "viem";
+import { createCartesiPublicClient, walletActionsL1 } from "@cartesi/viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { mainnet } from "viem/chains";
+
+const chain = mainnet;
+const account = privateKeyToAccount("0x...");
+const walletClient = createWalletClient({ chain, transport: http() }).extend(walletActionsL1());
+
+const hash = await walletClient.depositERC20Tokens({
+  account,
+  application: "0x...",
+  chain,
+  token: "0x...",
+  amount: parseUnits("1", 18),
+  execLayerData: "0x",
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { DepositERC20TokensParameters } from "@cartesi/viem";
+// {
+//   account: Account | Address;
+//   application: Address;
+//   chain?: Chain;
+//   token: Address;
+//   amount: bigint;
+//   execLayerData: Hex;
+//   gas?: bigint | null;
+//   ...other viem FormattedTransactionRequest fields
+// }
+```
+
+## Return Type
+
+```ts twoslash
+// Hash (string)
+```

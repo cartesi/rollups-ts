@@ -1,5 +1,50 @@
 # depositBatchERC1155Token
 
-:::note
-TODO
-:::
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createWalletClient } from "viem";
+import { createCartesiPublicClient, walletActionsL1 } from "@cartesi/viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { mainnet } from "viem/chains";
+
+const chain = mainnet;
+const account = privateKeyToAccount("0x...");
+const walletClient = createWalletClient({ chain, transport: http() }).extend(walletActionsL1());
+
+const hash = await walletClient.depositBatchERC1155Token({
+  account,
+  application: "0x...",
+  chain,
+  token: "0x...",
+  tokenIds: [1n],
+  values: [1n],
+  baseLayerData: "0x",
+  execLayerData: "0x",
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { DepositBatchERC1155TokenParameters } from "@cartesi/viem";
+// {
+//   account: Account | Address;
+//   application: Address;
+//   chain?: Chain;
+//   token: Address;
+//   tokenIds: bigint[];
+//   values: bigint[];
+//   baseLayerData: Hex;
+//   execLayerData: Hex;
+//   gas?: bigint | null;
+//   ...other viem FormattedTransactionRequest fields
+// }
+```
+
+## Return Type
+
+```ts twoslash
+// Hash (string)
+```
