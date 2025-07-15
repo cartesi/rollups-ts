@@ -1,0 +1,22 @@
+# useLastAcceptedEpochIndex
+
+## Usage
+
+```tsx twoslash
+import { useLastAcceptedEpochIndex } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useLastAcceptedEpochIndex({
+    application: "0x...",
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is the last accepted epoch index (bigint):
+
+```ts twoslash
+import type { GetLastAcceptedEpochIndexReturnType } from "@cartesi/viem";
+```

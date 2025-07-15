@@ -1,0 +1,31 @@
+# useApplications
+
+## Usage
+
+```tsx twoslash
+import { useApplications } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useApplications({
+    limit: 50,
+    offset: 0,
+    // ...other filters
+  });
+  const { data: applications, pagination } = data || {};
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is an array of `Application`:
+
+```ts twoslash
+import type {
+  Application,
+  ListApplicationsReturnType,
+  Pagination,
+} from "@cartesi/viem";
+```
+
+For more information about pagination refer to the [pagination section](/wagmi#index).

@@ -1,0 +1,25 @@
+# useApplication
+
+## Usage
+
+```tsx twoslash
+import { useApplication } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useApplication({
+    application: "0x...",
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is an `Application`:
+
+```ts twoslash
+import type {
+  Application,
+  GetApplicationReturnType,
+} from "@cartesi/viem";
+```

@@ -1,0 +1,20 @@
+# useChainId
+
+## Usage
+
+```tsx twoslash
+import { useChainId } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useChainId({});
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is the chain ID (number):
+
+```ts twoslash
+import type { GetChainIdReturnType } from "@cartesi/viem";
+```

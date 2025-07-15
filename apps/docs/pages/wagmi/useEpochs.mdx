@@ -1,0 +1,46 @@
+# useEpochs
+
+## Usage
+
+```tsx twoslash
+import { useEpochs } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useEpochs({
+    application: "0x...",
+    limit: 50,
+    offset: 0,
+    // ...other filters
+  });
+  const { data: epochs, pagination } = data || {};
+  // render logic
+}
+```
+
+## Filters
+
+The hook can filter results by:
+
+- `application: Address | string`
+- `status?: EpochStatus`
+
+```ts twoslash
+import type {
+  EpochStatus,
+  ListEpochsParams,
+} from "@cartesi/viem";
+```
+
+## Return Type
+
+The `data` is an array of `Epoch`:
+
+```ts twoslash
+import type {
+  Epoch,
+  ListEpochsReturnType,
+  Pagination,
+} from "@cartesi/viem";
+```
+
+For more information about pagination refer to the [pagination section](/wagmi#index).

@@ -1,0 +1,46 @@
+# useReports
+
+## Usage
+
+```tsx twoslash
+import { useReports } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useReports({
+    application: "0x...",
+    limit: 50,
+    offset: 0,
+    // ...other filters
+  });
+  const { data: reports, pagination } = data || {};
+  // render logic
+}
+```
+
+## Filters
+
+The hook can filter results by:
+
+- `application: Address | string`
+- `epochIndex?: bigint`
+- `inputIndex?: bigint`
+
+```ts twoslash
+import type {
+  ListReportsParams,
+} from "@cartesi/viem";
+```
+
+## Return Type
+
+The `data` is an array of `Report`:
+
+```ts twoslash
+import type {
+  Report,
+  ListReportsReturnType,
+  Pagination,
+} from "@cartesi/viem";
+```
+
+For more information about pagination refer to the [pagination section](/wagmi#index).

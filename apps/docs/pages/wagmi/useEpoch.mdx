@@ -1,0 +1,26 @@
+# useEpoch
+
+## Usage
+
+```tsx twoslash
+import { useEpoch } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useEpoch({
+    application: "0x...",
+    epochIndex: 1n,
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is an `Epoch`:
+
+```ts twoslash
+import {
+  type Epoch,
+  type GetEpochReturnType,
+} from "@cartesi/viem";
+```

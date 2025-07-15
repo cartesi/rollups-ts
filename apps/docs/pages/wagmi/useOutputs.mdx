@@ -1,0 +1,46 @@
+# useOutputs
+
+## Usage
+
+```tsx twoslash
+import { useOutputs } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useOutputs({
+    application: "0x...",
+    limit: 50,
+    offset: 0,
+    // ...other filters
+  });
+  const { data: outputs, pagination } = data || {};
+  // render logic
+}
+```
+
+## Filters
+
+The hook can filter results by:
+
+- `application: Address | string`
+- `epochIndex?: bigitn`
+- `inputIndex?: bigint`
+- `outputType?: OutputType`
+- `voucherAddress?: Address`
+
+```ts twoslash
+import { type ListOutputsParams } from "@cartesi/viem"
+```
+
+## Return Type
+
+The `data` is an array of `Output`:
+
+```ts twoslash
+import type {
+  Output,
+  ListOutputsReturnType,
+  Pagination,
+} from "@cartesi/viem";
+```
+
+For more information about pagination refer to the [pagination section](/wagmi#index).

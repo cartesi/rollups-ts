@@ -1,0 +1,20 @@
+# useNodeVersion
+
+## Usage
+
+```tsx twoslash
+import { useNodeVersion } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useNodeVersion({});
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is the node version (string):
+
+```ts twoslash
+import type { GetNodeVersionReturnType } from "@cartesi/viem";
+```

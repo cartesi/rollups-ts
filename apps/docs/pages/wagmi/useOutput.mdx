@@ -1,0 +1,26 @@
+# useOutput
+
+## Usage
+
+```tsx twoslash
+import { useOutput } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useOutput({
+    application: "0x...",
+    outputIndex: 2n,
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is an `Output`:
+
+```ts twoslash
+import type {
+  Output,
+  GetOutputReturnType,
+} from "@cartesi/viem";
+```

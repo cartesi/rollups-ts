@@ -1,0 +1,24 @@
+# useWaitForInput
+
+## Usage
+
+```tsx twoslash
+import { useWaitForInput } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useWaitForInput({
+    application: "0x...",
+    inputIndex: 2n,
+    // ...other wait options
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is an `Input` (resolved when the input is processed):
+
+```ts twoslash
+import type { GetInputReturnType } from "@cartesi/viem";
+```

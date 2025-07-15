@@ -1,0 +1,46 @@
+# useInputs
+
+## Usage
+
+```tsx twoslash
+import { useInputs } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useInputs({
+    application: "0x...",
+    limit: 50,
+    offset: 0,
+    // ...other filters
+  });
+  const { data: inputs, pagination } = data || {};
+  // render logic
+}
+```
+
+## Filters
+
+The hook can filter results by:
+
+- `application: Address | string`
+- `epochIndex?: bigint`
+- `sender?: Address`
+
+```ts twoslash
+import type {
+  ListInputsParams,
+} from "@cartesi/viem";
+```
+
+## Return Type
+
+The `data` is an array of `Input`:
+
+```ts twoslash 
+import type {
+  Input,
+  ListInputsReturnType,
+  Pagination,
+} from "@cartesi/viem";
+```
+
+For more information about pagination refer to the [pagination section](/wagmi#index).

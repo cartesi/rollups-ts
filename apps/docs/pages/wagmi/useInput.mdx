@@ -1,0 +1,26 @@
+# useInput
+
+## Usage
+
+```tsx twoslash
+import { useInput } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useInput({
+    application: "0x...",
+    inputIndex: 2n,
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is an `Input`:
+
+```ts twoslash
+import type {
+  Input,
+  GetInputReturnType,
+} from "@cartesi/viem";
+```

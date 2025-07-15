@@ -1,0 +1,22 @@
+# useProcessedInputCount
+
+## Usage
+
+```tsx twoslash
+import { useProcessedInputCount } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useProcessedInputCount({
+    application: "0x...",
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is the processed input count (bigint):
+
+```ts twoslash
+import type { GetProcessedInputCountReturnType } from "@cartesi/viem";
+```

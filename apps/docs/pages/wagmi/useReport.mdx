@@ -1,0 +1,26 @@
+# useReport
+
+## Usage
+
+```tsx twoslash
+import { useReport } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useReport({
+    application: "0x...",
+    reportIndex: 2n,
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is a `Report`:
+
+```ts twoslash
+import type {
+  Report,
+  GetReportReturnType,
+} from "@cartesi/viem";
+```
