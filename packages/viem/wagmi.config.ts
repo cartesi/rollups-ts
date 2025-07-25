@@ -1,10 +1,7 @@
-import DataAvailability from "@cartesi/rollups/out/DataAvailability.sol/DataAvailability.json" with { type: "json" };
-import IApplication from "@cartesi/rollups/out/IApplication.sol/IApplication.json" with { type: "json" };
-import Outputs from "@cartesi/rollups/out/Outputs.sol/Outputs.json" with { type: "json" };
-import { defineConfig, Plugin } from "@wagmi/cli";
-import { readdirSync, readFileSync } from "fs";
-import path from "path";
-import { Abi } from "viem";
+import { defineConfig, type Plugin } from "@wagmi/cli";
+import { foundry } from "@wagmi/cli/plugins";
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 
 interface CannonOptions {
     directory: string;
@@ -64,21 +61,26 @@ const cannonDeployments = (config: CannonOptions): Plugin => {
 
 const config: ReturnType<typeof defineConfig> = defineConfig({
     out: "src/rollups.ts",
-    contracts: [
-        {
-            abi: DataAvailability.abi as Abi,
-            name: "DataAvailability",
-        },
-        {
-            abi: IApplication.abi as Abi,
-            name: "IApplication",
-        },
-        {
-            abi: Outputs.abi as Abi,
-            name: "Outputs",
-        },
+    plugins: [
+        cannonDeployments({ directory: "deployment" }),
+        foundry({
+            project: "node_modules/@cartesi/rollups",
+            forge: { build: false },
+            exclude: [
+                "ApplicationFactory.sol/**",
+                "AuthorityFactory.sol/**",
+                "ERC1155BatchPortal.sol/**",
+                "ERC1155SinglePortal.sol/**",
+                "ERC20Portal.sol/**",
+                "ERC721Portal.sol/**",
+                "EtherPortal.sol/**",
+                "InputBox.sol/**",
+                "QuorumFactory.sol/**",
+                "SafeERC20Transfer.sol/**",
+                "SelfHostedApplicationFactory.sol/**",
+            ],
+        }),
     ],
-    plugins: [cannonDeployments({ directory: "deployment" })],
 });
 
 export default config;

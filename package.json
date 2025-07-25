@@ -13,12 +13,12 @@
         "version-packages": "changeset version"
     },
     "devDependencies": {
-        "@changesets/cli": "^2.29.4",
-        "prettier": "^3.5.3",
-        "turbo": "^2.5.4",
-        "typescript": "5.8.3"
+        "@changesets/cli": "^2.29.5",
+        "prettier": "^3.6.2",
+        "turbo": "^2.5.5",
+        "typescript": "catalog:"
     },
-    "packageManager": "pnpm@10.11.0",
+    "packageManager": "pnpm@10.13.1",
     "engines": {
         "node": ">=22"
     }
