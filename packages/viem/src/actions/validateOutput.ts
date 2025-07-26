@@ -45,7 +45,7 @@ export const validateOutput = async <
             functionName: "validateOutput",
         });
         return true;
-    } catch (error) {
+    } catch {
         return false;
     }
 };

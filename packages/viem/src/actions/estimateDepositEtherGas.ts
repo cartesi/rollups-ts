@@ -87,5 +87,6 @@ export const estimateDepositEtherGas = <
         typeof etherPortalAbi,
         "depositEther"
     >;
+    // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     return estimateContractGas(client, params as any);
 };

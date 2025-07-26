@@ -91,6 +91,7 @@ export const executeOutput = async <
 
     const args = toEVM(output);
     return writeContract(client, {
+        // biome-ignore lint/style/noNonNullAssertion: viem pattern
         account: account!,
         abi: iApplicationAbi,
         address: application,
@@ -101,5 +102,6 @@ export const executeOutput = async <
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
+        // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     } satisfies WriteContractParameters as any);
 };

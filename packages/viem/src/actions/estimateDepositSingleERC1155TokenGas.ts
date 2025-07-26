@@ -110,5 +110,6 @@ export const estimateDepositSingleERC1155TokenGas = <
         typeof erc1155SinglePortalAbi,
         "depositSingleERC1155Token"
     >;
+    // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     return estimateContractGas(client, params as any);
 };

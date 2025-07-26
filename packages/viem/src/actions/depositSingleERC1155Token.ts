@@ -104,6 +104,7 @@ export const depositSingleERC1155Token = async <
             : undefined;
 
     return writeContract(client, {
+        // biome-ignore lint/style/noNonNullAssertion: viem pattern
         account: account!,
         abi: erc1155SinglePortalAbi,
         address: erc1155SinglePortalAddress,
@@ -121,5 +122,6 @@ export const depositSingleERC1155Token = async <
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
+        // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     } satisfies WriteContractParameters as any);
 };

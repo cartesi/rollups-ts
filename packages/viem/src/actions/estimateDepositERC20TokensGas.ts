@@ -96,5 +96,6 @@ export const estimateDepositERC20TokensGas = <
         typeof erc20PortalAbi,
         "depositERC20Tokens"
     >;
+    // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     return estimateContractGas(client, params as any);
 };

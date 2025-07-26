@@ -85,5 +85,6 @@ export const estimateAddInputGas = <
         // @ts-ignore
         chain,
     } satisfies EstimateContractGasParameters<typeof inputBoxAbi, "addInput">;
+    // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     return estimateContractGas(client, params as any);
 };

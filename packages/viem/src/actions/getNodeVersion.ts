@@ -1,4 +1,4 @@
-import { type Client, type Transport } from "viem";
+import type { Client, Transport } from "viem";
 import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import type { GetNodeVersionReturnType } from "../types/actions.js";
 

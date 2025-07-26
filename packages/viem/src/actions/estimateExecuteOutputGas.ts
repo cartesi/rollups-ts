@@ -95,5 +95,6 @@ export const estimateExecuteOutputGas = <
         typeof iApplicationAbi,
         "executeOutput"
     >;
+    // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     return estimateContractGas(client, params as any);
 };

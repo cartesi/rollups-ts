@@ -7,14 +7,13 @@
         "check-types": "turbo run check-types",
         "clean": "turbo run clean",
         "dev": "turbo run dev",
-        "format": "prettier --write \"**/*.{ts,tsx,md}\"",
         "lint": "turbo run lint",
         "release": "turbo build && changeset publish",
         "version-packages": "changeset version"
     },
     "devDependencies": {
+        "@biomejs/biome": "catalog:",
         "@changesets/cli": "^2.29.5",
-        "prettier": "^3.6.2",
         "turbo": "^2.5.5",
         "typescript": "catalog:"
     },

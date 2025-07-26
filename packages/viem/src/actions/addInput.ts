@@ -89,6 +89,7 @@ export const addInput = async <
             : undefined;
 
     return writeContract(client, {
+        // biome-ignore lint/style/noNonNullAssertion: viem pattern
         account: account!,
         abi: inputBoxAbi,
         address: inputBoxAddress,
@@ -99,5 +100,6 @@ export const addInput = async <
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
+        // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     } satisfies WriteContractParameters as any);
 };

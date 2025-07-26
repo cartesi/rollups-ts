@@ -91,6 +91,7 @@ export const depositEther = async <
             : undefined;
 
     return writeContract(client, {
+        // biome-ignore lint/style/noNonNullAssertion: viem pattern
         account: account!,
         abi: etherPortalAbi,
         address: etherPortalAddress,
@@ -102,5 +103,6 @@ export const depositEther = async <
         maxPriorityFeePerGas,
         nonce,
         value,
+        // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     } satisfies WriteContractParameters as any);
 };

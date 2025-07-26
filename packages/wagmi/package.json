@@ -6,6 +6,7 @@
         "@cartesi/viem": "workspace:*"
     },
     "devDependencies": {
+        "@biomejs/biome": "catalog:",
         "@cartesi/rollups": "^2.0.1",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
@@ -52,7 +53,7 @@
         "compile": "tsdown",
         "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
         "dev": "tsdown --watch",
-        "lint": "eslint",
+        "lint": "biome check",
         "prepack": "run-s build"
     }
 }

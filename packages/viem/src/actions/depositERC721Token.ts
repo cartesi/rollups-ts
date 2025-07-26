@@ -95,6 +95,7 @@ export const depositERC721Token = async <
             : undefined;
 
     return writeContract(client, {
+        // biome-ignore lint/style/noNonNullAssertion: viem pattern
         account: account!,
         abi: erc721PortalAbi,
         address: erc721PortalAddress,
@@ -105,5 +106,6 @@ export const depositERC721Token = async <
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
+        // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     } satisfies WriteContractParameters as any);
 };

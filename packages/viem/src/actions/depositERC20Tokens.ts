@@ -93,6 +93,7 @@ export const depositERC20Tokens = async <
             : undefined;
 
     return writeContract(client, {
+        // biome-ignore lint/style/noNonNullAssertion: viem pattern
         account: account!,
         abi: erc20PortalAbi,
         address: erc20PortalAddress,
@@ -103,5 +104,6 @@ export const depositERC20Tokens = async <
         maxFeePerGas,
         maxPriorityFeePerGas,
         nonce,
+        // biome-ignore lint/suspicious/noExplicitAny: viem pattern
     } satisfies WriteContractParameters as any);
 };

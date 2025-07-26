@@ -1,10 +1,14 @@
-import DataAvailability from "@cartesi/rollups/out/DataAvailability.sol/DataAvailability.json" with { type: "json" };
-import IApplication from "@cartesi/rollups/out/IApplication.sol/IApplication.json" with { type: "json" };
-import { defineConfig, Plugin } from "@wagmi/cli";
+import DataAvailability from "@cartesi/rollups/out/DataAvailability.sol/DataAvailability.json" with {
+    type: "json",
+};
+import IApplication from "@cartesi/rollups/out/IApplication.sol/IApplication.json" with {
+    type: "json",
+};
+import { defineConfig, type Plugin } from "@wagmi/cli";
 import { actions, react } from "@wagmi/cli/plugins";
-import { readdirSync, readFileSync } from "fs";
-import path from "path";
-import { Abi } from "viem";
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
+import type { Abi } from "viem";
 
 interface CannonOptions {
     directory: string;

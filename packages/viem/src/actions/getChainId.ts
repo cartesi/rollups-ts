@@ -1,4 +1,5 @@
-import { type Client, Hex, hexToNumber, type Transport } from "viem";
+import type { Client, Hex, Transport } from "viem";
+import { hexToNumber } from "viem";
 import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import type { GetChainIdReturnType } from "../types/actions.js";
 
