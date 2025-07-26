@@ -1,57 +1,65 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.9
+
+### Patch Changes
+
+-   15915c3: new cartesi_getNodeVersion and cartesi_getChainId methods
+-   8c498fd: add descending optional parameter
+-   2ab9548: tsdown packaging
+
 ## 2.0.0-alpha.8
 
 ### Patch Changes
 
-- 5e00d57: fix module resolution
+-   5e00d57: fix module resolution
 
 ## 2.0.0-alpha.7
 
 ### Patch Changes
 
-- 7ce81ae: fix output type: output_hashes_siblings is nullable
+-   7ce81ae: fix output type: output_hashes_siblings is nullable
 
 ## 2.0.0-alpha.6
 
 ### Patch Changes
 
-- 715df3f: bump dependencies
-- 7e06ba6: lint
+-   715df3f: bump dependencies
+-   7e06ba6: lint
 
 ## 2.0.0-alpha.5
 
 ### Patch Changes
 
-- 871fb13: fix packaging and bump dependencies
+-   871fb13: fix packaging and bump dependencies
 
 ## 2.0.0-alpha.4
 
 ### Patch Changes
 
-- 967147d: fix type of output_type
+-   967147d: fix type of output_type
 
 ## 2.0.0-alpha.3
 
 ### Patch Changes
 
-- c0f29cb: replace LastAcceptedEpoch with LastAcceptedEpochIndex
+-   c0f29cb: replace LastAcceptedEpoch with LastAcceptedEpochIndex
 
 ## 2.0.0-alpha.2
 
 ### Patch Changes
 
-- f4caca5: fix output typings
+-   f4caca5: fix output typings
 
 ## 2.0.0-alpha.1
 
 ### Patch Changes
 
-- 1dbff18: fix execution_parameters fields types
-- 2d39391: make reason optional
+-   1dbff18: fix execution_parameters fields types
+-   2d39391: make reason optional
 
 ## 2.0.0-alpha.0
 
 ### Major Changes
 
-- c45c0c7: first v2-alpha version
+-   c45c0c7: first v2-alpha version
