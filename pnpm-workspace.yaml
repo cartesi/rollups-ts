@@ -5,6 +5,7 @@ catalog:
     "@types/node": ^24.1.0
     "@types/react": ^19.1.8
     "@usecannon/cli": "^2.24.2"
+    tsdown: "^0.13.0"
     typescript: "^5.8.3"
     viem: ^2.33.1
 onlyBuiltDependencies:
