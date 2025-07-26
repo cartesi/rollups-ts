@@ -3,23 +3,37 @@
 ## Usage
 
 ```ts twoslash
-import { http } from "viem";
-import { createCartesiPublicClient } from "@cartesi/viem";
+import { createCartesiPublicClient, publicActionsL1 } from "@cartesi/viem";
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
 
+const publicClient = createPublicClient({
+    chain: mainnet,
+    transport: http(),
+}).extend(publicActionsL1());
+
+// create cartesi public client to L2 with RPC url
 const publicClientL2 = createCartesiPublicClient({
-  transport: http("http://127.0.0.1:6751/rpc"),
+    transport: http("http://127.0.0.1:6751/rpc"),
 });
 
-const isValid = await publicClientL2.validateOutput({
+// get output from L2
+const output = await publicClientL2.getOutput({
+    application: "test",
+    outputIndex: 0n,
+})
+
+// validate output on L1
+const isValid = await publicClient.validateOutput({
   application: "0x...",
-  output: {/* Output object */},
+  output,
 });
 ```
 
 ## Parameters
 
 ```ts twoslash
-import type { ValidateOutputParams } from "@cartesi/viem";
+import type { ValidateOutputParameters } from "@cartesi/viem";
 // {
 //   application: Address | string;
 //   output: Output;
