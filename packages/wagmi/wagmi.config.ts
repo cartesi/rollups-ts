@@ -1,14 +1,7 @@
-import DataAvailability from "@cartesi/rollups/out/DataAvailability.sol/DataAvailability.json" with {
-    type: "json",
-};
-import IApplication from "@cartesi/rollups/out/IApplication.sol/IApplication.json" with {
-    type: "json",
-};
 import { defineConfig, type Plugin } from "@wagmi/cli";
-import { actions, react } from "@wagmi/cli/plugins";
+import { actions, foundry, react } from "@wagmi/cli/plugins";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import type { Abi } from "viem";
 
 interface CannonOptions {
     directory: string;
@@ -68,18 +61,25 @@ const cannonDeployments = (config: CannonOptions): Plugin => {
 
 const config: ReturnType<typeof defineConfig> = defineConfig({
     out: "src/generated.ts",
-    contracts: [
-        {
-            abi: DataAvailability.abi as Abi,
-            name: "DataAvailability",
-        },
-        {
-            abi: IApplication.abi as Abi,
-            name: "IApplication",
-        },
-    ],
     plugins: [
         cannonDeployments({ directory: "deployment" }),
+        foundry({
+            project: "node_modules/@cartesi/rollups",
+            forge: { build: false },
+            exclude: [
+                "ApplicationFactory.sol/**",
+                "AuthorityFactory.sol/**",
+                "ERC1155BatchPortal.sol/**",
+                "ERC1155SinglePortal.sol/**",
+                "ERC20Portal.sol/**",
+                "ERC721Portal.sol/**",
+                "EtherPortal.sol/**",
+                "InputBox.sol/**",
+                "QuorumFactory.sol/**",
+                "SafeERC20Transfer.sol/**",
+                "SelfHostedApplicationFactory.sol/**",
+            ],
+        }),
         actions(),
         react(),
     ],
