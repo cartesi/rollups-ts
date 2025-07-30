@@ -15,7 +15,7 @@
         "@wagmi/cli": "^2.3.2",
         "npm-run-all": "^4.1.5",
         "ts-node": "^10.9.2",
-        "tsdown": "catalog:",
+        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "^3.2.4"
     },
@@ -79,9 +79,9 @@
         "codegen": "run-s codegen:cannon codegen:wagmi",
         "codegen:cannon": "cannon inspect cartesi-rollups:2.0.0 --write-deployments ./deployment",
         "codegen:wagmi": "wagmi generate",
-        "compile": "tsdown",
+        "compile": "tsup",
         "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-        "dev": "tsdown --watch",
+        "dev": "tsup --watch",
         "lint": "biome check",
         "prepack": "run-s build",
         "test": "vitest"
