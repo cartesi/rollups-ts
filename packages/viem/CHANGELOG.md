@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.14
+
+### Patch Changes
+
+-   365dabb: reverting back to tsup
+-   Updated dependencies [365dabb]
+    -   @cartesi/rpc@2.0.0-alpha.10
+
 ## 2.0.0-alpha.13
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.14
+
+### Patch Changes
+
+-   365dabb: reverting back to tsup
+-   Updated dependencies [365dabb]
+    -   @cartesi/viem@2.0.0-alpha.14
+
 ## 2.0.0-alpha.13
 
 ### Patch Changes
