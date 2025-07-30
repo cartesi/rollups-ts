@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.10
+
+### Patch Changes
+
+-   365dabb: reverting back to tsup
+
 ## 2.0.0-alpha.9
 
 ### Patch Changes
