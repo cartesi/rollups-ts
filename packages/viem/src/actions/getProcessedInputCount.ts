@@ -9,9 +9,9 @@ export const getProcessedInputCount = async (
     client: Client<Transport, undefined, undefined, PublicCartesiRpcSchema>,
     params: GetProcessedInputCountParams,
 ): Promise<GetProcessedInputCountReturnType> => {
-    const { processed_inputs } = await client.request({
+    const { data } = await client.request({
         method: "cartesi_getProcessedInputCount",
         params,
     });
-    return hexToBigInt(processed_inputs);
+    return hexToBigInt(data);
 };

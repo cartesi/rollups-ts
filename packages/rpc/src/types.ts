@@ -184,7 +184,7 @@ export type GetOutputReturnType = {
 export type GetProcessedInputCountParams = { application: string | Address };
 
 export type GetProcessedInputCountReturnType = {
-    processed_inputs: HexNumber;
+    data: HexNumber;
 };
 
 export type GetReportParams = {
