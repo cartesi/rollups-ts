@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.11
+
+### Patch Changes
+
+-   9cffb8b: fix return type of cartesi_getProcessedInputCount
+
 ## 2.0.0-alpha.10
 
 ### Patch Changes
