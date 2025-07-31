@@ -1,6 +1,6 @@
 {
     "name": "@cartesi/rpc",
-    "version": "2.0.0-alpha.10",
+    "version": "2.0.0-alpha.11",
     "description": "Cartesi JSON-RPC Client",
     "type": "module",
     "main": "./dist/index.cjs",

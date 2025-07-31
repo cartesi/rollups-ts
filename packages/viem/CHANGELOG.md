@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.15
+
+### Patch Changes
+
+-   9cffb8b: fix return type of cartesi_getProcessedInputCount
+-   Updated dependencies [9cffb8b]
+    -   @cartesi/rpc@2.0.0-alpha.11
+
 ## 2.0.0-alpha.14
 
 ### Patch Changes
