@@ -10,15 +10,15 @@
         "preview": "vocs preview"
     },
     "dependencies": {
-        "react": "^19.1.0",
-        "react-dom": "^19.1.0",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
         "vocs": "^1.0.13"
     },
     "devDependencies": {
         "@cartesi/rpc": "workspace:*",
         "@cartesi/viem": "workspace:*",
         "@cartesi/wagmi": "workspace:*",
-        "@tanstack/react-query": "^5.83.0",
+        "@tanstack/react-query": "^5.90.5",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "typescript": "catalog:",
