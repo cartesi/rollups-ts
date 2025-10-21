@@ -1,19 +1,27 @@
 # RPC Client
 
 This library provides a typed JSON-RPC client for the Cartesi Rollups v2 [JSON-RPC API](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/cartesi/rollups-node/refs/tags/v2.0.0-alpha.3/internal/jsonrpc/jsonrpc-discover.json&uiSchema[appBar][ui:title]=Cartesi&uiSchema[appBar][ui:logoUrl]=https://cartesi.io/favicon.svg&uiSchema[appBar][ui:transports]=false&uiSchema[appBar][ui:input]=false&uiSchema[appBar][ui:edit]=false&uiSchema[appBar][ui:examplesDropdown]=false&uiSchema[appBar][ui:splitView]=false).
-The API currently provides read-only access to 5 entities managed by a rollups node: applications, epochs, inputs, outputs and Reports.
+The API currently provides read-only access to 9 entities managed by a rollups node: applications, epochs, tournaments, commitments, matches, match advances, inputs, outputs and Reports.
 
 There are RPC methods to get a single entity and methods to list a paginated collection of entities, for the 5 entities above:
 
 ```
 cartesi_getApplication
 cartesi_getEpoch
+cartesi_getTournament
+cartesi_getCommitment
+cartesi_getMatch
+cartesi_getMatchAdvanced
 cartesi_getInput
 cartesi_getOutput
 cartesi_getReport
 
 cartesi_listApplications
 cartesi_listEpochs
+cartesi_listTournaments
+cartesi_listCommitments
+cartesi_listMatches
+cartesi_listMatchAdvances
 cartesi_listInputs
 cartesi_listOutputs
 cartesi_listReports
@@ -33,6 +41,11 @@ Cartesi rollups is an optimistic rollups solution based on fraud proofs.
 These proofs are generated every interval called epoch, and a commitment is posted onchain.
 These commitments can then be challenged by Cartesi's upcoming fraud proof system.
 Once epochs are finalized executable outputs that were generated within that epoch can then be executed.
+
+## Tournaments, commitments, matches and match advances
+
+Tournaments are the base of the dispute resolution system of Cartesi Rollups, currently implemented using the PRT algorithm. It follows a multi-level structure, composed of top level tournaments, which breaks down into mid level tournaments and bottom level tournaments.
+Validators submit commitments to tournaments, which are matched with other commitments in case of disputes to create matches.
 
 ## Inputs
 

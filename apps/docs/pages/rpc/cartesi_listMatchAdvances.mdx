@@ -1,0 +1,26 @@
+# cartesi_listMatchAdvances
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data, pagination } = await client.request("cartesi_listMatchAdvances", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    epoch_index: "0x2A",
+    tournament_address: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    id_hash: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    limit: 50,
+    offset: 0,
+});
+```
+
+## Return Type
+
+The `data` is an array of `MatchAdvanced`:
+
+```ts twoslash
+import { type MatchAdvanced, type ListMatchAdvancesReturnType } from "@cartesi/rpc";
+```
+
+For more information about pagination refer to the [pagination section](/rpc#pagination).

@@ -51,9 +51,11 @@ export type Application = {
     template_hash: Hash;
     epoch_length: HexNumber;
     data_availability: Hex;
+    dave_consensus: boolean;
     state: "ENABLED" | "DISABLED" | "INOPERABLE";
     reason?: string | null;
     iinputbox_block: HexNumber;
+    last_epoch_check_block: HexNumber;
     last_input_check_block: HexNumber;
     last_output_check_block: HexNumber;
     processed_inputs: HexNumber;
@@ -91,8 +93,12 @@ export type Epoch = {
     index: HexNumber;
     first_block: HexNumber;
     last_block: HexNumber;
+    input_index_lower_bound: HexNumber;
+    input_index_upper_bound: HexNumber;
+    machine_hash: Hash;
     claim_hash: Hash;
     claim_transaction_hash: Hash;
+    tournament_address: Address;
     status: EpochStatus;
     virtual_index: HexNumber;
     created_at: DateTime;
@@ -215,6 +221,134 @@ export type ListEpochsParams = PaginationParams & {
 };
 
 export type ListEpochsReturnType = PaginatedReturnType<Epoch>;
+
+export type ListTournamentsParams = PaginationParams & {
+    application: string | Address;
+    epoch_index?: HexNumber;
+    level?: HexNumber;
+};
+
+export type Tournament = {
+    epoch_index: HexNumber;
+    address: Address;
+    parent_tournament_address: Address | null;
+    parent_match_id_hash: Hash | null;
+    max_level: HexNumber;
+    level: HexNumber;
+    log2step: HexNumber;
+    height: HexNumber;
+    finished_at_block: HexNumber;
+    created_at: DateTime;
+    updated_at: DateTime;
+};
+
+export type ListTournamentsReturnType = PaginatedReturnType<Tournament>;
+
+export type GetTournamentParams = {
+    application: string | Address;
+    address: Address;
+};
+
+export type GetTournamentReturnType = {
+    data: Tournament;
+};
+
+export type ListCommitmentsParams = PaginationParams & {
+    application: string | Address;
+    epoch_index?: HexNumber;
+    tournament_address?: Address;
+};
+
+export type Commitment = {
+    epoch_index: HexNumber;
+    tournament_address: Address;
+    commitment: Hash;
+    final_state_hash: Hash;
+    participant_address: Address;
+    block_number: HexNumber;
+    tx_hash: Hash;
+    created_at: DateTime;
+    updated_at: DateTime;
+};
+
+export type ListCommitmentsReturnType = PaginatedReturnType<Commitment>;
+
+export type GetCommitmentParams = {
+    application: string | Address;
+    epoch_index: HexNumber;
+    tournament_address: Address;
+    commitment: Hash;
+};
+
+export type GetCommitmentReturnType = {
+    data: Commitment;
+};
+
+export type ListMatchesParams = PaginationParams & {
+    application: string | Address;
+    epoch_index?: HexNumber;
+    tournament_address?: Address;
+};
+
+export type Match = {
+    epoch_index: HexNumber;
+    tournament_address: Address;
+    id_hash: Hash;
+    commitment_one: Hash;
+    commitment_two: Hash;
+    left_of_two: Hash;
+    winner_commitment: Hash;
+    block_number: HexNumber;
+    tx_hash: Hash;
+    created_at: DateTime;
+    updated_at: DateTime;
+};
+
+export type ListMatchesReturnType = PaginatedReturnType<Match>;
+
+export type GetMatchParams = {
+    application: string | Address;
+    epoch_index: HexNumber;
+    tournament_address: Address;
+    id_hash: Hash;
+};
+
+export type GetMatchReturnType = {
+    data: Match;
+};
+
+export type ListMatchAdvancesParams = PaginationParams & {
+    application: string | Address;
+    epoch_index: HexNumber;
+    tournament_address: Address;
+    id_hash: Hash;
+};
+
+export type MatchAdvanced = {
+    epoch_index: HexNumber;
+    tournament_address: Address;
+    id_hash: Hash;
+    parent: Hash;
+    left_node: Hash;
+    block_number: HexNumber;
+    tx_hash: Hash;
+    created_at: DateTime;
+    updated_at: DateTime;
+};
+
+export type ListMatchAdvancesReturnType = PaginatedReturnType<MatchAdvanced>;
+
+export type GetMatchAdvancedParams = {
+    application: string | Address;
+    epoch_index: HexNumber;
+    tournament_address: Address;
+    id_hash: Hash;
+    parent: Hash;
+};
+
+export type GetMatchAdvancedReturnType = {
+    data: MatchAdvanced;
+};
 
 export type ListInputsParams = PaginationParams & {
     application: string | Address;
