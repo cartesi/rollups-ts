@@ -1,26 +1,34 @@
 import type {
     Application as ApplicationRpc,
+    Commitment as CommitmentRpc,
     DelegateCallVoucher as DelegateCallVoucherRpc,
     Epoch as EpochRpc,
     Input as InputRpc,
+    MatchAdvanced as MatchAdvancedRpc,
+    Match as MatchRpc,
     Notice as NoticeRpc,
     Output as OutputRpc,
     Pagination as PaginationRpc,
     Report as ReportRpc,
+    Tournament as TournamentRpc,
     Voucher as VoucherRpc,
 } from "@cartesi/rpc";
 import { type Hex, decodeFunctionData, getAddress, hexToBigInt } from "viem";
 import { dataAvailabilityAbi } from "../rollups.js";
 import type {
     Application,
+    Commitment,
     DataAvailability,
     DelegateCallVoucher,
     Epoch,
     Input,
+    Match,
+    MatchAdvanced,
     Notice,
     Output,
     Pagination,
     Report,
+    Tournament,
     Voucher,
 } from "./actions.js";
 
@@ -68,9 +76,11 @@ export const applicationConverter = (
         templateHash: application.template_hash,
         epochLength: hexToBigInt(application.epoch_length),
         dataAvailability: parseDataAvailability(application.data_availability),
+        daveConsensus: application.dave_consensus,
         state: application.state,
         reason: application.reason,
         inputBoxBlock: hexToBigInt(application.iinputbox_block),
+        lastEpochCheckBlock: hexToBigInt(application.last_epoch_check_block),
         lastInputCheckBlock: hexToBigInt(application.last_input_check_block),
         lastOutputCheckBlock: hexToBigInt(application.last_output_check_block),
         processedInputs: hexToBigInt(application.processed_inputs),
@@ -124,12 +134,80 @@ export const epochConverter = (epoch: EpochRpc): Epoch => {
         index: hexToBigInt(epoch.index),
         firstBlock: hexToBigInt(epoch.first_block),
         lastBlock: hexToBigInt(epoch.last_block),
+        inputIndexLowerBound: hexToBigInt(epoch.input_index_lower_bound),
+        inputIndexUpperBound: hexToBigInt(epoch.input_index_upper_bound),
+        tournamentAddress: getAddress(epoch.tournament_address),
+        machineHash: epoch.machine_hash,
         claimHash: epoch.claim_hash,
         claimTransactionHash: epoch.claim_transaction_hash,
         status: epoch.status,
         virtualIndex: hexToBigInt(epoch.virtual_index),
         createdAt: new Date(epoch.created_at),
         updatedAt: new Date(epoch.updated_at),
+    };
+};
+
+export const tournamentConverter = (tournament: TournamentRpc): Tournament => {
+    return {
+        epochIndex: hexToBigInt(tournament.epoch_index),
+        address: getAddress(tournament.address),
+        parentTournamentAddress: tournament.parent_tournament_address
+            ? getAddress(tournament.parent_tournament_address)
+            : null,
+        parentMatchIdHash: tournament.parent_match_id_hash,
+        maxLevel: hexToBigInt(tournament.max_level),
+        level: hexToBigInt(tournament.level),
+        log2step: hexToBigInt(tournament.log2step),
+        height: hexToBigInt(tournament.height),
+        finishedAtBlock: hexToBigInt(tournament.finished_at_block),
+        createdAt: new Date(tournament.created_at),
+        updatedAt: new Date(tournament.updated_at),
+    };
+};
+
+export const commitmentConverter = (commitment: CommitmentRpc): Commitment => {
+    return {
+        epochIndex: hexToBigInt(commitment.epoch_index),
+        tournamentAddress: getAddress(commitment.tournament_address),
+        commitment: commitment.commitment,
+        finalStateHash: commitment.final_state_hash,
+        participantAddress: getAddress(commitment.participant_address),
+        blockNumber: hexToBigInt(commitment.block_number),
+        txHash: commitment.tx_hash,
+        createdAt: new Date(commitment.created_at),
+        updatedAt: new Date(commitment.updated_at),
+    };
+};
+
+export const matchConverter = (match: MatchRpc): Match => {
+    return {
+        epochIndex: hexToBigInt(match.epoch_index),
+        tournamentAddress: getAddress(match.tournament_address),
+        idHash: match.id_hash,
+        commitmentOne: match.commitment_one,
+        commitmentTwo: match.commitment_two,
+        leftOfTwo: match.left_of_two,
+        winnerCommitment: match.winner_commitment,
+        blockNumber: hexToBigInt(match.block_number),
+        txHash: match.tx_hash,
+        createdAt: new Date(match.created_at),
+        updatedAt: new Date(match.updated_at),
+    };
+};
+
+export const matchAdvancedConverter = (
+    matchAdvanced: MatchAdvancedRpc,
+): MatchAdvanced => {
+    return {
+        epochIndex: hexToBigInt(matchAdvanced.epoch_index),
+        tournamentAddress: getAddress(matchAdvanced.tournament_address),
+        idHash: matchAdvanced.id_hash,
+        parent: matchAdvanced.parent,
+        leftNode: matchAdvanced.left_node,
+        blockNumber: hexToBigInt(matchAdvanced.block_number),
+        txHash: matchAdvanced.tx_hash,
+        createdAt: new Date(matchAdvanced.created_at),
+        updatedAt: new Date(matchAdvanced.updated_at),
     };
 };
 
