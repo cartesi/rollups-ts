@@ -1,0 +1,44 @@
+# useTournaments
+
+## Usage
+
+```tsx twoslash
+import { useTournaments } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useTournaments({
+    application: "0x...",
+    limit: 50,
+    offset: 0,
+    // ...other filters
+  });
+  const { data: tournaments, pagination } = data || {};
+  // render logic
+}
+```
+
+## Filters
+
+The hook can filter results by:
+
+- `application: Address | string`
+- `epochIndex?: bigint`
+- `level?: bigint`
+
+```ts twoslash
+import type {
+  ListTournamentsParams,
+} from "@cartesi/viem";
+```
+
+## Return Type
+
+The `data` is an array of `Tournament`:
+
+```ts twoslash
+import type {
+  Tournament,
+  ListTournamentsReturnType,
+  Pagination,
+} from "@cartesi/viem";
+```

@@ -1,0 +1,53 @@
+# useMatchAdvances
+
+## Usage
+
+```tsx twoslash
+import { useMatchAdvances } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useMatchAdvances({
+    application: "0x...",
+    limit: 50,
+    offset: 0,
+    // ...other filters
+  });
+  const { data: matchAdvances, pagination } = data || {};
+  // render logic
+}
+```
+
+## Filters
+
+The hook can filter results by:
+
+- `application: Address | string`
+- `epochIndex?: bigint`
+- `tournamentAddress?: Address`
+
+```ts twoslash
+import type {
+  ListMatchAdvancesParams,
+} from "@cartesi/viem";
+// {
+//   application: Address | string;
+//   epochIndex?: bigint;
+//   tournamentAddress?: Address;
+//   idHash: Hash;
+//   limit?: number;
+//   offset?: number;
+//   descending?: boolean;
+// }
+```
+
+## Return Type
+
+The `data` is an array of `MatchAdvanced`:
+
+```ts twoslash
+import type {
+  MatchAdvanced,
+  ListMatchAdvancesReturnType,
+  Pagination,
+} from "@cartesi/viem";
+```

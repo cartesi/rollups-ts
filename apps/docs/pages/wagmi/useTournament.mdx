@@ -1,0 +1,26 @@
+# useTournament
+
+## Usage
+
+```tsx twoslash
+import { useTournament } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useTournament({
+    application: "0x...",
+    address: "0x...",
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is an `Tournament`:
+
+```ts twoslash
+import {
+  type Tournament,
+  type GetTournamentReturnType,
+} from "@cartesi/viem";
+```

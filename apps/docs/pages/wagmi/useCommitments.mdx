@@ -1,0 +1,52 @@
+# useCommitments
+
+## Usage
+
+```tsx twoslash
+import { useCommitments } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useCommitments({
+    application: "0x...",
+    limit: 50,
+    offset: 0,
+    // ...other filters
+  });
+  const { data: commitments, pagination } = data || {};
+  // render logic
+}
+```
+
+## Filters
+
+The hook can filter results by:
+
+- `application: Address | string`
+- `epochIndex?: bigint`
+- `tournamentAddress?: Address`
+
+```ts twoslash
+import type {
+  ListCommitmentsParams,
+} from "@cartesi/viem";
+// {
+//   application: Address | string;
+//   epochIndex?: bigint;
+//   tournamentAddress?: Address;
+//   limit?: number;
+//   offset?: number;
+//   descending?: boolean;
+// }
+```
+
+## Return Type
+
+The `data` is an array of `Commitment`:
+
+```ts twoslash
+import type {
+  Commitment,
+  ListCommitmentsReturnType,
+  Pagination,
+} from "@cartesi/viem";
+```
