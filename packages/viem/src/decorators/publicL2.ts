@@ -2,12 +2,18 @@ import type {
     GetApplicationParams as GetApplicationParamsRpc,
     GetApplicationReturnType as GetApplicationReturnTypeRpc,
     GetChainIdReturnType as GetChainIdReturnTypeRpc,
+    GetCommitmentParams as GetCommitmentParamsRpc,
+    GetCommitmentReturnType as GetCommitmentReturnTypeRpc,
     GetEpochParams as GetEpochParamsRpc,
     GetEpochReturnType as GetEpochReturnTypeRpc,
     GetInputParams as GetInputParamsRpc,
     GetInputReturnType as GetInputReturnTypeRpc,
     GetLastAcceptedEpochIndexParams as GetLastAcceptedEpochIndexParamsRpc,
     GetLastAcceptedEpochIndexReturnType as GetLastAcceptedEpochIndexReturnTypeRpc,
+    GetMatchAdvancedParams as GetMatchAdvancedParamsRpc,
+    GetMatchAdvancedReturnType as GetMatchAdvancedReturnTypeRpc,
+    GetMatchParams as GetMatchParamsRpc,
+    GetMatchReturnType as GetMatchReturnTypeRpc,
     GetNodeVersionReturnType as GetNodeVersionReturnTypeRpc,
     GetOutputParams as GetOutputParamsRpc,
     GetOutputReturnType as GetOutputReturnTypeRpc,
@@ -15,46 +21,70 @@ import type {
     GetProcessedInputCountReturnType as GetProcessedInputCountReturnTypeRpc,
     GetReportParams as GetReportParamsRpc,
     GetReportReturnType as GetReportReturnTypeRpc,
+    GetTournamentParams as GetTournamentParamsRpc,
+    GetTournamentReturnType as GetTournamentReturnTypeRpc,
     ListApplicationsParams as ListApplicationsParamsRpc,
     ListApplicationsReturnType as ListApplicationsReturnTypeRpc,
+    ListCommitmentsParams as ListCommitmentsParamsRpc,
+    ListCommitmentsReturnType as ListCommitmentsReturnTypeRpc,
     ListEpochsParams as ListEpochsParamsRpc,
     ListEpochsReturnType as ListEpochsReturnTypeRpc,
     ListInputsParams as ListInputsParamsRpc,
     ListInputsReturnType as ListInputsReturnTypeRpc,
+    ListMatchAdvancesParams as ListMatchAdvancesParamsRpc,
+    ListMatchAdvancesReturnType as ListMatchAdvancesReturnTypeRpc,
+    ListMatchesParams as ListMatchesParamsRpc,
+    ListMatchesReturnType as ListMatchesReturnTypeRpc,
     ListOutputsParams as ListOutputsParamsRpc,
     ListOutputsReturnType as ListOutputsReturnTypeRpc,
     ListReportsParams as ListReportsParamsRpc,
     ListReportsReturnType as ListReportsReturnTypeRpc,
+    ListTournamentsParams as ListTournamentsParamsRpc,
+    ListTournamentsReturnType as ListTournamentsReturnTypeRpc,
 } from "@cartesi/rpc";
 import type { Client, Transport } from "viem";
 
 import {
     getApplication,
     getChainId,
+    getCommitment,
     getEpoch,
     getInput,
     getLastAcceptedEpochIndex,
+    getMatch,
+    getMatchAdvanced,
     getNodeVersion,
     getOutput,
     getProcessedInputCount,
     getReport,
+    getTournament,
     listApplications,
+    listCommitments,
     listEpochs,
     listInputs,
+    listMatchAdvances,
+    listMatches,
     listOutputs,
     listReports,
+    listTournaments,
     waitForInput,
 } from "../actions/index.js";
 import type {
     GetApplicationParams,
     GetApplicationReturnType,
     GetChainIdReturnType,
+    GetCommitmentParams,
+    GetCommitmentReturnType,
     GetEpochParams,
     GetEpochReturnType,
     GetInputParams,
     GetInputReturnType,
     GetLastAcceptedEpochIndexParams,
     GetLastAcceptedEpochIndexReturnType,
+    GetMatchAdvancedParams,
+    GetMatchAdvancedReturnType,
+    GetMatchParams,
+    GetMatchReturnType,
     GetNodeVersionReturnType,
     GetOutputParams,
     GetOutputReturnType,
@@ -62,16 +92,26 @@ import type {
     GetProcessedInputCountReturnType,
     GetReportParams,
     GetReportReturnType,
+    GetTournamentParams,
+    GetTournamentReturnType,
     ListApplicationsParams,
     ListApplicationsReturnType,
+    ListCommitmentsParams,
+    ListCommitmentsReturnType,
     ListEpochsParams,
     ListEpochsReturnType,
     ListInputsParams,
     ListInputsReturnType,
+    ListMatchAdvancesParams,
+    ListMatchAdvancesReturnType,
+    ListMatchesParams,
+    ListMatchesReturnType,
     ListOutputsParams,
     ListOutputsReturnType,
     ListReportsParams,
     ListReportsReturnType,
+    ListTournamentsParams,
+    ListTournamentsReturnType,
     WaitForInputParams,
     WaitForInputReturnType,
 } from "../types/actions.js";
@@ -96,6 +136,46 @@ export type PublicCartesiRpcSchema = [
         Method: "cartesi_getEpoch";
         Parameters: GetEpochParamsRpc;
         ReturnType: GetEpochReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_listTournaments";
+        Parameters: ListTournamentsParamsRpc;
+        ReturnType: ListTournamentsReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_getTournament";
+        Parameters: GetTournamentParamsRpc;
+        ReturnType: GetTournamentReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_listCommitments";
+        Parameters: ListCommitmentsParamsRpc;
+        ReturnType: ListCommitmentsReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_getCommitment";
+        Parameters: GetCommitmentParamsRpc;
+        ReturnType: GetCommitmentReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_listMatches";
+        Parameters: ListMatchesParamsRpc;
+        ReturnType: ListMatchesReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_getMatch";
+        Parameters: GetMatchParamsRpc;
+        ReturnType: GetMatchReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_listMatchAdvances";
+        Parameters: ListMatchAdvancesParamsRpc;
+        ReturnType: ListMatchAdvancesReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_getMatchAdvanced";
+        Parameters: GetMatchAdvancedParamsRpc;
+        ReturnType: GetMatchAdvancedReturnTypeRpc;
     },
     {
         Method: "cartesi_getLastAcceptedEpochIndex";
@@ -152,6 +232,16 @@ export type PublicActionsL2 = {
         params?: ListApplicationsParams,
     ) => Promise<ListApplicationsReturnType>;
     listEpochs: (params: ListEpochsParams) => Promise<ListEpochsReturnType>;
+    listTournaments: (
+        params: ListTournamentsParams,
+    ) => Promise<ListTournamentsReturnType>;
+    listCommitments: (
+        params: ListCommitmentsParams,
+    ) => Promise<ListCommitmentsReturnType>;
+    listMatches: (params: ListMatchesParams) => Promise<ListMatchesReturnType>;
+    listMatchAdvances: (
+        params: ListMatchAdvancesParams,
+    ) => Promise<ListMatchAdvancesReturnType>;
     listInputs: (params: ListInputsParams) => Promise<ListInputsReturnType>;
     listOutputs: (params: ListOutputsParams) => Promise<ListOutputsReturnType>;
     listReports: (params: ListReportsParams) => Promise<ListReportsReturnType>;
@@ -161,6 +251,16 @@ export type PublicActionsL2 = {
     ) => Promise<GetApplicationReturnType>;
     getChainId: () => Promise<GetChainIdReturnType>;
     getEpoch: (params: GetEpochParams) => Promise<GetEpochReturnType>;
+    getTournament: (
+        params: GetTournamentParams,
+    ) => Promise<GetTournamentReturnType>;
+    getCommitment: (
+        params: GetCommitmentParams,
+    ) => Promise<GetCommitmentReturnType>;
+    getMatch: (params: GetMatchParams) => Promise<GetMatchReturnType>;
+    getMatchAdvanced: (
+        params: GetMatchAdvancedParams,
+    ) => Promise<GetMatchAdvancedReturnType>;
     getNodeVersion: () => Promise<GetNodeVersionReturnType>;
     getInput: (params: GetInputParams) => Promise<GetInputReturnType>;
     getOutput: (params: GetOutputParams) => Promise<GetOutputReturnType>;
@@ -191,6 +291,14 @@ export const publicActionsL2 =
         getApplication: (params) => getApplication(client, params),
         listEpochs: (params) => listEpochs(client, params),
         getEpoch: (params) => getEpoch(client, params),
+        listTournaments: (params) => listTournaments(client, params),
+        getTournament: (params) => getTournament(client, params),
+        listCommitments: (params) => listCommitments(client, params),
+        getCommitment: (params) => getCommitment(client, params),
+        listMatches: (params) => listMatches(client, params),
+        getMatch: (params) => getMatch(client, params),
+        listMatchAdvances: (params) => listMatchAdvances(client, params),
+        getMatchAdvanced: (params) => getMatchAdvanced(client, params),
         getChainId: () => getChainId(client),
         getNodeVersion: () => getNodeVersion(client),
         listInputs: (params) => listInputs(client, params),

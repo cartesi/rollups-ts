@@ -104,6 +104,26 @@ const config: Config = defineConfig({
                         },
                         { text: "listEpochs", link: "/viem/listEpochs" },
                         { text: "getEpoch", link: "/viem/getEpoch" },
+                        {
+                            text: "listTournaments",
+                            link: "/viem/listTournaments",
+                        },
+                        { text: "getTournament", link: "/viem/getTournament" },
+                        {
+                            text: "listCommitments",
+                            link: "/viem/listCommitments",
+                        },
+                        { text: "getCommitment", link: "/viem/getCommitment" },
+                        { text: "listMatches", link: "/viem/listMatches" },
+                        { text: "getMatch", link: "/viem/getMatch" },
+                        {
+                            text: "listMatchAdvances",
+                            link: "/viem/listMatchAdvances",
+                        },
+                        {
+                            text: "getMatchAdvanced",
+                            link: "/viem/getMatchAdvanced",
+                        },
                         { text: "listInputs", link: "/viem/listInputs" },
                         { text: "getInput", link: "/viem/getInput" },
                         { text: "listOutputs", link: "/viem/listOutputs" },

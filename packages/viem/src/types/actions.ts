@@ -61,9 +61,11 @@ export type Application = {
     templateHash: Hash;
     epochLength: bigint;
     dataAvailability: DataAvailability;
+    daveConsensus: boolean;
     state: string;
     reason?: string | null;
     inputBoxBlock: bigint;
+    lastEpochCheckBlock: bigint;
     lastInputCheckBlock: bigint;
     lastOutputCheckBlock: bigint;
     processedInputs: bigint;
@@ -102,14 +104,107 @@ export type Epoch = {
     index: bigint;
     firstBlock: bigint;
     lastBlock: bigint;
+    inputIndexLowerBound: bigint;
+    inputIndexUpperBound: bigint;
+    machineHash: Hash;
     claimHash: Hash;
     claimTransactionHash: Hash;
+    tournamentAddress: Address;
     status: EpochStatus;
     virtualIndex: bigint;
     createdAt: Date;
     updatedAt: Date;
 };
+
 export type GetEpochReturnType = Epoch;
+
+export type GetTournamentParams = {
+    application: Address | string;
+    address: Address;
+};
+
+export type Tournament = {
+    epochIndex: bigint;
+    address: Address;
+    parentTournamentAddress: Address | null;
+    parentMatchIdHash: Hash | null;
+    maxLevel: bigint;
+    level: bigint;
+    log2step: bigint;
+    height: bigint;
+    finishedAtBlock: bigint;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+export type GetTournamentReturnType = Tournament;
+
+export type Commitment = {
+    epochIndex: bigint;
+    tournamentAddress: Address;
+    commitment: Hash;
+    finalStateHash: Hash;
+    participantAddress: Address;
+    blockNumber: bigint;
+    txHash: Hash;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+export type GetCommitmentParams = {
+    application: Address | string;
+    epochIndex: bigint;
+    tournamentAddress: Address;
+    commitment: Hash;
+};
+
+export type GetCommitmentReturnType = Commitment;
+
+export type Match = {
+    epochIndex: bigint;
+    tournamentAddress: Address;
+    idHash: Hash;
+    commitmentOne: Hash;
+    commitmentTwo: Hash;
+    leftOfTwo: Hash;
+    winnerCommitment: Hash;
+    blockNumber: bigint;
+    txHash: Hash;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+export type GetMatchParams = {
+    application: Address | string;
+    epochIndex: bigint;
+    tournamentAddress: Address;
+    idHash: Hash;
+};
+
+export type GetMatchReturnType = Match;
+
+export type MatchAdvanced = {
+    epochIndex: bigint;
+    tournamentAddress: Address;
+    idHash: Hash;
+    parent: Hash;
+    leftNode: Hash;
+    blockNumber: bigint;
+    txHash: Hash;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+export type GetMatchAdvancedParams = {
+    application: Address | string;
+    epochIndex: bigint;
+    tournamentAddress: Address;
+    idHash: Hash;
+    parent: Hash;
+};
+
+export type GetMatchAdvancedReturnType = MatchAdvanced;
+
 export type GetInputParams = {
     application: Address | string;
     inputIndex: bigint;
@@ -211,6 +306,51 @@ export type ListEpochsParams = PaginationParams & {
 
 export type ListEpochsReturnType = {
     data: Epoch[];
+    pagination: Pagination;
+};
+
+export type ListTournamentsParams = PaginationParams & {
+    application: Address | string;
+    epochIndex?: bigint;
+    level?: bigint;
+};
+
+export type ListTournamentsReturnType = {
+    data: Tournament[];
+    pagination: Pagination;
+};
+
+export type ListCommitmentsParams = PaginationParams & {
+    application: Address | string;
+    epochIndex?: bigint;
+    tournamentAddress?: Address;
+};
+
+export type ListCommitmentsReturnType = {
+    data: Commitment[];
+    pagination: Pagination;
+};
+
+export type ListMatchesParams = PaginationParams & {
+    application: Address | string;
+    epochIndex?: bigint;
+    tournamentAddress?: Address;
+};
+
+export type ListMatchesReturnType = {
+    data: Match[];
+    pagination: Pagination;
+};
+
+export type ListMatchAdvancesParams = PaginationParams & {
+    application: Address | string;
+    epochIndex: bigint;
+    tournamentAddress: Address;
+    idHash: Hash;
+};
+
+export type ListMatchAdvancesReturnType = {
+    data: MatchAdvanced[];
     pagination: Pagination;
 };
 
