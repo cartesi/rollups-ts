@@ -2,12 +2,12 @@ packages:
     - apps/*
     - packages/*
 catalog:
-    "@biomejs/biome": "2.1.2"
+    "@biomejs/biome": "2.2.6"
     "@types/node": ^24.1.0
     "@types/react": ^19.1.8
     "@usecannon/cli": "^2.24.2"
     tsup: "^8.5.0"
-    typescript: "^5.8.3"
+    typescript: "^5.9.3"
     viem: ^2.33.1
 onlyBuiltDependencies:
     - bufferutil
