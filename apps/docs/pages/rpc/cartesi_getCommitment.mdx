@@ -1,0 +1,20 @@
+# cartesi_getCommitment
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data: commitment } = await client.request("cartesi_getCommitment", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    epoch_index: "0x2A",
+    tournament_address: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    commitment: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+});
+```
+
+## Return Type
+
+```ts twoslash
+import { type Commitment } from "@cartesi/rpc";
+```

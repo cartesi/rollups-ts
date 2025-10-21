@@ -1,0 +1,18 @@
+# cartesi_getTournament
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data: tournament } = await client.request("cartesi_getTournament", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    address: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+});
+```
+
+## Return Type
+
+```ts twoslash
+import { type Tournament } from "@cartesi/rpc";
+```

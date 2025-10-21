@@ -2,12 +2,18 @@ import type {
     GetApplicationParams,
     GetApplicationReturnType,
     GetChainIdReturnType,
+    GetCommitmentParams,
+    GetCommitmentReturnType,
     GetEpochParams,
     GetEpochReturnType,
     GetInputParams,
     GetInputReturnType,
     GetLastAcceptedEpochIndexParams,
     GetLastAcceptedEpochIndexReturnType,
+    GetMatchAdvancedParams,
+    GetMatchAdvancedReturnType,
+    GetMatchParams,
+    GetMatchReturnType,
     GetNodeVersionReturnType,
     GetOutputParams,
     GetOutputReturnType,
@@ -15,16 +21,26 @@ import type {
     GetProcessedInputCountReturnType,
     GetReportParams,
     GetReportReturnType,
+    GetTournamentParams,
+    GetTournamentReturnType,
     ListApplicationsParams,
     ListApplicationsReturnType,
+    ListCommitmentsParams,
+    ListCommitmentsReturnType,
     ListEpochsParams,
     ListEpochsReturnType,
     ListInputsParams,
     ListInputsReturnType,
+    ListMatchAdvancesParams,
+    ListMatchAdvancesReturnType,
+    ListMatchesParams,
+    ListMatchesReturnType,
     ListOutputsParams,
     ListOutputsReturnType,
     ListReportsParams,
     ListReportsReturnType,
+    ListTournamentsParams,
+    ListTournamentsReturnType,
 } from "./types.js";
 
 export type Methods = {
@@ -39,6 +55,22 @@ export type Methods = {
     cartesi_getLastAcceptedEpochIndex(
         params: GetLastAcceptedEpochIndexParams,
     ): GetLastAcceptedEpochIndexReturnType;
+    cartesi_listTournaments(
+        params: ListTournamentsParams,
+    ): ListTournamentsReturnType;
+    cartesi_getTournament(params: GetTournamentParams): GetTournamentReturnType;
+    cartesi_listCommitments(
+        params: ListCommitmentsParams,
+    ): ListCommitmentsReturnType;
+    cartesi_getCommitment(params: GetCommitmentParams): GetCommitmentReturnType;
+    cartesi_listMatches(params: ListMatchesParams): ListMatchesReturnType;
+    cartesi_getMatch(params: GetMatchParams): GetMatchReturnType;
+    cartesi_listMatchAdvances(
+        params: ListMatchAdvancesParams,
+    ): ListMatchAdvancesReturnType;
+    cartesi_getMatchAdvanced(
+        params: GetMatchAdvancedParams,
+    ): GetMatchAdvancedReturnType;
     cartesi_listInputs(params: ListInputsParams): ListInputsReturnType;
     cartesi_getInput(params: GetInputParams): GetInputReturnType;
     cartesi_getProcessedInputCount(

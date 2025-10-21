@@ -2,6 +2,10 @@
     "name": "@cartesi/rpc",
     "version": "2.0.0-alpha.11",
     "description": "Cartesi JSON-RPC Client",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cartesi/rollups-ts"
+    },
     "type": "module",
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",
