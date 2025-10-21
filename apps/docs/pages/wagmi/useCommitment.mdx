@@ -1,0 +1,28 @@
+# useCommitment
+
+## Usage
+
+```tsx twoslash
+import { useCommitment } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useCommitment({
+    application: "0x...",
+    epochIndex: 1n,
+    tournamentAddress: "0x...",
+    commitment: "0x...",
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is an `Commitment`:
+
+```ts twoslash
+import {
+  type Commitment,
+  type GetCommitmentReturnType,
+} from "@cartesi/viem";
+```

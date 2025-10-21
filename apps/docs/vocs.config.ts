@@ -165,6 +165,26 @@ const config: Config = defineConfig({
                         { text: "useChainId", link: "/wagmi/useChainId" },
                         { text: "useEpoch", link: "/wagmi/useEpoch" },
                         { text: "useEpochs", link: "/wagmi/useEpochs" },
+                        { text: "useTournament", link: "/wagmi/useTournament" },
+                        {
+                            text: "useTournaments",
+                            link: "/wagmi/useTournaments",
+                        },
+                        { text: "useCommitment", link: "/wagmi/useCommitment" },
+                        {
+                            text: "useCommitments",
+                            link: "/wagmi/useCommitments",
+                        },
+                        { text: "useMatch", link: "/wagmi/useMatch" },
+                        { text: "useMatches", link: "/wagmi/useMatches" },
+                        {
+                            text: "useMatchAdvanced",
+                            link: "/wagmi/useMatchAdvanced",
+                        },
+                        {
+                            text: "useMatchAdvances",
+                            link: "/wagmi/useMatchAdvances",
+                        },
                         { text: "useInput", link: "/wagmi/useInput" },
                         { text: "useInputs", link: "/wagmi/useInputs" },
                         {

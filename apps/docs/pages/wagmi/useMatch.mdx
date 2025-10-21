@@ -1,0 +1,28 @@
+# useMatch
+
+## Usage
+
+```tsx twoslash
+import { useMatch } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useMatch({
+    application: "0x...",
+    epochIndex: 1n,
+    tournamentAddress: "0x...",
+    idHash: "0x...",
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is an `Match`:
+
+```ts twoslash
+import {
+  type Match,
+  type GetMatchReturnType,
+} from "@cartesi/viem";
+```

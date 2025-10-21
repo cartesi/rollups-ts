@@ -1,0 +1,53 @@
+# useMatches
+
+## Usage
+
+```tsx twoslash
+import { useMatches } from "@cartesi/wagmi";
+
+function Example() {
+  const { data, isLoading } = useMatches({
+    application: "0x...",
+    limit: 50,
+    offset: 0,
+    // ...other filters
+  });
+  const { data: matches, pagination } = data || {};
+  // render logic
+}
+```
+
+## Filters
+
+The hook can filter results by:
+
+- `application: Address | string`
+- `epochIndex?: bigint`
+- `tournamentAddress?: Address`
+
+```ts twoslash
+import type {
+  ListMatchesParams,
+} from "@cartesi/viem";
+// {
+//   application: Address | string;
+//   epochIndex?: bigint;
+//   tournamentAddress?: Address;
+//   idHash?: Hash;
+//   limit?: number;
+//   offset?: number;
+//   descending?: boolean;
+// }
+```
+
+## Return Type
+
+The `data` is an array of `Match`:
+
+```ts twoslash
+import type {
+  Match,
+  ListMatchesReturnType,
+  Pagination,
+} from "@cartesi/viem";
+```
