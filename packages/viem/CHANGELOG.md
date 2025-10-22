@@ -1,5 +1,11 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.17
+
+### Patch Changes
+
+-   1b4585b: fix commitments list
+
 ## 2.0.0-alpha.16
 
 ### Patch Changes
