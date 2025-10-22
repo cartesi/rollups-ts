@@ -1,5 +1,13 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.17
+
+### Patch Changes
+
+-   1b4585b: fix commitments list
+-   Updated dependencies [1b4585b]
+    -   @cartesi/viem@2.0.0-alpha.17
+
 ## 2.0.0-alpha.16
 
 ### Patch Changes
