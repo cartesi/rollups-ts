@@ -7,7 +7,10 @@ const matchesOptions = (
     params: Partial<ListMatchesParams>,
 ) =>
     queryOptions({
-        queryKey: ["matches", params],
+        queryKey: [
+            "matches",
+            { ...params, epochIndex: params.epochIndex?.toString() },
+        ],
         queryFn: params.application
             ? () =>
                   client.listMatches({

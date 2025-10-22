@@ -7,7 +7,10 @@ const commitmentsOptions = (
     params: Partial<ListCommitmentsParams>,
 ) =>
     queryOptions({
-        queryKey: ["commitments", params],
+        queryKey: [
+            "commitments",
+            { ...params, epochIndex: params.epochIndex?.toString() },
+        ],
         queryFn: params.application
             ? () =>
                   client.listCommitments({

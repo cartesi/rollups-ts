@@ -8,7 +8,10 @@ const commitmentOptions = (
     params: Partial<GetCommitmentParams>,
 ) =>
     queryOptions({
-        queryKey: ["commitment", params],
+        queryKey: [
+            "commitment",
+            { ...params, epochIndex: params.epochIndex?.toString() },
+        ],
         queryFn:
             params.application &&
             params.epochIndex &&

@@ -11,7 +11,10 @@ const matchAdvancesOptions = (
     params: Partial<ListMatchAdvancesParams>,
 ) =>
     queryOptions({
-        queryKey: ["matchAdvances", params],
+        queryKey: [
+            "matchAdvances",
+            { ...params, epochIndex: params.epochIndex?.toString() },
+        ],
         queryFn:
             params.application &&
             params.epochIndex &&

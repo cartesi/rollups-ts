@@ -144,7 +144,7 @@ export type Commitment = {
     tournamentAddress: Address;
     commitment: Hash;
     finalStateHash: Hash;
-    participantAddress: Address;
+    participantAddress: Address | null;
     blockNumber: bigint;
     txHash: Hash;
     createdAt: Date;

@@ -171,7 +171,9 @@ export const commitmentConverter = (commitment: CommitmentRpc): Commitment => {
         tournamentAddress: getAddress(commitment.tournament_address),
         commitment: commitment.commitment,
         finalStateHash: commitment.final_state_hash,
-        participantAddress: getAddress(commitment.participant_address),
+        participantAddress: commitment.participant_address
+            ? getAddress(commitment.participant_address)
+            : null,
         blockNumber: hexToBigInt(commitment.block_number),
         txHash: commitment.tx_hash,
         createdAt: new Date(commitment.created_at),

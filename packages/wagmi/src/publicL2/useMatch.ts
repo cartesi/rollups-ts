@@ -8,7 +8,10 @@ const matchOptions = (
     params: Partial<GetMatchParams>,
 ) =>
     queryOptions({
-        queryKey: ["match", params],
+        queryKey: [
+            "match",
+            { ...params, epochIndex: params.epochIndex?.toString() },
+        ],
         queryFn:
             params.application &&
             params.epochIndex &&

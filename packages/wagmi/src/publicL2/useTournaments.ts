@@ -7,7 +7,14 @@ const tournamentsOptions = (
     params: Partial<ListTournamentsParams>,
 ) =>
     queryOptions({
-        queryKey: ["tournaments", params],
+        queryKey: [
+            "tournaments",
+            {
+                ...params,
+                epochIndex: params.epochIndex?.toString(),
+                level: params.level?.toString(),
+            },
+        ],
         queryFn: params.application
             ? () =>
                   client.listTournaments({

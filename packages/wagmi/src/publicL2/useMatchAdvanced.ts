@@ -11,7 +11,10 @@ const matchAdvancedOptions = (
     params: Partial<GetMatchAdvancedParams>,
 ) =>
     queryOptions({
-        queryKey: ["matchAdvanced", params],
+        queryKey: [
+            "matchAdvanced",
+            { ...params, epochIndex: params.epochIndex?.toString() },
+        ],
         queryFn:
             params.application &&
             params.epochIndex &&
