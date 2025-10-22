@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.16
+
+### Patch Changes
+
+-   c396f9e: PRT methods
+-   Updated dependencies [b9a2482]
+    -   @cartesi/rpc@2.0.0-alpha.12
+
 ## 2.0.0-alpha.15
 
 ### Patch Changes

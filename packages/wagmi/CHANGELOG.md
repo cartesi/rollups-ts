@@ -1,5 +1,13 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.16
+
+### Patch Changes
+
+-   3d4cd7d: PRT methods
+-   Updated dependencies [c396f9e]
+    -   @cartesi/viem@2.0.0-alpha.16
+
 ## 2.0.0-alpha.15
 
 ### Patch Changes

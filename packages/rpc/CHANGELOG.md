@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.12
+
+### Patch Changes
+
+-   b9a2482: PRT methods
+
 ## 2.0.0-alpha.11
 
 ### Patch Changes
