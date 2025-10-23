@@ -1,5 +1,13 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.18
+
+### Patch Changes
+
+-   d2357b8: tournament winner
+-   Updated dependencies [d2357b8]
+    -   @cartesi/viem@2.0.0-alpha.18
+
 ## 2.0.0-alpha.17
 
 ### Patch Changes
