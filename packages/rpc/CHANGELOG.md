@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.13
+
+### Patch Changes
+
+-   d2357b8: tournament winner
+
 ## 2.0.0-alpha.12
 
 ### Patch Changes
