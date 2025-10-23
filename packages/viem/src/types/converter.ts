@@ -159,6 +159,7 @@ export const tournamentConverter = (tournament: TournamentRpc): Tournament => {
         level: hexToBigInt(tournament.level),
         log2step: hexToBigInt(tournament.log2step),
         height: hexToBigInt(tournament.height),
+        winnerCommitment: tournament.winner_commitment,
         finishedAtBlock: hexToBigInt(tournament.finished_at_block),
         createdAt: new Date(tournament.created_at),
         updatedAt: new Date(tournament.updated_at),

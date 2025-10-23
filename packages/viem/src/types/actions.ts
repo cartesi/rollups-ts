@@ -62,7 +62,7 @@ export type Application = {
     epochLength: bigint;
     dataAvailability: DataAvailability;
     daveConsensus: boolean;
-    state: string;
+    state: "ENABLED" | "DISABLED" | "INOPERABLE";
     reason?: string | null;
     inputBoxBlock: bigint;
     lastEpochCheckBlock: bigint;
@@ -132,6 +132,7 @@ export type Tournament = {
     level: bigint;
     log2step: bigint;
     height: bigint;
+    winnerCommitment: Hash | null;
     finishedAtBlock: bigint;
     createdAt: Date;
     updatedAt: Date;
@@ -167,7 +168,7 @@ export type Match = {
     commitmentOne: Hash;
     commitmentTwo: Hash;
     leftOfTwo: Hash;
-    winnerCommitment: Hash;
+    winnerCommitment: Hash | null;
     blockNumber: bigint;
     txHash: Hash;
     createdAt: Date;

@@ -237,6 +237,7 @@ export type Tournament = {
     level: HexNumber;
     log2step: HexNumber;
     height: HexNumber;
+    winner_commitment: Hash | null;
     finished_at_block: HexNumber;
     created_at: DateTime;
     updated_at: DateTime;
@@ -297,7 +298,7 @@ export type Match = {
     commitment_one: Hash;
     commitment_two: Hash;
     left_of_two: Hash;
-    winner_commitment: Hash;
+    winner_commitment: Hash | null;
     block_number: HexNumber;
     tx_hash: Hash;
     created_at: DateTime;
