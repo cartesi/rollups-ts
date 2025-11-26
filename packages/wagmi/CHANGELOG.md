@@ -1,5 +1,13 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.19
+
+### Patch Changes
+
+-   ec3cfa1: RPC changes
+-   Updated dependencies [ec3cfa1]
+    -   @cartesi/viem@2.0.0-alpha.19
+
 ## 2.0.0-alpha.18
 
 ### Patch Changes
