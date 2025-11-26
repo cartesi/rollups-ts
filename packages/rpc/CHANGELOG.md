@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.14
+
+### Patch Changes
+
+-   ec3cfa1: RPC changes
+
 ## 2.0.0-alpha.13
 
 ### Patch Changes
