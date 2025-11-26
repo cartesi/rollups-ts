@@ -18,7 +18,7 @@
         "@cartesi/rpc": "workspace:*",
         "@cartesi/viem": "workspace:*",
         "@cartesi/wagmi": "workspace:*",
-        "@tanstack/react-query": "^5.90.5",
+        "@tanstack/react-query": "^5.90.11",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "typescript": "catalog:",
