@@ -61,7 +61,7 @@ export type Application = {
     templateHash: Hash;
     epochLength: bigint;
     dataAvailability: DataAvailability;
-    daveConsensus: boolean;
+    consensusType: "AUTHORITY" | "QUORUM" | "PRT";
     state: "ENABLED" | "DISABLED" | "INOPERABLE";
     reason?: string | null;
     inputBoxBlock: bigint;
@@ -72,7 +72,7 @@ export type Application = {
     createdAt: Date;
     updatedAt: Date;
     executionParameters: {
-        snapshotPolicy: "NONE" | "EACH_INPUT" | "EACH_EPOCH";
+        snapshotPolicy: "NONE" | "EVERY_INPUT" | "EVERY_EPOCH";
         advanceIncCycles: bigint;
         advanceMaxCycles: bigint;
         inspectIncCycles: bigint;
@@ -110,6 +110,7 @@ export type Epoch = {
     claimHash: Hash;
     claimTransactionHash: Hash;
     tournamentAddress: Address;
+    commitment: Hash;
     status: EpochStatus;
     virtualIndex: bigint;
     createdAt: Date;
@@ -133,6 +134,7 @@ export type Tournament = {
     log2step: bigint;
     height: bigint;
     winnerCommitment: Hash | null;
+    finalStateHash: Hash | null;
     finishedAtBlock: bigint;
     createdAt: Date;
     updatedAt: Date;
@@ -145,7 +147,7 @@ export type Commitment = {
     tournamentAddress: Address;
     commitment: Hash;
     finalStateHash: Hash;
-    participantAddress: Address | null;
+    submitterAddress: Address | null;
     blockNumber: bigint;
     txHash: Hash;
     createdAt: Date;
@@ -168,9 +170,12 @@ export type Match = {
     commitmentOne: Hash;
     commitmentTwo: Hash;
     leftOfTwo: Hash;
-    winnerCommitment: Hash | null;
     blockNumber: bigint;
     txHash: Hash;
+    winnerCommitment: Hash | null;
+    deletionReason: "STEP" | "TIMEOUT" | "CHILD_TOURNAMENT" | "NOT_DELETED";
+    deletionBlockNumber: bigint | null;
+    deletionTxHash: Hash | null;
     createdAt: Date;
     updatedAt: Date;
 };
@@ -188,7 +193,7 @@ export type MatchAdvanced = {
     epochIndex: bigint;
     tournamentAddress: Address;
     idHash: Hash;
-    parent: Hash;
+    otherParent: Hash;
     leftNode: Hash;
     blockNumber: bigint;
     txHash: Hash;
@@ -314,6 +319,8 @@ export type ListTournamentsParams = PaginationParams & {
     application: Address | string;
     epochIndex?: bigint;
     level?: bigint;
+    parentTournamentAddress?: Address;
+    parentMatchIdHash?: Hash;
 };
 
 export type ListTournamentsReturnType = {

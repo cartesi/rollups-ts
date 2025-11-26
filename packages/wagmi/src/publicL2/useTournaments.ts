@@ -13,6 +13,9 @@ const tournamentsOptions = (
                 ...params,
                 epochIndex: params.epochIndex?.toString(),
                 level: params.level?.toString(),
+                parentTournamentAddress:
+                    params.parentTournamentAddress?.toString(),
+                parentMatchIdHash: params.parentMatchIdHash?.toString(),
             },
         ],
         queryFn: params.application
