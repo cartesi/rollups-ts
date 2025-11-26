@@ -120,8 +120,8 @@ importers:
         specifier: 'catalog:'
         version: 2.3.7
       '@cartesi/rollups':
-        specifier: ^2.0.1
-        version: 2.0.1
+        specifier: ^2.1.0
+        version: 2.1.0
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.1
@@ -169,8 +169,8 @@ importers:
         specifier: 'catalog:'
         version: 2.3.7
       '@cartesi/rollups':
-        specifier: ^2.0.1
-        version: 2.0.1
+        specifier: ^2.1.0
+        version: 2.1.0
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.1
@@ -366,8 +366,8 @@ packages:
   '@braintree/sanitize-url@7.1.1':
     resolution: {integrity: sha512-i1L7noDNxtFyL5DmZafWy1wRVhGehQmzZaz1HiN5e7iylJMSZR7ekOV7NsIqa5qBldlLrsKv4HbgFUVlQrz8Mw==}
 
-  '@cartesi/rollups@2.0.1':
-    resolution: {integrity: sha512-SBmjAFAQNkiydnuDrDNjRt+uxv05bRkUGilbX4dFPhiN7L/CrTOQhVe9QJxwVlz8yIOmgz/obv5ZO0lzjy3clw==}
+  '@cartesi/rollups@2.1.0':
+    resolution: {integrity: sha512-KyKaG2Qs605BGFeuvAIIiPudEAJIsWzMvXfcumA6Gu92n+/5qm+fS3yhxU5fkDKMcJ8L3Mjzx7UcdIVP10wsaA==}
 
   '@changesets/apply-release-plan@7.0.13':
     resolution: {integrity: sha512-BIW7bofD2yAWoE8H4V40FikC+1nNFEKBisMECccS16W1rt6qqhNTBDmIw5HaqmMgtLNz9e7oiALiEUuKrQ4oHg==}
@@ -6836,7 +6836,7 @@ snapshots:
 
   '@braintree/sanitize-url@7.1.1': {}
 
-  '@cartesi/rollups@2.0.1': {}
+  '@cartesi/rollups@2.1.0': {}
 
   '@changesets/apply-release-plan@7.0.13':
     dependencies:
