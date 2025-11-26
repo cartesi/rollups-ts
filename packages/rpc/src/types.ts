@@ -51,7 +51,7 @@ export type Application = {
     template_hash: Hash;
     epoch_length: HexNumber;
     data_availability: Hex;
-    dave_consensus: boolean;
+    consensus_type: "AUTHORITY" | "QUORUM" | "PRT";
     state: "ENABLED" | "DISABLED" | "INOPERABLE";
     reason?: string | null;
     iinputbox_block: HexNumber;
@@ -62,7 +62,7 @@ export type Application = {
     created_at: DateTime;
     updated_at: DateTime;
     execution_parameters: {
-        snapshot_policy: "NONE" | "EACH_INPUT" | "EACH_EPOCH";
+        snapshot_policy: "NONE" | "EVERY_INPUT" | "EVERY_EPOCH";
         advance_inc_cycles: HexNumber;
         advance_max_cycles: HexNumber;
         inspect_inc_cycles: HexNumber;
@@ -99,6 +99,7 @@ export type Epoch = {
     claim_hash: Hash;
     claim_transaction_hash: Hash;
     tournament_address: Address;
+    commitment: Hash;
     status: EpochStatus;
     virtual_index: HexNumber;
     created_at: DateTime;
@@ -226,6 +227,8 @@ export type ListTournamentsParams = PaginationParams & {
     application: string | Address;
     epoch_index?: HexNumber;
     level?: HexNumber;
+    parent_tournament_address?: Address;
+    parent_match_id_hash?: Hash;
 };
 
 export type Tournament = {
@@ -238,6 +241,7 @@ export type Tournament = {
     log2step: HexNumber;
     height: HexNumber;
     winner_commitment: Hash | null;
+    final_state_hash: Hash | null;
     finished_at_block: HexNumber;
     created_at: DateTime;
     updated_at: DateTime;
@@ -265,7 +269,7 @@ export type Commitment = {
     tournament_address: Address;
     commitment: Hash;
     final_state_hash: Hash;
-    participant_address: Address;
+    submitter_address: Address;
     block_number: HexNumber;
     tx_hash: Hash;
     created_at: DateTime;
@@ -298,9 +302,12 @@ export type Match = {
     commitment_one: Hash;
     commitment_two: Hash;
     left_of_two: Hash;
-    winner_commitment: Hash | null;
     block_number: HexNumber;
     tx_hash: Hash;
+    winner_commitment: Hash | null;
+    deletion_reason: "STEP" | "TIMEOUT" | "CHILD_TOURNAMENT" | "NOT_DELETED";
+    deletion_block_number: HexNumber | null;
+    deletion_tx_hash: Hash | null;
     created_at: DateTime;
     updated_at: DateTime;
 };
@@ -329,7 +336,7 @@ export type MatchAdvanced = {
     epoch_index: HexNumber;
     tournament_address: Address;
     id_hash: Hash;
-    parent: Hash;
+    other_parent: Hash;
     left_node: Hash;
     block_number: HexNumber;
     tx_hash: Hash;

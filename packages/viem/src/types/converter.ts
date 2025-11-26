@@ -76,7 +76,7 @@ export const applicationConverter = (
         templateHash: application.template_hash,
         epochLength: hexToBigInt(application.epoch_length),
         dataAvailability: parseDataAvailability(application.data_availability),
-        daveConsensus: application.dave_consensus,
+        consensusType: application.consensus_type,
         state: application.state,
         reason: application.reason,
         inputBoxBlock: hexToBigInt(application.iinputbox_block),
@@ -137,6 +137,7 @@ export const epochConverter = (epoch: EpochRpc): Epoch => {
         inputIndexLowerBound: hexToBigInt(epoch.input_index_lower_bound),
         inputIndexUpperBound: hexToBigInt(epoch.input_index_upper_bound),
         tournamentAddress: getAddress(epoch.tournament_address),
+        commitment: epoch.commitment,
         machineHash: epoch.machine_hash,
         claimHash: epoch.claim_hash,
         claimTransactionHash: epoch.claim_transaction_hash,
@@ -160,6 +161,7 @@ export const tournamentConverter = (tournament: TournamentRpc): Tournament => {
         log2step: hexToBigInt(tournament.log2step),
         height: hexToBigInt(tournament.height),
         winnerCommitment: tournament.winner_commitment,
+        finalStateHash: tournament.final_state_hash,
         finishedAtBlock: hexToBigInt(tournament.finished_at_block),
         createdAt: new Date(tournament.created_at),
         updatedAt: new Date(tournament.updated_at),
@@ -172,8 +174,8 @@ export const commitmentConverter = (commitment: CommitmentRpc): Commitment => {
         tournamentAddress: getAddress(commitment.tournament_address),
         commitment: commitment.commitment,
         finalStateHash: commitment.final_state_hash,
-        participantAddress: commitment.participant_address
-            ? getAddress(commitment.participant_address)
+        submitterAddress: commitment.submitter_address
+            ? getAddress(commitment.submitter_address)
             : null,
         blockNumber: hexToBigInt(commitment.block_number),
         txHash: commitment.tx_hash,
@@ -190,9 +192,14 @@ export const matchConverter = (match: MatchRpc): Match => {
         commitmentOne: match.commitment_one,
         commitmentTwo: match.commitment_two,
         leftOfTwo: match.left_of_two,
-        winnerCommitment: match.winner_commitment,
         blockNumber: hexToBigInt(match.block_number),
         txHash: match.tx_hash,
+        winnerCommitment: match.winner_commitment,
+        deletionReason: match.deletion_reason,
+        deletionBlockNumber: match.deletion_block_number
+            ? hexToBigInt(match.deletion_block_number)
+            : null,
+        deletionTxHash: match.deletion_tx_hash,
         createdAt: new Date(match.created_at),
         updatedAt: new Date(match.updated_at),
     };
@@ -205,7 +212,7 @@ export const matchAdvancedConverter = (
         epochIndex: hexToBigInt(matchAdvanced.epoch_index),
         tournamentAddress: getAddress(matchAdvanced.tournament_address),
         idHash: matchAdvanced.id_hash,
-        parent: matchAdvanced.parent,
+        otherParent: matchAdvanced.other_parent,
         leftNode: matchAdvanced.left_node,
         blockNumber: hexToBigInt(matchAdvanced.block_number),
         txHash: matchAdvanced.tx_hash,
