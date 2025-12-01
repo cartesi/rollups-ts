@@ -41,6 +41,18 @@ export type InputStatus =
     | "TIME_LIMIT_EXCEEDED"
     | "PAYLOAD_LENGTH_LIMIT_EXCEEDED";
 
+export type ConsensusType = "AUTHORITY" | "QUORUM" | "PRT";
+
+export type ApplicationState = "ENABLED" | "DISABLED" | "INOPERABLE";
+
+export type SnapshotPolicy = "NONE" | "EVERY_INPUT" | "EVERY_EPOCH";
+
+export type DeletionReason =
+    | "STEP"
+    | "TIMEOUT"
+    | "CHILD_TOURNAMENT"
+    | "NOT_DELETED";
+
 export type GetApplicationParams = { application: string | Address };
 
 export type Application = {
@@ -51,8 +63,8 @@ export type Application = {
     template_hash: Hash;
     epoch_length: HexNumber;
     data_availability: Hex;
-    consensus_type: "AUTHORITY" | "QUORUM" | "PRT";
-    state: "ENABLED" | "DISABLED" | "INOPERABLE";
+    consensus_type: ConsensusType;
+    state: ApplicationState;
     reason?: string | null;
     iinputbox_block: HexNumber;
     last_epoch_check_block: HexNumber;
@@ -62,7 +74,7 @@ export type Application = {
     created_at: DateTime;
     updated_at: DateTime;
     execution_parameters: {
-        snapshot_policy: "NONE" | "EVERY_INPUT" | "EVERY_EPOCH";
+        snapshot_policy: SnapshotPolicy;
         advance_inc_cycles: HexNumber;
         advance_max_cycles: HexNumber;
         inspect_inc_cycles: HexNumber;
@@ -305,7 +317,7 @@ export type Match = {
     block_number: HexNumber;
     tx_hash: Hash;
     winner_commitment: Hash | null;
-    deletion_reason: "STEP" | "TIMEOUT" | "CHILD_TOURNAMENT" | "NOT_DELETED";
+    deletion_reason: DeletionReason;
     deletion_block_number: HexNumber | null;
     deletion_tx_hash: Hash | null;
     created_at: DateTime;

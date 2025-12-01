@@ -1,5 +1,21 @@
+import type {
+    ApplicationState,
+    ConsensusType,
+    DeletionReason,
+    EpochStatus,
+    InputStatus,
+    SnapshotPolicy,
+} from "@cartesi/rpc";
 import type { ExtractAbiFunctionNames } from "abitype";
 import type { Address, Hash, Hex } from "viem";
+export type {
+    ApplicationState,
+    ConsensusType,
+    DeletionReason,
+    EpochStatus,
+    InputStatus,
+    SnapshotPolicy,
+} from "@cartesi/rpc";
 
 import type { outputsAbi } from "../rollups";
 
@@ -14,26 +30,6 @@ export type Pagination = {
     limit: number;
     offset: number;
 };
-
-export type EpochStatus =
-    | "OPEN"
-    | "CLOSED"
-    | "INPUTS_PROCESSED"
-    | "CLAIM_COMPUTED"
-    | "CLAIM_SUBMITTED"
-    | "CLAIM_ACCEPTED"
-    | "CLAIM_REJECTED";
-
-export type InputStatus =
-    | "NONE"
-    | "ACCEPTED"
-    | "REJECTED"
-    | "EXCEPTION"
-    | "MACHINE_HALTED"
-    | "OUTPUTS_LIMIT_EXCEEDED"
-    | "CYCLE_LIMIT_EXCEEDED"
-    | "TIME_LIMIT_EXCEEDED"
-    | "PAYLOAD_LENGTH_LIMIT_EXCEEDED";
 
 export type DataAvailabilityInputBox = {
     type: "InputBox";
@@ -61,8 +57,8 @@ export type Application = {
     templateHash: Hash;
     epochLength: bigint;
     dataAvailability: DataAvailability;
-    consensusType: "AUTHORITY" | "QUORUM" | "PRT";
-    state: "ENABLED" | "DISABLED" | "INOPERABLE";
+    consensusType: ConsensusType;
+    state: ApplicationState;
     reason?: string | null;
     inputBoxBlock: bigint;
     lastEpochCheckBlock: bigint;
@@ -72,7 +68,7 @@ export type Application = {
     createdAt: Date;
     updatedAt: Date;
     executionParameters: {
-        snapshotPolicy: "NONE" | "EVERY_INPUT" | "EVERY_EPOCH";
+        snapshotPolicy: SnapshotPolicy;
         advanceIncCycles: bigint;
         advanceMaxCycles: bigint;
         inspectIncCycles: bigint;
@@ -173,7 +169,7 @@ export type Match = {
     blockNumber: bigint;
     txHash: Hash;
     winnerCommitment: Hash | null;
-    deletionReason: "STEP" | "TIMEOUT" | "CHILD_TOURNAMENT" | "NOT_DELETED";
+    deletionReason: DeletionReason;
     deletionBlockNumber: bigint | null;
     deletionTxHash: Hash | null;
     createdAt: Date;
