@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.20
+
+### Patch Changes
+
+-   86238a5: Fix nullable results
+-   Updated dependencies [86238a5]
+    -   @cartesi/rpc@2.0.0-alpha.15
+
 ## 2.0.0-alpha.19
 
 ### Patch Changes
