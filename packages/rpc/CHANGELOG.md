@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.15
+
+### Patch Changes
+
+-   86238a5: Fix nullable results
+
 ## 2.0.0-alpha.14
 
 ### Patch Changes
