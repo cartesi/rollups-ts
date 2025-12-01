@@ -95,11 +95,11 @@ export type Epoch = {
     last_block: HexNumber;
     input_index_lower_bound: HexNumber;
     input_index_upper_bound: HexNumber;
-    machine_hash: Hash;
-    claim_hash: Hash;
-    claim_transaction_hash: Hash;
-    tournament_address: Address;
-    commitment: Hash;
+    machine_hash: Hash | null;
+    claim_hash: Hash | null;
+    claim_transaction_hash: Hash | null;
+    tournament_address: Address | null;
+    commitment: Hash | null;
     status: EpochStatus;
     virtual_index: HexNumber;
     created_at: DateTime;

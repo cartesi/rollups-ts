@@ -106,11 +106,11 @@ export type Epoch = {
     lastBlock: bigint;
     inputIndexLowerBound: bigint;
     inputIndexUpperBound: bigint;
-    machineHash: Hash;
-    claimHash: Hash;
-    claimTransactionHash: Hash;
-    tournamentAddress: Address;
-    commitment: Hash;
+    machineHash: Hash | null;
+    claimHash: Hash | null;
+    claimTransactionHash: Hash | null;
+    tournamentAddress: Address | null;
+    commitment: Hash | null;
     status: EpochStatus;
     virtualIndex: bigint;
     createdAt: Date;

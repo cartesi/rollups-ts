@@ -136,7 +136,9 @@ export const epochConverter = (epoch: EpochRpc): Epoch => {
         lastBlock: hexToBigInt(epoch.last_block),
         inputIndexLowerBound: hexToBigInt(epoch.input_index_lower_bound),
         inputIndexUpperBound: hexToBigInt(epoch.input_index_upper_bound),
-        tournamentAddress: getAddress(epoch.tournament_address),
+        tournamentAddress: epoch.tournament_address
+            ? getAddress(epoch.tournament_address)
+            : null,
         commitment: epoch.commitment,
         machineHash: epoch.machine_hash,
         claimHash: epoch.claim_hash,
