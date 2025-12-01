@@ -12,7 +12,7 @@
     "dependencies": {
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
-        "vocs": "^1.1.4"
+        "vocs": "^1.2.0"
     },
     "devDependencies": {
         "@cartesi/rpc": "workspace:*",

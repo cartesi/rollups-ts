@@ -13,7 +13,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
-        "@cartesi/rollups": "^2.1.0",
+        "@cartesi/rollups": "^2.1.1",
         "@types/node": "catalog:",
         "@usecannon/cli": "catalog:",
         "@wagmi/cli": "^2.8.0",
