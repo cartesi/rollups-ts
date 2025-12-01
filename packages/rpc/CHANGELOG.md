@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.16
+
+### Patch Changes
+
+-   af101d3: Defining enum types
+
 ## 2.0.0-alpha.15
 
 ### Patch Changes

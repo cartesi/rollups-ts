@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.21
+
+### Patch Changes
+
+-   af101d3: Defining enum types
+-   Updated dependencies [af101d3]
+    -   @cartesi/rpc@2.0.0-alpha.16
+
 ## 2.0.0-alpha.20
 
 ### Patch Changes
