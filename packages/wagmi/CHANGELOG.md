@@ -1,5 +1,11 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.22
+
+### Patch Changes
+
+-   41b7c93: Fix hooks params check
+
 ## 2.0.0-alpha.21
 
 ### Patch Changes
