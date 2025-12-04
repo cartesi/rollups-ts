@@ -18,13 +18,14 @@ const tournamentsOptions = (
                 parentMatchIdHash: params.parentMatchIdHash?.toString(),
             },
         ],
-        queryFn: params.application
-            ? () =>
-                  client.listTournaments({
-                      application: params.application as string,
-                      ...params,
-                  })
-            : skipToken,
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.listTournaments({
+                          application: params.application as string,
+                          ...params,
+                      })
+                : skipToken,
     });
 
 export const useTournaments = (

@@ -12,7 +12,7 @@ const epochOptions = (
             { ...params, epochIndex: params.epochIndex?.toString() },
         ],
         queryFn:
-            params.application && params.epochIndex
+            params.application !== undefined && params.epochIndex !== undefined
                 ? () =>
                       client.getEpoch({
                           application: params.application as string,

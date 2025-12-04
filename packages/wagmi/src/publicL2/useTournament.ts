@@ -10,7 +10,7 @@ const tournamentOptions = (
     queryOptions({
         queryKey: ["tournament", params],
         queryFn:
-            params.application && params.address
+            params.application !== undefined && params.address !== undefined
                 ? () =>
                       client.getTournament({
                           application: params.application as string,

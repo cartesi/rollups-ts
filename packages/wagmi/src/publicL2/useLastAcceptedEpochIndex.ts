@@ -11,12 +11,13 @@ const lastAcceptedEpochIndexOptions = (
 ) =>
     queryOptions({
         queryKey: ["lastAcceptedEpochIndex", params],
-        queryFn: params.application
-            ? () =>
-                  client.getLastAcceptedEpochIndex({
-                      application: params.application as string,
-                  })
-            : skipToken,
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.getLastAcceptedEpochIndex({
+                          application: params.application as string,
+                      })
+                : skipToken,
     });
 
 export const useLastAcceptedEpochIndex = (

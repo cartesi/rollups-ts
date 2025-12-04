@@ -13,10 +13,10 @@ const commitmentOptions = (
             { ...params, epochIndex: params.epochIndex?.toString() },
         ],
         queryFn:
-            params.application &&
-            params.epochIndex &&
-            params.tournamentAddress &&
-            params.commitment
+            params.application !== undefined &&
+            params.epochIndex !== undefined &&
+            params.tournamentAddress !== undefined &&
+            params.commitment !== undefined
                 ? () =>
                       client.getCommitment({
                           application: params.application as string,

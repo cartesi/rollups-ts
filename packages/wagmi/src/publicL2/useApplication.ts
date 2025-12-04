@@ -8,12 +8,13 @@ const applicationOptions = (
 ) =>
     queryOptions({
         queryKey: ["application", params],
-        queryFn: params.application
-            ? () =>
-                  client.getApplication({
-                      application: params.application as string,
-                  })
-            : skipToken,
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.getApplication({
+                          application: params.application as string,
+                      })
+                : skipToken,
     });
 
 export const useApplication = (

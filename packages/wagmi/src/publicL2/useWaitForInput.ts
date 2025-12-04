@@ -15,7 +15,7 @@ const waitForInputOptions = (
             },
         ],
         queryFn:
-            params.application && params.inputIndex !== undefined
+            params.application !== undefined && params.inputIndex !== undefined
                 ? () =>
                       client.waitForInput({
                           application: params.application as string,

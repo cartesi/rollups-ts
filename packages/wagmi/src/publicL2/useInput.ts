@@ -12,7 +12,7 @@ const inputOptions = (
             { ...params, inputIndex: params.inputIndex?.toString() },
         ],
         queryFn:
-            params.application && params.inputIndex
+            params.application !== undefined && params.inputIndex !== undefined
                 ? () =>
                       client.getInput({
                           application: params.application as string,

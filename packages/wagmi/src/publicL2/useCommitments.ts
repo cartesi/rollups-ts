@@ -11,13 +11,14 @@ const commitmentsOptions = (
             "commitments",
             { ...params, epochIndex: params.epochIndex?.toString() },
         ],
-        queryFn: params.application
-            ? () =>
-                  client.listCommitments({
-                      application: params.application as string,
-                      ...params,
-                  })
-            : skipToken,
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.listCommitments({
+                          application: params.application as string,
+                          ...params,
+                      })
+                : skipToken,
     });
 
 export const useCommitments = (

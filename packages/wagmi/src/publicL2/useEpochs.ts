@@ -8,13 +8,14 @@ const epochsOptions = (
 ) =>
     queryOptions({
         queryKey: ["epochs", params],
-        queryFn: params.application
-            ? () =>
-                  client.listEpochs({
-                      application: params.application as string,
-                      ...params,
-                  })
-            : skipToken,
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.listEpochs({
+                          application: params.application as string,
+                          ...params,
+                      })
+                : skipToken,
     });
 
 export const useEpochs = (

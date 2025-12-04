@@ -11,13 +11,14 @@ const matchesOptions = (
             "matches",
             { ...params, epochIndex: params.epochIndex?.toString() },
         ],
-        queryFn: params.application
-            ? () =>
-                  client.listMatches({
-                      application: params.application as string,
-                      ...params,
-                  })
-            : skipToken,
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.listMatches({
+                          application: params.application as string,
+                          ...params,
+                      })
+                : skipToken,
     });
 
 export const useMatches = (

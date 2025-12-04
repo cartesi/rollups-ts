@@ -11,13 +11,14 @@ const inputsOptions = (
             "inputs",
             { ...params, epochIndex: params.epochIndex?.toString() },
         ],
-        queryFn: params.application
-            ? () =>
-                  client.listInputs({
-                      application: params.application as string,
-                      ...params,
-                  })
-            : skipToken,
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.listInputs({
+                          application: params.application as string,
+                          ...params,
+                      })
+                : skipToken,
     });
 
 export const useInputs = (

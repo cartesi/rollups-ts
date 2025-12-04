@@ -15,13 +15,14 @@ const outputsOptions = (
                 inputIndex: params.inputIndex?.toString(),
             },
         ],
-        queryFn: params.application
-            ? () =>
-                  client.listOutputs({
-                      application: params.application as string,
-                      ...params,
-                  })
-            : skipToken,
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.listOutputs({
+                          application: params.application as string,
+                          ...params,
+                      })
+                : skipToken,
     });
 
 export const useOutputs = (

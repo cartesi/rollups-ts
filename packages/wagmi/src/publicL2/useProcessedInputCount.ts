@@ -11,12 +11,13 @@ const processedInputCountOptions = (
 ) =>
     queryOptions({
         queryKey: ["processedInputCount", params],
-        queryFn: params.application
-            ? () =>
-                  client.getProcessedInputCount({
-                      application: params.application as string,
-                  })
-            : skipToken,
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.getProcessedInputCount({
+                          application: params.application as string,
+                      })
+                : skipToken,
     });
 
 export const useProcessedInputCount = (

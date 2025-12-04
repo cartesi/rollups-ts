@@ -12,7 +12,7 @@ const reportOptions = (
             { ...params, reportIndex: params.reportIndex?.toString() },
         ],
         queryFn:
-            params.application && params.reportIndex
+            params.application !== undefined && params.reportIndex !== undefined
                 ? () =>
                       client.getReport({
                           application: params.application as string,

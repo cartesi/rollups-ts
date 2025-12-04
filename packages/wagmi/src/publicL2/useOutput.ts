@@ -12,7 +12,7 @@ const outputOptions = (
             { ...params, outputIndex: params.outputIndex?.toString() },
         ],
         queryFn:
-            params.application && params.outputIndex
+            params.application !== undefined && params.outputIndex !== undefined
                 ? () =>
                       client.getOutput({
                           application: params.application as string,

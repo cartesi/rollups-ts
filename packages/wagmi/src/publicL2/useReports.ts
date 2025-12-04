@@ -15,13 +15,14 @@ const reportsOptions = (
                 inputIndex: params.inputIndex?.toString(),
             },
         ],
-        queryFn: params.application
-            ? () =>
-                  client.listReports({
-                      application: params.application as string,
-                      ...params,
-                  })
-            : skipToken,
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.listReports({
+                          application: params.application as string,
+                          ...params,
+                      })
+                : skipToken,
     });
 
 export const useReports = (

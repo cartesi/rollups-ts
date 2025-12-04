@@ -16,10 +16,10 @@ const matchAdvancesOptions = (
             { ...params, epochIndex: params.epochIndex?.toString() },
         ],
         queryFn:
-            params.application &&
-            params.epochIndex &&
-            params.tournamentAddress &&
-            params.idHash
+            params.application !== undefined &&
+            params.epochIndex !== undefined &&
+            params.tournamentAddress !== undefined &&
+            params.idHash !== undefined
                 ? () =>
                       client.listMatchAdvances({
                           application: params.application as string,
