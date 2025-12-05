@@ -53,6 +53,8 @@ export type DeletionReason =
     | "CHILD_TOURNAMENT"
     | "NOT_DELETED";
 
+export type WinnerCommitment = "NONE" | "ONE" | "TWO";
+
 export type GetApplicationParams = { application: string | Address };
 
 export type Application = {
@@ -316,7 +318,7 @@ export type Match = {
     left_of_two: Hash;
     block_number: HexNumber;
     tx_hash: Hash;
-    winner_commitment: Hash | null;
+    winner_commitment: WinnerCommitment;
     deletion_reason: DeletionReason;
     deletion_block_number: HexNumber | null;
     deletion_tx_hash: Hash | null;

@@ -5,6 +5,7 @@ import type {
     EpochStatus,
     InputStatus,
     SnapshotPolicy,
+    WinnerCommitment,
 } from "@cartesi/rpc";
 import type { ExtractAbiFunctionNames } from "abitype";
 import type { Address, Hash, Hex } from "viem";
@@ -15,6 +16,7 @@ export type {
     EpochStatus,
     InputStatus,
     SnapshotPolicy,
+    WinnerCommitment,
 } from "@cartesi/rpc";
 
 import type { outputsAbi } from "../rollups";
@@ -168,7 +170,7 @@ export type Match = {
     leftOfTwo: Hash;
     blockNumber: bigint;
     txHash: Hash;
-    winnerCommitment: Hash | null;
+    winnerCommitment: WinnerCommitment;
     deletionReason: DeletionReason;
     deletionBlockNumber: bigint | null;
     deletionTxHash: Hash | null;
