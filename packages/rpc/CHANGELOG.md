@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.17
+
+### Patch Changes
+
+-   7c629af: fix match winner commitment definition
+
 ## 2.0.0-alpha.16
 
 ### Patch Changes

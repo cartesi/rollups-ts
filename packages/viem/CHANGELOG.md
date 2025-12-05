@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.22
+
+### Patch Changes
+
+-   7c629af: fix match winner commitment definition
+-   Updated dependencies [7c629af]
+    -   @cartesi/rpc@2.0.0-alpha.17
+
 ## 2.0.0-alpha.21
 
 ### Patch Changes
