@@ -1,5 +1,11 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.24
+
+### Patch Changes
+
+-   977964e: mark provider as client
+
 ## 2.0.0-alpha.23
 
 ### Patch Changes
