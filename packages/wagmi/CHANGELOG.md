@@ -1,5 +1,11 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.25
+
+### Patch Changes
+
+-   d6dfa9e: use client banner
+
 ## 2.0.0-alpha.24
 
 ### Patch Changes
