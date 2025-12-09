@@ -28,6 +28,8 @@ export const listTournaments = async (
                     : undefined,
             limit: params.limit,
             offset: params.offset,
+            parent_tournament_address: params.parentTournamentAddress,
+            parent_match_id_hash: params.parentMatchIdHash,
         },
     });
     return {
