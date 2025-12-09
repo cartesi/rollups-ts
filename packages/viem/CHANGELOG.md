@@ -1,5 +1,11 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.23
+
+### Patch Changes
+
+-   7f99c5e: fix missing listTournaments params
+
 ## 2.0.0-alpha.22
 
 ### Patch Changes
