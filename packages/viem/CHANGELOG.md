@@ -1,5 +1,11 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.24
+
+### Patch Changes
+
+-   de930c1: fix list params
+
 ## 2.0.0-alpha.23
 
 ### Patch Changes
