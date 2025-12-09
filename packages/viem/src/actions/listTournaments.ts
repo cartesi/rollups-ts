@@ -16,8 +16,7 @@ export const listTournaments = async (
     const tournaments = await client.request({
         method: "cartesi_listTournaments",
         params: {
-            application: params.application,
-            descending: params.descending,
+            ...params,
             epoch_index:
                 params.epochIndex !== undefined
                     ? numberToHex(params.epochIndex)
@@ -26,8 +25,6 @@ export const listTournaments = async (
                 params.level !== undefined
                     ? numberToHex(params.level)
                     : undefined,
-            limit: params.limit,
-            offset: params.offset,
             parent_tournament_address: params.parentTournamentAddress,
             parent_match_id_hash: params.parentMatchIdHash,
         },

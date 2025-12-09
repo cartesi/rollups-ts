@@ -16,8 +16,7 @@ export const listCommitments = async (
     const commitments = await client.request({
         method: "cartesi_listCommitments",
         params: {
-            application: params.application,
-            descending: params.descending,
+            ...params,
             epoch_index:
                 params.epochIndex !== undefined
                     ? numberToHex(params.epochIndex)
@@ -25,8 +24,6 @@ export const listCommitments = async (
             tournament_address: params.tournamentAddress
                 ? getAddress(params.tournamentAddress)
                 : undefined,
-            limit: params.limit,
-            offset: params.offset,
         },
     });
     return {

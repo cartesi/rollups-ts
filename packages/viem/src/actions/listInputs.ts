@@ -13,14 +13,11 @@ export const listInputs = async (
     const inputs = await client.request({
         method: "cartesi_listInputs",
         params: {
-            application: params.application,
+            ...params,
             epoch_index:
                 params.epochIndex !== undefined
                     ? numberToHex(params.epochIndex)
                     : undefined,
-            sender: params.sender,
-            limit: params.limit,
-            offset: params.offset,
         },
     });
     return {

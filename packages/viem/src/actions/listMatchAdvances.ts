@@ -16,13 +16,10 @@ export const listMatchAdvances = async (
     const matchAdvances = await client.request({
         method: "cartesi_listMatchAdvances",
         params: {
-            application: params.application,
-            descending: params.descending,
+            ...params,
             epoch_index: numberToHex(params.epochIndex),
             tournament_address: getAddress(params.tournamentAddress),
             id_hash: params.idHash,
-            limit: params.limit,
-            offset: params.offset,
         },
     });
     return {

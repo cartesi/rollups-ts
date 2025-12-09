@@ -13,7 +13,7 @@ export const listReports = async (
     const reports = await client.request({
         method: "cartesi_listReports",
         params: {
-            application: params.application,
+            ...params,
             epoch_index:
                 params.epochIndex !== undefined
                     ? numberToHex(params.epochIndex)
@@ -22,8 +22,6 @@ export const listReports = async (
                 params.inputIndex !== undefined
                     ? numberToHex(params.inputIndex)
                     : undefined,
-            limit: params.limit,
-            offset: params.offset,
         },
     });
     return {
