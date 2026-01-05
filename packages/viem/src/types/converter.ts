@@ -139,9 +139,11 @@ export const epochConverter = (epoch: EpochRpc): Epoch => {
         tournamentAddress: epoch.tournament_address
             ? getAddress(epoch.tournament_address)
             : null,
-        commitment: epoch.commitment,
         machineHash: epoch.machine_hash,
-        claimHash: epoch.claim_hash,
+        outputsMerkleRoot: epoch.outputs_merkle_root,
+        outputsMerkleProof: epoch.outputs_merkle_proof,
+        commitment: epoch.commitment,
+        commitmentProof: epoch.commitment_proof,
         claimTransactionHash: epoch.claim_transaction_hash,
         status: epoch.status,
         virtualIndex: hexToBigInt(epoch.virtual_index),

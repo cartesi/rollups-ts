@@ -105,10 +105,12 @@ export type Epoch = {
     inputIndexLowerBound: bigint;
     inputIndexUpperBound: bigint;
     machineHash: Hash | null;
-    claimHash: Hash | null;
-    claimTransactionHash: Hash | null;
+    outputsMerkleRoot: Hash | null;
+    outputsMerkleProof: Hash[] | null;
     tournamentAddress: Address | null;
     commitment: Hash | null;
+    commitmentProof: Hash[] | null;
+    claimTransactionHash: Hash | null;
     status: EpochStatus;
     virtualIndex: bigint;
     createdAt: Date;
