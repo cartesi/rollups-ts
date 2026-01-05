@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.18
+
+### Patch Changes
+
+-   f8ae86a: rename claim_hash to outputs_merkle_root
+
 ## 2.0.0-alpha.17
 
 ### Patch Changes
