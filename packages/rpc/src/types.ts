@@ -110,10 +110,12 @@ export type Epoch = {
     input_index_lower_bound: HexNumber;
     input_index_upper_bound: HexNumber;
     machine_hash: Hash | null;
-    claim_hash: Hash | null;
+    outputs_merkle_root: Hash | null;
+    outputs_merkle_proof: Hash[] | null;
+    commitment: Hash | null;
+    commitment_proof: Hash[] | null;
     claim_transaction_hash: Hash | null;
     tournament_address: Address | null;
-    commitment: Hash | null;
     status: EpochStatus;
     virtual_index: HexNumber;
     created_at: DateTime;
