@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.25
+
+### Patch Changes
+
+-   f8ae86a: rename claim_hash to outputs_merkle_root
+-   Updated dependencies [f8ae86a]
+    -   @cartesi/rpc@2.0.0-alpha.18
+
 ## 2.0.0-alpha.24
 
 ### Patch Changes
