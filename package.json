@@ -14,10 +14,10 @@
     "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@changesets/cli": "^2.29.8",
-        "turbo": "^2.7.2",
+        "turbo": "^2.7.4",
         "typescript": "catalog:"
     },
-    "packageManager": "pnpm@10.27.0",
+    "packageManager": "pnpm@10.28.0",
     "engines": {
         "node": ">=22"
     }

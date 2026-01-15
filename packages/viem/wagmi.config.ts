@@ -3,13 +3,16 @@ import { foundry } from "@wagmi/cli/plugins";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
-interface CannonOptions {
+interface DeploymentsOptions {
     directory: string;
     includes?: RegExp[];
     excludes?: RegExp[];
 }
 
-const shouldIncludeFile = (name: string, config: CannonOptions): boolean => {
+const shouldIncludeFile = (
+    name: string,
+    config: DeploymentsOptions,
+): boolean => {
     if (config.excludes) {
         // if there is a list of excludes, then if the name matches any of them, then exclude
         for (const exclude of config.excludes) {
@@ -32,11 +35,11 @@ const shouldIncludeFile = (name: string, config: CannonOptions): boolean => {
     }
 };
 
-const cannonDeployments = (config: CannonOptions): Plugin => {
+const deployments = (config: DeploymentsOptions): Plugin => {
     return {
-        name: "cannon",
+        name: "deployments",
         contracts: () => {
-            // list all files exported by cannon in directory
+            // list all files exported by deployments in directory
             const files = readdirSync(config.directory).filter((file) =>
                 shouldIncludeFile(file, config),
             );
@@ -62,7 +65,7 @@ const cannonDeployments = (config: CannonOptions): Plugin => {
 const config: ReturnType<typeof defineConfig> = defineConfig({
     out: "src/rollups.ts",
     plugins: [
-        cannonDeployments({ directory: "deployment" }),
+        deployments({ directory: "deployment" }),
         foundry({
             project: "node_modules/@cartesi/rollups",
             forge: { build: false },
