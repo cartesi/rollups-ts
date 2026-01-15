@@ -1,5 +1,13 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.26
+
+### Patch Changes
+
+-   bb7f20e: Change chainId from 13370 to 31337
+-   Updated dependencies [bb7f20e]
+    -   @cartesi/rpc@2.0.0-alpha.19
+
 ## 2.0.0-alpha.25
 
 ### Patch Changes

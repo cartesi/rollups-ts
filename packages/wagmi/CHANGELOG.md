@@ -1,5 +1,13 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.30
+
+### Patch Changes
+
+-   bb7f20e: Change chainId from 13370 to 31337
+-   Updated dependencies [bb7f20e]
+    -   @cartesi/viem@2.0.0-alpha.26
+
 ## 2.0.0-alpha.29
 
 ### Patch Changes

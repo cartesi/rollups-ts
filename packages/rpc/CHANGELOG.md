@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.19
+
+### Patch Changes
+
+-   bb7f20e: Change chainId from 13370 to 31337
+
 ## 2.0.0-alpha.18
 
 ### Patch Changes
