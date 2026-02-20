@@ -1,5 +1,11 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.27
+
+### Patch Changes
+
+-   55f18c4: bump dependencies
+
 ## 2.0.0-alpha.26
 
 ### Patch Changes
