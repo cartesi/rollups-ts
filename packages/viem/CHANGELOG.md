@@ -1,5 +1,11 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.28
+
+### Patch Changes
+
+-   060c58f: fix build
+
 ## 2.0.0-alpha.27
 
 ### Patch Changes
