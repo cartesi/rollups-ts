@@ -1,5 +1,13 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.31
+
+### Patch Changes
+
+-   55f18c4: bump dependencies
+-   Updated dependencies [55f18c4]
+    -   @cartesi/viem@2.0.0-alpha.27
+
 ## 2.0.0-alpha.30
 
 ### Patch Changes
