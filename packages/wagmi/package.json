@@ -11,7 +11,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
-        "@cartesi/rollups": "^2.1.1",
+        "@cartesi/rollups": "2.1.1",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "@usecannon/cli": "catalog:",
