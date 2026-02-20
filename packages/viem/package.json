@@ -16,12 +16,12 @@
         "@cartesi/rollups": "^2.1.1",
         "@types/node": "catalog:",
         "@usecannon/cli": "catalog:",
-        "@wagmi/cli": "^2.8.0",
+        "@wagmi/cli": "^2.10.0",
         "npm-run-all": "^4.1.5",
         "ts-node": "^10.9.2",
         "tsup": "catalog:",
         "typescript": "catalog:",
-        "vitest": "^4.0.17"
+        "vitest": "^4.0.18"
     },
     "type": "module",
     "main": "./dist/index.cjs",
