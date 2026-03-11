@@ -120,8 +120,8 @@ importers:
         specifier: 'catalog:'
         version: 2.4.4
       '@cartesi/rollups':
-        specifier: 2.1.1
-        version: 2.1.1
+        specifier: 2.2.0
+        version: 2.2.0
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.0
@@ -169,8 +169,8 @@ importers:
         specifier: 'catalog:'
         version: 2.4.4
       '@cartesi/rollups':
-        specifier: 2.1.1
-        version: 2.1.1
+        specifier: 2.2.0
+        version: 2.2.0
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.0
@@ -360,8 +360,8 @@ packages:
   '@braintree/sanitize-url@7.1.2':
     resolution: {integrity: sha512-jigsZK+sMF/cuiB7sERuo9V7N9jx+dhmHHnQyDSVdpZwVutaBu7WvNYqMDLSgFgfB30n452TP3vjDAvFC973mA==}
 
-  '@cartesi/rollups@2.1.1':
-    resolution: {integrity: sha512-1k+8gEp6VL6pGr0hlUTqK1hEIvBmRKUBodU3259e7rpR7ECaTLUV08C+P4efnXrz5Zj2SYWF8QZuFUVMxsMBVA==}
+  '@cartesi/rollups@2.2.0':
+    resolution: {integrity: sha512-I4mC6UBvLmz52d+jSHvbWXh9VLSprWYRcT3VoufBypA7P66sXU7XKoOgHiiBzoVp/KX4lL3agv3Fx0rxE+nvWg==}
 
   '@changesets/apply-release-plan@7.0.14':
     resolution: {integrity: sha512-ddBvf9PHdy2YY0OUiEl3TV78mH9sckndJR14QAt87KLEbIov81XO0q0QAmvooBxXlqRRP8I9B7XOzZwQG7JkWA==}
@@ -5568,6 +5568,9 @@ packages:
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 
+  web-solc@0.5.1:
+    resolution: {integrity: sha512-Z/hBplZq1+4i4bYeIeD9N3vP1BLUBXpSDa4h0Ipm2Z2cHv7x7DtZ2zFb0E1L1VZo4BF+OJGVtGlT+nTUXGgncQ==}
+
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
 
@@ -5857,7 +5860,7 @@ snapshots:
 
   '@braintree/sanitize-url@7.1.2': {}
 
-  '@cartesi/rollups@2.1.1': {}
+  '@cartesi/rollups@2.2.0': {}
 
   '@changesets/apply-release-plan@7.0.14':
     dependencies:
@@ -7750,7 +7753,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@usecannon/web-solc@0.5.1': {}
+  '@usecannon/web-solc@0.5.1':
+    dependencies:
+      web-solc: 0.5.1
 
   '@vanilla-extract/babel-plugin-debug-ids@1.2.2':
     dependencies:
@@ -11998,6 +12003,10 @@ snapshots:
       - porto
 
   web-namespaces@2.0.1: {}
+
+  web-solc@0.5.1:
+    dependencies:
+      semver: 7.7.4
 
   webidl-conversions@3.0.1: {}
 
