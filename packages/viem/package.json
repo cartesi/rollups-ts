@@ -13,7 +13,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
-        "@cartesi/rollups": "2.1.1",
+        "@cartesi/rollups": "2.2.0",
         "@types/node": "catalog:",
         "@usecannon/cli": "catalog:",
         "@wagmi/cli": "^2.10.0",
@@ -81,7 +81,7 @@
     "scripts": {
         "build": "run-s codegen compile",
         "codegen": "run-s codegen:cannon codegen:wagmi",
-        "codegen:cannon": "cannon inspect cartesi-rollups:2.1.0 --write-deployments ./deployment",
+        "codegen:cannon": "cannon inspect cartesi-rollups:2.2.0 --write-deployments ./deployment",
         "codegen:wagmi": "wagmi generate",
         "compile": "tsup",
         "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
