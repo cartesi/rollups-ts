@@ -43,7 +43,7 @@ export type InputStatus =
 
 export type ConsensusType = "AUTHORITY" | "QUORUM" | "PRT";
 
-export type ApplicationState = "ENABLED" | "DISABLED" | "INOPERABLE";
+export type ApplicationState = "ENABLED" | "DISABLED" | "FAILED" | "INOPERABLE";
 
 export type SnapshotPolicy = "NONE" | "EVERY_INPUT" | "EVERY_EPOCH";
 
