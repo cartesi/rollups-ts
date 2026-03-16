@@ -3,13 +3,13 @@ packages:
     - packages/*
 
 catalog:
-    "@biomejs/biome": 2.4.4
-    "@types/node": ^25.3.0
+    "@biomejs/biome": 2.4.7
+    "@types/node": ^25.5.0
     "@types/react": ^19.2.14
-    "@usecannon/cli": ^2.25.1
+    "@usecannon/cli": ^2.26.0
     tsup: ^8.5.1
     typescript: ^5.9.3
-    viem: ^2.46.2
+    viem: ^2.47.4
 
 onlyBuiltDependencies:
     - bufferutil
