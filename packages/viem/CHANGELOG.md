@@ -1,5 +1,17 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.29
+
+### Patch Changes
+
+-   c096acf: adding nullable to some RPC return fields
+-   f950a4a: bump dependencies
+-   9b690ab: Bump @cartesi/rollups package to v2.2.0 and cannon inspection to lookup version 2.2.0
+-   Updated dependencies [c096acf]
+-   Updated dependencies [f950a4a]
+-   Updated dependencies [0285ea5]
+    -   @cartesi/rpc@2.0.0-alpha.20
+
 ## 2.0.0-alpha.28
 
 ### Patch Changes

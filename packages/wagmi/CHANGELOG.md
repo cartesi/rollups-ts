@@ -1,5 +1,16 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.33
+
+### Patch Changes
+
+-   f950a4a: bump dependencies
+-   9b690ab: Bump @cartesi/rollups package to v2.2.0 and cannon inspection to lookup version 2.2.0
+-   Updated dependencies [c096acf]
+-   Updated dependencies [f950a4a]
+-   Updated dependencies [9b690ab]
+    -   @cartesi/viem@2.0.0-alpha.29
+
 ## 2.0.0-alpha.32
 
 ### Patch Changes

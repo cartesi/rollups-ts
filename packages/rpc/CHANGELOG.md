@@ -1,5 +1,13 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.20
+
+### Patch Changes
+
+-   c096acf: adding nullable to some RPC return fields
+-   f950a4a: bump dependencies
+-   0285ea5: Add new application state FAILED.
+
 ## 2.0.0-alpha.19
 
 ### Patch Changes
