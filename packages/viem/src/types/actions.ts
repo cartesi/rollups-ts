@@ -230,10 +230,10 @@ export type Input = {
         prevRandao: bigint;
         index: bigint;
         payload: Hex;
-    };
+    } | null;
     status: InputStatus;
-    machineHash: Hash;
-    outputsHash: Hash;
+    machineHash: Hash | null;
+    outputsHash: Hash | null;
     transactionReference: Hash;
     createdAt: Date;
     updatedAt: Date;
@@ -273,8 +273,8 @@ export type Output = {
     inputIndex: bigint;
     index: bigint;
     rawData: Hex;
-    decodedData: Notice | Voucher | DelegateCallVoucher;
-    hash: Hash;
+    decodedData: Notice | Voucher | DelegateCallVoucher | null;
+    hash: Hash | null;
     outputHashesSiblings: Hash[] | null;
     executionTransactionHash: Hash | null;
     createdAt: Date;
