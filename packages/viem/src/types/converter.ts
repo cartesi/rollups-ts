@@ -231,18 +231,24 @@ export const inputConverter = (input: InputRpc): Input => {
         index: hexToBigInt(input.index),
         blockNumber: hexToBigInt(input.block_number),
         rawData: input.raw_data,
-        decodedData: {
-            chainId: hexToBigInt(input.decoded_data.chain_id as Hex),
-            applicationContract: getAddress(
-                input.decoded_data.application_contract,
-            ),
-            sender: getAddress(input.decoded_data.sender),
-            blockNumber: hexToBigInt(input.decoded_data.block_number),
-            blockTimestamp: hexToBigInt(input.decoded_data.block_timestamp),
-            prevRandao: hexToBigInt(input.decoded_data.prev_randao as Hex),
-            index: hexToBigInt(input.decoded_data.index),
-            payload: input.decoded_data.payload,
-        },
+        decodedData: input.decoded_data
+            ? {
+                  chainId: hexToBigInt(input.decoded_data.chain_id as Hex),
+                  applicationContract: getAddress(
+                      input.decoded_data.application_contract,
+                  ),
+                  sender: getAddress(input.decoded_data.sender),
+                  blockNumber: hexToBigInt(input.decoded_data.block_number),
+                  blockTimestamp: hexToBigInt(
+                      input.decoded_data.block_timestamp,
+                  ),
+                  prevRandao: hexToBigInt(
+                      input.decoded_data.prev_randao as Hex,
+                  ),
+                  index: hexToBigInt(input.decoded_data.index),
+                  payload: input.decoded_data.payload,
+              }
+            : null,
         status: input.status,
         machineHash: input.machine_hash,
         outputsHash: input.outputs_hash,
@@ -286,7 +292,9 @@ export const outputConverter = (output: OutputRpc): Output => {
         inputIndex: hexToBigInt(output.input_index),
         index: hexToBigInt(output.index),
         rawData: output.raw_data,
-        decodedData: parseOutputDecodedData(output.decoded_data),
+        decodedData: output.decoded_data
+            ? parseOutputDecodedData(output.decoded_data)
+            : null,
         hash: output.hash,
         outputHashesSiblings: output.output_hashes_siblings,
         executionTransactionHash: output.execution_transaction_hash,

@@ -15,7 +15,9 @@ describe("converter", () => {
             iinputbox_address: "0xb6b39fb3dd926a9e3fbc7a129540eebea3016a6c",
             template_hash:
                 "0x3b57a86b635d433eb923dc86fa6f9832f15a88f89cfa7d8d45f568dbb6cf992e",
-            data_availability: "0xb12c9ede",
+            data_availability:
+                "0xb12c9ede0000000000000000000000001b51e2992a2755ba4d6f7094032df91991a0cfac",
+            consensus_type: "AUTHORITY",
             state: "ENABLED",
             created_at: "2025-04-10T03:23:27.450183Z",
             updated_at: "2025-04-10T04:03:28.755635Z",
@@ -37,6 +39,7 @@ describe("converter", () => {
                 updated_at: "2025-04-10T03:23:27.450183Z",
             },
             iinputbox_block: "0x1",
+            last_epoch_check_block: "0x1f3",
             last_input_check_block: "0x1f3",
             last_output_check_block: "0x1f3",
             epoch_length: "0x2d0",
@@ -50,7 +53,10 @@ describe("converter", () => {
         expect(application.consensusAddress).toBe(
             getAddress(rpcApplication.iconsensus_address),
         );
-        expect(application.dataAvailability).toBe("InputBox");
+        expect(application.dataAvailability.type).toBe("InputBox");
+        expect(application.dataAvailability.inputBoxAddress).toBe(
+            "0x1b51e2992A2755Ba4D6F7094032DF91991a0Cfac",
+        );
         expect(application.epochLength).toBe(
             hexToBigInt(rpcApplication.epoch_length),
         );
@@ -221,7 +227,9 @@ describe("converter", () => {
         expect(output.createdAt).toStrictEqual(new Date(rpcOutput.created_at));
         expect(output.updatedAt).toStrictEqual(new Date(rpcOutput.updated_at));
         expect(output.decodedData).toBeDefined();
-        expect(output.decodedData.type).toBe(rpcOutput.decoded_data.type);
-        expect(output.decodedData.payload).toBe(rpcOutput.decoded_data.payload);
+        expect(output.decodedData?.type).toBe(rpcOutput.decoded_data?.type);
+        expect(output.decodedData?.payload).toBe(
+            rpcOutput.decoded_data?.payload,
+        );
     });
 });

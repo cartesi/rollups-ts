@@ -151,10 +151,10 @@ export type Input = {
         prev_randao: string;
         index: HexNumber;
         payload: Hex;
-    };
+    } | null;
     status: InputStatus;
-    machine_hash: Hash;
-    outputs_hash: Hash;
+    machine_hash: Hash | null;
+    outputs_hash: Hash | null;
     transaction_reference: Hex;
     created_at: DateTime;
     updated_at: DateTime;
@@ -192,8 +192,8 @@ export type Output = {
     input_index: HexNumber;
     index: HexNumber;
     raw_data: Hex;
-    decoded_data: Notice | Voucher | DelegateCallVoucher;
-    hash: Hash;
+    decoded_data: Notice | Voucher | DelegateCallVoucher | null;
+    hash: Hash | null;
     output_hashes_siblings: Hash[] | null;
     execution_transaction_hash: Hash | null;
     created_at: DateTime;
