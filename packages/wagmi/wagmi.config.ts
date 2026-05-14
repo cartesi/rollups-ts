@@ -1,73 +1,16 @@
-import { defineConfig, type Plugin } from "@wagmi/cli";
+import { deployments } from "@rollups-ts/utils/wagmi/plugins";
+import { defineConfig } from "@wagmi/cli";
 import { actions, foundry, react } from "@wagmi/cli/plugins";
-import { readdirSync, readFileSync } from "node:fs";
-import path from "node:path";
-
-interface DeploymentsOptions {
-    directory: string;
-    includes?: RegExp[];
-    excludes?: RegExp[];
-}
-
-const shouldIncludeFile = (
-    name: string,
-    config: DeploymentsOptions,
-): boolean => {
-    if (config.excludes) {
-        // if there is a list of excludes, then if the name matches any of them, then exclude
-        for (const exclude of config.excludes) {
-            if (exclude.test(name)) {
-                return false;
-            }
-        }
-    }
-    if (config.includes) {
-        // if there is a list of includes, then only include if the name matches any of them
-        for (const include of config.includes) {
-            if (include.test(name)) {
-                return true;
-            }
-        }
-        return false;
-    } else {
-        // if there is no list of includes, then include everything
-        return true;
-    }
-};
-
-const deployments = (config: DeploymentsOptions): Plugin => {
-    return {
-        name: "deployments",
-        contracts: () => {
-            // list all files exported by deployments in directory
-            const files = readdirSync(config.directory).filter((file) =>
-                shouldIncludeFile(file, config),
-            );
-
-            // return an array of contracts as expected by wagmi
-            return files.map((file) => {
-                // read the file and parse it as json
-                const deployment = JSON.parse(
-                    readFileSync(path.join(config.directory, file), "utf8"),
-                );
-
-                // get the address and abi from the deployment
-                return {
-                    abi: deployment.abi,
-                    address: deployment.address,
-                    name: deployment.contractName,
-                };
-            });
-        },
-    };
-};
 
 const config: ReturnType<typeof defineConfig> = defineConfig({
     out: "src/generated.ts",
     plugins: [
-        deployments({ directory: "deployment" }),
+        deployments({
+            directory: "./tmp/deployments/1",
+            contractsDir: "./tmp/out",
+        }),
         foundry({
-            project: "node_modules/@cartesi/rollups",
+            project: "./tmp",
             forge: { build: false },
             exclude: [
                 "ApplicationFactory.sol/**",
@@ -81,6 +24,9 @@ const config: ReturnType<typeof defineConfig> = defineConfig({
                 "QuorumFactory.sol/**",
                 "SafeERC20Transfer.sol/**",
                 "SelfHostedApplicationFactory.sol/**",
+                "UsdWithdrawalOutputBuilderFactory.sol/**",
+                "IApplicationForeclosure.sol/**",
+                "IApplicationWithdrawal.sol/**",
             ],
         }),
         actions(),
