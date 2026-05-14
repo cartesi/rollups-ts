@@ -1,0 +1,82 @@
+{
+    "name": "@rollups-ts/utils",
+    "description": "utility functions for rollups-ts",
+    "version": "0.0.0",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cartesi/rollups-ts"
+    },
+    "dependencies": {
+        "abitype": "^1.2.3",
+        "modern-tar": "^0.7.6"
+    },
+    "peerDependencies": {
+        "@wagmi/cli": "^2.10.0",
+        "viem": "^2.0.0"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@types/node": "catalog:",
+        "npm-run-all": "^4.1.5",
+        "ts-node": "^10.9.2",
+        "tsup": "catalog:",
+        "typescript": "catalog:"
+    },
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "require": "./dist/index.cjs"
+            }
+        },
+        "./download": {
+            "import": {
+                "types": "./dist/download.d.ts",
+                "import": "./dist/download.js"
+            },
+            "require": {
+                "types": "./dist/download.d.cts",
+                "require": "./dist/download.cjs"
+            }
+        },
+        "./wagmi/plugins": {
+            "import": {
+                "types": "./dist/wagmi/plugins/index.d.ts",
+                "import": "./dist/wagmi/plugins/index.js"
+            },
+            "require": {
+                "types": "./dist/wagmi/plugins/index.d.cts",
+                "require": "./dist/wagmi/plugins/index.cjs"
+            }
+        },
+        "./wagmi/plugins/deployments": {
+            "import": {
+                "types": "./dist/wagmi/plugins/deployments.d.ts",
+                "import": "./dist/wagmi/plugins/deployments.js"
+            },
+            "require": {
+                "types": "./dist/wagmi/plugins/deployments.d.cts",
+                "require": "./dist/wagmi/plugins/deployments.cjs"
+            }
+        }
+    },
+    "files": [
+        "dist/**"
+    ],
+    "scripts": {
+        "build": "run-s compile",
+        "compile": "tsup",
+        "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+        "dev": "tsup --watch",
+        "lint": "biome check"
+    }
+}
