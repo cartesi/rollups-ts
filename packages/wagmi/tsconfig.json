@@ -20,7 +20,8 @@
         "skipLibCheck": true,
         "strict": true,
         "target": "ES2020",
-        "jsx": "react-jsx"
+        "jsx": "react-jsx",
+        "types": ["node"]
     },
     "include": ["."],
     "exclude": ["dist", "node_modules"]
