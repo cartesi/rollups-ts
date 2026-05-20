@@ -1,8 +1,8 @@
 import { unpackTar } from "modern-tar/fs";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import type { ReadableStream } from "node:stream/web";
 import { createGunzip } from "node:zlib";
 
 type DownloadAndExtractParams = {
@@ -10,6 +10,8 @@ type DownloadAndExtractParams = {
     name: string;
     /** URL to download the file from */
     downloadUrl: string;
+    /** The expected SHA-256 hash of the downloaded file */
+    expectedHash: string;
     /** Destination directory to extract the files to */
     destination: string;
 };
@@ -21,7 +23,7 @@ const ensureDir = (dir: string) => {
 };
 
 export const downloadAndExtract = async (params: DownloadAndExtractParams) => {
-    const { name, downloadUrl, destination } = params;
+    const { name, downloadUrl, expectedHash, destination } = params;
 
     try {
         console.info(
@@ -41,16 +43,27 @@ export const downloadAndExtract = async (params: DownloadAndExtractParams) => {
             throw new Error("Response body is empty");
         }
 
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        console.info(`Download complete for ${name}, verifying integrity...`);
+
+        const actualHash = createHash("sha256").update(buffer).digest("hex");
+
+        if (actualHash !== expectedHash) {
+            throw new Error(
+                `Hash mismatch for ${name}: expected ${expectedHash}, got ${actualHash}`,
+            );
+        }
+
+        console.info(`Hash verification succeeded for ${name}, extracting...`);
+
         ensureDir(destination);
 
-        // Convert Web Stream to Node Stream and pipeline it
-        // Casting the body as an exact ReadableStream type for the Node compatibility layer
-        const responseStream = Readable.fromWeb(
-            response.body as ReadableStream,
-        );
+        // Convert the safe buffer into a ReadableStream for the extraction process
+        const bufferStream = Readable.from(buffer);
 
         /** unpackTar by default defend against tarSlip attacks */
-        await pipeline(responseStream, createGunzip(), unpackTar(destination));
+        await pipeline(bufferStream, createGunzip(), unpackTar(destination));
 
         console.info(`Success! Extracted ${params.name} to ${destination}\n`);
     } catch (err) {

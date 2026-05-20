@@ -16,11 +16,13 @@ async function run() {
     await Promise.all([
         downloadAndExtract({
             name: "GitHub rollups-contracts artifacts",
+            expectedHash: artifactHash,
             downloadUrl: artifactUrl,
             destination: artifactDestination,
         }),
         downloadAndExtract({
             name: "GitHub rollups-contracts deployment addresses",
+            expectedHash: deploymentHash,
             downloadUrl: deploymentUrl,
             destination: deploymentDestination,
         }),

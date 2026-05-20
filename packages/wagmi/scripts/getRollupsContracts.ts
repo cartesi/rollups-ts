@@ -17,11 +17,13 @@ async function run() {
         downloadAndExtract({
             name: "GitHub rollups-contracts artifacts",
             downloadUrl: artifactUrl,
+            expectedHash: artifactHash,
             destination: artifactDestination,
         }),
         downloadAndExtract({
             name: "GitHub rollups-contracts deployment addresses",
             downloadUrl: deploymentUrl,
+            expectedHash: deploymentHash,
             destination: deploymentDestination,
         }),
     ])
