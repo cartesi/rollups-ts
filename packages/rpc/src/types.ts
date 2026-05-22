@@ -27,6 +27,7 @@ export type EpochStatus =
     | "INPUTS_PROCESSED"
     | "CLAIM_COMPUTED"
     | "CLAIM_SUBMITTED"
+    | "CLAIM_STAGED"
     | "CLAIM_ACCEPTED"
     | "CLAIM_REJECTED";
 
@@ -64,6 +65,8 @@ export type Application = {
     iinputbox_address: Address;
     template_hash: Hash;
     epoch_length: HexNumber;
+    claim_staging_period: HexNumber;
+    withdrawal_config: WithdrawalConfig;
     data_availability: Hex;
     consensus_type: ConsensusType;
     state: ApplicationState;
@@ -72,6 +75,8 @@ export type Application = {
     last_epoch_check_block: HexNumber;
     last_input_check_block: HexNumber;
     last_output_check_block: HexNumber;
+    last_tournament_check_block: HexNumber;
+    foreclose_search_last_block: HexNumber;
     processed_inputs: HexNumber;
     created_at: DateTime;
     updated_at: DateTime;
@@ -92,6 +97,14 @@ export type Application = {
         created_at: DateTime;
         updated_at: DateTime;
     };
+};
+
+export type WithdrawalConfig = {
+    guardian: Address;
+    log2_leaves_per_account: HexNumber;
+    log2_max_num_of_accounts: HexNumber;
+    accounts_drive_start_index: HexNumber;
+    withdrawal_output_builder: Address;
 };
 
 export type GetApplicationReturnType = {
@@ -117,6 +130,7 @@ export type Epoch = {
     claim_transaction_hash: Hash | null;
     tournament_address: Address | null;
     status: EpochStatus;
+    staged_at_block: HexNumber | null;
     virtual_index: HexNumber;
     created_at: DateTime;
     updated_at: DateTime;
