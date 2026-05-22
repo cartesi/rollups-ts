@@ -9,6 +9,8 @@ import type {
 } from "@cartesi/rpc";
 import type { ExtractAbiFunctionNames } from "abitype";
 import type { Address, Hash, Hex } from "viem";
+import type { outputsAbi } from "../rollups";
+
 export type {
     ApplicationState,
     ConsensusType,
@@ -17,9 +19,7 @@ export type {
     InputStatus,
     SnapshotPolicy,
     WinnerCommitment,
-} from "@cartesi/rpc";
-
-import type { outputsAbi } from "../rollups";
+};
 
 export type PaginationParams = {
     limit?: number;
@@ -58,6 +58,14 @@ export type Application = {
     inputBoxAddress: Address;
     templateHash: Hash;
     epochLength: bigint;
+    claimStagingPeriod: bigint;
+    withdrawalConfig: {
+        guardian: Address;
+        log2LeavesPerAccount: bigint;
+        log2MaxNumOfAccounts: bigint;
+        accountsDriveStartIndex: bigint;
+        withdrawalOutputBuilder: Address;
+    };
     dataAvailability: DataAvailability;
     consensusType: ConsensusType;
     state: ApplicationState;
@@ -66,6 +74,8 @@ export type Application = {
     lastEpochCheckBlock: bigint;
     lastInputCheckBlock: bigint;
     lastOutputCheckBlock: bigint;
+    lastTournamentCheckBlock: bigint;
+    forecloseSearchLastBlock: bigint;
     processedInputs: bigint;
     createdAt: Date;
     updatedAt: Date;
@@ -112,6 +122,7 @@ export type Epoch = {
     commitmentProof: Hash[] | null;
     claimTransactionHash: Hash | null;
     status: EpochStatus;
+    stagedAtBlock: bigint | null;
     virtualIndex: bigint;
     createdAt: Date;
     updatedAt: Date;

@@ -1,8 +1,9 @@
-import type { Application, Output } from "@cartesi/rpc";
+import type { Application, Epoch, Output } from "@cartesi/rpc";
 import { getAddress, hexToBigInt } from "viem";
 import { describe, expect, it } from "vitest";
 import {
     applicationConverter,
+    epochConverter,
     outputConverter,
 } from "../src/types/converter.js";
 
@@ -43,9 +44,87 @@ describe("converter", () => {
             last_input_check_block: "0x1f3",
             last_output_check_block: "0x1f3",
             epoch_length: "0x2d0",
+            claim_staging_period: "0x5",
+            foreclose_search_last_block: "0x1f3",
+            last_tournament_check_block: "0x1f3",
+            withdrawal_config: {
+                guardian: "0x0000000000000000000000000000000000000000",
+                log2_leaves_per_account: "0x14",
+                log2_max_num_of_accounts: "0x20",
+                accounts_drive_start_index: "0x0",
+                withdrawal_output_builder:
+                    "0x0000000000000000000000000000000000000000",
+            },
             processed_inputs: "0x0",
         };
+
         const application = applicationConverter(rpcApplication);
+
+        const properties = Object.keys(application);
+        expect(properties).toHaveLength(22);
+        expect(properties).toEqual(
+            expect.arrayContaining([
+                "name",
+                "applicationAddress",
+                "consensusAddress",
+                "inputBoxAddress",
+                "templateHash",
+                "epochLength",
+                "claimStagingPeriod",
+                "withdrawalConfig",
+                "dataAvailability",
+                "consensusType",
+                "state",
+                "inputBoxBlock",
+                "lastEpochCheckBlock",
+                "lastInputCheckBlock",
+                "lastOutputCheckBlock",
+                "lastTournamentCheckBlock",
+                "forecloseSearchLastBlock",
+                "processedInputs",
+                "createdAt",
+                "updatedAt",
+                "executionParameters",
+            ]),
+        );
+
+        const withdrawalConfigProperties = Object.keys(
+            application.withdrawalConfig,
+        );
+        expect(withdrawalConfigProperties).toHaveLength(5);
+        expect(withdrawalConfigProperties).toEqual(
+            expect.arrayContaining([
+                "guardian",
+                "log2LeavesPerAccount",
+                "log2MaxNumOfAccounts",
+                "accountsDriveStartIndex",
+                "withdrawalOutputBuilder",
+            ]),
+        );
+
+        const executionParametersProperties = Object.keys(
+            application.executionParameters,
+        );
+
+        expect(executionParametersProperties).toHaveLength(15);
+        expect(executionParametersProperties).toEqual(
+            expect.arrayContaining([
+                "snapshotPolicy",
+                "advanceIncCycles",
+                "advanceMaxCycles",
+                "inspectIncCycles",
+                "inspectMaxCycles",
+                "advanceIncDeadline",
+                "advanceMaxDeadline",
+                "inspectIncDeadline",
+                "inspectMaxDeadline",
+                "loadDeadline",
+                "storeDeadline",
+                "fastDeadline",
+                "maxConcurrentInspects",
+            ]),
+        );
+
         expect(application).toBeDefined();
         expect(application.applicationAddress).toBe(
             getAddress(rpcApplication.iapplication_address),
@@ -128,7 +207,114 @@ describe("converter", () => {
         expect(application.updatedAt).toStrictEqual(
             new Date(rpcApplication.updated_at),
         );
+
+        expect(application.claimStagingPeriod).toEqual(
+            hexToBigInt(rpcApplication.claim_staging_period),
+        );
+        expect(application.forecloseSearchLastBlock).toEqual(
+            hexToBigInt(rpcApplication.foreclose_search_last_block),
+        );
+        expect(application.lastTournamentCheckBlock).toEqual(
+            hexToBigInt(rpcApplication.last_tournament_check_block),
+        );
+        expect(application.withdrawalConfig).toEqual({
+            guardian: rpcApplication.withdrawal_config.guardian,
+            log2LeavesPerAccount: hexToBigInt(
+                rpcApplication.withdrawal_config.log2_leaves_per_account,
+            ),
+            log2MaxNumOfAccounts: hexToBigInt(
+                rpcApplication.withdrawal_config.log2_max_num_of_accounts,
+            ),
+            accountsDriveStartIndex: hexToBigInt(
+                rpcApplication.withdrawal_config.accounts_drive_start_index,
+            ),
+            withdrawalOutputBuilder:
+                rpcApplication.withdrawal_config.withdrawal_output_builder,
+        });
         expect(application.reason).toBeUndefined();
+    });
+
+    it("should convert the epoch", () => {
+        const rpcEpoch: Epoch = {
+            index: "0x5",
+            first_block: "0x10",
+            last_block: "0x1f3",
+            input_index_lower_bound: "0x0",
+            input_index_upper_bound: "0x5",
+            machine_hash:
+                "0x3b57a86b635d433eb923dc86fa6f9832f15a88f89cfa7d8d45f568dbb6cf992e",
+            outputs_merkle_root:
+                "0x3b57a86b635d433eb923dc86fa6f9832f15a88f89cfa7d8d45f568dbb6cf992e",
+            outputs_merkle_proof: null,
+            tournament_address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+            commitment:
+                "0x3b57a86b635d433eb923dc86fa6f9832f15a88f89cfa7d8d45f568dbb6cf992e",
+            commitment_proof: null,
+            claim_transaction_hash: null,
+            created_at: "2025-04-10T03:23:27.450Z",
+            updated_at: "2025-04-10T04:03:28.755Z",
+            staged_at_block: "0x1f3",
+            status: "OPEN",
+            virtual_index: "0x5",
+        };
+
+        const epoch = epochConverter(rpcEpoch);
+
+        const props = Object.keys(epoch);
+        expect(props).toHaveLength(17);
+        expect(props).toEqual(
+            expect.arrayContaining([
+                "index",
+                "firstBlock",
+                "lastBlock",
+                "inputIndexLowerBound",
+                "inputIndexUpperBound",
+                "machineHash",
+                "outputsMerkleRoot",
+                "outputsMerkleProof",
+                "tournamentAddress",
+                "commitment",
+                "commitmentProof",
+                "claimTransactionHash",
+                "createdAt",
+                "updatedAt",
+                "stagedAtBlock",
+                "status",
+                "virtualIndex",
+            ]),
+        );
+
+        expect(epoch.index).toEqual(hexToBigInt(rpcEpoch.index));
+        expect(epoch.firstBlock).toEqual(hexToBigInt(rpcEpoch.first_block));
+        expect(epoch.lastBlock).toEqual(hexToBigInt(rpcEpoch.last_block));
+        expect(epoch.inputIndexLowerBound).toEqual(
+            hexToBigInt(rpcEpoch.input_index_lower_bound),
+        );
+        expect(epoch.inputIndexUpperBound).toEqual(
+            hexToBigInt(rpcEpoch.input_index_upper_bound),
+        );
+        expect(epoch.machineHash).toEqual(rpcEpoch.machine_hash);
+        expect(epoch.outputsMerkleRoot).toEqual(rpcEpoch.outputs_merkle_root);
+        expect(epoch.outputsMerkleProof).toEqual(rpcEpoch.outputs_merkle_proof);
+        expect(epoch.tournamentAddress).toEqual(
+            rpcEpoch.tournament_address
+                ? getAddress(rpcEpoch.tournament_address)
+                : null,
+        );
+        expect(epoch.commitment).toEqual(rpcEpoch.commitment);
+        expect(epoch.commitmentProof).toEqual(rpcEpoch.commitment_proof);
+        expect(epoch.claimTransactionHash).toEqual(
+            rpcEpoch.claim_transaction_hash,
+        );
+        expect(epoch.status).toEqual(rpcEpoch.status);
+        expect(epoch.stagedAtBlock).toEqual(
+            rpcEpoch.staged_at_block
+                ? hexToBigInt(rpcEpoch.staged_at_block)
+                : null,
+        );
+        expect(epoch.virtualIndex).toEqual(hexToBigInt(rpcEpoch.virtual_index));
+        expect(epoch.createdAt).toStrictEqual(new Date(rpcEpoch.created_at));
+        expect(epoch.updatedAt).toStrictEqual(new Date(rpcEpoch.updated_at));
     });
 
     it("should convert the output", () => {

@@ -75,6 +75,22 @@ export const applicationConverter = (
         inputBoxAddress: getAddress(application.iinputbox_address),
         templateHash: application.template_hash,
         epochLength: hexToBigInt(application.epoch_length),
+        claimStagingPeriod: hexToBigInt(application.claim_staging_period),
+        withdrawalConfig: {
+            guardian: getAddress(application.withdrawal_config.guardian),
+            log2LeavesPerAccount: hexToBigInt(
+                application.withdrawal_config.log2_leaves_per_account,
+            ),
+            log2MaxNumOfAccounts: hexToBigInt(
+                application.withdrawal_config.log2_max_num_of_accounts,
+            ),
+            accountsDriveStartIndex: hexToBigInt(
+                application.withdrawal_config.accounts_drive_start_index,
+            ),
+            withdrawalOutputBuilder: getAddress(
+                application.withdrawal_config.withdrawal_output_builder,
+            ),
+        },
         dataAvailability: parseDataAvailability(application.data_availability),
         consensusType: application.consensus_type,
         state: application.state,
@@ -83,6 +99,12 @@ export const applicationConverter = (
         lastEpochCheckBlock: hexToBigInt(application.last_epoch_check_block),
         lastInputCheckBlock: hexToBigInt(application.last_input_check_block),
         lastOutputCheckBlock: hexToBigInt(application.last_output_check_block),
+        lastTournamentCheckBlock: hexToBigInt(
+            application.last_tournament_check_block,
+        ),
+        forecloseSearchLastBlock: hexToBigInt(
+            application.foreclose_search_last_block,
+        ),
         processedInputs: hexToBigInt(application.processed_inputs),
         createdAt: new Date(application.created_at),
         updatedAt: new Date(application.updated_at),
@@ -146,6 +168,9 @@ export const epochConverter = (epoch: EpochRpc): Epoch => {
         commitmentProof: epoch.commitment_proof,
         claimTransactionHash: epoch.claim_transaction_hash,
         status: epoch.status,
+        stagedAtBlock: epoch.staged_at_block
+            ? hexToBigInt(epoch.staged_at_block)
+            : null,
         virtualIndex: hexToBigInt(epoch.virtual_index),
         createdAt: new Date(epoch.created_at),
         updatedAt: new Date(epoch.updated_at),
