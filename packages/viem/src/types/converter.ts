@@ -12,6 +12,7 @@ import type {
     Report as ReportRpc,
     Tournament as TournamentRpc,
     Voucher as VoucherRpc,
+    Withdrawal as WithdrawalRpc,
 } from "@cartesi/rpc";
 import { type Hex, decodeFunctionData, getAddress, hexToBigInt } from "viem";
 import { dataAvailabilityAbi } from "../rollups.js";
@@ -30,6 +31,7 @@ import type {
     Report,
     Tournament,
     Voucher,
+    Withdrawal,
 } from "./actions.js";
 
 export const paginationConverter = (pagination: PaginationRpc): Pagination => {
@@ -93,7 +95,8 @@ export const applicationConverter = (
         },
         dataAvailability: parseDataAvailability(application.data_availability),
         consensusType: application.consensus_type,
-        state: application.state,
+        status: application.status,
+        enabled: application.enabled,
         reason: application.reason,
         inputBoxBlock: hexToBigInt(application.iinputbox_block),
         lastEpochCheckBlock: hexToBigInt(application.last_epoch_check_block),
@@ -102,10 +105,24 @@ export const applicationConverter = (
         lastTournamentCheckBlock: hexToBigInt(
             application.last_tournament_check_block,
         ),
-        forecloseSearchLastBlock: hexToBigInt(
-            application.foreclose_search_last_block,
+        lastForecloseCheckBlock: hexToBigInt(
+            application.last_foreclose_check_block,
+        ),
+        lastAccountsDriveProvedCheckBlock: hexToBigInt(
+            application.last_accounts_drive_proved_check_block,
+        ),
+        lastWithdrawalCheckBlock: hexToBigInt(
+            application.last_withdrawal_check_block,
         ),
         processedInputs: hexToBigInt(application.processed_inputs),
+        forecloseBlock: hexToBigInt(application.foreclose_block),
+        forecloseTransaction: application.foreclose_transaction,
+        accountsDriveProvedBlock: hexToBigInt(
+            application.accounts_drive_proved_block,
+        ),
+        accountsDriveProvedTransaction:
+            application.accounts_drive_proved_transaction,
+        accountsDriveMerkleRoot: application.accounts_drive_merkle_root,
         createdAt: new Date(application.created_at),
         updatedAt: new Date(application.updated_at),
         executionParameters: {
@@ -335,5 +352,18 @@ export const reportConverter = (report: ReportRpc): Report => {
         rawData: report.raw_data,
         createdAt: new Date(report.created_at),
         updatedAt: new Date(report.updated_at),
+    };
+};
+
+export const withdrawalConverter = (withdrawal: WithdrawalRpc): Withdrawal => {
+    return {
+        accountIndex: hexToBigInt(withdrawal.account_index),
+        account: withdrawal.account,
+        output: withdrawal.output,
+        blockNumber: hexToBigInt(withdrawal.block_number),
+        transactionHash: withdrawal.transaction_hash,
+        logIndex: hexToBigInt(withdrawal.log_index),
+        createdAt: new Date(withdrawal.created_at),
+        updatedAt: new Date(withdrawal.updated_at),
     };
 };

@@ -1,10 +1,11 @@
-import type { Application, Epoch, Output } from "@cartesi/rpc";
+import type { Application, Epoch, Output, Withdrawal } from "@cartesi/rpc";
 import { getAddress, hexToBigInt } from "viem";
 import { describe, expect, it } from "vitest";
 import {
     applicationConverter,
     epochConverter,
     outputConverter,
+    withdrawalConverter,
 } from "../src/types/converter.js";
 
 describe("converter", () => {
@@ -19,7 +20,8 @@ describe("converter", () => {
             data_availability:
                 "0xb12c9ede0000000000000000000000001b51e2992a2755ba4d6f7094032df91991a0cfac",
             consensus_type: "AUTHORITY",
-            state: "ENABLED",
+            status: "OK",
+            enabled: true,
             created_at: "2025-04-10T03:23:27.450183Z",
             updated_at: "2025-04-10T04:03:28.755635Z",
             execution_parameters: {
@@ -45,8 +47,18 @@ describe("converter", () => {
             last_output_check_block: "0x1f3",
             epoch_length: "0x2d0",
             claim_staging_period: "0x5",
-            foreclose_search_last_block: "0x1f3",
             last_tournament_check_block: "0x1f3",
+            last_accounts_drive_proved_check_block: "0x0",
+            last_foreclose_check_block: "0x0",
+            last_withdrawal_check_block: "0x0",
+            foreclose_block: "0x0",
+            foreclose_transaction:
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+            accounts_drive_proved_block: "0x0",
+            accounts_drive_proved_transaction:
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+            accounts_drive_merkle_root:
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
             withdrawal_config: {
                 guardian: "0x0000000000000000000000000000000000000000",
                 log2_leaves_per_account: "0x14",
@@ -61,31 +73,40 @@ describe("converter", () => {
         const application = applicationConverter(rpcApplication);
 
         const properties = Object.keys(application);
-        expect(properties).toHaveLength(22);
-        expect(properties).toEqual(
-            expect.arrayContaining([
+        expect(properties).toHaveLength(30);
+        expect(properties.sort()).toEqual(
+            [
                 "name",
                 "applicationAddress",
                 "consensusAddress",
                 "inputBoxAddress",
+                "lastForecloseCheckBlock",
+                "lastAccountsDriveProvedCheckBlock",
+                "lastWithdrawalCheckBlock",
+                "forecloseBlock",
+                "forecloseTransaction",
+                "accountsDriveProvedBlock",
+                "accountsDriveProvedTransaction",
+                "accountsDriveMerkleRoot",
                 "templateHash",
                 "epochLength",
                 "claimStagingPeriod",
                 "withdrawalConfig",
                 "dataAvailability",
                 "consensusType",
-                "state",
+                "status",
+                "enabled",
+                "reason",
                 "inputBoxBlock",
                 "lastEpochCheckBlock",
                 "lastInputCheckBlock",
                 "lastOutputCheckBlock",
                 "lastTournamentCheckBlock",
-                "forecloseSearchLastBlock",
                 "processedInputs",
                 "createdAt",
                 "updatedAt",
                 "executionParameters",
-            ]),
+            ].sort(),
         );
 
         const withdrawalConfigProperties = Object.keys(
@@ -151,7 +172,7 @@ describe("converter", () => {
         expect(application.processedInputs).toBe(
             hexToBigInt(rpcApplication.processed_inputs),
         );
-        expect(application.state).toBe(rpcApplication.state);
+        expect(application.status).toBe(rpcApplication.status);
         expect(application.templateHash).toBe(rpcApplication.template_hash);
         expect(application.executionParameters).toBeDefined();
         expect(application.executionParameters.advanceIncCycles).toBe(
@@ -211,8 +232,29 @@ describe("converter", () => {
         expect(application.claimStagingPeriod).toEqual(
             hexToBigInt(rpcApplication.claim_staging_period),
         );
-        expect(application.forecloseSearchLastBlock).toEqual(
-            hexToBigInt(rpcApplication.foreclose_search_last_block),
+        expect(application.lastForecloseCheckBlock).toEqual(
+            hexToBigInt(rpcApplication.last_foreclose_check_block),
+        );
+        expect(application.lastAccountsDriveProvedCheckBlock).toEqual(
+            hexToBigInt(rpcApplication.last_accounts_drive_proved_check_block),
+        );
+        expect(application.lastWithdrawalCheckBlock).toEqual(
+            hexToBigInt(rpcApplication.last_withdrawal_check_block),
+        );
+        expect(application.forecloseBlock).toEqual(
+            hexToBigInt(rpcApplication.foreclose_block),
+        );
+        expect(application.forecloseTransaction).toEqual(
+            rpcApplication.foreclose_transaction,
+        );
+        expect(application.accountsDriveProvedBlock).toEqual(
+            hexToBigInt(rpcApplication.accounts_drive_proved_block),
+        );
+        expect(application.accountsDriveProvedTransaction).toEqual(
+            rpcApplication.accounts_drive_proved_transaction,
+        );
+        expect(application.accountsDriveMerkleRoot).toEqual(
+            rpcApplication.accounts_drive_merkle_root,
         );
         expect(application.lastTournamentCheckBlock).toEqual(
             hexToBigInt(rpcApplication.last_tournament_check_block),
@@ -416,6 +458,54 @@ describe("converter", () => {
         expect(output.decodedData?.type).toBe(rpcOutput.decoded_data?.type);
         expect(output.decodedData?.payload).toBe(
             rpcOutput.decoded_data?.payload,
+        );
+    });
+
+    it("should convert the withdrawal", () => {
+        const rpcWithdrawal: Withdrawal = {
+            account_index: "0x2a",
+            account: "0xAbCdef1234567890aBCDEf1234567890abCDef12",
+            output: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+            block_number: "0x1f4",
+            transaction_hash:
+                "0x8f2c9ab4d7e15c30b6f18a4ee2d9037c4a1f5d2e9b7c63a0d4e8f1b25c7a9d3e",
+            log_index: "0x3",
+            created_at: "2025-04-11T10:00:00.000Z",
+            updated_at: "2025-04-11T10:05:00.000Z",
+        };
+
+        const withdrawal = withdrawalConverter(rpcWithdrawal);
+
+        const props = Object.keys(withdrawal);
+        expect(props).toHaveLength(8);
+        expect(props).toEqual(
+            expect.arrayContaining([
+                "accountIndex",
+                "account",
+                "output",
+                "blockNumber",
+                "transactionHash",
+                "logIndex",
+                "createdAt",
+                "updatedAt",
+            ]),
+        );
+
+        expect(withdrawal.accountIndex).toBe(
+            hexToBigInt(rpcWithdrawal.account_index),
+        );
+        expect(withdrawal.account).toBe(rpcWithdrawal.account);
+        expect(withdrawal.output).toBe(rpcWithdrawal.output);
+        expect(withdrawal.blockNumber).toBe(
+            hexToBigInt(rpcWithdrawal.block_number),
+        );
+        expect(withdrawal.transactionHash).toBe(rpcWithdrawal.transaction_hash);
+        expect(withdrawal.logIndex).toBe(hexToBigInt(rpcWithdrawal.log_index));
+        expect(withdrawal.createdAt).toStrictEqual(
+            new Date(rpcWithdrawal.created_at),
+        );
+        expect(withdrawal.updatedAt).toStrictEqual(
+            new Date(rpcWithdrawal.updated_at),
         );
     });
 });
