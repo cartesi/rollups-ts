@@ -1,0 +1,42 @@
+import type { CartesiPublicClient, ListWithdrawalsParams } from "@cartesi/viem";
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
+import { useCartesiClient } from "./provider.js";
+
+const withdrawalsOptions = (
+    client: CartesiPublicClient,
+    params: Partial<ListWithdrawalsParams>,
+) =>
+    queryOptions({
+        queryKey: [
+            "withdrawals",
+            {
+                application: params.application,
+                accountIndex: params.accountIndex?.toString(),
+                limit: params.limit,
+                offset: params.offset,
+                descending: params.descending,
+            },
+        ],
+        queryFn:
+            params.application !== undefined
+                ? () =>
+                      client.listWithdrawals({
+                          application: params.application as string,
+                          accountIndex: params.accountIndex,
+                          limit: params.limit,
+                          offset: params.offset,
+                          descending: params.descending,
+                      })
+                : skipToken,
+    });
+
+export const useWithdrawals = (
+    params: Partial<ListWithdrawalsParams> &
+        Omit<ReturnType<typeof withdrawalsOptions>, "queryKey" | "queryFn">,
+) => {
+    const client = useCartesiClient();
+    return useQuery({
+        ...params,
+        ...withdrawalsOptions(client, params),
+    });
+};
