@@ -1,0 +1,23 @@
+# useWithdrawal
+
+## Usage
+
+```tsx twoslash
+import { useWithdrawal } from "@cartesi/wagmi";
+
+function Example() {
+    const { data, isLoading } = useWithdrawal({
+        application: "0x...",
+        accountIndex: 0n,
+    });
+    // render logic
+}
+```
+
+## Return Type
+
+The `data` is a `Withdrawal`:
+
+```ts twoslash
+import { type Withdrawal, type GetWithdrawalReturnType } from "@cartesi/viem";
+```

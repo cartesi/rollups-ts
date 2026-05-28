@@ -138,6 +138,11 @@ const config: Config = defineConfig({
                             text: "getLastAcceptedEpochIndex",
                             link: "/viem/getLastAcceptedEpochIndex",
                         },
+                        { text: "getWithdrawal", link: "/viem/getWithdrawal" },
+                        {
+                            text: "listWithdrawals",
+                            link: "/viem/listWithdrawals",
+                        },
                         { text: "waitForInput", link: "viem/waitForInput" },
                     ],
                 },
@@ -206,6 +211,14 @@ const config: Config = defineConfig({
                         {
                             text: "useWaitForInput",
                             link: "/wagmi/useWaitForInput",
+                        },
+                        {
+                            text: "useWithdrawal",
+                            link: "/wagmi/useWithdrawal",
+                        },
+                        {
+                            text: "useWithdrawals",
+                            link: "/wagmi/useWithdrawals",
                         },
                     ],
                 },
@@ -311,6 +324,14 @@ const config: Config = defineConfig({
                         {
                             text: "cartesi_getReport",
                             link: "/rpc/cartesi_getReport",
+                        },
+                        {
+                            text: "cartesi_getWithdrawal",
+                            link: "/rpc/cartesi_getWithdrawal",
+                        },
+                        {
+                            text: "cartesi_listWithdrawals",
+                            link: "/rpc/cartesi_listWithdrawals",
                         },
                     ],
                 },

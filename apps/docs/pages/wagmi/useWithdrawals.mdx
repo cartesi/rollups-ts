@@ -1,0 +1,41 @@
+# useWithdrawals
+
+## Usage
+
+```tsx twoslash
+import { useWithdrawals } from "@cartesi/wagmi";
+
+function Example() {
+    const { data, isLoading } = useWithdrawals({
+        application: "0x1234567890abcdef1234567890abcdef12345678",
+        limit: 50,
+        offset: 0,
+        // accountIndex: 0n, // optional
+    });
+    const { data: withdrawals, pagination } = data || {};
+    // render logic
+}
+```
+
+## Filters
+
+The hook can filter results by:
+
+- `application: Address | string`
+- `accountIndex?: bigint`
+
+```ts twoslash
+import type { ListWithdrawalsParams } from "@cartesi/viem";
+```
+
+## Return Type
+
+The `data` is an object of type `ListWithdrawalsReturnType`:
+
+```ts twoslash
+import type {
+    Withdrawal,
+    ListWithdrawalsReturnType,
+    Pagination,
+} from "@cartesi/viem";
+```

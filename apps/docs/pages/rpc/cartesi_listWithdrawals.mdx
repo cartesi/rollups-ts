@@ -1,0 +1,33 @@
+# cartesi_listWithdrawals
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data, pagination } = await client.request("cartesi_listWithdrawals", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    limit: 50,
+    offset: 0,
+});
+```
+
+## Filters
+
+The request can filter results by:
+
+- `account_index: HexNumber`
+
+```ts twoslash
+import { type HexNumber } from "@cartesi/rpc";
+```
+
+## Return Type
+
+The `data` is an array of `Withdrawal`:
+
+```ts twoslash
+import { type Withdrawal, type ListWithdrawalsReturnType } from "@cartesi/rpc";
+```
+
+For more information about pagination refer to the [pagination section](/rpc#pagination).
