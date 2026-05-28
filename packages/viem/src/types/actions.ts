@@ -1,5 +1,5 @@
 import type {
-    ApplicationState,
+    ApplicationStatus,
     ConsensusType,
     DeletionReason,
     EpochStatus,
@@ -12,7 +12,7 @@ import type { Address, Hash, Hex } from "viem";
 import type { outputsAbi } from "../rollups";
 
 export type {
-    ApplicationState,
+    ApplicationStatus,
     ConsensusType,
     DeletionReason,
     EpochStatus,
@@ -68,15 +68,23 @@ export type Application = {
     };
     dataAvailability: DataAvailability;
     consensusType: ConsensusType;
-    state: ApplicationState;
+    status: ApplicationStatus;
+    enabled: boolean;
     reason?: string | null;
     inputBoxBlock: bigint;
     lastEpochCheckBlock: bigint;
     lastInputCheckBlock: bigint;
     lastOutputCheckBlock: bigint;
     lastTournamentCheckBlock: bigint;
-    forecloseSearchLastBlock: bigint;
+    lastForecloseCheckBlock: bigint;
+    lastAccountsDriveProvedCheckBlock: bigint;
+    lastWithdrawalCheckBlock: bigint;
     processedInputs: bigint;
+    forecloseBlock: bigint;
+    forecloseTransaction: Hash;
+    accountsDriveProvedBlock: bigint;
+    accountsDriveProvedTransaction: Hash;
+    accountsDriveMerkleRoot: Hash;
     createdAt: Date;
     updatedAt: Date;
     executionParameters: {
@@ -419,3 +427,31 @@ export type WaitForInputParams = GetInputParams & {
 };
 
 export type WaitForInputReturnType = Input;
+
+export type Withdrawal = {
+    accountIndex: bigint;
+    account: Hex;
+    output: Hex;
+    blockNumber: bigint;
+    transactionHash: Hash;
+    logIndex: bigint;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+export type ListWithdrawalsParams = PaginationParams & {
+    application: string | Address;
+    accountIndex?: bigint;
+};
+
+export type ListWithdrawalsReturnType = {
+    data: Withdrawal[];
+    pagination: Pagination;
+};
+
+export type GetWithdrawalParams = {
+    application: string | Address;
+    accountIndex: bigint;
+};
+
+export type GetWithdrawalReturnType = Withdrawal;

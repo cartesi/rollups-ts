@@ -81,6 +81,7 @@ export { getOutput } from "./getOutput.js";
 export { getProcessedInputCount } from "./getProcessedInputCount.js";
 export { getReport } from "./getReport.js";
 export { getTournament } from "./getTournament.js";
+export { getWithdrawal } from "./getWithdrawal.js";
 export { listApplications } from "./listApplications.js";
 export { listCommitments } from "./listCommitments.js";
 export { listEpochs } from "./listEpochs.js";
@@ -90,6 +91,7 @@ export { listMatches } from "./listMatches.js";
 export { listOutputs } from "./listOutputs.js";
 export { listReports } from "./listReports.js";
 export { listTournaments } from "./listTournaments.js";
+export { listWithdrawals } from "./listWithdrawals.js";
 export {
     validateOutput,
     type ValidateOutputParameters,

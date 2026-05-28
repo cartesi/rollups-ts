@@ -23,6 +23,8 @@ import type {
     GetReportReturnType as GetReportReturnTypeRpc,
     GetTournamentParams as GetTournamentParamsRpc,
     GetTournamentReturnType as GetTournamentReturnTypeRpc,
+    GetWithdrawalParams as GetWithdrawalParamsRpc,
+    GetWithdrawalReturnType as GetWithdrawalReturnTypeRpc,
     ListApplicationsParams as ListApplicationsParamsRpc,
     ListApplicationsReturnType as ListApplicationsReturnTypeRpc,
     ListCommitmentsParams as ListCommitmentsParamsRpc,
@@ -41,6 +43,8 @@ import type {
     ListReportsReturnType as ListReportsReturnTypeRpc,
     ListTournamentsParams as ListTournamentsParamsRpc,
     ListTournamentsReturnType as ListTournamentsReturnTypeRpc,
+    ListWithdrawalsParams as ListWithdrawalsParamsRpc,
+    ListWithdrawalsReturnType as ListWithdrawalsReturnTypeRpc,
 } from "@cartesi/rpc";
 import type { Client, Transport } from "viem";
 
@@ -58,6 +62,7 @@ import {
     getProcessedInputCount,
     getReport,
     getTournament,
+    getWithdrawal,
     listApplications,
     listCommitments,
     listEpochs,
@@ -67,6 +72,7 @@ import {
     listOutputs,
     listReports,
     listTournaments,
+    listWithdrawals,
     waitForInput,
 } from "../actions/index.js";
 import type {
@@ -94,6 +100,8 @@ import type {
     GetReportReturnType,
     GetTournamentParams,
     GetTournamentReturnType,
+    GetWithdrawalParams,
+    GetWithdrawalReturnType,
     ListApplicationsParams,
     ListApplicationsReturnType,
     ListCommitmentsParams,
@@ -112,6 +120,8 @@ import type {
     ListReportsReturnType,
     ListTournamentsParams,
     ListTournamentsReturnType,
+    ListWithdrawalsParams,
+    ListWithdrawalsReturnType,
     WaitForInputParams,
     WaitForInputReturnType,
 } from "../types/actions.js";
@@ -225,6 +235,16 @@ export type PublicCartesiRpcSchema = [
         Method: "cartesi_getNodeVersion";
         ReturnType: GetNodeVersionReturnTypeRpc;
     },
+    {
+        Method: "cartesi_getWithdrawal";
+        Parameters: GetWithdrawalParamsRpc;
+        ReturnType: GetWithdrawalReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_listWithdrawals";
+        Parameters: ListWithdrawalsParamsRpc;
+        ReturnType: ListWithdrawalsReturnTypeRpc;
+    },
 ];
 
 export type PublicActionsL2 = {
@@ -245,7 +265,9 @@ export type PublicActionsL2 = {
     listInputs: (params: ListInputsParams) => Promise<ListInputsReturnType>;
     listOutputs: (params: ListOutputsParams) => Promise<ListOutputsReturnType>;
     listReports: (params: ListReportsParams) => Promise<ListReportsReturnType>;
-
+    listWithdrawals: (
+        params: ListWithdrawalsParams,
+    ) => Promise<ListWithdrawalsReturnType>;
     getApplication: (
         params: GetApplicationParams,
     ) => Promise<GetApplicationReturnType>;
@@ -265,6 +287,9 @@ export type PublicActionsL2 = {
     getInput: (params: GetInputParams) => Promise<GetInputReturnType>;
     getOutput: (params: GetOutputParams) => Promise<GetOutputReturnType>;
     getReport: (params: GetReportParams) => Promise<GetReportReturnType>;
+    getWithdrawal: (
+        params: GetWithdrawalParams,
+    ) => Promise<GetWithdrawalReturnType>;
 
     getProcessedInputCount: (
         params: GetProcessedInputCountParams,
@@ -312,4 +337,6 @@ export const publicActionsL2 =
         getLastAcceptedEpochIndex: (params) =>
             getLastAcceptedEpochIndex(client, params),
         waitForInput: (params) => waitForInput(client, params),
+        getWithdrawal: (params) => getWithdrawal(client, params),
+        listWithdrawals: (params) => listWithdrawals(client, params),
     });
