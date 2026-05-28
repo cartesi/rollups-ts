@@ -23,6 +23,8 @@ import type {
     GetReportReturnType,
     GetTournamentParams,
     GetTournamentReturnType,
+    GetWithdrawalParams,
+    GetWithdrawalReturnType,
     ListApplicationsParams,
     ListApplicationsReturnType,
     ListCommitmentsParams,
@@ -41,6 +43,8 @@ import type {
     ListReportsReturnType,
     ListTournamentsParams,
     ListTournamentsReturnType,
+    ListWithdrawalsParams,
+    ListWithdrawalsReturnType,
 } from "./types.js";
 
 export type Methods = {
@@ -82,4 +86,8 @@ export type Methods = {
     cartesi_getReport(params: GetReportParams): GetReportReturnType;
     cartesi_getChainId(): GetChainIdReturnType;
     cartesi_getNodeVersion(): GetNodeVersionReturnType;
+    cartesi_listWithdrawals(
+        params: ListWithdrawalsParams,
+    ): ListWithdrawalsReturnType;
+    cartesi_getWithdrawal(params: GetWithdrawalParams): GetWithdrawalReturnType;
 };

@@ -29,7 +29,8 @@ export type EpochStatus =
     | "CLAIM_SUBMITTED"
     | "CLAIM_STAGED"
     | "CLAIM_ACCEPTED"
-    | "CLAIM_REJECTED";
+    | "CLAIM_REJECTED"
+    | "CLAIM_FORECLOSED";
 
 export type InputStatus =
     | "NONE"
@@ -44,7 +45,7 @@ export type InputStatus =
 
 export type ConsensusType = "AUTHORITY" | "QUORUM" | "PRT";
 
-export type ApplicationState = "ENABLED" | "DISABLED" | "FAILED" | "INOPERABLE";
+export type ApplicationStatus = "OK" | "FAILED" | "DIVERGED" | "CORRUPTED";
 
 export type SnapshotPolicy = "NONE" | "EVERY_INPUT" | "EVERY_EPOCH";
 
@@ -69,15 +70,23 @@ export type Application = {
     withdrawal_config: WithdrawalConfig;
     data_availability: Hex;
     consensus_type: ConsensusType;
-    state: ApplicationState;
+    enabled: boolean;
+    status: ApplicationStatus;
     reason?: string | null;
     iinputbox_block: HexNumber;
     last_epoch_check_block: HexNumber;
     last_input_check_block: HexNumber;
     last_output_check_block: HexNumber;
     last_tournament_check_block: HexNumber;
-    foreclose_search_last_block: HexNumber;
+    last_foreclose_check_block: HexNumber;
+    last_accounts_drive_proved_check_block: HexNumber;
+    last_withdrawal_check_block: HexNumber;
     processed_inputs: HexNumber;
+    foreclose_block: HexNumber;
+    foreclose_transaction: Hash;
+    accounts_drive_proved_block: HexNumber;
+    accounts_drive_proved_transaction: Hash;
+    accounts_drive_merkle_root: Hash;
     created_at: DateTime;
     updated_at: DateTime;
     execution_parameters: {
@@ -420,4 +429,31 @@ export type GetChainIdReturnType = {
 
 export type GetNodeVersionReturnType = {
     data: string;
+};
+
+export type Withdrawal = {
+    account_index: HexNumber;
+    account: Hex;
+    output: Hex;
+    block_number: HexNumber;
+    transaction_hash: Hash;
+    log_index: HexNumber;
+    created_at: DateTime;
+    updated_at: DateTime;
+};
+
+export type ListWithdrawalsParams = PaginationParams & {
+    application: string | Address;
+    account_index?: HexNumber;
+};
+
+export type ListWithdrawalsReturnType = PaginatedReturnType<Withdrawal>;
+
+export type GetWithdrawalParams = {
+    application: string | Address;
+    account_index: HexNumber;
+};
+
+export type GetWithdrawalReturnType = {
+    data: Withdrawal;
 };
