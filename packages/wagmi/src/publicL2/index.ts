@@ -22,3 +22,5 @@ export { useReports } from "./useReports.js";
 export { useTournament } from "./useTournament.js";
 export { useTournaments } from "./useTournaments.js";
 export { useWaitForInput } from "./useWaitForInput.js";
+export { useWithdrawal } from "./useWithdrawal.js";
+export { useWithdrawals } from "./useWithdrawals.js";
