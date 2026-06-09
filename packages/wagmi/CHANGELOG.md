@@ -1,5 +1,16 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.34
+
+### Patch Changes
+
+-   76ea041: Upgrade rollups-contracts to version 3.0.0-alpha.6. The dependencies on Cannon and NPM packages were removed.
+    The information is collected from a GitHub release.
+-   aa37bb7: Add react hooks for get-withdrawal and list-withdrawals JSON-RPC API methods.
+-   Updated dependencies [6f8cbf9]
+-   Updated dependencies [76ea041]
+    -   @cartesi/viem@2.0.0-alpha.30
+
 ## 2.0.0-alpha.33
 
 ### Patch Changes

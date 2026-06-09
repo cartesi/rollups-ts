@@ -1,5 +1,15 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.30
+
+### Patch Changes
+
+-   6f8cbf9: Implement the new methods getWithdrawal and listWithdrawals including the new withdrawal converter. Also update the application-converter.
+-   76ea041: Upgrade rollups-contracts to version 3.0.0-alpha.6. The dependencies on Cannon and NPM packages were removed.
+    The information is collected from a GitHub release.
+-   Updated dependencies [c99de89]
+    -   @cartesi/rpc@2.0.0-alpha.21
+
 ## 2.0.0-alpha.29
 
 ### Patch Changes

@@ -5,7 +5,8 @@
     "@cartesi/docs": "0.0.0",
     "@cartesi/rpc": "1.0.0",
     "@cartesi/viem": "1.0.0",
-    "@cartesi/wagmi": "1.0.0"
+    "@cartesi/wagmi": "1.0.0",
+    "@rollups-ts/utils": "0.0.0"
   },
   "changesets": [
     "angry-horses-cheat",
@@ -35,6 +36,7 @@
     "good-buttons-juggle",
     "goofy-carpets-take",
     "green-mangos-argue",
+    "hip-aliens-work",
     "honest-bobcats-guess",
     "hungry-meals-shave",
     "icy-mangos-make",
@@ -62,7 +64,10 @@
     "tangy-carrots-serve",
     "tasty-planets-knock",
     "tender-places-help",
+    "tender-rings-sneeze",
     "thick-shrimps-lose",
+    "thirty-moose-poke",
+    "tiny-masks-turn",
     "tiny-taxes-sort",
     "tough-crabs-admire",
     "tough-jars-dream",
