@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.22
+
+### Patch Changes
+
+-   123f24b: Add REPORTS_LIMIT_EXCEEDED to the InputStatus union type.
+
 ## 2.0.0-alpha.21
 
 ### Patch Changes
