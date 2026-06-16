@@ -1,5 +1,12 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.31
+
+### Patch Changes
+
+-   Updated dependencies [123f24b]
+    -   @cartesi/rpc@2.0.0-alpha.22
+
 ## 2.0.0-alpha.30
 
 ### Patch Changes
