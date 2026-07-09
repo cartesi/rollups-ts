@@ -1,14 +1,16 @@
-import { type Config, defineConfig } from "vocs";
+import { type Config, defineConfig } from "vocs/config";
 
 const config: Config = defineConfig({
     rootDir: ".",
+    srcDir: ".",
+    // twoslash renders viem's JSDoc, which contains viem.sh-relative links
+    checkDeadlinks: "warn",
+    // GitHub Pages deployment requires fully static output
+    renderStrategy: "full-static",
     title: "Cartesi",
     description: "Documentation for Cartesi TypeScript libraries",
     baseUrl: "https://cartesi.github.io",
     basePath: "/rollups-ts",
-    vite: {
-        base: "/rollups-ts",
-    },
     logoUrl: "https://cartesi.io/favicon.svg",
     editLink: {
         pattern:
