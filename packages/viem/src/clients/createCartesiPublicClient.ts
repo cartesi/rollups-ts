@@ -12,7 +12,13 @@ import {
 // Define a simpler type that doesn't use the generic parameters for account
 export type CartesiPublicClientConfig<transport extends Transport = Transport> =
     Prettify<
-        ClientConfig<transport, undefined, undefined, PublicCartesiRpcSchema>
+        ClientConfig<
+            transport,
+            undefined,
+            undefined,
+            PublicCartesiRpcSchema,
+            undefined
+        >
     >;
 
 export const createCartesiPublicClient = <

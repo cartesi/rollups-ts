@@ -1,15 +1,15 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from "tsdown";
 
 export default defineConfig({
     clean: true,
     dts: true,
     entry: [
-        "src/actions/index.ts",
-        "src/chains.ts",
         "src/index.ts",
-        "src/rollups.ts",
+        "src/download.ts",
+        "src/wagmi/plugins/index.ts",
+        "src/wagmi/plugins/deployments.ts",
     ],
-    external: ["viem"],
+    fixedExtension: false,
     format: ["cjs", "esm"],
     minify: true,
     sourcemap: true,

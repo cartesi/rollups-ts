@@ -3,6 +3,7 @@
     "version": "0.0.1-alpha.1",
     "private": true,
     "description": "Documentation for the project",
+    "type": "module",
     "scripts": {
         "build": "vocs build",
         "clean": "vocs clean",
@@ -10,15 +11,17 @@
         "preview": "vocs preview"
     },
     "dependencies": {
-        "react": "^19.2.4",
-        "react-dom": "^19.2.4",
-        "vocs": "^1.4.1"
+        "react": "^19.2.7",
+        "react-dom": "^19.2.7",
+        "vite": "^8.1.3",
+        "vocs": "^2.5.3",
+        "waku": "1.0.0-beta.6"
     },
     "devDependencies": {
         "@cartesi/rpc": "workspace:*",
         "@cartesi/viem": "workspace:*",
         "@cartesi/wagmi": "workspace:*",
-        "@tanstack/react-query": "^5.90.21",
+        "@tanstack/react-query": "^5.101.2",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "typescript": "catalog:",
