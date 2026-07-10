@@ -1,34 +1,22 @@
-import { deployments } from "@rollups-ts/utils/wagmi/plugins";
+import { rollupsContracts } from "@cartesi/wagmi-plugin";
 import { defineConfig } from "@wagmi/cli";
-import { foundry } from "@wagmi/cli/plugins";
+
+const version = "3.0.0-alpha.6";
+const releaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${version}`;
 
 const config: ReturnType<typeof defineConfig> = defineConfig({
     out: "src/rollups.ts",
     plugins: [
-        deployments({
-            // Assumes all chains have same address. Therefore picks the mainnet deployment information.
-            directory: "./tmp/deployments/1",
-            contractsDir: "./tmp/out",
-        }),
-        foundry({
-            project: "./tmp",
-            forge: { build: false },
-            exclude: [
-                "ApplicationFactory.sol/**",
-                "AuthorityFactory.sol/**",
-                "ERC1155BatchPortal.sol/**",
-                "ERC1155SinglePortal.sol/**",
-                "ERC20Portal.sol/**",
-                "ERC721Portal.sol/**",
-                "EtherPortal.sol/**",
-                "InputBox.sol/**",
-                "QuorumFactory.sol/**",
-                "SafeERC20Transfer.sol/**",
-                "SelfHostedApplicationFactory.sol/**",
-                "UsdWithdrawalOutputBuilderFactory.sol/**",
-                "IApplicationForeclosure.sol/**",
-                "IApplicationWithdrawal.sol/**",
-            ],
+        rollupsContracts({
+            artifacts: {
+                url: `${releaseUrl}/rollups-contracts-${version}-artifacts.tar.gz`,
+                sha256: "ad1e0880766d25419fc6da1858ea4e7b9074b400e9d9ef68da88b12f4a8bba45",
+            },
+            deployments: {
+                url: `${releaseUrl}/rollups-contracts-${version}-deployment-addresses.tar.gz`,
+                sha256: "bd6ee9b339e0541ce464ea3368e5e70595627b35fe0a68c6f5e044ef433ab895",
+            },
+            exclude: ["IApplicationForeclosure", "IApplicationWithdrawal"],
         }),
     ],
 });
