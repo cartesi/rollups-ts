@@ -6,7 +6,7 @@
     "@cartesi/rpc": "1.0.0",
     "@cartesi/viem": "1.0.0",
     "@cartesi/wagmi": "1.0.0",
-    "@rollups-ts/utils": "0.0.0"
+    "@cartesi/wagmi-plugin": "0.0.0"
   },
   "changesets": [
     "angry-horses-cheat",
