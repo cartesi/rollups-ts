@@ -7,6 +7,7 @@ export default defineConfig({
         "src/actions/index.ts",
         "src/chains.ts",
         "src/index.ts",
+        "src/portal/index.ts",
         "src/rollups.ts",
     ],
     fixedExtension: false,

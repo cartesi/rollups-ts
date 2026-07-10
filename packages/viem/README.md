@@ -57,6 +57,20 @@ const receipt = await publicClient.waitForTransactionReceipt({ hash });
 const [inputAdded] = getInputsAdded(receipt);
 ```
 
+- getPortal / decodeDeposit: pure, isomorphic functions to identify and decode portal deposit inputs (Ether, ERC-20, ERC-721, ERC-1155 single and batch), following the encoding defined by `InputEncoding.sol` of rollups-contracts. Per-portal decoders are also available (`decodeEtherDeposit`, `decodeERC20Deposit`, `decodeERC721Deposit`, `decodeERC1155SingleDeposit`, `decodeERC1155BatchDeposit`), as well as a standalone `@cartesi/viem/portal` entry point, convenient for use inside the Cartesi machine. Malformed payloads throw `InvalidDepositPayloadError`.
+
+```typescript
+import { decodeDeposit, getPortal } from "@cartesi/viem/portal";
+
+const portal = getPortal(sender);
+if (portal) {
+    const deposit = decodeDeposit(portal, payload);
+    if (deposit.type === "ERC20Deposit") {
+        // deposit.token, deposit.sender, deposit.value, deposit.execLayerData
+    }
+}
+```
+
 ## Example
 
 Find below a complete example of depositing ERC-20 tokens and waiting for its effect on L2.

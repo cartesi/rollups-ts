@@ -1,0 +1,43 @@
+# decodeERC1155SingleDeposit
+
+Decode an `ERC1155SinglePortal` deposit input payload: `token` (20 bytes) + `sender` (20 bytes) + `tokenId` (32 bytes) + `value` (32 bytes) + `abi.encode(baseLayerData, execLayerData)`.
+
+Throws `InvalidDepositPayloadError` if the payload is shorter than 104 bytes; a malformed abi-encoded tail throws viem's own decoding errors.
+
+## Usage
+
+```ts twoslash
+import { decodeERC1155SingleDeposit } from "@cartesi/viem/portal";
+
+const deposit = decodeERC1155SingleDeposit("0x...");
+// {
+//   type: "ERC1155SingleDeposit",
+//   token: "0x...",
+//   sender: "0x...",
+//   tokenId: 7n,
+//   value: 100n,
+//   baseLayerData: "0x",
+//   execLayerData: "0x",
+// }
+```
+
+## Parameters
+
+```ts twoslash
+// payload: Hex — the deposit input payload produced by the ERC1155SinglePortal
+```
+
+## Return Type
+
+```ts twoslash
+import type { ERC1155SingleDeposit } from "@cartesi/viem/portal";
+// {
+//   type: "ERC1155SingleDeposit";
+//   token: Address;         // checksummed
+//   sender: Address;        // checksummed
+//   tokenId: bigint;
+//   value: bigint;
+//   baseLayerData: Hex;
+//   execLayerData: Hex;
+// }
+```

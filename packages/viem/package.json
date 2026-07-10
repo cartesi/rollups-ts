@@ -66,6 +66,16 @@
                 "types": "./dist/chains.d.cts",
                 "require": "./dist/chains.cjs"
             }
+        },
+        "./portal": {
+            "import": {
+                "types": "./dist/portal/index.d.ts",
+                "import": "./dist/portal/index.js"
+            },
+            "require": {
+                "types": "./dist/portal/index.d.cts",
+                "require": "./dist/portal/index.cjs"
+            }
         }
     },
     "files": [

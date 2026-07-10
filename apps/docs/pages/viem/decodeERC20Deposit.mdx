@@ -1,0 +1,39 @@
+# decodeERC20Deposit
+
+Decode an `ERC20Portal` deposit input payload: `token` (20 bytes) + `sender` (20 bytes) + `value` (32 bytes) + `execLayerData`.
+
+Throws `InvalidDepositPayloadError` if the payload is shorter than 72 bytes.
+
+## Usage
+
+```ts twoslash
+import { decodeERC20Deposit } from "@cartesi/viem/portal";
+
+const deposit = decodeERC20Deposit("0x...");
+// {
+//   type: "ERC20Deposit",
+//   token: "0x...",
+//   sender: "0x...",
+//   value: 1000000000000000000n,
+//   execLayerData: "0x",
+// }
+```
+
+## Parameters
+
+```ts twoslash
+// payload: Hex — the deposit input payload produced by the ERC20Portal
+```
+
+## Return Type
+
+```ts twoslash
+import type { ERC20Deposit } from "@cartesi/viem/portal";
+// {
+//   type: "ERC20Deposit";
+//   token: Address;         // checksummed
+//   sender: Address;        // checksummed
+//   value: bigint;
+//   execLayerData: Hex;
+// }
+```

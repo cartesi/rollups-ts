@@ -1,0 +1,47 @@
+# decodeDeposit
+
+Decode a portal deposit input payload, given the portal it came from. Dispatches to the matching per-portal decoder ([decodeEtherDeposit](/viem/decodeEtherDeposit), [decodeERC20Deposit](/viem/decodeERC20Deposit), [decodeERC721Deposit](/viem/decodeERC721Deposit), [decodeERC1155SingleDeposit](/viem/decodeERC1155SingleDeposit), [decodeERC1155BatchDeposit](/viem/decodeERC1155BatchDeposit)) and returns a discriminated union narrowed by the portal kind.
+
+Throws `InvalidDepositPayloadError` if the payload is shorter than the portal's fixed-size prefix; malformed abi-encoded tails throw viem's own decoding errors.
+
+## Usage
+
+```ts twoslash
+import { getPortal, decodeDeposit } from "@cartesi/viem/portal";
+
+const portal = getPortal("0x8b53327575ac999bdfa8003f4b5134DFF9027516");
+
+if (portal) {
+    const deposit = decodeDeposit(portal, "0x...");
+    switch (deposit.type) {
+        case "EtherDeposit":
+            deposit.value; // bigint
+            break;
+        case "ERC20Deposit":
+            deposit.token; // Address
+            break;
+    }
+}
+```
+
+## Parameters
+
+```ts twoslash
+import type { PortalKind } from "@cartesi/viem/portal";
+// portal: PortalKind — which portal produced the payload
+// payload: Hex — the deposit input payload
+```
+
+## Return Type
+
+```ts twoslash
+import type { Deposit } from "@cartesi/viem/portal";
+// Deposit (narrowed to the portal's deposit type for literal portal kinds)
+//
+// type Deposit =
+//   | EtherDeposit
+//   | ERC20Deposit
+//   | ERC721Deposit
+//   | ERC1155SingleDeposit
+//   | ERC1155BatchDeposit;
+```

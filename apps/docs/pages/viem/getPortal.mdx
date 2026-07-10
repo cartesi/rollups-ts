@@ -1,0 +1,36 @@
+# getPortal
+
+Identify which portal a deposit input came from, by its sender address. The match is case-insensitive and uses the deterministic portal deployment addresses shipped with `@cartesi/viem`.
+
+## Usage
+
+```ts twoslash
+import { getPortal, decodeDeposit } from "@cartesi/viem/portal";
+
+const portal = getPortal("0x8b53327575ac999bdfa8003f4b5134DFF9027516");
+// -> "EtherPortal"
+
+if (portal) {
+    const deposit = decodeDeposit(portal, "0x...");
+}
+```
+
+## Parameters
+
+```ts twoslash
+// sender: Address — the input sender address (any casing)
+```
+
+## Return Type
+
+```ts twoslash
+import type { PortalKind } from "@cartesi/viem/portal";
+// PortalKind | undefined
+//
+// type PortalKind =
+//   | "EtherPortal"
+//   | "ERC20Portal"
+//   | "ERC721Portal"
+//   | "ERC1155SinglePortal"
+//   | "ERC1155BatchPortal";
+```

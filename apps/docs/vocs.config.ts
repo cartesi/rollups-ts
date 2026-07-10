@@ -148,6 +148,37 @@ const config: Config = defineConfig({
                         { text: "waitForInput", link: "viem/waitForInput" },
                     ],
                 },
+                {
+                    text: "Utilities",
+                    collapsed: true,
+                    items: [
+                        { text: "getPortal", link: "/viem/getPortal" },
+                        {
+                            text: "decodeDeposit",
+                            link: "/viem/decodeDeposit",
+                        },
+                        {
+                            text: "decodeEtherDeposit",
+                            link: "/viem/decodeEtherDeposit",
+                        },
+                        {
+                            text: "decodeERC20Deposit",
+                            link: "/viem/decodeERC20Deposit",
+                        },
+                        {
+                            text: "decodeERC721Deposit",
+                            link: "/viem/decodeERC721Deposit",
+                        },
+                        {
+                            text: "decodeERC1155SingleDeposit",
+                            link: "/viem/decodeERC1155SingleDeposit",
+                        },
+                        {
+                            text: "decodeERC1155BatchDeposit",
+                            link: "/viem/decodeERC1155BatchDeposit",
+                        },
+                    ],
+                },
             ],
         },
         {

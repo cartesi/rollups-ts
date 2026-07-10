@@ -1,0 +1,41 @@
+# decodeERC721Deposit
+
+Decode an `ERC721Portal` deposit input payload: `token` (20 bytes) + `sender` (20 bytes) + `tokenId` (32 bytes) + `abi.encode(baseLayerData, execLayerData)`.
+
+Throws `InvalidDepositPayloadError` if the payload is shorter than 72 bytes; a malformed abi-encoded tail throws viem's own decoding errors.
+
+## Usage
+
+```ts twoslash
+import { decodeERC721Deposit } from "@cartesi/viem/portal";
+
+const deposit = decodeERC721Deposit("0x...");
+// {
+//   type: "ERC721Deposit",
+//   token: "0x...",
+//   sender: "0x...",
+//   tokenId: 42n,
+//   baseLayerData: "0x",
+//   execLayerData: "0x",
+// }
+```
+
+## Parameters
+
+```ts twoslash
+// payload: Hex — the deposit input payload produced by the ERC721Portal
+```
+
+## Return Type
+
+```ts twoslash
+import type { ERC721Deposit } from "@cartesi/viem/portal";
+// {
+//   type: "ERC721Deposit";
+//   token: Address;         // checksummed
+//   sender: Address;        // checksummed
+//   tokenId: bigint;
+//   baseLayerData: Hex;
+//   execLayerData: Hex;
+// }
+```
