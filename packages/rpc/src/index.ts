@@ -19,7 +19,9 @@ export const createClient = (options: ClientOptions): CartesiClient => {
             headers.authorization = `Bearer ${token}`;
         }
 
-        fetch(uri, {
+        // return the promise so JSONRPCClient rejects the pending request
+        // when the transport fails (network error, non-200, invalid JSON)
+        return fetch(uri, {
             method: "POST",
             headers,
             body: JSON.stringify(jsonRPCRequest),
@@ -30,7 +32,9 @@ export const createClient = (options: ClientOptions): CartesiClient => {
                     .then((jsonRPCResponse) => client.receive(jsonRPCResponse));
             }
             if (jsonRPCRequest.id !== undefined) {
-                return Promise.reject(new Error(response.statusText));
+                return Promise.reject(
+                    new Error(response.statusText || `HTTP ${response.status}`),
+                );
             }
         });
     });
