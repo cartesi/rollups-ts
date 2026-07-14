@@ -227,6 +227,15 @@ const config: Config = defineConfig({
             ],
         },
         {
+            text: "Wagmi CLI Plugin",
+            items: [
+                {
+                    text: "Introduction",
+                    link: "/wagmi-plugin",
+                },
+            ],
+        },
+        {
             text: "RPC Client",
             items: [
                 {

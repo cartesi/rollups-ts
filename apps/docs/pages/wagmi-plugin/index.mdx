@@ -1,0 +1,120 @@
+# Introduction
+
+`@cartesi/wagmi-plugin` is a [Wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates code for the [Cartesi Rollups smart contracts](https://github.com/cartesi/rollups-contracts) directly from an official release: ABIs come from the foundry build artifacts tarball, and deployment addresses from the deployment addresses tarball.
+
+Combined with other Wagmi CLI plugins, it can generate fully typed [viem contract actions](https://wagmi.sh/cli/api/plugins/actions) or [React hooks](https://wagmi.sh/cli/api/plugins/react) for the Cartesi contracts. It is the tool used by `@cartesi/viem` and `@cartesi/wagmi` themselves for their code generation.
+
+## Installation
+
+Add the plugin and the Wagmi CLI as development dependencies of your project.
+
+:::code-group
+
+```bash [pnpm]
+pnpm add -D @cartesi/wagmi-plugin @wagmi/cli
+```
+
+```bash [npm]
+npm install --save-dev @cartesi/wagmi-plugin @wagmi/cli
+```
+
+```bash [yarn]
+yarn add -D @cartesi/wagmi-plugin @wagmi/cli
+```
+
+:::
+
+## Usage
+
+Add the plugin to your [wagmi.config.ts](https://wagmi.sh/cli/configuration). With no options, it uses the tarballs of the rollups-contracts `v3.0.0-alpha.6` GitHub release, verified against known SHA-256 hashes.
+
+```ts [wagmi.config.ts]
+import { rollupsContracts } from "@cartesi/wagmi-plugin";
+import { defineConfig } from "@wagmi/cli";
+
+export default defineConfig({
+    out: "src/generated.ts",
+    plugins: [rollupsContracts()],
+});
+```
+
+Then run code generation:
+
+```bash
+pnpm wagmi generate
+```
+
+The generated file exports one ABI per contract, plus its deployment address on every supported chain: a single address when it is identical across chains, or a per-chain record otherwise.
+
+## Using a different release
+
+To generate code from another rollups-contracts release, point `artifacts` and `deployments` at that release's tarballs. Each accepts a plain URL string, or an object with an expected SHA-256 hash of the tarball for integrity verification (recommended).
+
+```ts [wagmi.config.ts]
+import { rollupsContracts } from "@cartesi/wagmi-plugin";
+import { defineConfig } from "@wagmi/cli";
+
+const version = "3.0.0-alpha.6";
+const releaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${version}`;
+
+export default defineConfig({
+    out: "src/generated.ts",
+    plugins: [
+        rollupsContracts({
+            artifacts: {
+                url: `${releaseUrl}/rollups-contracts-${version}-artifacts.tar.gz`,
+                sha256: "ad1e0880766d25419fc6da1858ea4e7b9074b400e9d9ef68da88b12f4a8bba45",
+            },
+            deployments: {
+                url: `${releaseUrl}/rollups-contracts-${version}-deployment-addresses.tar.gz`,
+                sha256: "bd6ee9b339e0541ce464ea3368e5e70595627b35fe0a68c6f5e044ef433ab895",
+            },
+        }),
+    ],
+});
+```
+
+Tarballs are downloaded and extracted to the operating system temporary directory and cached across runs, so repeated code generation does not download them again.
+
+## Selecting contracts
+
+Deployed contracts are always included. Use `include` to select which contracts *without* a deployment should also be generated (all of them, when omitted), and `exclude` to drop contracts entirely. Both accept contract names or regular expressions.
+
+```ts [wagmi.config.ts]
+import { rollupsContracts } from "@cartesi/wagmi-plugin";
+import { defineConfig } from "@wagmi/cli";
+
+export default defineConfig({
+    out: "src/generated.ts",
+    plugins: [
+        rollupsContracts({
+            include: ["IApplication", "IInputBox", /^IERC\d+Portal$/],
+            exclude: ["SafeERC20Transfer"],
+        }),
+    ],
+});
+```
+
+## Generating React hooks
+
+Compose the plugin with the Wagmi CLI [react plugin](https://wagmi.sh/cli/api/plugins/react) to generate React hooks for the Cartesi contracts.
+
+```ts [wagmi.config.ts]
+import { rollupsContracts } from "@cartesi/wagmi-plugin";
+import { defineConfig } from "@wagmi/cli";
+import { react } from "@wagmi/cli/plugins";
+
+export default defineConfig({
+    out: "src/generated.ts",
+    plugins: [rollupsContracts(), react()],
+});
+```
+
+## Options
+
+| Option        | Type                                                | Description                                                                                                                                    |
+| ------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `artifacts`   | `string \| { url: string; sha256?: string }`        | Source of the foundry build artifacts tarball. Defaults to the rollups-contracts `v3.0.0-alpha.6` release tarball, hash-verified.               |
+| `deployments` | `string \| { url: string; sha256?: string }`        | Source of the deployment addresses tarball. Defaults to the rollups-contracts `v3.0.0-alpha.6` release tarball, hash-verified.                  |
+| `include`     | `(string \| RegExp)[]`                              | Contracts (by name) to include among those that have no deployment. Deployed contracts are always included. When omitted, all are included.     |
+| `exclude`     | `(string \| RegExp)[]`                              | Contracts (by name) to exclude, deployed or not. Applied after `include`.                                                                       |

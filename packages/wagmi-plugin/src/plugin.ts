@@ -7,19 +7,49 @@ import { downloadAndExtract, type TarballSource } from "./download.js";
 
 export type ContractFilter = string | RegExp;
 
+/**
+ * rollups-contracts version used by default when `artifacts` and
+ * `deployments` are omitted.
+ */
+export const DEFAULT_VERSION = "3.0.0-alpha.6";
+
+const defaultReleaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${DEFAULT_VERSION}`;
+
+/**
+ * Default source of the foundry build artifacts tarball: the
+ * rollups-contracts `DEFAULT_VERSION` GitHub release, hash-verified.
+ */
+export const DEFAULT_ARTIFACTS: TarballSource = {
+    url: `${defaultReleaseUrl}/rollups-contracts-${DEFAULT_VERSION}-artifacts.tar.gz`,
+    sha256: "ad1e0880766d25419fc6da1858ea4e7b9074b400e9d9ef68da88b12f4a8bba45",
+};
+
+/**
+ * Default source of the deployment addresses tarball: the rollups-contracts
+ * `DEFAULT_VERSION` GitHub release, hash-verified.
+ */
+export const DEFAULT_DEPLOYMENTS: TarballSource = {
+    url: `${defaultReleaseUrl}/rollups-contracts-${DEFAULT_VERSION}-deployment-addresses.tar.gz`,
+    sha256: "bd6ee9b339e0541ce464ea3368e5e70595627b35fe0a68c6f5e044ef433ab895",
+};
+
 export interface RollupsContractsOptions {
     /**
      * URL of the rollups-contracts foundry build artifacts tarball, i.e.
      * `rollups-contracts-<version>-artifacts.tar.gz`. Optionally with an
      * expected SHA-256 hash for integrity verification.
+     * Defaults to `DEFAULT_ARTIFACTS`, the tarball of the rollups-contracts
+     * `DEFAULT_VERSION` GitHub release.
      */
-    artifacts: TarballSource;
+    artifacts?: TarballSource;
     /**
      * URL of the rollups-contracts deployment addresses tarball, i.e.
      * `rollups-contracts-<version>-deployment-addresses.tar.gz`. Optionally
      * with an expected SHA-256 hash for integrity verification.
+     * Defaults to `DEFAULT_DEPLOYMENTS`, the tarball of the rollups-contracts
+     * `DEFAULT_VERSION` GitHub release.
      */
-    deployments: TarballSource;
+    deployments?: TarballSource;
     /**
      * Contracts (by name) to include among those that have no deployment.
      * Deployed contracts are always included, regardless of this list.
@@ -148,19 +178,28 @@ const collapseAddress = (
  * Wagmi plugin that generates contracts from a rollups-contracts release:
  * ABIs from the foundry build artifacts tarball, addresses from the
  * deployment addresses tarball. Both tarballs are downloaded and extracted
- * to the OS temporary directory (cached across runs).
+ * to the OS temporary directory (cached across runs). When `artifacts` and
+ * `deployments` are omitted, the tarballs of the rollups-contracts
+ * `DEFAULT_VERSION` GitHub release are used.
  *
  * Deployed contracts get their address across all chains: a single address
  * if it is the same on every chain, or a per-chain record otherwise.
  */
-export const rollupsContracts = (options: RollupsContractsOptions): Plugin => {
-    const { include, exclude } = options;
+export const rollupsContracts = (
+    options: RollupsContractsOptions = {},
+): Plugin => {
+    const {
+        artifacts: artifactsSource = DEFAULT_ARTIFACTS,
+        deployments: deploymentsSource = DEFAULT_DEPLOYMENTS,
+        include,
+        exclude,
+    } = options;
     return {
         name: "rollupsContracts",
         contracts: async () => {
             const [artifactsDir, deploymentsDir] = await Promise.all([
-                downloadAndExtract(options.artifacts),
-                downloadAndExtract(options.deployments),
+                downloadAndExtract(artifactsSource),
+                downloadAndExtract(deploymentsSource),
             ]);
 
             // tarballs contain the `out` (resp. `deployments`) directory
