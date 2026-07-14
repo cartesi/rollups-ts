@@ -22,7 +22,7 @@ Formatting/linting is Biome (`biome.json` at root): 4-space indent, double quote
 
 ## Architecture
 
-Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/wagmi`, with private `@cartesi/wagmi-plugin` supporting codegen.
+Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/wagmi`, with `@cartesi/wagmi-plugin` supporting codegen.
 
 - **packages/rpc (`@cartesi/rpc`)** — Typed JSON-RPC client for the Cartesi node API. `types.ts` and `methods.ts` are hand-written mirrors of the node's `cartesi_*` JSON-RPC methods. Wire types are raw: hex-string quantities and snake_case field names.
 
@@ -34,7 +34,7 @@ Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/wagmi`, with 
 
 - **packages/wagmi (`@cartesi/wagmi`)** — React hooks. `src/publicL2/` wraps each viem L2 action in a TanStack Query hook (`useInput`, `useOutputs`, …), using the `CartesiPublicClient` from `provider.tsx` (`CartesiProvider` / `useCartesiClient`). `src/generated.ts` is **generated** contract hooks.
 
-- **packages/wagmi-plugin (`@cartesi/wagmi-plugin`)** — private build tooling: the `rollupsContracts` `@wagmi/cli` plugin, which downloads a rollups-contracts release (build artifacts + deployment addresses tarballs, hash-verified) into the OS temp dir and emits contracts with ABIs and addresses (single address when identical across chains, per-chain otherwise). Supports `include`/`exclude` by contract name; deployed contracts are always included unless excluded.
+- **packages/wagmi-plugin (`@cartesi/wagmi-plugin`)** — the `rollupsContracts` `@wagmi/cli` plugin, which downloads a rollups-contracts release (build artifacts + deployment addresses tarballs, hash-verified) into the OS temp dir and emits contracts with ABIs and addresses (single address when identical across chains, per-chain otherwise). `artifacts`/`deployments` default to the release pinned by `DEFAULT_VERSION` in `src/plugin.ts`. Supports `include`/`exclude` by contract name; deployed contracts are always included unless excluded.
 
 - **apps/docs** — vocs documentation site (`pnpm --filter @cartesi/docs dev`).
 
@@ -42,4 +42,4 @@ Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/wagmi`, with 
 
 `pnpm build` in these packages runs `codegen` (= `wagmi generate`) before compiling. Each package's `wagmi.config.ts` uses the `rollupsContracts` plugin from `@cartesi/wagmi-plugin` to produce `src/rollups.ts` (viem) / `src/generated.ts` (wagmi) straight from the pinned rollups-contracts release tarballs; downloads are cached in the OS temp dir.
 
-To bump the rollups-contracts version, update the version and SHA-256 hashes in both packages' `wagmi.config.ts`.
+Both packages use the plugin's default `artifacts`/`deployments`. To bump the rollups-contracts version, update `DEFAULT_VERSION` and the SHA-256 hashes in `packages/wagmi-plugin/src/plugin.ts`.
