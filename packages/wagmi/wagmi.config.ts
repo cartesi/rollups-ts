@@ -7,7 +7,14 @@ const config: ReturnType<typeof defineConfig> = defineConfig({
     plugins: [
         rollupsContracts({
             include: [
+                "ApplicationFactory",
+                "AuthorityFactory",
                 "DataAvailability",
+                "ERC1155BatchPortal",
+                "ERC1155SinglePortal",
+                "ERC20Portal",
+                "ERC721Portal",
+                "EtherPortal",
                 "IApplicationFactory",
                 "IApplication",
                 "IAuthorityFactory",
@@ -19,6 +26,7 @@ const config: ReturnType<typeof defineConfig> = defineConfig({
                 "IERC721Portal",
                 "IEtherPortal",
                 "IInputBox",
+                "InputBox",
                 "Inputs",
                 "IOutputsMerkleRootValidator",
                 "IQuorumFactory",
@@ -30,6 +38,10 @@ const config: ReturnType<typeof defineConfig> = defineConfig({
                 "IUsdWithdrawalOutputBuilder",
                 "IWithdrawalOutputBuilder",
                 "Outputs",
+                "QuorumFactory",
+                "SafeERC20Transfer",
+                "SelfHostedApplicationFactory",
+                "UsdWithdrawalOutputBuilderFactory",
             ],
         }),
         actions(),

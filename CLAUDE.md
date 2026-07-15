@@ -34,7 +34,7 @@ Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/wagmi`, with 
 
 - **packages/wagmi (`@cartesi/wagmi`)** — React hooks. `src/publicL2/` wraps each viem L2 action in a TanStack Query hook (`useInput`, `useOutputs`, …), using the `CartesiPublicClient` from `provider.tsx` (`CartesiProvider` / `useCartesiClient`). `src/generated.ts` is **generated** contract hooks.
 
-- **packages/wagmi-plugin (`@cartesi/wagmi-plugin`)** — the `rollupsContracts` `@wagmi/cli` plugin, which downloads a rollups-contracts release (build artifacts + deployment addresses tarballs, hash-verified) into the OS temp dir and emits contracts with ABIs and addresses (single address when identical across chains, per-chain otherwise). `artifacts`/`deployments` default to the release pinned by `DEFAULT_VERSION` in `src/plugin.ts`. Supports `include`/`exclude` by contract name; deployed contracts are always included unless excluded.
+- **packages/wagmi-plugin (`@cartesi/wagmi-plugin`)** — the `rollupsContracts` `@wagmi/cli` plugin, which downloads a rollups-contracts release (build artifacts + deployment addresses tarballs, hash-verified) into the OS temp dir and emits contracts with ABIs and addresses (single address when identical across chains, per-chain otherwise). `artifacts`/`deployments` default to the release pinned by `DEFAULT_VERSION` in `src/plugin.ts`. Supports `include`/`exclude` by contract name (or regex), applied to all contracts alike: when neither is given all contracts in the artifacts are included, `include` narrows the set, and `exclude` is applied after `include`.
 
 - **apps/docs** — vocs documentation site (`pnpm --filter @cartesi/docs dev`).
 
