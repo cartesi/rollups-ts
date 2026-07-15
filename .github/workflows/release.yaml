@@ -29,8 +29,11 @@ jobs:
                   node-version: 22.x
                   cache: "pnpm"
 
-            - name: Install latest npm
-              run: npm install -g npm@latest
+            - name: Install npm 11
+              # npm 12 wraps `npm info --json` output in an array, which breaks
+              # changesets' published-version detection (it then re-publishes
+              # existing versions and crashes). Pin to 11 until changesets supports it.
+              run: npm install -g npm@11
 
             - name: Install Foundry
               uses: foundry-rs/foundry-toolchain@v1
