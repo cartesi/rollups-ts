@@ -1,0 +1,50 @@
+# decodeDeposit
+
+Decodes the payload of an input as a portal deposit, dispatching on the input's `msgSender`: if it is one of the portal deployment addresses, the payload is decoded with the corresponding decode function ([decodeEtherDeposit](/codec/decodeEtherDeposit), [decodeERC20Deposit](/codec/decodeERC20Deposit), [decodeERC721Deposit](/codec/decodeERC721Deposit), [decodeSingleERC1155Deposit](/codec/decodeSingleERC1155Deposit) or [decodeBatchERC1155Deposit](/codec/decodeBatchERC1155Deposit)).
+
+The portal deployment addresses come from the same pinned rollups-contracts release as the ABIs, and are also exported (`etherPortalAddress`, `erc20PortalAddress`, `erc721PortalAddress`, `erc1155SinglePortalAddress`, `erc1155BatchPortalAddress`).
+
+## Usage
+
+```ts twoslash
+import { decodeDeposit, decodeInput } from "@cartesi/codec";
+
+const input = decodeInput("0x...");
+const deposit = decodeDeposit(input);
+
+if (deposit) {
+  switch (deposit.type) {
+    case "EtherDeposit":
+      console.log(deposit.sender, deposit.value);
+      break;
+    case "ERC20Deposit":
+      console.log(deposit.token, deposit.sender, deposit.value);
+      break;
+    case "ERC721Deposit":
+      console.log(deposit.token, deposit.sender, deposit.tokenId);
+      break;
+    case "SingleERC1155Deposit":
+      console.log(deposit.token, deposit.tokenId, deposit.value);
+      break;
+    case "BatchERC1155Deposit":
+      console.log(deposit.token, deposit.tokenIds, deposit.values);
+      break;
+  }
+} else {
+  // not a deposit: a regular input sent by `input.msgSender`
+}
+```
+
+## Parameters
+
+- `input`: a decoded input — only the `msgSender` and `payload` fields are used.
+
+## Return Type
+
+A `Deposit` union discriminated by the `type` field (`"EtherDeposit"`, `"ERC20Deposit"`, `"ERC721Deposit"`, `"SingleERC1155Deposit"` or `"BatchERC1155Deposit"`), where each variant carries the fields of the corresponding deposit type.
+
+Returns `undefined` if `msgSender` is not a portal, i.e. the input is not a deposit.
+
+## Errors
+
+Throws if `msgSender` is a portal but the payload is malformed.
