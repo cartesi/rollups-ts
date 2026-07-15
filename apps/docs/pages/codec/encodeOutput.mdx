@@ -1,0 +1,40 @@
+# encodeOutput
+
+Encodes an output as one of the functions of the rollups contracts `Outputs` interface, based on its `type` field. This is the inverse of [decodeOutput](/codec/decodeOutput), useful for testing.
+
+For encoding a specific output type, see [encodeNotice](/codec/encodeNotice), [encodeVoucher](/codec/encodeVoucher) and [encodeDelegateCallVoucher](/codec/encodeDelegateCallVoucher).
+
+## Usage
+
+```ts twoslash
+import { encodeOutput } from "@cartesi/codec";
+
+const notice = encodeOutput({ type: "Notice", payload: "0xdeadbeef" });
+// "0xc258d6e5...deadbeef..."
+
+const voucher = encodeOutput({
+  type: "Voucher",
+  destination: "0x0000000000000000000000000000000000000001",
+  value: 2n,
+  payload: "0xdeadbeef",
+});
+// "0x237a816f..."
+
+const delegateCallVoucher = encodeOutput({
+  type: "DelegateCallVoucher",
+  destination: "0x0000000000000000000000000000000000000001",
+  payload: "0xdeadbeef",
+});
+// "0x10321e8b..."
+```
+
+## Parameters
+
+```ts twoslash
+import type { Output } from "@cartesi/codec";
+// type Output = DelegateCallVoucher | Notice | Voucher;
+```
+
+## Return Type
+
+`Hex`: ABI-encoded output data.

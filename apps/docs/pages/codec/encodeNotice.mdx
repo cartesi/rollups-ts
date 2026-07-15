@@ -1,0 +1,20 @@
+# encodeNotice
+
+Encodes a notice as a `Notice` call of the rollups contracts `Outputs` interface.
+
+## Usage
+
+```ts twoslash
+import { encodeNotice } from "@cartesi/codec";
+
+const data = encodeNotice({ payload: "0xdeadbeef" });
+// "0xc258d6e5...deadbeef..."
+```
+
+## Parameters
+
+- `payload` (`Hex`): application-specific payload of the notice.
+
+## Return Type
+
+`Hex`: ABI-encoded output data, starting with the `Notice` function selector (`0xc258d6e5`).

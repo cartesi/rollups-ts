@@ -177,6 +177,83 @@ const config: Config = defineConfig({
             ],
         },
         {
+            text: "Codec",
+            items: [
+                {
+                    text: "Introduction",
+                    link: "/codec",
+                },
+                {
+                    text: "Decode Functions",
+                    collapsed: true,
+                    items: [
+                        { text: "decodeInput", link: "/codec/decodeInput" },
+                        { text: "decodeOutput", link: "/codec/decodeOutput" },
+                    ],
+                },
+                {
+                    text: "Encode Functions",
+                    collapsed: true,
+                    items: [
+                        { text: "encodeInput", link: "/codec/encodeInput" },
+                        { text: "encodeOutput", link: "/codec/encodeOutput" },
+                        { text: "encodeNotice", link: "/codec/encodeNotice" },
+                        { text: "encodeVoucher", link: "/codec/encodeVoucher" },
+                        {
+                            text: "encodeDelegateCallVoucher",
+                            link: "/codec/encodeDelegateCallVoucher",
+                        },
+                    ],
+                },
+                {
+                    text: "Portal Deposits",
+                    collapsed: true,
+                    items: [
+                        {
+                            text: "decodeEtherDeposit",
+                            link: "/codec/decodeEtherDeposit",
+                        },
+                        {
+                            text: "encodeEtherDeposit",
+                            link: "/codec/encodeEtherDeposit",
+                        },
+                        {
+                            text: "decodeERC20Deposit",
+                            link: "/codec/decodeERC20Deposit",
+                        },
+                        {
+                            text: "encodeERC20Deposit",
+                            link: "/codec/encodeERC20Deposit",
+                        },
+                        {
+                            text: "decodeERC721Deposit",
+                            link: "/codec/decodeERC721Deposit",
+                        },
+                        {
+                            text: "encodeERC721Deposit",
+                            link: "/codec/encodeERC721Deposit",
+                        },
+                        {
+                            text: "decodeSingleERC1155Deposit",
+                            link: "/codec/decodeSingleERC1155Deposit",
+                        },
+                        {
+                            text: "encodeSingleERC1155Deposit",
+                            link: "/codec/encodeSingleERC1155Deposit",
+                        },
+                        {
+                            text: "decodeBatchERC1155Deposit",
+                            link: "/codec/decodeBatchERC1155Deposit",
+                        },
+                        {
+                            text: "encodeBatchERC1155Deposit",
+                            link: "/codec/encodeBatchERC1155Deposit",
+                        },
+                    ],
+                },
+            ],
+        },
+        {
             text: "RPC Client",
             items: [
                 {

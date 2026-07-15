@@ -1,0 +1,28 @@
+# encodeEtherDeposit
+
+Encodes an Ether deposit payload as the Ether portal does. This is the inverse of [decodeEtherDeposit](/codec/decodeEtherDeposit), useful for testing.
+
+## Usage
+
+```ts twoslash
+import { encodeEtherDeposit } from "@cartesi/codec";
+
+const payload = encodeEtherDeposit({
+  sender: "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+  value: 123456789n,
+  execLayerData: "0xdeadbeef",
+});
+// "0x92cc14432c1f82622493abd64d99ea8a3000a7c7000000...deadbeef"
+```
+
+## Parameters
+
+An `EtherDeposit` object:
+
+- `sender` (`Address`): Ether sender.
+- `value` (`bigint`): amount of Wei being sent.
+- `execLayerData` (`Hex`): additional data to be interpreted by the execution layer.
+
+## Return Type
+
+`Hex`: packed-encoded deposit payload, with layout `sender (20 bytes) ‖ value (32 bytes) ‖ execLayerData`.

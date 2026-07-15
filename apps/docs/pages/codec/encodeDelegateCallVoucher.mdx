@@ -1,0 +1,24 @@
+# encodeDelegateCallVoucher
+
+Encodes a delegate call voucher as a `DelegateCallVoucher` call of the rollups contracts `Outputs` interface.
+
+## Usage
+
+```ts twoslash
+import { encodeDelegateCallVoucher } from "@cartesi/codec";
+
+const data = encodeDelegateCallVoucher({
+  destination: "0x0000000000000000000000000000000000000001",
+  payload: "0xdeadbeef",
+});
+// "0x10321e8b..."
+```
+
+## Parameters
+
+- `destination` (`Address`): address of the contract to be delegate-called.
+- `payload` (`Hex`): calldata of the delegate call.
+
+## Return Type
+
+`Hex`: ABI-encoded output data, starting with the `DelegateCallVoucher` function selector (`0x10321e8b`).

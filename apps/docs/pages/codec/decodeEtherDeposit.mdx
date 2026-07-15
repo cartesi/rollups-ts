@@ -1,0 +1,37 @@
+# decodeEtherDeposit
+
+Decodes the payload of an input added by the Ether portal (`depositEther`).
+
+Portal deposit payloads are packed-encoded (`abi.encodePacked`) by the rollups contracts [`InputEncoding`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/InputEncoding.sol) library, with layout `sender (20 bytes) ‖ value (32 bytes) ‖ execLayerData`. There is no function selector, so make sure the input's `msgSender` is the Ether portal before decoding its `payload`.
+
+## Usage
+
+```ts twoslash
+import { decodeEtherDeposit, decodeInput } from "@cartesi/codec";
+
+const input = decodeInput("0x...");
+const deposit = decodeEtherDeposit(input.payload);
+// {
+//   sender: "0x...",
+//   value: 123456789n,
+//   execLayerData: "0xdeadbeef",
+// }
+```
+
+## Parameters
+
+- `payload` (`Hex`): packed-encoded deposit payload (the `payload` field of a decoded input).
+
+## Return Type
+
+An `EtherDeposit` object:
+
+- `sender` (`Address`): Ether sender.
+- `value` (`bigint`): amount of Wei being sent.
+- `execLayerData` (`Hex`): additional data to be interpreted by the execution layer.
+
+Addresses are returned checksummed.
+
+## Errors
+
+Throws an `Error` if the payload is shorter than 52 bytes.
