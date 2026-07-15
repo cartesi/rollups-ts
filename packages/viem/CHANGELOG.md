@@ -1,5 +1,19 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.32
+
+### Patch Changes
+
+-   ba44c32: migration from tsup to tsdown
+-   ba44c32: bump dependencies
+-   ba44c32: migration to typescript 6
+-   ea5f62f: excluding several imported contracts
+-   Updated dependencies [ba44c32]
+-   Updated dependencies [ba44c32]
+-   Updated dependencies [ba44c32]
+-   Updated dependencies [cf2ffe4]
+    -   @cartesi/rpc@2.0.0-alpha.23
+
 ## 2.0.0-alpha.31
 
 ### Patch Changes
