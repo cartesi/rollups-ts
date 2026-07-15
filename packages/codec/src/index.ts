@@ -2,6 +2,8 @@ export { decodeInput, encodeInput, type Input } from "./input.js";
 export {
     type BatchERC1155Deposit,
     decodeBatchERC1155Deposit,
+    decodeDeposit,
+    type Deposit,
     decodeERC20Deposit,
     decodeERC721Deposit,
     decodeEtherDeposit,
@@ -27,4 +29,12 @@ export {
     type Output,
     type Voucher,
 } from "./output.js";
-export { inputsAbi, outputsAbi } from "./rollups.js";
+export {
+    erc1155BatchPortalAddress,
+    erc1155SinglePortalAddress,
+    erc20PortalAddress,
+    erc721PortalAddress,
+    etherPortalAddress,
+    inputsAbi,
+    outputsAbi,
+} from "./rollups.js";

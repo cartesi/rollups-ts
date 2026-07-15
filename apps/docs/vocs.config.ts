@@ -210,6 +210,10 @@ const config: Config = defineConfig({
                     collapsed: true,
                     items: [
                         {
+                            text: "decodeDeposit",
+                            link: "/codec/decodeDeposit",
+                        },
+                        {
                             text: "decodeEtherDeposit",
                             link: "/codec/decodeEtherDeposit",
                         },

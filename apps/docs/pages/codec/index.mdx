@@ -46,6 +46,7 @@ Each decode function has an encoding counterpart, useful for producing test fixt
 
 Deposits made through the rollups portals arrive as inputs whose `msgSender` is the portal and whose `payload` is packed-encoded (`abi.encodePacked`) by the rollups contracts [`InputEncoding`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/InputEncoding.sol) library. These functions decode (and encode, for testing) those payloads:
 
+- [decodeDeposit](/codec/decodeDeposit) — decode any deposit, dispatching on the input's `msgSender` against the portal deployment addresses
 - [decodeEtherDeposit](/codec/decodeEtherDeposit) / [encodeEtherDeposit](/codec/encodeEtherDeposit)
 - [decodeERC20Deposit](/codec/decodeERC20Deposit) / [encodeERC20Deposit](/codec/encodeERC20Deposit)
 - [decodeERC721Deposit](/codec/decodeERC721Deposit) / [encodeERC721Deposit](/codec/encodeERC721Deposit)

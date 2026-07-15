@@ -55,37 +55,22 @@ switch (output.type) {
 
 ### Decoding portal deposits
 
-Deposits made through the rollups portals arrive as inputs whose `msgSender` is the portal and whose `payload` is packed-encoded (`abi.encodePacked`) by the rollups contracts [`InputEncoding`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/InputEncoding.sol) library. Since packed payloads carry no function selector, check the input's `msgSender` against the portal address before decoding:
+Deposits made through the rollups portals arrive as inputs whose `msgSender` is the portal and whose `payload` is packed-encoded (`abi.encodePacked`) by the rollups contracts [`InputEncoding`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/InputEncoding.sol) library. `decodeDeposit` checks the input's `msgSender` against the portal deployment addresses (pinned to the same rollups-contracts release as the ABIs) and decodes the payload accordingly:
 
 ```ts
-import {
-    decodeBatchERC1155Deposit,
-    decodeERC20Deposit,
-    decodeERC721Deposit,
-    decodeEtherDeposit,
-    decodeInput,
-    decodeSingleERC1155Deposit,
-} from "@cartesi/codec";
+import { decodeDeposit, decodeInput } from "@cartesi/codec";
 
 const input = decodeInput("0x415bf363...");
-
-const etherDeposit = decodeEtherDeposit(input.payload);
-// { sender: "0x...", value: 123456789n, execLayerData: "0x..." }
-
-const erc20Deposit = decodeERC20Deposit(input.payload);
-// { token: "0x...", sender: "0x...", value: 1000n, execLayerData: "0x..." }
-
-const erc721Deposit = decodeERC721Deposit(input.payload);
-// { token, sender, tokenId, baseLayerData, execLayerData }
-
-const singleDeposit = decodeSingleERC1155Deposit(input.payload);
-// { token, sender, tokenId, value, baseLayerData, execLayerData }
-
-const batchDeposit = decodeBatchERC1155Deposit(input.payload);
-// { token, sender, tokenIds, values, baseLayerData, execLayerData }
+const deposit = decodeDeposit(input);
+// { type: "EtherDeposit", sender: "0x...", value: 123456789n, execLayerData: "0x..." }
+// or { type: "ERC20Deposit", token, sender, value, execLayerData }
+// or { type: "ERC721Deposit", token, sender, tokenId, baseLayerData, execLayerData }
+// or { type: "SingleERC1155Deposit", token, sender, tokenId, value, baseLayerData, execLayerData }
+// or { type: "BatchERC1155Deposit", token, sender, tokenIds, values, baseLayerData, execLayerData }
+// or undefined, if msgSender is not a portal (i.e. the input is not a deposit)
 ```
 
-Each has an encoding counterpart (`encodeEtherDeposit`, `encodeERC20Deposit`, `encodeERC721Deposit`, `encodeSingleERC1155Deposit`, `encodeBatchERC1155Deposit`) for producing test fixtures.
+Per-portal decode functions are also available (`decodeEtherDeposit`, `decodeERC20Deposit`, `decodeERC721Deposit`, `decodeSingleERC1155Deposit`, `decodeBatchERC1155Deposit`), each taking the payload directly and each with an encoding counterpart (`encodeEtherDeposit`, …) for producing test fixtures. The portal deployment addresses are exported as well (`etherPortalAddress`, `erc20PortalAddress`, `erc721PortalAddress`, `erc1155SinglePortalAddress`, `erc1155BatchPortalAddress`).
 
 ### Encoding (for testing)
 
@@ -125,7 +110,7 @@ const delegateCallVoucher = encodeDelegateCallVoucher({
 
 ### ABIs
 
-The `Inputs` and `Outputs` ABIs used by the codec are also exported, both from the main entrypoint and from `@cartesi/codec/abi`:
+The `Inputs` and `Outputs` ABIs used by the codec are also exported, both from the main entrypoint and from `@cartesi/codec/abi` (which additionally exports the portal ABIs, addresses and configs):
 
 ```ts
 import { inputsAbi, outputsAbi } from "@cartesi/codec/abi";

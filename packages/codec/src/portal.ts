@@ -6,9 +6,19 @@ import {
     getAddress,
     type Hex,
     hexToBigInt,
+    isAddressEqual,
     size,
     slice,
 } from "viem";
+import type { Input } from "./input.js";
+import {
+    erc1155BatchPortalAddress,
+    erc1155SinglePortalAddress,
+    erc20PortalAddress,
+    erc721PortalAddress,
+    etherPortalAddress,
+} from "./rollups.js";
+import type { Prettify } from "./types.js";
 
 // payloads of portal deposit inputs are packed-encoded (`abi.encodePacked`)
 // by the rollups contracts `InputEncoding` library, so unlike inputs and
@@ -314,3 +324,52 @@ export const encodeBatchERC1155Deposit = (deposit: BatchERC1155Deposit): Hex =>
             ]),
         ],
     );
+
+/**
+ * Deposit made through one of the rollups portals, discriminated by the
+ * `type` field.
+ */
+export type Deposit = Prettify<
+    | ({ type: "BatchERC1155Deposit" } & BatchERC1155Deposit)
+    | ({ type: "ERC20Deposit" } & ERC20Deposit)
+    | ({ type: "ERC721Deposit" } & ERC721Deposit)
+    | ({ type: "EtherDeposit" } & EtherDeposit)
+    | ({ type: "SingleERC1155Deposit" } & SingleERC1155Deposit)
+>;
+
+/**
+ * Decode the payload of an input as a portal deposit, dispatching on the
+ * input's `msgSender`: if it is one of the portal deployment addresses, the
+ * payload is decoded with the corresponding decode function.
+ * @param input decoded input (only `msgSender` and `payload` are used)
+ * @returns decoded deposit, discriminated by the `type` field, or `undefined`
+ * if `msgSender` is not a portal (i.e. the input is not a deposit)
+ * @throws if `msgSender` is a portal but the payload is malformed
+ */
+export const decodeDeposit = (
+    input: Pick<Input, "msgSender" | "payload">,
+): Deposit | undefined => {
+    const { msgSender, payload } = input;
+    if (isAddressEqual(msgSender, etherPortalAddress)) {
+        return { type: "EtherDeposit", ...decodeEtherDeposit(payload) };
+    }
+    if (isAddressEqual(msgSender, erc20PortalAddress)) {
+        return { type: "ERC20Deposit", ...decodeERC20Deposit(payload) };
+    }
+    if (isAddressEqual(msgSender, erc721PortalAddress)) {
+        return { type: "ERC721Deposit", ...decodeERC721Deposit(payload) };
+    }
+    if (isAddressEqual(msgSender, erc1155SinglePortalAddress)) {
+        return {
+            type: "SingleERC1155Deposit",
+            ...decodeSingleERC1155Deposit(payload),
+        };
+    }
+    if (isAddressEqual(msgSender, erc1155BatchPortalAddress)) {
+        return {
+            type: "BatchERC1155Deposit",
+            ...decodeBatchERC1155Deposit(payload),
+        };
+    }
+    return undefined;
+};
