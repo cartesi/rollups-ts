@@ -1,4 +1,4 @@
-# decodeBatchERC1155Deposit
+# decodeERC1155BatchDeposit
 
 Decodes the payload of an input added by the ERC-1155 batch portal (`depositBatchERC1155Token`).
 
@@ -7,10 +7,10 @@ Portal deposit payloads are packed-encoded (`abi.encodePacked`) by the rollups c
 ## Usage
 
 ```ts twoslash
-import { decodeBatchERC1155Deposit, decodeInput } from "@cartesi/codec";
+import { decodeERC1155BatchDeposit, decodeInput } from "@cartesi/codec";
 
 const input = decodeInput("0x...");
-const deposit = decodeBatchERC1155Deposit(input.payload);
+const deposit = decodeERC1155BatchDeposit(input.payload);
 // {
 //   token: "0x...",
 //   sender: "0x...",
@@ -27,7 +27,7 @@ const deposit = decodeBatchERC1155Deposit(input.payload);
 
 ## Return Type
 
-A `BatchERC1155Deposit` object:
+A `ERC1155BatchDeposit` object:
 
 - `token` (`Address`): token contract.
 - `sender` (`Address`): token sender.

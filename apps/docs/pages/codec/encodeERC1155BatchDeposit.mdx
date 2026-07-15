@@ -1,13 +1,13 @@
-# encodeBatchERC1155Deposit
+# encodeERC1155BatchDeposit
 
-Encodes an ERC-1155 batch deposit payload as the ERC-1155 batch portal does. This is the inverse of [decodeBatchERC1155Deposit](/codec/decodeBatchERC1155Deposit), useful for testing.
+Encodes an ERC-1155 batch deposit payload as the ERC-1155 batch portal does. This is the inverse of [decodeERC1155BatchDeposit](/codec/decodeERC1155BatchDeposit), useful for testing.
 
 ## Usage
 
 ```ts twoslash
-import { encodeBatchERC1155Deposit } from "@cartesi/codec";
+import { encodeERC1155BatchDeposit } from "@cartesi/codec";
 
-const payload = encodeBatchERC1155Deposit({
+const payload = encodeERC1155BatchDeposit({
   token: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
   sender: "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
   tokenIds: [1n, 2n, 3n],
@@ -19,7 +19,7 @@ const payload = encodeBatchERC1155Deposit({
 
 ## Parameters
 
-A `BatchERC1155Deposit` object:
+A `ERC1155BatchDeposit` object:
 
 - `token` (`Address`): token contract.
 - `sender` (`Address`): token sender.

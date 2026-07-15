@@ -1,4 +1,4 @@
-# decodeSingleERC1155Deposit
+# decodeERC1155SingleDeposit
 
 Decodes the payload of an input added by the ERC-1155 single portal (`depositSingleERC1155Token`).
 
@@ -7,10 +7,10 @@ Portal deposit payloads are packed-encoded (`abi.encodePacked`) by the rollups c
 ## Usage
 
 ```ts twoslash
-import { decodeInput, decodeSingleERC1155Deposit } from "@cartesi/codec";
+import { decodeInput, decodeERC1155SingleDeposit } from "@cartesi/codec";
 
 const input = decodeInput("0x...");
-const deposit = decodeSingleERC1155Deposit(input.payload);
+const deposit = decodeERC1155SingleDeposit(input.payload);
 // {
 //   token: "0x...",
 //   sender: "0x...",
@@ -27,7 +27,7 @@ const deposit = decodeSingleERC1155Deposit(input.payload);
 
 ## Return Type
 
-A `SingleERC1155Deposit` object:
+A `ERC1155SingleDeposit` object:
 
 - `token` (`Address`): token contract.
 - `sender` (`Address`): token sender.

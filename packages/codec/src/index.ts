@@ -1,22 +1,22 @@
 export { decodeInput, encodeInput, type Input } from "./input.js";
 export {
-    type BatchERC1155Deposit,
-    decodeBatchERC1155Deposit,
+    type ERC1155BatchDeposit,
+    decodeERC1155BatchDeposit,
     decodeDeposit,
     type Deposit,
     decodeERC20Deposit,
     decodeERC721Deposit,
     decodeEtherDeposit,
-    decodeSingleERC1155Deposit,
-    encodeBatchERC1155Deposit,
+    decodeERC1155SingleDeposit,
+    encodeERC1155BatchDeposit,
     encodeERC20Deposit,
     encodeERC721Deposit,
     encodeEtherDeposit,
-    encodeSingleERC1155Deposit,
+    encodeERC1155SingleDeposit,
     type ERC20Deposit,
     type ERC721Deposit,
     type EtherDeposit,
-    type SingleERC1155Deposit,
+    type ERC1155SingleDeposit,
 } from "./portal.js";
 export {
     decodeOutput,
