@@ -2,11 +2,11 @@ import { getAddress } from "viem";
 import { describe, expect, it } from "vitest";
 import {
     decodeDeposit,
-    encodeBatchERC1155Deposit,
+    encodeERC1155BatchDeposit,
     encodeERC20Deposit,
     encodeERC721Deposit,
     encodeEtherDeposit,
-    encodeSingleERC1155Deposit,
+    encodeERC1155SingleDeposit,
 } from "../src/portal.js";
 import {
     erc1155BatchPortalAddress,
@@ -77,9 +77,9 @@ describe("decodeDeposit", () => {
         expect(
             decodeDeposit({
                 msgSender: erc1155SinglePortalAddress,
-                payload: encodeSingleERC1155Deposit(deposit),
+                payload: encodeERC1155SingleDeposit(deposit),
             }),
-        ).toEqual({ type: "SingleERC1155Deposit", ...deposit });
+        ).toEqual({ type: "ERC1155SingleDeposit", ...deposit });
     });
 
     it("should decode an ERC-1155 batch deposit input", () => {
@@ -94,9 +94,9 @@ describe("decodeDeposit", () => {
         expect(
             decodeDeposit({
                 msgSender: erc1155BatchPortalAddress,
-                payload: encodeBatchERC1155Deposit(deposit),
+                payload: encodeERC1155BatchDeposit(deposit),
             }),
-        ).toEqual({ type: "BatchERC1155Deposit", ...deposit });
+        ).toEqual({ type: "ERC1155BatchDeposit", ...deposit });
     });
 
     it("should dispatch regardless of msgSender case", () => {

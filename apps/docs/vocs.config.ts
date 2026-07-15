@@ -238,20 +238,20 @@ const config: Config = defineConfig({
                             link: "/codec/encodeERC721Deposit",
                         },
                         {
-                            text: "decodeSingleERC1155Deposit",
-                            link: "/codec/decodeSingleERC1155Deposit",
+                            text: "decodeERC1155SingleDeposit",
+                            link: "/codec/decodeERC1155SingleDeposit",
                         },
                         {
-                            text: "encodeSingleERC1155Deposit",
-                            link: "/codec/encodeSingleERC1155Deposit",
+                            text: "encodeERC1155SingleDeposit",
+                            link: "/codec/encodeERC1155SingleDeposit",
                         },
                         {
-                            text: "decodeBatchERC1155Deposit",
-                            link: "/codec/decodeBatchERC1155Deposit",
+                            text: "decodeERC1155BatchDeposit",
+                            link: "/codec/decodeERC1155BatchDeposit",
                         },
                         {
-                            text: "encodeBatchERC1155Deposit",
-                            link: "/codec/encodeBatchERC1155Deposit",
+                            text: "encodeERC1155BatchDeposit",
+                            link: "/codec/encodeERC1155BatchDeposit",
                         },
                     ],
                 },

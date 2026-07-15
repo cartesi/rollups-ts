@@ -1,6 +1,6 @@
 # decodeDeposit
 
-Decodes the payload of an input as a portal deposit, dispatching on the input's `msgSender`: if it is one of the portal deployment addresses, the payload is decoded with the corresponding decode function ([decodeEtherDeposit](/codec/decodeEtherDeposit), [decodeERC20Deposit](/codec/decodeERC20Deposit), [decodeERC721Deposit](/codec/decodeERC721Deposit), [decodeSingleERC1155Deposit](/codec/decodeSingleERC1155Deposit) or [decodeBatchERC1155Deposit](/codec/decodeBatchERC1155Deposit)).
+Decodes the payload of an input as a portal deposit, dispatching on the input's `msgSender`: if it is one of the portal deployment addresses, the payload is decoded with the corresponding decode function ([decodeEtherDeposit](/codec/decodeEtherDeposit), [decodeERC20Deposit](/codec/decodeERC20Deposit), [decodeERC721Deposit](/codec/decodeERC721Deposit), [decodeERC1155SingleDeposit](/codec/decodeERC1155SingleDeposit) or [decodeERC1155BatchDeposit](/codec/decodeERC1155BatchDeposit)).
 
 The portal deployment addresses come from the same pinned rollups-contracts release as the ABIs, and are also exported (`etherPortalAddress`, `erc20PortalAddress`, `erc721PortalAddress`, `erc1155SinglePortalAddress`, `erc1155BatchPortalAddress`).
 
@@ -23,10 +23,10 @@ if (deposit) {
     case "ERC721Deposit":
       console.log(deposit.token, deposit.sender, deposit.tokenId);
       break;
-    case "SingleERC1155Deposit":
+    case "ERC1155SingleDeposit":
       console.log(deposit.token, deposit.tokenId, deposit.value);
       break;
-    case "BatchERC1155Deposit":
+    case "ERC1155BatchDeposit":
       console.log(deposit.token, deposit.tokenIds, deposit.values);
       break;
   }
@@ -41,7 +41,7 @@ if (deposit) {
 
 ## Return Type
 
-A `Deposit` union discriminated by the `type` field (`"EtherDeposit"`, `"ERC20Deposit"`, `"ERC721Deposit"`, `"SingleERC1155Deposit"` or `"BatchERC1155Deposit"`), where each variant carries the fields of the corresponding deposit type.
+A `Deposit` union discriminated by the `type` field (`"EtherDeposit"`, `"ERC20Deposit"`, `"ERC721Deposit"`, `"ERC1155SingleDeposit"` or `"ERC1155BatchDeposit"`), where each variant carries the fields of the corresponding deposit type.
 
 Returns `undefined` if `msgSender` is not a portal, i.e. the input is not a deposit.
 

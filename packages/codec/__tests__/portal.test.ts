@@ -7,21 +7,21 @@ import {
 } from "viem";
 import { describe, expect, it } from "vitest";
 import {
-    type BatchERC1155Deposit,
-    decodeBatchERC1155Deposit,
+    type ERC1155BatchDeposit,
+    decodeERC1155BatchDeposit,
     decodeERC20Deposit,
     decodeERC721Deposit,
     decodeEtherDeposit,
-    decodeSingleERC1155Deposit,
-    encodeBatchERC1155Deposit,
+    decodeERC1155SingleDeposit,
+    encodeERC1155BatchDeposit,
     encodeERC20Deposit,
     encodeERC721Deposit,
     encodeEtherDeposit,
-    encodeSingleERC1155Deposit,
+    encodeERC1155SingleDeposit,
     type ERC20Deposit,
     type ERC721Deposit,
     type EtherDeposit,
-    type SingleERC1155Deposit,
+    type ERC1155SingleDeposit,
 } from "../src/portal.js";
 
 const token = getAddress("0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182");
@@ -172,7 +172,7 @@ describe("erc721 deposit", () => {
 });
 
 describe("erc1155 single deposit", () => {
-    const deposit: SingleERC1155Deposit = {
+    const deposit: ERC1155SingleDeposit = {
         token,
         sender,
         tokenId: 42n,
@@ -192,24 +192,24 @@ describe("erc1155 single deposit", () => {
     ]);
 
     it("should encode", () => {
-        expect(encodeSingleERC1155Deposit(deposit)).toEqual(
+        expect(encodeERC1155SingleDeposit(deposit)).toEqual(
             payload.toLowerCase(),
         );
     });
 
     it("should decode", () => {
-        expect(decodeSingleERC1155Deposit(payload)).toEqual(deposit);
+        expect(decodeERC1155SingleDeposit(payload)).toEqual(deposit);
     });
 
     it("should throw on a payload that is too short", () => {
-        expect(() => decodeSingleERC1155Deposit("0xdeadbeef")).toThrow(
+        expect(() => decodeERC1155SingleDeposit("0xdeadbeef")).toThrow(
             "invalid ERC-1155 single deposit payload",
         );
     });
 });
 
 describe("erc1155 batch deposit", () => {
-    const deposit: BatchERC1155Deposit = {
+    const deposit: ERC1155BatchDeposit = {
         token,
         sender,
         tokenIds: [1n, 2n, 3n],
@@ -235,17 +235,17 @@ describe("erc1155 batch deposit", () => {
     ]);
 
     it("should encode", () => {
-        expect(encodeBatchERC1155Deposit(deposit)).toEqual(
+        expect(encodeERC1155BatchDeposit(deposit)).toEqual(
             payload.toLowerCase(),
         );
     });
 
     it("should decode", () => {
-        expect(decodeBatchERC1155Deposit(payload)).toEqual(deposit);
+        expect(decodeERC1155BatchDeposit(payload)).toEqual(deposit);
     });
 
     it("should roundtrip with empty lists", () => {
-        const original: BatchERC1155Deposit = {
+        const original: ERC1155BatchDeposit = {
             token,
             sender,
             tokenIds: [],
@@ -254,12 +254,12 @@ describe("erc1155 batch deposit", () => {
             execLayerData: "0x",
         };
         expect(
-            decodeBatchERC1155Deposit(encodeBatchERC1155Deposit(original)),
+            decodeERC1155BatchDeposit(encodeERC1155BatchDeposit(original)),
         ).toEqual(original);
     });
 
     it("should throw on a payload that is too short", () => {
-        expect(() => decodeBatchERC1155Deposit("0xdeadbeef")).toThrow(
+        expect(() => decodeERC1155BatchDeposit("0xdeadbeef")).toThrow(
             "invalid ERC-1155 batch deposit payload",
         );
     });
