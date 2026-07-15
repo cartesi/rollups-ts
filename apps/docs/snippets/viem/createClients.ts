@@ -1,25 +1,21 @@
-import {
-    createCartesiPublicClient,
-    publicActionsL1,
-    walletActionsL1,
-} from "@cartesi/viem";
+import { createCartesiPublicClient } from "@cartesi/viem";
 import { cartesi } from "@cartesi/viem/chains";
 import { createPublicClient, createWalletClient, http } from "viem";
 
 const main = async () => {
     const chain = cartesi;
 
-    // create public client with extra L1 actions
+    // create public client
     const publicClient = createPublicClient({
         chain,
         transport: http(),
-    }).extend(publicActionsL1());
+    });
 
-    // create wallet client with extra L1 actions
+    // create wallet client
     const walletClient = createWalletClient({
         chain,
         transport: http(),
-    }).extend(walletActionsL1());
+    });
 
     // create cartesi public client to L2 with RPC url
     const publicClientL2 = createCartesiPublicClient({

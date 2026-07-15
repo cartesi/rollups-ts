@@ -6,11 +6,8 @@ import {
     stringToHex,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import {
-    createCartesiPublicClient,
-    getInputsAdded,
-    walletActionsL1,
-} from "../src";
+import { createCartesiPublicClient, getInputsAdded } from "../src";
+import { inputBoxAbi, inputBoxAddress } from "../src/rollups";
 
 async function main() {
     const chain = cartesi;
@@ -26,11 +23,12 @@ async function main() {
         transport: http("http://127.0.0.1:6751/rpc"),
     });
 
-    // create extended wallet client to chain default url
+    // create wallet client to chain default url
     const walletClient = createWalletClient({
+        account,
         chain,
         transport: http(),
-    }).extend(walletActionsL1());
+    });
 
     // application address
     const { data: applications } = await publicClientL2.listApplications();
@@ -40,12 +38,12 @@ async function main() {
         // input payload
         const payload = stringToHex("hello");
 
-        // send input transaction
-        const hash = await walletClient.addInput({
-            account,
-            application,
-            chain,
-            payload,
+        // send input transaction to the InputBox contract
+        const hash = await walletClient.writeContract({
+            abi: inputBoxAbi,
+            address: inputBoxAddress,
+            functionName: "addInput",
+            args: [application, payload],
         });
 
         // wait for receipt

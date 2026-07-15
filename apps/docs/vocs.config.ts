@@ -30,67 +30,8 @@ const config: Config = defineConfig({
                     link: "/viem",
                 },
                 {
-                    text: "Public L1 Actions",
-                    collapsed: true,
-                    items: [
-                        {
-                            text: "estimateAddInputGas",
-                            link: "/viem/estimateAddInputGas",
-                        },
-                        {
-                            text: "estimateDepositEtherGas",
-                            link: "/viem/estimateDepositEtherGas",
-                        },
-                        {
-                            text: "estimateDepositERC20TokenGas",
-                            link: "/viem/estimateDepositERC20TokenGas",
-                        },
-                        {
-                            text: "estimateDepositERC721TokenGas",
-                            link: "/viem/estimateDepositERC721TokenGas",
-                        },
-                        {
-                            text: "estimateDepositSingleERC1155TokenGas",
-                            link: "/viem/estimateDepositSingleERC1155TokenGas",
-                        },
-                        {
-                            text: "estimateDepositBatchERC1155TokenGas",
-                            link: "/viem/estimateDepositBatchERC1155TokenGas",
-                        },
-                        {
-                            text: "estimateExecuteOutputGas",
-                            link: "/viem/estimateExecuteOutputGas",
-                        },
-                        {
-                            text: "validateOutput",
-                            link: "/viem/validateOutput",
-                        },
-                    ],
-                },
-                {
-                    text: "Wallet L1 Actions",
-                    collapsed: true,
-                    items: [
-                        { text: "addInput", link: "/viem/addInput" },
-                        { text: "depositEther", link: "/viem/depositEther" },
-                        {
-                            text: "depositERC20Tokens",
-                            link: "/viem/depositERC20Tokens",
-                        },
-                        {
-                            text: "depositERC721Token",
-                            link: "/viem/depositERC721Token",
-                        },
-                        {
-                            text: "depositSingleERC1155Token",
-                            link: "/viem/depositSingleERC1155Token",
-                        },
-                        {
-                            text: "depositBatchERC1155Token",
-                            link: "/viem/depositBatchERC1155Token",
-                        },
-                        { text: "executeOutput", link: "/viem/executeOutput" },
-                    ],
+                    text: "L1 Contract Interactions",
+                    link: "/viem/l1",
                 },
                 {
                     text: "Public L2 Actions",

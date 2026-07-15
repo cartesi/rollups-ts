@@ -1,12 +1,8 @@
 import { cartesi } from "@cartesi/viem/chains";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import {
-    createCartesiPublicClient,
-    getOutputsExecuted,
-    publicActionsL1,
-    walletActionsL1,
-} from "../src";
+import { createCartesiPublicClient, getOutputsExecuted, toEVM } from "../src";
+import { iApplicationAbi } from "../src/rollups";
 
 async function main() {
     const chain = cartesi;
@@ -15,21 +11,19 @@ async function main() {
     );
 
     // create public client to chain default url
-    const publicClient = createPublicClient({
-        chain,
-        transport: http(),
-    }).extend(publicActionsL1());
+    const publicClient = createPublicClient({ chain, transport: http() });
 
     // create cartesi public client to L2 with RPC url
     const publicClientL2 = createCartesiPublicClient({
         transport: http("http://127.0.0.1:6751/rpc"),
     });
 
-    // create extended wallet client to chain default url
+    // create wallet client to chain default url
     const walletClient = createWalletClient({
+        account,
         chain,
         transport: http(),
-    }).extend(walletActionsL1());
+    });
 
     // application address
     const applications = await publicClientL2.listApplications();
@@ -45,21 +39,23 @@ async function main() {
         });
         console.log(output);
 
-        const isValid = await publicClient.validateOutput({
-            application,
-            output,
+        // convert output to `IApplication.executeOutput` arguments
+        const args = toEVM(output);
+
+        // validateOutput reverts if the output is invalid
+        await publicClient.readContract({
+            abi: iApplicationAbi,
+            address: application,
+            functionName: "validateOutput",
+            args,
         });
 
-        if (!isValid) {
-            throw new Error(`Output ${output.index} is invalid`);
-        }
-
         // execute output
-        const hash = await walletClient.executeOutput({
-            account,
-            application,
-            chain,
-            output,
+        const hash = await walletClient.writeContract({
+            abi: iApplicationAbi,
+            address: application,
+            functionName: "executeOutput",
+            args,
         });
 
         // wait for receipt
@@ -68,7 +64,7 @@ async function main() {
             timeout: 6000,
         });
 
-        // get input index from receipt
+        // get output index from receipt
         const [execution] = getOutputsExecuted(receipt);
         if (execution) {
             console.log(`Output ${execution.outputIndex} executed`);
