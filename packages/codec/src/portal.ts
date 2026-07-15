@@ -42,7 +42,7 @@ export type EtherDeposit = {
  * Payload of an input added by the ERC-20 portal.
  * Layout: `token (20) ‖ sender (20) ‖ value (32) ‖ execLayerData`.
  */
-export type ERC20Deposit = {
+export type Erc20Deposit = {
     /** Token contract */
     token: Address;
     /** Token sender */
@@ -58,7 +58,7 @@ export type ERC20Deposit = {
  * Layout: `token (20) ‖ sender (20) ‖ tokenId (32) ‖
  * abi.encode(baseLayerData, execLayerData)`.
  */
-export type ERC721Deposit = {
+export type Erc721Deposit = {
     /** Token contract */
     token: Address;
     /** Token sender */
@@ -76,7 +76,7 @@ export type ERC721Deposit = {
  * Layout: `token (20) ‖ sender (20) ‖ tokenId (32) ‖ value (32) ‖
  * abi.encode(baseLayerData, execLayerData)`.
  */
-export type ERC1155SingleDeposit = {
+export type Erc1155SingleDeposit = {
     /** Token contract */
     token: Address;
     /** Token sender */
@@ -96,7 +96,7 @@ export type ERC1155SingleDeposit = {
  * Layout: `token (20) ‖ sender (20) ‖
  * abi.encode(tokenIds, values, baseLayerData, execLayerData)`.
  */
-export type ERC1155BatchDeposit = {
+export type Erc1155BatchDeposit = {
     /** Token contract */
     token: Address;
     /** Token sender */
@@ -169,7 +169,7 @@ export const encodeEtherDeposit = (deposit: EtherDeposit): Hex =>
  * @returns decoded ERC-20 deposit
  * @throws if the payload is too short
  */
-export const decodeERC20Deposit = (payload: Hex): ERC20Deposit => {
+export const decodeErc20Deposit = (payload: Hex): Erc20Deposit => {
     assertMinSize(payload, 72, "ERC-20 deposit");
     return {
         token: getAddress(slice(payload, 0, 20)),
@@ -181,11 +181,11 @@ export const decodeERC20Deposit = (payload: Hex): ERC20Deposit => {
 
 /**
  * Encode an ERC-20 deposit as the ERC-20 portal does. This is the inverse of
- * `decodeERC20Deposit`, useful for testing.
+ * `decodeErc20Deposit`, useful for testing.
  * @param deposit ERC-20 deposit to encode
  * @returns packed-encoded deposit payload
  */
-export const encodeERC20Deposit = (deposit: ERC20Deposit): Hex =>
+export const encodeErc20Deposit = (deposit: Erc20Deposit): Hex =>
     encodePacked(
         ["address", "address", "uint256", "bytes"],
         [deposit.token, deposit.sender, deposit.value, deposit.execLayerData],
@@ -198,7 +198,7 @@ export const encodeERC20Deposit = (deposit: ERC20Deposit): Hex =>
  * @returns decoded ERC-721 deposit
  * @throws if the payload is too short or its data tail is malformed
  */
-export const decodeERC721Deposit = (payload: Hex): ERC721Deposit => {
+export const decodeErc721Deposit = (payload: Hex): Erc721Deposit => {
     assertMinSize(payload, 72, "ERC-721 deposit");
     const [baseLayerData, execLayerData] = decodeAbiParameters(
         dataAbi,
@@ -215,11 +215,11 @@ export const decodeERC721Deposit = (payload: Hex): ERC721Deposit => {
 
 /**
  * Encode an ERC-721 deposit as the ERC-721 portal does. This is the inverse
- * of `decodeERC721Deposit`, useful for testing.
+ * of `decodeErc721Deposit`, useful for testing.
  * @param deposit ERC-721 deposit to encode
  * @returns packed-encoded deposit payload
  */
-export const encodeERC721Deposit = (deposit: ERC721Deposit): Hex =>
+export const encodeErc721Deposit = (deposit: Erc721Deposit): Hex =>
     encodePacked(
         ["address", "address", "uint256", "bytes"],
         [
@@ -240,9 +240,9 @@ export const encodeERC721Deposit = (deposit: ERC721Deposit): Hex =>
  * @returns decoded ERC-1155 single deposit
  * @throws if the payload is too short or its data tail is malformed
  */
-export const decodeERC1155SingleDeposit = (
+export const decodeErc1155SingleDeposit = (
     payload: Hex,
-): ERC1155SingleDeposit => {
+): Erc1155SingleDeposit => {
     assertMinSize(payload, 104, "ERC-1155 single deposit");
     const [baseLayerData, execLayerData] = decodeAbiParameters(
         dataAbi,
@@ -260,12 +260,12 @@ export const decodeERC1155SingleDeposit = (
 
 /**
  * Encode an ERC-1155 single deposit as the ERC-1155 single portal does. This
- * is the inverse of `decodeERC1155SingleDeposit`, useful for testing.
+ * is the inverse of `decodeErc1155SingleDeposit`, useful for testing.
  * @param deposit ERC-1155 single deposit to encode
  * @returns packed-encoded deposit payload
  */
-export const encodeERC1155SingleDeposit = (
-    deposit: ERC1155SingleDeposit,
+export const encodeErc1155SingleDeposit = (
+    deposit: Erc1155SingleDeposit,
 ): Hex =>
     encodePacked(
         ["address", "address", "uint256", "uint256", "bytes"],
@@ -288,9 +288,9 @@ export const encodeERC1155SingleDeposit = (
  * @returns decoded ERC-1155 batch deposit
  * @throws if the payload is too short or its data tail is malformed
  */
-export const decodeERC1155BatchDeposit = (
+export const decodeErc1155BatchDeposit = (
     payload: Hex,
-): ERC1155BatchDeposit => {
+): Erc1155BatchDeposit => {
     assertMinSize(payload, 40, "ERC-1155 batch deposit");
     const [tokenIds, values, baseLayerData, execLayerData] =
         decodeAbiParameters(batchDataAbi, sliceFrom(payload, 40));
@@ -306,11 +306,11 @@ export const decodeERC1155BatchDeposit = (
 
 /**
  * Encode an ERC-1155 batch deposit as the ERC-1155 batch portal does. This is
- * the inverse of `decodeERC1155BatchDeposit`, useful for testing.
+ * the inverse of `decodeErc1155BatchDeposit`, useful for testing.
  * @param deposit ERC-1155 batch deposit to encode
  * @returns packed-encoded deposit payload
  */
-export const encodeERC1155BatchDeposit = (deposit: ERC1155BatchDeposit): Hex =>
+export const encodeErc1155BatchDeposit = (deposit: Erc1155BatchDeposit): Hex =>
     encodePacked(
         ["address", "address", "bytes"],
         [
@@ -330,11 +330,11 @@ export const encodeERC1155BatchDeposit = (deposit: ERC1155BatchDeposit): Hex =>
  * `type` field.
  */
 export type Deposit = Prettify<
-    | ({ type: "ERC1155BatchDeposit" } & ERC1155BatchDeposit)
-    | ({ type: "ERC20Deposit" } & ERC20Deposit)
-    | ({ type: "ERC721Deposit" } & ERC721Deposit)
+    | ({ type: "Erc1155BatchDeposit" } & Erc1155BatchDeposit)
+    | ({ type: "Erc20Deposit" } & Erc20Deposit)
+    | ({ type: "Erc721Deposit" } & Erc721Deposit)
     | ({ type: "EtherDeposit" } & EtherDeposit)
-    | ({ type: "ERC1155SingleDeposit" } & ERC1155SingleDeposit)
+    | ({ type: "Erc1155SingleDeposit" } & Erc1155SingleDeposit)
 >;
 
 /**
@@ -354,21 +354,21 @@ export const decodeDeposit = (
         return { type: "EtherDeposit", ...decodeEtherDeposit(payload) };
     }
     if (isAddressEqual(msgSender, erc20PortalAddress)) {
-        return { type: "ERC20Deposit", ...decodeERC20Deposit(payload) };
+        return { type: "Erc20Deposit", ...decodeErc20Deposit(payload) };
     }
     if (isAddressEqual(msgSender, erc721PortalAddress)) {
-        return { type: "ERC721Deposit", ...decodeERC721Deposit(payload) };
+        return { type: "Erc721Deposit", ...decodeErc721Deposit(payload) };
     }
     if (isAddressEqual(msgSender, erc1155SinglePortalAddress)) {
         return {
-            type: "ERC1155SingleDeposit",
-            ...decodeERC1155SingleDeposit(payload),
+            type: "Erc1155SingleDeposit",
+            ...decodeErc1155SingleDeposit(payload),
         };
     }
     if (isAddressEqual(msgSender, erc1155BatchPortalAddress)) {
         return {
-            type: "ERC1155BatchDeposit",
-            ...decodeERC1155BatchDeposit(payload),
+            type: "Erc1155BatchDeposit",
+            ...decodeErc1155BatchDeposit(payload),
         };
     }
     return undefined;

@@ -63,14 +63,14 @@ import { decodeDeposit, decodeInput } from "@cartesi/codec";
 const input = decodeInput("0x415bf363...");
 const deposit = decodeDeposit(input);
 // { type: "EtherDeposit", sender: "0x...", value: 123456789n, execLayerData: "0x..." }
-// or { type: "ERC20Deposit", token, sender, value, execLayerData }
-// or { type: "ERC721Deposit", token, sender, tokenId, baseLayerData, execLayerData }
-// or { type: "ERC1155SingleDeposit", token, sender, tokenId, value, baseLayerData, execLayerData }
-// or { type: "ERC1155BatchDeposit", token, sender, tokenIds, values, baseLayerData, execLayerData }
+// or { type: "Erc20Deposit", token, sender, value, execLayerData }
+// or { type: "Erc721Deposit", token, sender, tokenId, baseLayerData, execLayerData }
+// or { type: "Erc1155SingleDeposit", token, sender, tokenId, value, baseLayerData, execLayerData }
+// or { type: "Erc1155BatchDeposit", token, sender, tokenIds, values, baseLayerData, execLayerData }
 // or undefined, if msgSender is not a portal (i.e. the input is not a deposit)
 ```
 
-Per-portal decode functions are also available (`decodeEtherDeposit`, `decodeERC20Deposit`, `decodeERC721Deposit`, `decodeERC1155SingleDeposit`, `decodeERC1155BatchDeposit`), each taking the payload directly and each with an encoding counterpart (`encodeEtherDeposit`, …) for producing test fixtures. The portal deployment addresses are exported as well (`etherPortalAddress`, `erc20PortalAddress`, `erc721PortalAddress`, `erc1155SinglePortalAddress`, `erc1155BatchPortalAddress`).
+Per-portal decode functions are also available (`decodeEtherDeposit`, `decodeErc20Deposit`, `decodeErc721Deposit`, `decodeErc1155SingleDeposit`, `decodeErc1155BatchDeposit`), each taking the payload directly and each with an encoding counterpart (`encodeEtherDeposit`, …) for producing test fixtures. The portal deployment addresses are exported as well (`etherPortalAddress`, `erc20PortalAddress`, `erc721PortalAddress`, `erc1155SinglePortalAddress`, `erc1155BatchPortalAddress`).
 
 ### Encoding (for testing)
 

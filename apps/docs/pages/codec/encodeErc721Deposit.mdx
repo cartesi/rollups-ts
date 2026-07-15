@@ -1,13 +1,13 @@
-# encodeERC721Deposit
+# encodeErc721Deposit
 
-Encodes an ERC-721 deposit payload as the ERC-721 portal does. This is the inverse of [decodeERC721Deposit](/codec/decodeERC721Deposit), useful for testing.
+Encodes an ERC-721 deposit payload as the ERC-721 portal does. This is the inverse of [decodeErc721Deposit](/codec/decodeErc721Deposit), useful for testing.
 
 ## Usage
 
 ```ts twoslash
-import { encodeERC721Deposit } from "@cartesi/codec";
+import { encodeErc721Deposit } from "@cartesi/codec";
 
-const payload = encodeERC721Deposit({
+const payload = encodeErc721Deposit({
   token: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
   sender: "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
   tokenId: 42n,
@@ -18,7 +18,7 @@ const payload = encodeERC721Deposit({
 
 ## Parameters
 
-An `ERC721Deposit` object:
+An `Erc721Deposit` object:
 
 - `token` (`Address`): token contract.
 - `sender` (`Address`): token sender.

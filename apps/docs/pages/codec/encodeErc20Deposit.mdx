@@ -1,13 +1,13 @@
-# encodeERC20Deposit
+# encodeErc20Deposit
 
-Encodes an ERC-20 deposit payload as the ERC-20 portal does. This is the inverse of [decodeERC20Deposit](/codec/decodeERC20Deposit), useful for testing.
+Encodes an ERC-20 deposit payload as the ERC-20 portal does. This is the inverse of [decodeErc20Deposit](/codec/decodeErc20Deposit), useful for testing.
 
 ## Usage
 
 ```ts twoslash
-import { encodeERC20Deposit } from "@cartesi/codec";
+import { encodeErc20Deposit } from "@cartesi/codec";
 
-const payload = encodeERC20Deposit({
+const payload = encodeErc20Deposit({
   token: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
   sender: "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
   value: 1000000000000000000n,
@@ -18,7 +18,7 @@ const payload = encodeERC20Deposit({
 
 ## Parameters
 
-An `ERC20Deposit` object:
+An `Erc20Deposit` object:
 
 - `token` (`Address`): token contract.
 - `sender` (`Address`): token sender.

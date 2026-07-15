@@ -1,4 +1,4 @@
-# decodeERC721Deposit
+# decodeErc721Deposit
 
 Decodes the payload of an input added by the ERC-721 portal (`depositERC721Token`).
 
@@ -7,10 +7,10 @@ Portal deposit payloads are packed-encoded (`abi.encodePacked`) by the rollups c
 ## Usage
 
 ```ts twoslash
-import { decodeERC721Deposit, decodeInput } from "@cartesi/codec";
+import { decodeErc721Deposit, decodeInput } from "@cartesi/codec";
 
 const input = decodeInput("0x...");
-const deposit = decodeERC721Deposit(input.payload);
+const deposit = decodeErc721Deposit(input.payload);
 // {
 //   token: "0x...",
 //   sender: "0x...",
@@ -26,7 +26,7 @@ const deposit = decodeERC721Deposit(input.payload);
 
 ## Return Type
 
-An `ERC721Deposit` object:
+An `Erc721Deposit` object:
 
 - `token` (`Address`): token contract.
 - `sender` (`Address`): token sender.
