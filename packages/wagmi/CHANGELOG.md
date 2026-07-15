@@ -1,5 +1,19 @@
 # @cartesi/wagmi
 
+## 2.0.0-alpha.36
+
+### Patch Changes
+
+-   ba44c32: migration from tsup to tsdown
+-   ba44c32: bump dependencies
+-   ba44c32: migration to typescript 6
+-   ea5f62f: excluding several imported contracts
+-   Updated dependencies [ba44c32]
+-   Updated dependencies [ba44c32]
+-   Updated dependencies [ba44c32]
+-   Updated dependencies [ea5f62f]
+    -   @cartesi/viem@2.0.0-alpha.32
+
 ## 2.0.0-alpha.35
 
 ### Patch Changes

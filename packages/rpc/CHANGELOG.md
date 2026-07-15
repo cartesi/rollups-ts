@@ -1,5 +1,14 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.23
+
+### Patch Changes
+
+-   ba44c32: migration from tsup to tsdown
+-   ba44c32: bump dependencies
+-   ba44c32: migration to typescript 6
+-   cf2ffe4: propagate transport failures (network errors, non-200 responses, invalid JSON) to pending requests instead of hanging forever
+
 ## 2.0.0-alpha.22
 
 ### Patch Changes
