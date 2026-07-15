@@ -78,7 +78,14 @@ Tarballs are downloaded and extracted to the operating system temporary director
 
 ## Selecting contracts
 
-Deployed contracts are always included. Use `include` to select which contracts *without* a deployment should also be generated (all of them, when omitted), and `exclude` to drop contracts entirely. Both accept contract names or regular expressions.
+Use `include` and `exclude` to select which contracts are generated. Both accept contract names or regular expressions, and apply to every contract in the artifacts, whether it has a deployment or not:
+
+- Neither defined: all contracts are included.
+- Only `include`: only the matching contracts are included.
+- Only `exclude`: all contracts are included except the matching ones.
+- Both: `include` is applied first, then `exclude`.
+
+For example, to generate only the `Inputs` and `Outputs` contracts:
 
 ```ts [wagmi.config.ts]
 import { rollupsContracts } from "@cartesi/wagmi-plugin";
@@ -88,8 +95,24 @@ export default defineConfig({
     out: "src/generated.ts",
     plugins: [
         rollupsContracts({
-            include: ["IApplication", "IInputBox", /^IERC\d+Portal$/],
-            exclude: ["SafeERC20Transfer"],
+            include: ["Inputs", "Outputs"],
+        }),
+    ],
+});
+```
+
+Or to generate all portal contracts except the interfaces:
+
+```ts [wagmi.config.ts]
+import { rollupsContracts } from "@cartesi/wagmi-plugin";
+import { defineConfig } from "@wagmi/cli";
+
+export default defineConfig({
+    out: "src/generated.ts",
+    plugins: [
+        rollupsContracts({
+            include: [/Portal$/],
+            exclude: [/^I[A-Z]/],
         }),
     ],
 });
@@ -116,5 +139,5 @@ export default defineConfig({
 | ------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `artifacts`   | `string \| { url: string; sha256?: string }`        | Source of the foundry build artifacts tarball. Defaults to the rollups-contracts `v3.0.0-alpha.6` release tarball, hash-verified.               |
 | `deployments` | `string \| { url: string; sha256?: string }`        | Source of the deployment addresses tarball. Defaults to the rollups-contracts `v3.0.0-alpha.6` release tarball, hash-verified.                  |
-| `include`     | `(string \| RegExp)[]`                              | Contracts (by name) to include among those that have no deployment. Deployed contracts are always included. When omitted, all are included.     |
-| `exclude`     | `(string \| RegExp)[]`                              | Contracts (by name) to exclude, deployed or not. Applied after `include`.                                                                       |
+| `include`     | `(string \| RegExp)[]`                              | Contracts (by name or regular expression) to include, deployed or not. When omitted, all contracts in the artifacts are included.               |
+| `exclude`     | `(string \| RegExp)[]`                              | Contracts (by name or regular expression) to exclude, deployed or not. Applied after `include`.                                                 |

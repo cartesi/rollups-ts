@@ -51,14 +51,13 @@ export interface RollupsContractsOptions {
      */
     deployments?: TarballSource;
     /**
-     * Contracts (by name) to include among those that have no deployment.
-     * Deployed contracts are always included, regardless of this list.
+     * Contracts (by name or regular expression) to include, deployed or not.
      * When omitted, all contracts in the artifacts are included.
      */
     include?: ContractFilter[];
     /**
-     * Contracts (by name) to exclude, deployed or not. Applied after
-     * `include`.
+     * Contracts (by name or regular expression) to exclude, deployed or not.
+     * Applied after `include`.
      */
     exclude?: ContractFilter[];
 }
@@ -184,6 +183,11 @@ const collapseAddress = (
  *
  * Deployed contracts get their address across all chains: a single address
  * if it is the same on every chain, or a per-chain record otherwise.
+ *
+ * `include` and `exclude` filter all contracts alike, deployed or not: when
+ * neither is given every contract in the artifacts is generated, `include`
+ * narrows generation to the matching contracts, and `exclude` then drops
+ * matching contracts.
  */
 export const rollupsContracts = (
     options: RollupsContractsOptions = {},
@@ -194,6 +198,8 @@ export const rollupsContracts = (
         include,
         exclude,
     } = options;
+    const included = (name: string): boolean =>
+        (include ? matches(name, include) : true) && !matches(name, exclude);
     return {
         name: "rollupsContracts",
         contracts: async () => {
@@ -215,7 +221,7 @@ export const rollupsContracts = (
             );
 
             for (const name of deployments.keys()) {
-                if (!artifacts.has(name) && !matches(name, exclude)) {
+                if (included(name) && !artifacts.has(name)) {
                     throw new Error(
                         `Deployed contract ${name} has no build artifact`,
                     );
@@ -223,15 +229,7 @@ export const rollupsContracts = (
             }
 
             return [...artifacts.entries()]
-                .filter(([name]) => {
-                    if (matches(name, exclude)) {
-                        return false;
-                    }
-                    if (deployments.has(name)) {
-                        return true;
-                    }
-                    return include ? matches(name, include) : true;
-                })
+                .filter(([name]) => included(name))
                 .sort(([a], [b]) => a.localeCompare(b))
                 .flatMap(([name, artifactPath]) => {
                     const abi = readAbi(artifactPath, name);

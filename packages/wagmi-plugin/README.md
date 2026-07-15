@@ -50,12 +50,27 @@ rollupsContracts({
 
 ### Selecting contracts
 
-Deployed contracts are always included. Use `include` to pick additional contracts that have no deployment (all are included when omitted), and `exclude` to drop contracts entirely. Both accept contract names or regular expressions:
+Use `include` and `exclude` to select which contracts are generated. Both accept contract names or regular expressions, and apply to every contract in the artifacts, whether it has a deployment or not:
+
+- Neither defined: all contracts are included.
+- Only `include`: only the matching contracts are included.
+- Only `exclude`: all contracts are included except the matching ones.
+- Both: `include` is applied first, then `exclude`.
+
+For example, to generate only the `Inputs` and `Outputs` contracts:
 
 ```ts
 rollupsContracts({
-    include: ["IApplication", "IInputBox", /^IERC\d+Portal$/],
-    exclude: ["SafeERC20Transfer"],
+    include: ["Inputs", "Outputs"],
+});
+```
+
+Or to generate all portal contracts except the interfaces:
+
+```ts
+rollupsContracts({
+    include: [/Portal$/],
+    exclude: [/^I[A-Z]/],
 });
 ```
 
