@@ -60,6 +60,9 @@ importers:
         specifier: 1.0.0-beta.6
         version: 1.0.0-beta.6(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(react-dom@19.2.7(react@19.2.7))(react-server-dom-webpack@19.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(webpack@5.108.4(esbuild@0.28.1)))(react@19.2.7)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)
     devDependencies:
+      '@cartesi/codec':
+        specifier: workspace:*
+        version: link:../../packages/codec
       '@cartesi/rpc':
         specifier: workspace:*
         version: link:../../packages/rpc
@@ -84,6 +87,43 @@ importers:
       viem:
         specifier: 'catalog:'
         version: 2.55.0(typescript@6.0.3)(zod@4.3.6)
+
+  packages/codec:
+    dependencies:
+      abitype:
+        specifier: ^1.2.4
+        version: 1.2.4(typescript@6.0.3)(zod@4.3.6)
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.5.3
+      '@cartesi/wagmi-plugin':
+        specifier: workspace:*
+        version: link:../wagmi-plugin
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.1.1
+      '@vitest/coverage-v8':
+        specifier: ^4.1.10
+        version: 4.1.10(vitest@4.1.10)
+      '@wagmi/cli':
+        specifier: ^2.10.0
+        version: 2.10.0(typescript@6.0.3)
+      npm-run-all:
+        specifier: ^4.1.5
+        version: 4.1.5
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.22.4(tsx@4.23.0)(typescript@6.0.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      viem:
+        specifier: 'catalog:'
+        version: 2.55.0(typescript@6.0.3)(zod@4.3.6)
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
 
   packages/rpc:
     dependencies:
@@ -142,7 +182,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.10
-        version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
+        version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
 
   packages/wagmi:
     dependencies:
@@ -4240,9 +4280,6 @@ packages:
     resolution: {integrity: sha512-nK28WOo+QIjBkDduTINE4JkF/UJJKyf2EJxvJKfblDpyg0Q+pkOHNTL0Qwy6NP6FhE/EnzV73BxxqcJaXY9anw==}
     engines: {node: '>= 0.4'}
 
-  obug@2.1.1:
-    resolution: {integrity: sha512-uTqF9MuPraAQ+IsnPf366RG4cP9RtUi7MLO1N3KEc+wb0a6yKpeL0lmk2IB1jY5KHPAlTc6T/JRdC/YqxHNwkQ==}
-
   obug@2.1.3:
     resolution: {integrity: sha512-9miFgM2OFba7hB+pRgvtV84pYTBaoTHohvmIgiRt6dRIzbwEOIaNaP+dIlGs2fNFoB0SeISs0Jz5WFVRid6Xyg==}
     engines: {node: '>=12.20.0'}
@@ -4992,10 +5029,6 @@ packages:
 
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
-
-  tinyexec@1.0.4:
-    resolution: {integrity: sha512-u9r3uZC0bdpGOXtlxUIdwf9pkmvhqJdrVCH9fapQtgy/OeTTMZ1nqH7agtvEfmGui6e1XxjcdrlxvxJvc3sMqw==}
-    engines: {node: '>=18'}
 
   tinyexec@1.2.4:
     resolution: {integrity: sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg==}
@@ -7539,7 +7572,7 @@ snapshots:
       istanbul-lib-report: 3.0.1
       istanbul-reports: 3.2.0
       magicast: 0.5.3
-      obug: 2.1.1
+      obug: 2.1.3
       std-env: 4.0.0
       tinyrainbow: 3.1.0
       vitest: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
@@ -7560,6 +7593,14 @@ snapshots:
       magic-string: 0.30.21
     optionalDependencies:
       vite: 8.1.3(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)
+
+  '@vitest/mocker@4.1.10(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))':
+    dependencies:
+      '@vitest/spy': 4.1.10
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.10':
     dependencies:
@@ -9662,7 +9703,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.5
 
   markdown-extensions@2.0.0: {}
 
@@ -10290,8 +10331,6 @@ snapshots:
       es-object-atoms: 1.1.1
       has-symbols: 1.1.0
       object-keys: 1.1.1
-
-  obug@2.1.1: {}
 
   obug@2.1.3: {}
 
@@ -11225,8 +11264,6 @@ snapshots:
 
   tinybench@2.9.0: {}
 
-  tinyexec@1.0.4: {}
-
   tinyexec@1.2.4: {}
 
   tinyglobby@0.2.17:
@@ -11593,15 +11630,43 @@ snapshots:
       es-module-lexer: 2.3.0
       expect-type: 1.3.0
       magic-string: 0.30.21
-      obug: 2.1.1
+      obug: 2.1.3
       pathe: 2.0.3
       picomatch: 4.0.5
       std-env: 4.0.0
       tinybench: 2.9.0
-      tinyexec: 1.0.4
+      tinyexec: 1.2.4
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
       vite: 8.1.3(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 26.1.1
+      '@vitest/coverage-v8': 4.1.10(vitest@4.1.10)
+    transitivePeerDependencies:
+      - msw
+
+  vitest@4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)):
+    dependencies:
+      '@vitest/expect': 4.1.10
+      '@vitest/mocker': 4.1.10(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
+      '@vitest/pretty-format': 4.1.10
+      '@vitest/runner': 4.1.10
+      '@vitest/snapshot': 4.1.10
+      '@vitest/spy': 4.1.10
+      '@vitest/utils': 4.1.10
+      es-module-lexer: 2.3.0
+      expect-type: 1.3.0
+      magic-string: 0.30.21
+      obug: 2.1.3
+      pathe: 2.0.3
+      picomatch: 4.0.5
+      std-env: 4.0.0
+      tinybench: 2.9.0
+      tinyexec: 1.2.4
+      tinyglobby: 0.2.17
+      tinyrainbow: 3.1.0
+      vite: 8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.1.1

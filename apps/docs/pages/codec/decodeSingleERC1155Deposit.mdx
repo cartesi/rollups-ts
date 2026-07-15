@@ -1,0 +1,43 @@
+# decodeSingleERC1155Deposit
+
+Decodes the payload of an input added by the ERC-1155 single portal (`depositSingleERC1155Token`).
+
+Portal deposit payloads are packed-encoded (`abi.encodePacked`) by the rollups contracts [`InputEncoding`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/InputEncoding.sol) library, with layout `token (20 bytes) ‖ sender (20 bytes) ‖ tokenId (32 bytes) ‖ value (32 bytes) ‖ abi.encode(baseLayerData, execLayerData)`. There is no function selector, so make sure the input's `msgSender` is the ERC-1155 single portal before decoding its `payload`.
+
+## Usage
+
+```ts twoslash
+import { decodeInput, decodeSingleERC1155Deposit } from "@cartesi/codec";
+
+const input = decodeInput("0x...");
+const deposit = decodeSingleERC1155Deposit(input.payload);
+// {
+//   token: "0x...",
+//   sender: "0x...",
+//   tokenId: 42n,
+//   value: 7n,
+//   baseLayerData: "0x",
+//   execLayerData: "0xdeadbeef",
+// }
+```
+
+## Parameters
+
+- `payload` (`Hex`): packed-encoded deposit payload (the `payload` field of a decoded input).
+
+## Return Type
+
+A `SingleERC1155Deposit` object:
+
+- `token` (`Address`): token contract.
+- `sender` (`Address`): token sender.
+- `tokenId` (`bigint`): identifier of the token being transferred.
+- `value` (`bigint`): transfer amount.
+- `baseLayerData` (`Hex`): additional data to be interpreted by the base layer.
+- `execLayerData` (`Hex`): additional data to be interpreted by the execution layer.
+
+Addresses are returned checksummed.
+
+## Errors
+
+Throws an `Error` if the payload is shorter than 104 bytes, or a viem decoding error if the data tail is malformed.

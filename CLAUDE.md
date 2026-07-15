@@ -12,7 +12,7 @@ pnpm + Turborepo monorepo of Cartesi Rollups TypeScript libraries. Requires Node
 - `pnpm dev` — watch mode (tsdown --watch) across packages
 - `pnpm lint` — `biome check` in each package
 - `pnpm check-types` — TypeScript type checking
-- Tests (only `@cartesi/viem` has tests, via vitest):
+- Tests (`@cartesi/viem` and `@cartesi/codec` have tests, via vitest):
   - `pnpm --filter @cartesi/viem test` — watch mode
   - `pnpm --filter @cartesi/viem test:coverage` — single run with coverage
   - Single test: `pnpm --filter @cartesi/viem exec vitest run __tests__/converter.test.ts`
@@ -34,12 +34,14 @@ Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/wagmi`, with 
 
 - **packages/wagmi (`@cartesi/wagmi`)** — React hooks. `src/publicL2/` wraps each viem L2 action in a TanStack Query hook (`useInput`, `useOutputs`, …), using the `CartesiPublicClient` from `provider.tsx` (`CartesiProvider` / `useCartesiClient`). `src/generated.ts` is **generated** contract hooks.
 
+- **packages/codec (`@cartesi/codec`)** — isomorphic encode/decode of input and output blobs, which are ABI-encoded calls to the rollups contracts `Inputs` (`EvmAdvance`) and `Outputs` (`Notice`, `Voucher`, `DelegateCallVoucher`) interfaces, and of portal deposit payloads (`src/portal.ts`), which are packed-encoded per the rollups contracts `InputEncoding` library. `src/rollups.ts` is **generated** (see Codegen); depends only on viem (peer) and abitype.
+
 - **packages/wagmi-plugin (`@cartesi/wagmi-plugin`)** — the `rollupsContracts` `@wagmi/cli` plugin, which downloads a rollups-contracts release (build artifacts + deployment addresses tarballs, hash-verified) into the OS temp dir and emits contracts with ABIs and addresses (single address when identical across chains, per-chain otherwise). `artifacts`/`deployments` default to the release pinned by `DEFAULT_VERSION` in `src/plugin.ts`. Supports `include`/`exclude` by contract name (or regex), applied to all contracts alike: when neither is given all contracts in the artifacts are included, `include` narrows the set, and `exclude` is applied after `include`.
 
 - **apps/docs** — vocs documentation site (`pnpm --filter @cartesi/docs dev`).
 
-### Codegen (viem and wagmi packages)
+### Codegen (viem, wagmi and codec packages)
 
-`pnpm build` in these packages runs `codegen` (= `wagmi generate`) before compiling. Each package's `wagmi.config.ts` uses the `rollupsContracts` plugin from `@cartesi/wagmi-plugin` to produce `src/rollups.ts` (viem) / `src/generated.ts` (wagmi) straight from the pinned rollups-contracts release tarballs; downloads are cached in the OS temp dir.
+`pnpm build` in these packages runs `codegen` (= `wagmi generate`) before compiling. Each package's `wagmi.config.ts` uses the `rollupsContracts` plugin from `@cartesi/wagmi-plugin` to produce `src/rollups.ts` (viem, codec) / `src/generated.ts` (wagmi) straight from the pinned rollups-contracts release tarballs; downloads are cached in the OS temp dir.
 
 Both packages use the plugin's default `artifacts`/`deployments`. To bump the rollups-contracts version, update `DEFAULT_VERSION` and the SHA-256 hashes in `packages/wagmi-plugin/src/plugin.ts`.

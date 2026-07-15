@@ -1,0 +1,26 @@
+# encodeVoucher
+
+Encodes a voucher as a `Voucher` call of the rollups contracts `Outputs` interface.
+
+## Usage
+
+```ts twoslash
+import { encodeVoucher } from "@cartesi/codec";
+
+const data = encodeVoucher({
+  destination: "0x0000000000000000000000000000000000000001",
+  value: 2n,
+  payload: "0xdeadbeef",
+});
+// "0x237a816f..."
+```
+
+## Parameters
+
+- `destination` (`Address`): address of the contract to be called.
+- `value` (`bigint`): amount of Wei to be passed along the call.
+- `payload` (`Hex`): calldata of the call.
+
+## Return Type
+
+`Hex`: ABI-encoded output data, starting with the `Voucher` function selector (`0x237a816f`).

@@ -1,0 +1,46 @@
+# decodeInput
+
+Decodes a blob of input data as an `EvmAdvance` call of the rollups contracts `Inputs` interface.
+
+## Usage
+
+```ts twoslash
+import { decodeInput } from "@cartesi/codec";
+
+const input = decodeInput(
+  "0x415bf363000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000004deadbeef00000000000000000000000000000000000000000000000000000000",
+);
+// {
+//   chainId: 1n,
+//   appContract: "0x0000000000000000000000000000000000000002",
+//   msgSender: "0x0000000000000000000000000000000000000003",
+//   blockNumber: 4n,
+//   blockTimestamp: 5n,
+//   prevRandao: 6n,
+//   index: 7n,
+//   payload: "0xdeadbeef",
+// }
+```
+
+## Parameters
+
+- `data` (`Hex`): ABI-encoded input data, starting with the `EvmAdvance` function selector (`0x415bf363`).
+
+## Return Type
+
+An `Input` object, with field names and types inferred from the `EvmAdvance` ABI:
+
+- `chainId` (`bigint`): chain id of the base layer.
+- `appContract` (`Address`): address of the application contract.
+- `msgSender` (`Address`): address of the input sender.
+- `blockNumber` (`bigint`): base layer block number in which the input was added.
+- `blockTimestamp` (`bigint`): base layer block timestamp (in seconds) in which the input was added.
+- `prevRandao` (`bigint`): `prevrandao` value of the base layer block in which the input was added.
+- `index` (`bigint`): index of the input in the application input box.
+- `payload` (`Hex`): application-specific payload of the input.
+
+Addresses are returned checksummed.
+
+## Errors
+
+Throws a viem `AbiFunctionSignatureNotFoundError` if the data does not start with the `EvmAdvance` function selector.

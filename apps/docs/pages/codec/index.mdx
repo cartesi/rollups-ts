@@ -1,0 +1,61 @@
+# Codec
+
+The `@cartesi/codec` package provides isomorphic utility functions to decode (and encode, for testing) data compliant with the Cartesi Rollups [`Inputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Inputs.sol) and [`Outputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Outputs.sol) interfaces.
+
+Inputs delivered to a Cartesi application and outputs produced by it are ABI-encoded as calls to the functions of those interfaces:
+
+- inputs are encoded as `EvmAdvance(uint256,address,address,uint256,uint256,uint256,uint256,bytes)` calls;
+- outputs are encoded as `Notice(bytes)`, `Voucher(address,uint256,bytes)` or `DelegateCallVoucher(address,bytes)` calls.
+
+The package decodes those blobs into friendly typed objects, and encodes typed objects back into blobs. The `Input` and `Output` TypeScript types are inferred directly from the `Inputs` and `Outputs` ABIs, so they always match the rollups-contracts release the package is built against. It works in browsers and Node.js, and depends only on [viem](https://viem.sh) and [abitype](https://abitype.dev).
+
+## Installation
+
+:::code-group
+
+```sh [npm]
+npm install @cartesi/codec viem
+```
+
+```sh [pnpm]
+pnpm add @cartesi/codec viem
+```
+
+```sh [yarn]
+yarn add @cartesi/codec viem
+```
+
+:::
+
+## Decode functions
+
+- [decodeInput](/codec/decodeInput) — decode an `EvmAdvance` input blob
+- [decodeOutput](/codec/decodeOutput) — decode a `Notice`, `Voucher` or `DelegateCallVoucher` output blob
+
+## Encode functions
+
+Each decode function has an encoding counterpart, useful for producing test fixtures:
+
+- [encodeInput](/codec/encodeInput)
+- [encodeOutput](/codec/encodeOutput)
+- [encodeNotice](/codec/encodeNotice)
+- [encodeVoucher](/codec/encodeVoucher)
+- [encodeDelegateCallVoucher](/codec/encodeDelegateCallVoucher)
+
+## Portal deposit functions
+
+Deposits made through the rollups portals arrive as inputs whose `msgSender` is the portal and whose `payload` is packed-encoded (`abi.encodePacked`) by the rollups contracts [`InputEncoding`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/InputEncoding.sol) library. These functions decode (and encode, for testing) those payloads:
+
+- [decodeEtherDeposit](/codec/decodeEtherDeposit) / [encodeEtherDeposit](/codec/encodeEtherDeposit)
+- [decodeERC20Deposit](/codec/decodeERC20Deposit) / [encodeERC20Deposit](/codec/encodeERC20Deposit)
+- [decodeERC721Deposit](/codec/decodeERC721Deposit) / [encodeERC721Deposit](/codec/encodeERC721Deposit)
+- [decodeSingleERC1155Deposit](/codec/decodeSingleERC1155Deposit) / [encodeSingleERC1155Deposit](/codec/encodeSingleERC1155Deposit)
+- [decodeBatchERC1155Deposit](/codec/decodeBatchERC1155Deposit) / [encodeBatchERC1155Deposit](/codec/encodeBatchERC1155Deposit)
+
+## ABIs
+
+The `Inputs` and `Outputs` ABIs used by the codec are also exported, both from the main entrypoint and from `@cartesi/codec/abi`:
+
+```ts twoslash
+import { inputsAbi, outputsAbi } from "@cartesi/codec/abi";
+```

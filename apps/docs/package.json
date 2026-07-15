@@ -18,6 +18,7 @@
         "waku": "1.0.0-beta.6"
     },
     "devDependencies": {
+        "@cartesi/codec": "workspace:*",
         "@cartesi/rpc": "workspace:*",
         "@cartesi/viem": "workspace:*",
         "@cartesi/wagmi": "workspace:*",

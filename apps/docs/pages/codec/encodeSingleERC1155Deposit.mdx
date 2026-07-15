@@ -1,0 +1,33 @@
+# encodeSingleERC1155Deposit
+
+Encodes an ERC-1155 single deposit payload as the ERC-1155 single portal does. This is the inverse of [decodeSingleERC1155Deposit](/codec/decodeSingleERC1155Deposit), useful for testing.
+
+## Usage
+
+```ts twoslash
+import { encodeSingleERC1155Deposit } from "@cartesi/codec";
+
+const payload = encodeSingleERC1155Deposit({
+  token: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+  sender: "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+  tokenId: 42n,
+  value: 7n,
+  baseLayerData: "0x",
+  execLayerData: "0xdeadbeef",
+});
+```
+
+## Parameters
+
+A `SingleERC1155Deposit` object:
+
+- `token` (`Address`): token contract.
+- `sender` (`Address`): token sender.
+- `tokenId` (`bigint`): identifier of the token being transferred.
+- `value` (`bigint`): transfer amount.
+- `baseLayerData` (`Hex`): additional data to be interpreted by the base layer.
+- `execLayerData` (`Hex`): additional data to be interpreted by the execution layer.
+
+## Return Type
+
+`Hex`: packed-encoded deposit payload, with layout `token (20 bytes) ‖ sender (20 bytes) ‖ tokenId (32 bytes) ‖ value (32 bytes) ‖ abi.encode(baseLayerData, execLayerData)`.

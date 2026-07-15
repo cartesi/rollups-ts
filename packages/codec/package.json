@@ -1,0 +1,70 @@
+{
+    "name": "@cartesi/codec",
+    "description": "Codec for Cartesi Rollups inputs and outputs",
+    "version": "0.0.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cartesi/rollups-ts"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@cartesi/wagmi-plugin": "workspace:*",
+        "@types/node": "catalog:",
+        "@vitest/coverage-v8": "^4.1.10",
+        "@wagmi/cli": "^2.10.0",
+        "npm-run-all": "^4.1.5",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "viem": "catalog:",
+        "vitest": "^4.1.10"
+    },
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "require": "./dist/index.cjs"
+            }
+        },
+        "./abi": {
+            "import": {
+                "types": "./dist/rollups.d.ts",
+                "import": "./dist/rollups.js"
+            },
+            "require": {
+                "types": "./dist/rollups.d.cts",
+                "require": "./dist/rollups.cjs"
+            }
+        }
+    },
+    "files": [
+        "dist/**"
+    ],
+    "peerDependencies": {
+        "viem": "^2.0.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "run-s codegen compile",
+        "codegen": "wagmi generate",
+        "compile": "tsdown",
+        "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+        "dev": "tsdown --watch",
+        "lint": "biome check",
+        "prepack": "run-s build",
+        "test": "vitest",
+        "test:coverage": "vitest run --coverage"
+    },
+    "dependencies": {
+        "abitype": "^1.2.4"
+    }
+}
