@@ -47,8 +47,7 @@
         "compile": "tsdown",
         "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
         "dev": "tsdown --watch",
-        "lint": "biome check",
-        "prepack": "run-s build"
+        "lint": "biome check"
     },
     "publishConfig": {
         "access": "public"
