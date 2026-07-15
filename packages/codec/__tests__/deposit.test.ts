@@ -2,11 +2,11 @@ import { getAddress } from "viem";
 import { describe, expect, it } from "vitest";
 import {
     decodeDeposit,
-    encodeERC1155BatchDeposit,
-    encodeERC20Deposit,
-    encodeERC721Deposit,
+    encodeErc1155BatchDeposit,
+    encodeErc20Deposit,
+    encodeErc721Deposit,
     encodeEtherDeposit,
-    encodeERC1155SingleDeposit,
+    encodeErc1155SingleDeposit,
 } from "../src/portal.js";
 import {
     erc1155BatchPortalAddress,
@@ -44,9 +44,9 @@ describe("decodeDeposit", () => {
         expect(
             decodeDeposit({
                 msgSender: erc20PortalAddress,
-                payload: encodeERC20Deposit(deposit),
+                payload: encodeErc20Deposit(deposit),
             }),
-        ).toEqual({ type: "ERC20Deposit", ...deposit });
+        ).toEqual({ type: "Erc20Deposit", ...deposit });
     });
 
     it("should decode an ERC-721 deposit input", () => {
@@ -60,9 +60,9 @@ describe("decodeDeposit", () => {
         expect(
             decodeDeposit({
                 msgSender: erc721PortalAddress,
-                payload: encodeERC721Deposit(deposit),
+                payload: encodeErc721Deposit(deposit),
             }),
-        ).toEqual({ type: "ERC721Deposit", ...deposit });
+        ).toEqual({ type: "Erc721Deposit", ...deposit });
     });
 
     it("should decode an ERC-1155 single deposit input", () => {
@@ -77,9 +77,9 @@ describe("decodeDeposit", () => {
         expect(
             decodeDeposit({
                 msgSender: erc1155SinglePortalAddress,
-                payload: encodeERC1155SingleDeposit(deposit),
+                payload: encodeErc1155SingleDeposit(deposit),
             }),
-        ).toEqual({ type: "ERC1155SingleDeposit", ...deposit });
+        ).toEqual({ type: "Erc1155SingleDeposit", ...deposit });
     });
 
     it("should decode an ERC-1155 batch deposit input", () => {
@@ -94,9 +94,9 @@ describe("decodeDeposit", () => {
         expect(
             decodeDeposit({
                 msgSender: erc1155BatchPortalAddress,
-                payload: encodeERC1155BatchDeposit(deposit),
+                payload: encodeErc1155BatchDeposit(deposit),
             }),
-        ).toEqual({ type: "ERC1155BatchDeposit", ...deposit });
+        ).toEqual({ type: "Erc1155BatchDeposit", ...deposit });
     });
 
     it("should dispatch regardless of msgSender case", () => {
