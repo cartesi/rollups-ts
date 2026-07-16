@@ -1,7 +1,11 @@
 import { cartesi } from "@cartesi/viem/chains";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { createCartesiPublicClient, getOutputsExecuted, toEVM } from "../src";
+import {
+    createCartesiPublicClient,
+    getOutputsExecuted,
+    toOutputArgs,
+} from "../src";
 import { iApplicationAbi } from "../src/rollups";
 
 async function main() {
@@ -40,7 +44,7 @@ async function main() {
         console.log(output);
 
         // convert output to `IApplication.executeOutput` arguments
-        const args = toEVM(output);
+        const args = toOutputArgs(output);
 
         // validateOutput reverts if the output is invalid
         await publicClient.readContract({

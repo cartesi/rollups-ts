@@ -5,7 +5,7 @@ import type {
 import type { iApplicationAbi } from "../rollups.js";
 import type { Output } from "./actions.js";
 
-export type ExecuteOutputArgs = AbiParametersToPrimitiveTypes<
+export type OutputArgs = AbiParametersToPrimitiveTypes<
     ExtractAbiFunction<typeof iApplicationAbi, "executeOutput">["inputs"]
 >;
 
@@ -14,7 +14,7 @@ export type ExecuteOutputArgs = AbiParametersToPrimitiveTypes<
  * into the arguments of `IApplication.executeOutput` / `validateOutput`.
  * Throws if the output has no proof (`outputHashesSiblings`).
  */
-export const toEVM = (output: Output): ExecuteOutputArgs => {
+export const toOutputArgs = (output: Output): OutputArgs => {
     const { index: outputIndex, outputHashesSiblings, rawData } = output;
     if (!outputHashesSiblings) {
         throw new Error("Output has no proof");

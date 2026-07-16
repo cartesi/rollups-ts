@@ -44,7 +44,7 @@ Users of [wagmi](https://wagmi.sh) can use the generated actions and React hooks
 
 - getInputsAdded: get the input(s) added to the InputBox given a `TransactionReceipt`.
 - getOutputsExecuted: get the output(s) executed by an application given a `TransactionReceipt`.
-- toEVM: convert an `Output` returned by the node API into the arguments of `IApplication.executeOutput` / `IApplication.validateOutput`.
+- toOutputArgs: convert an `Output` returned by the node API into the arguments of `IApplication.executeOutput` / `IApplication.validateOutput`.
 
 ```typescript
 const receipt = await publicClient.waitForTransactionReceipt({ hash });
