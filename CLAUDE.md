@@ -27,7 +27,7 @@ Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/wagmi`, with 
 - **packages/rpc (`@cartesi/rpc`)** — Typed JSON-RPC client for the Cartesi node API. `types.ts` and `methods.ts` are hand-written mirrors of the node's `cartesi_*` JSON-RPC methods. Wire types are raw: hex-string quantities and snake_case field names.
 
 - **packages/viem (`@cartesi/viem`)** — viem extension, structured like viem itself:
-  - `src/actions/` — one file per action. **L2 actions** (getInput, listOutputs, waitForInput, …) call `cartesi_*` RPC methods on a Cartesi node through a viem transport. L1 contract interactions are done with plain viem contract actions using the generated ABIs/addresses exported via the `@cartesi/viem/abi` entrypoint (plus the `toEVM` output-conversion helper).
+  - `src/actions/` — one file per action. **L2 actions** (getInput, listOutputs, waitForInput, …) call `cartesi_*` RPC methods on a Cartesi node through a viem transport. L1 contract interactions are done with plain viem contract actions using the generated ABIs/addresses exported via the `@cartesi/viem/abi` entrypoint (plus the `toOutputArgs` output-conversion helper).
   - `src/types/converter.ts` — converts raw RPC wire types (hex/snake_case, from `@cartesi/rpc`) into friendly types (bigint/camelCase, defined in `src/types/actions.ts` and `src/types/output.ts`). New RPC-backed actions follow this pattern: request with raw params, convert the response.
   - `src/decorators/` — `publicActionsL2` (Cartesi node RPC schema + actions); `src/clients/createCartesiPublicClient.ts` creates a viem client bound to the Cartesi RPC schema.
   - `src/rollups.ts` is **generated** — do not edit by hand (see Codegen).
