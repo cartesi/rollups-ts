@@ -4,13 +4,14 @@ import type {
 } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const lastAcceptedEpochIndexOptions = (
+export const lastAcceptedEpochIndexOptions = (
     client: CartesiPublicClient,
     params: Partial<GetLastAcceptedEpochIndexParams>,
 ) =>
     queryOptions({
-        queryKey: ["lastAcceptedEpochIndex", params],
+        queryKey: [serverUrl(client), "lastAcceptedEpochIndex", params],
         queryFn:
             params.application !== undefined
                 ? () =>

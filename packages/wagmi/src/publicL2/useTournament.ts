@@ -2,13 +2,14 @@ import type { CartesiPublicClient, GetTournamentParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import type { Address } from "viem";
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const tournamentOptions = (
+export const tournamentOptions = (
     client: CartesiPublicClient,
     params: Partial<GetTournamentParams>,
 ) =>
     queryOptions({
-        queryKey: ["tournament", params],
+        queryKey: [serverUrl(client), "tournament", params],
         queryFn:
             params.application !== undefined && params.address !== undefined
                 ? () =>

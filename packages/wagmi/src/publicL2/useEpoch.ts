@@ -1,13 +1,15 @@
 import type { CartesiPublicClient, GetEpochParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const epochOptions = (
+export const epochOptions = (
     client: CartesiPublicClient,
     params: Partial<GetEpochParams>,
 ) =>
     queryOptions({
         queryKey: [
+            serverUrl(client),
             "epoch",
             { ...params, epochIndex: params.epochIndex?.toString() },
         ],

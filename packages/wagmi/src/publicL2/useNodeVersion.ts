@@ -2,10 +2,11 @@ import type { CartesiPublicClient } from "@cartesi/viem";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const nodeVersionOptions = (client: CartesiPublicClient) =>
+export const nodeVersionOptions = (client: CartesiPublicClient) =>
     queryOptions({
-        queryKey: ["nodeVersion"],
+        queryKey: [serverUrl(client), "nodeVersion"],
         queryFn: () => client.getNodeVersion(),
     });
 

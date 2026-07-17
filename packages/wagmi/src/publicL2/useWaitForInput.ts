@@ -1,13 +1,15 @@
 import type { CartesiPublicClient, WaitForInputParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
-import { useCartesiClient } from "./provider";
+import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const waitForInputOptions = (
+export const waitForInputOptions = (
     client: CartesiPublicClient,
     params: Partial<WaitForInputParams>,
 ) =>
     queryOptions({
         queryKey: [
+            serverUrl(client),
             "waitForInput",
             {
                 ...params,

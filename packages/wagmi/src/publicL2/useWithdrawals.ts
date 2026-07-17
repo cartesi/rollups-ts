@@ -1,13 +1,15 @@
 import type { CartesiPublicClient, ListWithdrawalsParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const withdrawalsOptions = (
+export const withdrawalsOptions = (
     client: CartesiPublicClient,
     params: Partial<ListWithdrawalsParams>,
 ) =>
     queryOptions({
         queryKey: [
+            serverUrl(client),
             "withdrawals",
             {
                 application: params.application,

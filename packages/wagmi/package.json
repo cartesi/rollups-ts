@@ -12,12 +12,16 @@
     "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@cartesi/wagmi-plugin": "workspace:*",
+        "@tanstack/react-query": "^5.0.0",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
+        "@vitest/coverage-v8": "^4.1.10",
         "@wagmi/cli": "^2.10.0",
         "npm-run-all": "^4.1.5",
         "tsdown": "catalog:",
-        "typescript": "catalog:"
+        "typescript": "catalog:",
+        "viem": "catalog:",
+        "vitest": "^4.1.10"
     },
     "type": "module",
     "main": "./dist/index.cjs",
@@ -53,6 +57,8 @@
         "compile": "tsdown",
         "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
         "dev": "tsdown --watch",
-        "lint": "biome check"
+        "lint": "biome check",
+        "test": "vitest",
+        "test:coverage": "vitest run --coverage"
     }
 }

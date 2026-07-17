@@ -1,13 +1,15 @@
 import type { CartesiPublicClient, GetInputParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const inputOptions = (
+export const inputOptions = (
     client: CartesiPublicClient,
     params: Partial<GetInputParams>,
 ) =>
     queryOptions({
         queryKey: [
+            serverUrl(client),
             "input",
             { ...params, inputIndex: params.inputIndex?.toString() },
         ],
