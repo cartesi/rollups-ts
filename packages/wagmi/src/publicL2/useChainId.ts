@@ -2,10 +2,11 @@ import type { CartesiPublicClient } from "@cartesi/viem";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const chainIdOptions = (client: CartesiPublicClient) =>
+export const chainIdOptions = (client: CartesiPublicClient) =>
     queryOptions({
-        queryKey: ["chainId"],
+        queryKey: [serverUrl(client), "chainId"],
         queryFn: () => client.getChainId(),
     });
 

@@ -4,13 +4,14 @@ import type {
 } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const processedInputCountOptions = (
+export const processedInputCountOptions = (
     client: CartesiPublicClient,
     params: Partial<GetProcessedInputCountParams>,
 ) =>
     queryOptions({
-        queryKey: ["processedInputCount", params],
+        queryKey: [serverUrl(client), "processedInputCount", params],
         queryFn:
             params.application !== undefined
                 ? () =>

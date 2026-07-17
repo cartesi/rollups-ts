@@ -1,13 +1,15 @@
 import type { CartesiPublicClient, GetOutputParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const outputOptions = (
+export const outputOptions = (
     client: CartesiPublicClient,
     params: Partial<GetOutputParams>,
 ) =>
     queryOptions({
         queryKey: [
+            serverUrl(client),
             "output",
             { ...params, outputIndex: params.outputIndex?.toString() },
         ],

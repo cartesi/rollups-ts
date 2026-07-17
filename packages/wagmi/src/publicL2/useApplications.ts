@@ -4,13 +4,14 @@ import type {
 } from "@cartesi/viem";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const applicationsOptions = (
+export const applicationsOptions = (
     client: CartesiPublicClient,
     params?: Partial<ListApplicationsParams>,
 ) =>
     queryOptions({
-        queryKey: ["applications", params],
+        queryKey: [serverUrl(client), "applications", params],
         queryFn: () => client.listApplications(params),
     });
 

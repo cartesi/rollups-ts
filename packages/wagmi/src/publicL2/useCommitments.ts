@@ -1,13 +1,15 @@
 import type { CartesiPublicClient, ListCommitmentsParams } from "@cartesi/viem";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const commitmentsOptions = (
+export const commitmentsOptions = (
     client: CartesiPublicClient,
     params: Partial<ListCommitmentsParams>,
 ) =>
     queryOptions({
         queryKey: [
+            serverUrl(client),
             "commitments",
             { ...params, epochIndex: params.epochIndex?.toString() },
         ],

@@ -5,13 +5,15 @@ import type {
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import type { Address, Hash } from "viem";
 import { useCartesiClient } from "./provider.js";
+import { serverUrl } from "./serverUrl.js";
 
-const matchAdvancesOptions = (
+export const matchAdvancesOptions = (
     client: CartesiPublicClient,
     params: Partial<ListMatchAdvancesParams>,
 ) =>
     queryOptions({
         queryKey: [
+            serverUrl(client),
             "matchAdvances",
             { ...params, epochIndex: params.epochIndex?.toString() },
         ],
