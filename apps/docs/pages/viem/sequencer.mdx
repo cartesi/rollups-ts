@@ -1,0 +1,217 @@
+# Sequencer Transactions
+
+The `@cartesi/viem/sequencer` entrypoint provides a dedicated client for sending transactions to a [Cartesi sequencer](https://github.com/cartesi/sequencer). Transactions are signed as [EIP-712 typed data](https://viem.sh/docs/actions/wallet/signTypedData) and submitted to the sequencer HTTP API.
+
+The sequencer is a separate service, so its client is separate from viem's L1 Wallet Client. A browser wallet can still sign transactions by supplying its Wallet Client as the sequencer client's signer.
+
+## Browser wallets
+
+Create a viem [`WalletClient`](https://viem.sh/docs/clients/wallet) from the wallet's EIP-1193 provider, then pass it to `createSequencerClient`. With MetaMask, signing opens the normal typed-data confirmation prompt.
+
+```ts
+import { createSequencerClient } from "@cartesi/viem/sequencer";
+import {
+  createWalletClient,
+  custom,
+  http,
+  type Address,
+} from "viem";
+import { mainnet } from "viem/chains";
+
+const [account] = (await window.ethereum.request({
+  method: "eth_requestAccounts",
+})) as [Address, ...Address[]];
+
+const walletClient = createWalletClient({
+  chain: mainnet,
+  transport: custom(window.ethereum),
+});
+
+const sequencerClient = createSequencerClient({
+  account,
+  application: "0x...",
+  chain: mainnet,
+  transport: http("https://sequencer.example.com"),
+  walletClient,
+});
+
+const receipt = await sequencerClient.sendTransaction({
+  data: "0x...",
+  maxFee: 1_200,
+  nonce: 0,
+});
+```
+
+The two transports have distinct responsibilities:
+
+- `custom(window.ethereum)` sends signing requests such as `eth_signTypedData_v4` to MetaMask.
+- `http("https://sequencer.example.com")` submits signed transactions to the sequencer's `/tx` endpoint.
+
+The private key is never exposed to either client.
+
+:::note
+The sequencer client's `chain` determines the EIP-712 `chainId`. It must match both the connected wallet network and the chain configured by the sequencer.
+:::
+
+## Local accounts
+
+For a viem local account, pass the account directly and omit `walletClient`. Viem signs locally, so the sequencer transport is never used for wallet RPC.
+
+```ts twoslash
+import { createSequencerClient } from "@cartesi/viem/sequencer";
+import { http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { mainnet } from "viem/chains";
+
+const account = privateKeyToAccount("0x...");
+
+const sequencerClient = createSequencerClient({
+  account,
+  application: "0x...",
+  chain: mainnet,
+  transport: http("https://sequencer.example.com"),
+});
+
+const receipt = await sequencerClient.sendTransaction({
+  data: "0x...",
+  maxFee: 1_200,
+  nonce: 0,
+});
+```
+
+## Actions
+
+### `sendTransaction`
+
+Signs the transaction and immediately submits it to the configured sequencer. This is the usual action for an application frontend.
+
+```ts
+const receipt = await sequencerClient.sendTransaction({
+  data: "0x...",
+  maxFee: 1_200,
+  nonce: 0,
+});
+```
+
+The returned receipt is the sequencer's soft confirmation:
+
+```ts
+type SequencerTransactionReceipt = {
+  ok: true;
+  sender: Address;
+  nonce: number;
+};
+```
+
+A soft confirmation means that the sequencer accepted the transaction. It is not an L1 transaction receipt or a finality guarantee.
+
+### `signTransaction`
+
+Signs without making an HTTP request to the sequencer. Use this when submission happens later or through another process.
+
+```ts
+const transaction = await sequencerClient.signTransaction({
+  data: "0x...",
+  maxFee: 1_200,
+  nonce: 0,
+});
+```
+
+It returns the exact payload accepted by the sequencer:
+
+```ts
+type SignedSequencerTransaction = {
+  message: {
+    data: Hex;
+    max_fee: number;
+    nonce: number;
+  };
+  sender: Address;
+  signature: Hex;
+};
+```
+
+### `submitTransaction`
+
+Submits an already signed transaction without asking the account to sign again. This complements `signTransaction` for deferred submission and relayer-style flows.
+
+```ts
+const receipt = await sequencerClient.submitTransaction({
+  transaction,
+});
+```
+
+In short, `sendTransaction` is the sign-and-submit convenience action, while `submitTransaction` performs only the submission step.
+
+## Client configuration
+
+| Parameter | Description |
+| --- | --- |
+| `account` | Local account or JSON-RPC account address that signs transactions. |
+| `application` | Application address used as the EIP-712 verifying contract. |
+| `chain` | L1 chain whose ID is included in the EIP-712 domain. |
+| `transport` | Viem HTTP transport pointed at the sequencer base URL. |
+| `walletClient` | Required for JSON-RPC accounts such as MetaMask; omitted for local accounts. |
+
+The HTTP transport accepts normal viem configuration such as request headers and a timeout:
+
+```ts
+createSequencerClient({
+  account,
+  application: "0x...",
+  chain: mainnet,
+  transport: http("https://sequencer.example.com", {
+    timeout: 10_000,
+    fetchOptions: {
+      headers: { "x-api-key": "..." },
+    },
+  }),
+  walletClient,
+});
+```
+
+## Transaction parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `data` | `Hex` | Application-defined, SSZ-encoded method payload. |
+| `maxFee` | `number` | Maximum fee as the sequencer protocol's `uint16` exponent. |
+| `nonce` | `number` | Sender nonce as an unsigned `uint32`. |
+| `account` | `Account \| Address` | Optional account override; defaults to the client account. |
+
+The current sequencer API does not discover the next nonce or estimate the fee. Applications must obtain those values from their own state or indexing service.
+
+## EIP-712 message
+
+The client signs a `UserOp` typed-data message with this domain:
+
+| Field | Value |
+| --- | --- |
+| `name` | `CartesiAppSequencer` |
+| `version` | `1` |
+| `chainId` | The sequencer client chain ID |
+| `verifyingContract` | The configured application address |
+
+The `UserOp` fields are `nonce: uint32`, `max_fee: uint16`, and `data: bytes`.
+
+## Errors and retries
+
+Rejected transactions throw `SequencerTransactionRejectedError`, which exposes the HTTP `status`, sequencer `code`, and structured response `body`. Network failures throw `SequencerRequestError`, and malformed HTTP responses throw `SequencerResponseError`.
+
+```ts
+import { SequencerTransactionRejectedError } from "@cartesi/viem/sequencer";
+
+try {
+  await sequencerClient.sendTransaction({
+    data: "0x...",
+    maxFee: 1_200,
+    nonce: 0,
+  });
+} catch (error) {
+  if (error instanceof SequencerTransactionRejectedError) {
+    console.error(error.code, error.body.message);
+  }
+}
+```
+
+The client does not retry submissions automatically. A request that times out may already have been accepted, so retry only after checking transaction state and nonce handling for the application.

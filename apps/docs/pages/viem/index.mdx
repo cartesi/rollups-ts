@@ -9,6 +9,11 @@ It provides L2 public actions and a new `createCartesiPublicClient` client const
 Interactions with the Cartesi rollups [smart contracts](https://github.com/cartesi/rollups-contracts) infrastructure, like sending inputs, depositing assets and executing outputs, are done with viem's own contract actions, using the properly typed ABIs and deployment addresses exported by the `@cartesi/viem/abi` entrypoint.
 Check the [L1 Contract Interactions](/viem/l1) guide for details.
 
+## Sequencer Transactions
+
+The `@cartesi/viem/sequencer` entrypoint provides a dedicated client for signing and sending application transactions to a Cartesi sequencer. It supports both browser wallets such as MetaMask and local viem accounts.
+Check the [Sequencer Transactions](/viem/sequencer) guide for setup and API details.
+
 ## Public L2 Actions
 
 Provides convenient methods to interact with Cartesi JSON-RPC API, which provides read-only access to the app specific L2.

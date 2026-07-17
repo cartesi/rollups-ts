@@ -34,6 +34,10 @@ const config: Config = defineConfig({
                     link: "/viem/l1",
                 },
                 {
+                    text: "Sequencer Transactions",
+                    link: "/viem/sequencer",
+                },
+                {
                     text: "Public L2 Actions",
                     collapsed: true,
                     items: [
