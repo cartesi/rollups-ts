@@ -4,9 +4,11 @@ import { inputsAbi } from "./rollups.js";
 import type { ParamsToObject } from "./types.js";
 
 /**
- * Input of a Cartesi application, as delivered to the machine by the node.
- * Field names and types are inferred from the arguments of the `EvmAdvance`
- * function of the rollups contracts `Inputs` interface.
+ * Input of a Cartesi application. Inputs are encoded as `EvmAdvance` calls
+ * by the `InputBox` contract when added on the base layer; the node just
+ * forwards the encoded blob to the machine. Field names and types are
+ * inferred from the arguments of the `EvmAdvance` function of the rollups
+ * contracts `Inputs` interface.
  */
 export type Input = ParamsToObject<
     ExtractAbiFunction<typeof inputsAbi, "EvmAdvance">["inputs"]
