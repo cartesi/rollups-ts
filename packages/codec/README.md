@@ -1,6 +1,6 @@
 # Cartesi Codec
 
-Isomorphic utility functions to decode (and encode, for testing) data compliant with the Cartesi Rollups [`Inputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Inputs.sol) and [`Outputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Outputs.sol) interfaces.
+Isomorphic utility functions to decode (and encode, for testing) data compliant with the Cartesi Rollups [`Inputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Inputs.sol) and [`Outputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Outputs.sol) interfaces, as well as the portal deposit input payloads packed-encoded by the [`InputEncoding`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/InputEncoding.sol) library.
 
 Inputs delivered to a Cartesi application and outputs produced by it are ABI-encoded as calls to the functions of those interfaces. This package decodes those blobs into friendly typed objects, and encodes typed objects back into blobs. The `Input` and `Output` TypeScript types are inferred directly from the `Inputs` and `Outputs` ABIs, so they always match the rollups-contracts release the package is built against. It works in browsers and Node.js, and depends only on [viem](https://viem.sh) and [abitype](https://abitype.dev).
 

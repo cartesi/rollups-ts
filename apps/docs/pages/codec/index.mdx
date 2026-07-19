@@ -1,6 +1,6 @@
 # Codec
 
-The `@cartesi/codec` package provides isomorphic utility functions to decode (and encode, for testing) data compliant with the Cartesi Rollups [`Inputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Inputs.sol) and [`Outputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Outputs.sol) interfaces.
+The `@cartesi/codec` package provides isomorphic utility functions to decode (and encode, for testing) data compliant with the Cartesi Rollups [`Inputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Inputs.sol) and [`Outputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Outputs.sol) interfaces, as well as the portal deposit input payloads packed-encoded by the [`InputEncoding`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/InputEncoding.sol) library.
 
 Inputs delivered to a Cartesi application and outputs produced by it are ABI-encoded as calls to the functions of those interfaces:
 
