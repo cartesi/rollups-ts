@@ -402,6 +402,7 @@ export type ListInputsParams = PaginationParams & {
     application: string | Address;
     epoch_index?: HexNumber;
     sender?: Address;
+    transaction_hash?: Hash;
 };
 
 export type ListInputsReturnType = PaginatedReturnType<Input>;
