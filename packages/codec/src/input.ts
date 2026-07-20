@@ -25,7 +25,7 @@ import {
     writeUint256,
 } from "./bytes.js";
 import { inputsAbi } from "./rollups.js";
-import type { DecodedBytes, EncodedData, ParamsToObject, To } from "./types.js";
+import type { ParamsToObject, To } from "./types.js";
 
 /**
  * Input of a Cartesi application. Inputs are encoded as `EvmAdvance` calls
@@ -102,14 +102,14 @@ const decodeInputBytes = (data: ByteArray): Input<ByteArray> => {
  * @throws viem `AbiFunctionSignatureNotFoundError` if the data does not start
  * with the `EvmAdvance` function selector
  */
-export const decodeInput = <data extends Hex | ByteArray>(
-    data: data,
-): Input<DecodedBytes<data>> => {
-    const blob: Hex | ByteArray = data;
-    return (
-        typeof blob === "string" ? decodeInputHex(blob) : decodeInputBytes(blob)
-    ) as Input<DecodedBytes<data>>;
-};
+export function decodeInput(data: Hex): Input;
+export function decodeInput(data: ByteArray): Input<ByteArray>;
+export function decodeInput(data: Hex | ByteArray): Input<Hex | ByteArray>;
+export function decodeInput(data: Hex | ByteArray): Input<Hex | ByteArray> {
+    return typeof data === "string"
+        ? decodeInputHex(data)
+        : decodeInputBytes(data);
+}
 
 const encodeInputBytes = (input: Input<Hex | ByteArray>): ByteArray => {
     const payload = asBytes(input.payload);
@@ -136,11 +136,20 @@ const encodeInputBytes = (input: Input<Hex | ByteArray>): ByteArray => {
  * `"bytes"`
  * @returns ABI-encoded input data
  */
-export const encodeInput = <to extends To = "hex">(
+export function encodeInput(input: Input<Hex | ByteArray>, to?: "hex"): Hex;
+export function encodeInput(
     input: Input<Hex | ByteArray>,
-    to?: to,
-): EncodedData<to> =>
-    (to === "bytes"
+    to: "bytes",
+): ByteArray;
+export function encodeInput(
+    input: Input<Hex | ByteArray>,
+    to?: To,
+): Hex | ByteArray;
+export function encodeInput(
+    input: Input<Hex | ByteArray>,
+    to?: To,
+): Hex | ByteArray {
+    return to === "bytes"
         ? encodeInputBytes(input)
         : encodeFunctionData({
               abi: inputsAbi,
@@ -155,4 +164,5 @@ export const encodeInput = <to extends To = "hex">(
                   input.index,
                   asHex(input.payload),
               ],
-          })) as EncodedData<to>;
+          });
+}

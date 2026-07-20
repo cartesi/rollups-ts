@@ -25,13 +25,7 @@ import {
     writeUint256,
 } from "./bytes.js";
 import { outputsAbi } from "./rollups.js";
-import type {
-    DecodedBytes,
-    EncodedData,
-    ParamsToObject,
-    Prettify,
-    To,
-} from "./types.js";
+import type { ParamsToObject, Prettify, To } from "./types.js";
 
 type OutputName = ExtractAbiFunctionNames<typeof outputsAbi>;
 
@@ -154,16 +148,14 @@ const decodeOutputBytes = (data: ByteArray): Output<ByteArray> => {
  * @throws viem `AbiFunctionSignatureNotFoundError` if the data does not start
  * with the selector of one of the `Outputs` functions
  */
-export const decodeOutput = <data extends Hex | ByteArray>(
-    data: data,
-): Output<DecodedBytes<data>> => {
-    const blob: Hex | ByteArray = data;
-    return (
-        typeof blob === "string"
-            ? decodeOutputHex(blob)
-            : decodeOutputBytes(blob)
-    ) as Output<DecodedBytes<data>>;
-};
+export function decodeOutput(data: Hex): Output;
+export function decodeOutput(data: ByteArray): Output<ByteArray>;
+export function decodeOutput(data: Hex | ByteArray): Output<Hex | ByteArray>;
+export function decodeOutput(data: Hex | ByteArray): Output<Hex | ByteArray> {
+    return typeof data === "string"
+        ? decodeOutputHex(data)
+        : decodeOutputBytes(data);
+}
 
 const encodeNoticeBytes = (
     notice: Omit<Notice<Hex | ByteArray>, "type">,
@@ -185,17 +177,30 @@ const encodeNoticeBytes = (
  * `"bytes"`
  * @returns ABI-encoded output data
  */
-export const encodeNotice = <to extends To = "hex">(
+export function encodeNotice(
     notice: Omit<Notice<Hex | ByteArray>, "type">,
-    to?: to,
-): EncodedData<to> =>
-    (to === "bytes"
+    to?: "hex",
+): Hex;
+export function encodeNotice(
+    notice: Omit<Notice<Hex | ByteArray>, "type">,
+    to: "bytes",
+): ByteArray;
+export function encodeNotice(
+    notice: Omit<Notice<Hex | ByteArray>, "type">,
+    to?: To,
+): Hex | ByteArray;
+export function encodeNotice(
+    notice: Omit<Notice<Hex | ByteArray>, "type">,
+    to?: To,
+): Hex | ByteArray {
+    return to === "bytes"
         ? encodeNoticeBytes(notice)
         : encodeFunctionData({
               abi: outputsAbi,
               functionName: "Notice",
               args: [asHex(notice.payload)],
-          })) as EncodedData<to>;
+          });
+}
 
 const encodeVoucherBytes = (
     voucher: Omit<Voucher<Hex | ByteArray>, "type">,
@@ -219,11 +224,23 @@ const encodeVoucherBytes = (
  * `"bytes"`
  * @returns ABI-encoded output data
  */
-export const encodeVoucher = <to extends To = "hex">(
+export function encodeVoucher(
     voucher: Omit<Voucher<Hex | ByteArray>, "type">,
-    to?: to,
-): EncodedData<to> =>
-    (to === "bytes"
+    to?: "hex",
+): Hex;
+export function encodeVoucher(
+    voucher: Omit<Voucher<Hex | ByteArray>, "type">,
+    to: "bytes",
+): ByteArray;
+export function encodeVoucher(
+    voucher: Omit<Voucher<Hex | ByteArray>, "type">,
+    to?: To,
+): Hex | ByteArray;
+export function encodeVoucher(
+    voucher: Omit<Voucher<Hex | ByteArray>, "type">,
+    to?: To,
+): Hex | ByteArray {
+    return to === "bytes"
         ? encodeVoucherBytes(voucher)
         : encodeFunctionData({
               abi: outputsAbi,
@@ -233,7 +250,8 @@ export const encodeVoucher = <to extends To = "hex">(
                   voucher.value,
                   asHex(voucher.payload),
               ],
-          })) as EncodedData<to>;
+          });
+}
 
 const encodeDelegateCallVoucherBytes = (
     voucher: Omit<DelegateCallVoucher<Hex | ByteArray>, "type">,
@@ -256,17 +274,30 @@ const encodeDelegateCallVoucherBytes = (
  * `"bytes"`
  * @returns ABI-encoded output data
  */
-export const encodeDelegateCallVoucher = <to extends To = "hex">(
+export function encodeDelegateCallVoucher(
     voucher: Omit<DelegateCallVoucher<Hex | ByteArray>, "type">,
-    to?: to,
-): EncodedData<to> =>
-    (to === "bytes"
+    to?: "hex",
+): Hex;
+export function encodeDelegateCallVoucher(
+    voucher: Omit<DelegateCallVoucher<Hex | ByteArray>, "type">,
+    to: "bytes",
+): ByteArray;
+export function encodeDelegateCallVoucher(
+    voucher: Omit<DelegateCallVoucher<Hex | ByteArray>, "type">,
+    to?: To,
+): Hex | ByteArray;
+export function encodeDelegateCallVoucher(
+    voucher: Omit<DelegateCallVoucher<Hex | ByteArray>, "type">,
+    to?: To,
+): Hex | ByteArray {
+    return to === "bytes"
         ? encodeDelegateCallVoucherBytes(voucher)
         : encodeFunctionData({
               abi: outputsAbi,
               functionName: "DelegateCallVoucher",
               args: [voucher.destination, asHex(voucher.payload)],
-          })) as EncodedData<to>;
+          });
+}
 
 /**
  * Encode an output as one of the functions of the rollups contracts `Outputs`
@@ -277,10 +308,19 @@ export const encodeDelegateCallVoucher = <to extends To = "hex">(
  * `"bytes"`
  * @returns ABI-encoded output data
  */
-export const encodeOutput = <to extends To = "hex">(
+export function encodeOutput(output: Output<Hex | ByteArray>, to?: "hex"): Hex;
+export function encodeOutput(
     output: Output<Hex | ByteArray>,
-    to?: to,
-): EncodedData<to> => {
+    to: "bytes",
+): ByteArray;
+export function encodeOutput(
+    output: Output<Hex | ByteArray>,
+    to?: To,
+): Hex | ByteArray;
+export function encodeOutput(
+    output: Output<Hex | ByteArray>,
+    to?: To,
+): Hex | ByteArray {
     switch (output.type) {
         case "Notice":
             return encodeNotice(output, to);
@@ -289,4 +329,4 @@ export const encodeOutput = <to extends To = "hex">(
         case "DelegateCallVoucher":
             return encodeDelegateCallVoucher(output, to);
     }
-};
+}
