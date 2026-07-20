@@ -18,9 +18,10 @@ The request can filter results by:
 
 - `epoch_index: HexNumber`
 - `sender: Address`
+- `transaction_hash: Hash`
 
 ```ts twoslash
-import { type Address, type HexNumber } from "@cartesi/rpc"
+import { type Address, type HexNumber, type Hash } from "@cartesi/rpc";
 ```
 
 ## Return Type
@@ -28,10 +29,7 @@ import { type Address, type HexNumber } from "@cartesi/rpc"
 The `data` is an array of `Input`:
 
 ```ts twoslash
-import {
-    type Input,
-    type ListInputsReturnType,
-} from "@cartesi/rpc";
+import { type Input, type ListInputsReturnType } from "@cartesi/rpc";
 ```
 
 For more information about pagination refer to the [pagination section](/rpc#pagination).
