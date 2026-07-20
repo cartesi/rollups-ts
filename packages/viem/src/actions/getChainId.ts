@@ -1,4 +1,4 @@
-import type { Client, Hex, Transport } from "viem";
+import type { Client, Transport } from "viem";
 import { hexToNumber } from "viem";
 import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import type { GetChainIdReturnType } from "../types/actions.js";
@@ -10,5 +10,5 @@ export const getChainId = async (
         method: "cartesi_getChainId",
         params: [],
     });
-    return hexToNumber(chainId as Hex);
+    return hexToNumber(chainId);
 };

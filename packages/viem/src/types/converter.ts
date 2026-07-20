@@ -220,9 +220,7 @@ export const commitmentConverter = (commitment: CommitmentRpc): Commitment => {
         tournamentAddress: getAddress(commitment.tournament_address),
         commitment: commitment.commitment,
         finalStateHash: commitment.final_state_hash,
-        submitterAddress: commitment.submitter_address
-            ? getAddress(commitment.submitter_address)
-            : null,
+        submitterAddress: getAddress(commitment.submitter_address),
         blockNumber: hexToBigInt(commitment.block_number),
         txHash: commitment.tx_hash,
         createdAt: new Date(commitment.created_at),
@@ -275,7 +273,7 @@ export const inputConverter = (input: InputRpc): Input => {
         rawData: input.raw_data,
         decodedData: input.decoded_data
             ? {
-                  chainId: hexToBigInt(input.decoded_data.chain_id as Hex),
+                  chainId: hexToBigInt(input.decoded_data.chain_id),
                   applicationContract: getAddress(
                       input.decoded_data.application_contract,
                   ),
@@ -284,9 +282,7 @@ export const inputConverter = (input: InputRpc): Input => {
                   blockTimestamp: hexToBigInt(
                       input.decoded_data.block_timestamp,
                   ),
-                  prevRandao: hexToBigInt(
-                      input.decoded_data.prev_randao as Hex,
-                  ),
+                  prevRandao: hexToBigInt(input.decoded_data.prev_randao),
                   index: hexToBigInt(input.decoded_data.index),
                   payload: input.decoded_data.payload,
               }
@@ -294,7 +290,8 @@ export const inputConverter = (input: InputRpc): Input => {
         status: input.status,
         machineHash: input.machine_hash,
         outputsHash: input.outputs_hash,
-        transactionReference: input.transaction_reference,
+        transactionHash: input.transaction_hash,
+        logIndex: hexToBigInt(input.log_index),
         createdAt: new Date(input.created_at),
         updatedAt: new Date(input.updated_at),
     };
@@ -347,6 +344,7 @@ export const outputConverter = (output: OutputRpc): Output => {
 
 export const reportConverter = (report: ReportRpc): Report => {
     return {
+        epochIndex: hexToBigInt(report.epoch_index),
         inputIndex: hexToBigInt(report.input_index),
         index: hexToBigInt(report.index),
         rawData: report.raw_data,

@@ -167,19 +167,20 @@ export type Input = {
     block_number: HexNumber;
     raw_data: Hex;
     decoded_data: {
-        chain_id: string;
+        chain_id: HexNumber;
         application_contract: Address;
         sender: Address;
         block_number: HexNumber;
         block_timestamp: HexNumber;
-        prev_randao: string;
+        prev_randao: Hex;
         index: HexNumber;
         payload: Hex;
     } | null;
     status: InputStatus;
     machine_hash: Hash | null;
     outputs_hash: Hash | null;
-    transaction_reference: Hex;
+    transaction_hash: Hash;
+    log_index: HexNumber;
     created_at: DateTime;
     updated_at: DateTime;
 };
@@ -426,7 +427,7 @@ export type ListReportsParams = PaginationParams & {
 export type ListReportsReturnType = PaginatedReturnType<Report>;
 
 export type GetChainIdReturnType = {
-    data: string;
+    data: HexNumber;
 };
 
 export type GetNodeVersionReturnType = {
