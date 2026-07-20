@@ -385,6 +385,7 @@ export type ListInputsParams = PaginationParams & {
     application: Address | string;
     epochIndex?: bigint;
     sender?: Address;
+    transactionHash?: Hash;
 };
 
 export type ListInputsReturnType = {
