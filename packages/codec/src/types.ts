@@ -33,17 +33,3 @@ export type Prettify<T> = { [K in keyof T]: T[K] } & {};
  * `Uint8Array`.
  */
 export type To = "hex" | "bytes";
-
-/**
- * Encoded data in the representation selected by `to`.
- */
-export type EncodedData<to extends To> = to extends "bytes" ? ByteArray : Hex;
-
-/**
- * Representation of the variable-size byte fields of a decoded object, given
- * the representation of the encoded data: hex in, hex out; bytes in, bytes
- * out.
- */
-export type DecodedBytes<data extends Hex | ByteArray> = data extends ByteArray
-    ? ByteArray
-    : Hex;
