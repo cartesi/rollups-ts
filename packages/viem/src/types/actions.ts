@@ -166,7 +166,7 @@ export type Commitment = {
     tournamentAddress: Address;
     commitment: Hash;
     finalStateHash: Hash;
-    submitterAddress: Address | null;
+    submitterAddress: Address;
     blockNumber: bigint;
     txHash: Hash;
     createdAt: Date;
@@ -253,7 +253,8 @@ export type Input = {
     status: InputStatus;
     machineHash: Hash | null;
     outputsHash: Hash | null;
-    transactionReference: Hash;
+    transactionHash: Hash;
+    logIndex: bigint;
     createdAt: Date;
     updatedAt: Date;
 };
@@ -310,6 +311,7 @@ export type GetReportParams = {
 };
 
 export type Report = {
+    epochIndex: bigint;
     inputIndex: bigint;
     index: bigint;
     rawData: Hex;

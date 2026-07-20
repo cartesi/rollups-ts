@@ -1,10 +1,19 @@
-import type { Application, Epoch, Output, Withdrawal } from "@cartesi/rpc";
+import type {
+    Application,
+    Epoch,
+    Input,
+    Output,
+    Report,
+    Withdrawal,
+} from "@cartesi/rpc";
 import { getAddress, hexToBigInt } from "viem";
 import { describe, expect, it } from "vitest";
 import {
     applicationConverter,
     epochConverter,
+    inputConverter,
     outputConverter,
+    reportConverter,
     withdrawalConverter,
 } from "../src/types/converter.js";
 
@@ -459,6 +468,81 @@ describe("converter", () => {
         expect(output.decodedData?.payload).toBe(
             rpcOutput.decoded_data?.payload,
         );
+    });
+
+    it("should convert the input", () => {
+        const rpcInput: Input = {
+            epoch_index: "0x1",
+            index: "0x7",
+            block_number: "0x1f4",
+            raw_data: "0x415bf363",
+            decoded_data: {
+                chain_id: "0x7a69",
+                application_contract:
+                    "0x8b2c3a19e91d0f8e2ca48c7ba0c2ee52a6b7d94f",
+                sender: "0xabcdef1234567890abcdef1234567890abcdef12",
+                block_number: "0x1f4",
+                block_timestamp: "0x67f8e5c0",
+                prev_randao:
+                    "0x2e17ac5d9b043f86d1c74a9e2f50b8d3c6a91e04f7b52d8ca31e6f90b4d27a58",
+                index: "0x7",
+                payload: "0xdeadbeef",
+            },
+            status: "ACCEPTED",
+            machine_hash: null,
+            outputs_hash: null,
+            transaction_hash:
+                "0x8f2c9ab4d7e15c30b6f18a4ee2d9037c4a1f5d2e9b7c63a0d4e8f1b25c7a9d3e",
+            log_index: "0x2",
+            created_at: "2025-04-11T10:00:00.000Z",
+            updated_at: "2025-04-11T10:05:00.000Z",
+        };
+
+        const input = inputConverter(rpcInput);
+        expect(input.epochIndex).toBe(hexToBigInt(rpcInput.epoch_index));
+        expect(input.index).toBe(hexToBigInt(rpcInput.index));
+        expect(input.blockNumber).toBe(hexToBigInt(rpcInput.block_number));
+        expect(input.rawData).toBe(rpcInput.raw_data);
+        expect(input.status).toBe(rpcInput.status);
+        expect(input.machineHash).toBeNull();
+        expect(input.outputsHash).toBeNull();
+        expect(input.transactionHash).toBe(rpcInput.transaction_hash);
+        expect(input.logIndex).toBe(hexToBigInt(rpcInput.log_index));
+        expect(input.decodedData).toBeDefined();
+        expect(input.decodedData?.chainId).toBe(
+            hexToBigInt(rpcInput.decoded_data?.chain_id ?? "0x0"),
+        );
+        expect(input.decodedData?.applicationContract).toBe(
+            getAddress(rpcInput.decoded_data?.application_contract ?? "0x"),
+        );
+        expect(input.decodedData?.sender).toBe(
+            getAddress(rpcInput.decoded_data?.sender ?? "0x"),
+        );
+        expect(input.decodedData?.prevRandao).toBe(
+            hexToBigInt(rpcInput.decoded_data?.prev_randao ?? "0x0"),
+        );
+        expect(input.decodedData?.payload).toBe(rpcInput.decoded_data?.payload);
+        expect(input.createdAt).toStrictEqual(new Date(rpcInput.created_at));
+        expect(input.updatedAt).toStrictEqual(new Date(rpcInput.updated_at));
+    });
+
+    it("should convert the report", () => {
+        const rpcReport: Report = {
+            epoch_index: "0x1",
+            input_index: "0x7",
+            index: "0x0",
+            raw_data: "0x4e756d626572206f6620616476616e6365733a2031",
+            created_at: "2025-04-11T10:00:00.000Z",
+            updated_at: "2025-04-11T10:05:00.000Z",
+        };
+
+        const report = reportConverter(rpcReport);
+        expect(report.epochIndex).toBe(hexToBigInt(rpcReport.epoch_index));
+        expect(report.inputIndex).toBe(hexToBigInt(rpcReport.input_index));
+        expect(report.index).toBe(hexToBigInt(rpcReport.index));
+        expect(report.rawData).toBe(rpcReport.raw_data);
+        expect(report.createdAt).toStrictEqual(new Date(rpcReport.created_at));
+        expect(report.updatedAt).toStrictEqual(new Date(rpcReport.updated_at));
     });
 
     it("should convert the withdrawal", () => {
