@@ -1,4 +1,4 @@
-import { getAddress } from "viem";
+import { getAddress, hexToBytes } from "viem";
 import { describe, expect, it } from "vitest";
 import {
     decodeDeposit,
@@ -126,5 +126,54 @@ describe("decodeDeposit", () => {
                 payload: "0xdeadbeef",
             }),
         ).toThrow("invalid Ether deposit payload");
+    });
+
+    it("should decode an Ether deposit input with a byte array payload", () => {
+        const deposit = {
+            sender,
+            value: 123456789n,
+            execLayerData: "0xdeadbeef",
+        } as const;
+        expect(
+            decodeDeposit({
+                msgSender: etherPortalAddress,
+                payload: encodeEtherDeposit(deposit, "bytes"),
+            }),
+        ).toEqual({
+            type: "EtherDeposit",
+            ...deposit,
+            execLayerData: hexToBytes("0xdeadbeef"),
+        });
+    });
+
+    it("should decode an ERC-1155 batch deposit input with a byte array payload", () => {
+        const deposit = {
+            token,
+            sender,
+            tokenIds: [1n, 2n, 3n],
+            values: [100n, 200n, 300n],
+            baseLayerData: "0xabcd",
+            execLayerData: "0xdeadbeef",
+        } as const;
+        expect(
+            decodeDeposit({
+                msgSender: erc1155BatchPortalAddress,
+                payload: encodeErc1155BatchDeposit(deposit, "bytes"),
+            }),
+        ).toEqual({
+            type: "Erc1155BatchDeposit",
+            ...deposit,
+            baseLayerData: hexToBytes("0xabcd"),
+            execLayerData: hexToBytes("0xdeadbeef"),
+        });
+    });
+
+    it("should return undefined for a byte array payload when msgSender is not a portal", () => {
+        expect(
+            decodeDeposit({
+                msgSender: sender,
+                payload: hexToBytes("0xdeadbeef"),
+            }),
+        ).toBeUndefined();
     });
 });

@@ -29,6 +29,7 @@ export {
     type Output,
     type Voucher,
 } from "./output.js";
+export type { DecodedBytes, EncodedData, To } from "./types.js";
 export {
     erc1155BatchPortalAddress,
     erc1155SinglePortalAddress,

@@ -37,11 +37,13 @@ if (deposit) {
 
 ## Parameters
 
-- `input`: a decoded input — only the `msgSender` and `payload` fields are used.
+- `input`: a decoded input — only the `msgSender` and `payload` fields are used. The `payload` may be a `Hex` string or a `Uint8Array`.
 
 ## Return Type
 
 A `Deposit` union discriminated by the `type` field (`"EtherDeposit"`, `"Erc20Deposit"`, `"Erc721Deposit"`, `"Erc1155SingleDeposit"` or `"Erc1155BatchDeposit"`), where each variant carries the fields of the corresponding deposit type.
+
+Byte fields follow the representation of the `payload`: hex string in, hex string out; byte array in, byte array out. When decoding from a `Uint8Array`, the returned byte fields are zero-copy subarrays of the payload — no data is copied.
 
 Returns `undefined` if `msgSender` is not a portal, i.e. the input is not a deposit.
 

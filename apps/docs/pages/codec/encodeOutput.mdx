@@ -35,6 +35,12 @@ import type { Output } from "@cartesi/codec";
 // type Output = DelegateCallVoucher | Notice | Voucher;
 ```
 
+And an optional second parameter:
+
+- `to` (`"hex" | "bytes"`, optional): representation of the encoded data. Defaults to `"hex"`.
+
 ## Return Type
 
-`Hex`: ABI-encoded output data.
+`Hex | Uint8Array`: ABI-encoded output data.
+
+Returns a `Hex` string by default, or a `Uint8Array` when `to` is `"bytes"`.

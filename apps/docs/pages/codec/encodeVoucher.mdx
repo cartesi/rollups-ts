@@ -19,8 +19,14 @@ const data = encodeVoucher({
 
 - `destination` (`Address`): address of the contract to be called.
 - `value` (`bigint`): amount of Wei to be passed along the call.
-- `payload` (`Hex`): calldata of the call.
+- `payload` (`Hex | Uint8Array`): calldata of the call.
+
+And an optional second parameter:
+
+- `to` (`"hex" | "bytes"`, optional): representation of the encoded data. Defaults to `"hex"`.
 
 ## Return Type
 
-`Hex`: ABI-encoded output data, starting with the `Voucher` function selector (`0x237a816f`).
+`Hex | Uint8Array`: ABI-encoded output data, starting with the `Voucher` function selector (`0x237a816f`).
+
+Returns a `Hex` string by default, or a `Uint8Array` when `to` is `"bytes"`.

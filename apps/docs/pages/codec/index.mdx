@@ -27,6 +27,29 @@ yarn add @cartesi/codec viem
 
 :::
 
+## Hex strings and byte arrays
+
+Every decode function accepts the encoded data as a `Hex` string or as a `Uint8Array` (including subclasses like the Node.js `Buffer`), and the variable-size byte fields of the result follow the representation of the input: hex in, hex out; bytes in, bytes out. When decoding from a `Uint8Array` the byte fields are returned as zero-copy subarrays of the input, so low-level bindings that already hold binary data (e.g. machine I/O) can decode without hex conversions or copies:
+
+```ts twoslash
+import { decodeInput } from "@cartesi/codec";
+
+declare const blob: Uint8Array; // e.g. straight from machine I/O
+
+const input = decodeInput(blob);
+input.payload; // Uint8Array, zero-copy view of `blob`
+```
+
+Every encode function takes an optional `to` parameter selecting the representation of the encoded data — `"hex"` (the default) or `"bytes"` — and accepts its byte fields in either representation:
+
+```ts twoslash
+import { encodeInput, decodeInput } from "@cartesi/codec";
+
+declare const blob: Uint8Array;
+
+const data = encodeInput(decodeInput(blob), "bytes"); // Uint8Array
+```
+
 ## Decode functions
 
 - [decodeInput](/codec/decodeInput) — decode an `EvmAdvance` input blob

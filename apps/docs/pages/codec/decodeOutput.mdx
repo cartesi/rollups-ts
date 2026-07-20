@@ -27,7 +27,7 @@ switch (output.type) {
 
 ## Parameters
 
-- `data` (`Hex`): ABI-encoded output data, starting with the selector of one of the `Outputs` functions: `Notice` (`0xc258d6e5`), `Voucher` (`0x237a816f`) or `DelegateCallVoucher` (`0x10321e8b`).
+- `data` (`Hex | Uint8Array`): ABI-encoded output data, starting with the selector of one of the `Outputs` functions: `Notice` (`0xc258d6e5`), `Voucher` (`0x237a816f`) or `DelegateCallVoucher` (`0x10321e8b`).
 
 ## Return Type
 
@@ -46,22 +46,24 @@ import type {
 `Notice` — informational statement that can be validated on the base layer, but not executed:
 
 - `type` (`"Notice"`)
-- `payload` (`Hex`): application-specific payload of the notice.
+- `payload` (`Hex | Uint8Array`): application-specific payload of the notice.
 
 `Voucher` — single-use permission to execute a `CALL` to a base layer contract on behalf of the application:
 
 - `type` (`"Voucher"`)
 - `destination` (`Address`): address of the contract to be called.
 - `value` (`bigint`): amount of Wei to be passed along the call.
-- `payload` (`Hex`): calldata of the call.
+- `payload` (`Hex | Uint8Array`): calldata of the call.
 
 `DelegateCallVoucher` — single-use permission to execute a `DELEGATECALL` to a base layer contract in the context of the application contract:
 
 - `type` (`"DelegateCallVoucher"`)
 - `destination` (`Address`): address of the contract to be delegate-called.
-- `payload` (`Hex`): calldata of the delegate call.
+- `payload` (`Hex | Uint8Array`): calldata of the delegate call.
 
 Addresses are returned checksummed.
+
+Byte fields follow the representation of the encoded data: hex string in, hex string out; byte array in, byte array out. When decoding from a `Uint8Array`, the returned byte fields are zero-copy subarrays of the input — no data is copied.
 
 ## Errors
 
