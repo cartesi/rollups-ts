@@ -90,9 +90,10 @@ export const readAbiUint256Array = (
 ): bigint[] => {
     const offset = base + readSize(data, pointer);
     const length = readSize(data, offset);
-    const values: bigint[] = [];
+    assertReadable(data, offset + WORD * (1 + length));
+    const values = new Array<bigint>(length);
     for (let i = 0; i < length; i++) {
-        values.push(readUint256(data, offset + WORD * (i + 1)));
+        values[i] = readUint256(data, offset + WORD * (i + 1));
     }
     return values;
 };
