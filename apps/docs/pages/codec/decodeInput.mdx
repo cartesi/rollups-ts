@@ -24,7 +24,7 @@ const input = decodeInput(
 
 ## Parameters
 
-- `data` (`Hex`): ABI-encoded input data, starting with the `EvmAdvance` function selector (`0x415bf363`).
+- `data` (`Hex | Uint8Array`): ABI-encoded input data, starting with the `EvmAdvance` function selector (`0x415bf363`).
 
 ## Return Type
 
@@ -37,9 +37,11 @@ An `Input` object, with field names and types inferred from the `EvmAdvance` ABI
 - `blockTimestamp` (`bigint`): base layer block timestamp (in seconds) in which the input was added.
 - `prevRandao` (`bigint`): `prevrandao` value of the base layer block in which the input was added.
 - `index` (`bigint`): index of the input in the application input box.
-- `payload` (`Hex`): application-specific payload of the input.
+- `payload` (`Hex | Uint8Array`): application-specific payload of the input.
 
 Addresses are returned checksummed.
+
+Byte fields follow the representation of the encoded data: hex string in, hex string out; byte array in, byte array out. When decoding from a `Uint8Array`, the returned byte fields are zero-copy subarrays of the input — no data is copied.
 
 ## Errors
 

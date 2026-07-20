@@ -13,8 +13,14 @@ const data = encodeNotice({ payload: "0xdeadbeef" });
 
 ## Parameters
 
-- `payload` (`Hex`): application-specific payload of the notice.
+- `payload` (`Hex | Uint8Array`): application-specific payload of the notice.
+
+And an optional second parameter:
+
+- `to` (`"hex" | "bytes"`, optional): representation of the encoded data. Defaults to `"hex"`.
 
 ## Return Type
 
-`Hex`: ABI-encoded output data, starting with the `Notice` function selector (`0xc258d6e5`).
+`Hex | Uint8Array`: ABI-encoded output data, starting with the `Notice` function selector (`0xc258d6e5`).
+
+Returns a `Hex` string by default, or a `Uint8Array` when `to` is `"bytes"`.

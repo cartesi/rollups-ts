@@ -3,6 +3,7 @@ import {
     encodeAbiParameters,
     getAddress,
     type Hex,
+    hexToBytes,
     numberToHex,
 } from "viem";
 import { describe, expect, it } from "vitest";
@@ -262,5 +263,193 @@ describe("erc1155 batch deposit", () => {
         expect(() => decodeErc1155BatchDeposit("0xdeadbeef")).toThrow(
             "invalid ERC-1155 batch deposit payload",
         );
+    });
+});
+
+describe("deposits (byte array)", () => {
+    const execLayerData = hexToBytes("0xdeadbeef");
+    const baseLayerData = hexToBytes("0xabcd");
+
+    it("should decode and encode an Ether deposit", () => {
+        const deposit: EtherDeposit<Uint8Array> = {
+            sender,
+            value: 123456789n,
+            execLayerData,
+        };
+        const payload = concat([
+            sender,
+            numberToHex(123456789n, { size: 32 }),
+            "0xdeadbeef",
+        ]);
+        expect(decodeEtherDeposit(hexToBytes(payload))).toEqual(deposit);
+        expect(encodeEtherDeposit(deposit, "bytes")).toEqual(
+            hexToBytes(payload),
+        );
+        expect(encodeEtherDeposit(deposit)).toEqual(payload.toLowerCase());
+    });
+
+    it("should decode and encode an ERC-20 deposit", () => {
+        const deposit: Erc20Deposit<Uint8Array> = {
+            token,
+            sender,
+            value: 1000000000000000000n,
+            execLayerData,
+        };
+        const payload = concat([
+            token,
+            sender,
+            numberToHex(1000000000000000000n, { size: 32 }),
+            "0xdeadbeef",
+        ]);
+        expect(decodeErc20Deposit(hexToBytes(payload))).toEqual(deposit);
+        expect(encodeErc20Deposit(deposit, "bytes")).toEqual(
+            hexToBytes(payload),
+        );
+    });
+
+    it("should return execLayerData as a zero-copy view of the payload", () => {
+        const payload = hexToBytes(
+            concat([
+                token,
+                sender,
+                numberToHex(1n, { size: 32 }),
+                "0xdeadbeef",
+            ]),
+        );
+        const decoded = decodeErc20Deposit(payload);
+        expect(decoded.execLayerData.buffer).toBe(payload.buffer);
+        expect(decoded.execLayerData.byteOffset).toBe(72);
+        expect(decoded.execLayerData.length).toBe(4);
+    });
+
+    it("should decode and encode an ERC-721 deposit", () => {
+        const deposit: Erc721Deposit<Uint8Array> = {
+            token,
+            sender,
+            tokenId: 42n,
+            baseLayerData,
+            execLayerData,
+        };
+        const payload = concat([
+            token,
+            sender,
+            numberToHex(42n, { size: 32 }),
+            dataTail("0xabcd", "0xdeadbeef"),
+        ]);
+        expect(decodeErc721Deposit(hexToBytes(payload))).toEqual(deposit);
+        expect(encodeErc721Deposit(deposit, "bytes")).toEqual(
+            hexToBytes(payload),
+        );
+        expect(encodeErc721Deposit(deposit)).toEqual(payload.toLowerCase());
+    });
+
+    it("should decode and encode an ERC-1155 single deposit", () => {
+        const deposit: Erc1155SingleDeposit<Uint8Array> = {
+            token,
+            sender,
+            tokenId: 42n,
+            value: 7n,
+            baseLayerData,
+            execLayerData,
+        };
+        const payload = concat([
+            token,
+            sender,
+            numberToHex(42n, { size: 32 }),
+            numberToHex(7n, { size: 32 }),
+            dataTail("0xabcd", "0xdeadbeef"),
+        ]);
+        expect(decodeErc1155SingleDeposit(hexToBytes(payload))).toEqual(
+            deposit,
+        );
+        expect(encodeErc1155SingleDeposit(deposit, "bytes")).toEqual(
+            hexToBytes(payload),
+        );
+    });
+
+    it("should decode and encode an ERC-1155 batch deposit", () => {
+        const deposit: Erc1155BatchDeposit<Uint8Array> = {
+            token,
+            sender,
+            tokenIds: [1n, 2n, 3n],
+            values: [100n, 200n, 300n],
+            baseLayerData,
+            execLayerData,
+        };
+        const payload = concat([
+            token,
+            sender,
+            encodeAbiParameters(
+                [
+                    { type: "uint256[]" },
+                    { type: "uint256[]" },
+                    { type: "bytes" },
+                    { type: "bytes" },
+                ],
+                [[1n, 2n, 3n], [100n, 200n, 300n], "0xabcd", "0xdeadbeef"],
+            ),
+        ]);
+        expect(decodeErc1155BatchDeposit(hexToBytes(payload))).toEqual(deposit);
+        expect(encodeErc1155BatchDeposit(deposit, "bytes")).toEqual(
+            hexToBytes(payload),
+        );
+        expect(encodeErc1155BatchDeposit(deposit)).toEqual(
+            payload.toLowerCase(),
+        );
+    });
+
+    it("should roundtrip deposits with empty data", () => {
+        const erc721: Erc721Deposit<Uint8Array> = {
+            token,
+            sender,
+            tokenId: 0n,
+            baseLayerData: new Uint8Array(),
+            execLayerData: new Uint8Array(),
+        };
+        expect(
+            decodeErc721Deposit(encodeErc721Deposit(erc721, "bytes")),
+        ).toEqual(erc721);
+        const batch: Erc1155BatchDeposit<Uint8Array> = {
+            token,
+            sender,
+            tokenIds: [],
+            values: [],
+            baseLayerData: new Uint8Array(),
+            execLayerData: new Uint8Array(),
+        };
+        expect(
+            decodeErc1155BatchDeposit(
+                encodeErc1155BatchDeposit(batch, "bytes"),
+            ),
+        ).toEqual(batch);
+    });
+
+    it("should throw on a payload that is too short", () => {
+        const short = hexToBytes("0xdeadbeef");
+        expect(() => decodeEtherDeposit(short)).toThrow(
+            "invalid Ether deposit payload",
+        );
+        expect(() => decodeErc20Deposit(short)).toThrow(
+            "invalid ERC-20 deposit payload",
+        );
+        expect(() => decodeErc721Deposit(short)).toThrow(
+            "invalid ERC-721 deposit payload",
+        );
+        expect(() => decodeErc1155SingleDeposit(short)).toThrow(
+            "invalid ERC-1155 single deposit payload",
+        );
+        expect(() => decodeErc1155BatchDeposit(short)).toThrow(
+            "invalid ERC-1155 batch deposit payload",
+        );
+    });
+
+    it("should throw on a payload with a malformed data tail", () => {
+        expect(() =>
+            decodeErc721Deposit(
+                hexToBytes(
+                    concat([token, sender, numberToHex(42n, { size: 32 })]),
+                ),
+            ),
+        ).toThrow("data out of bounds");
     });
 });

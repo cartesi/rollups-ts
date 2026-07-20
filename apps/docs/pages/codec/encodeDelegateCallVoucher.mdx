@@ -17,8 +17,14 @@ const data = encodeDelegateCallVoucher({
 ## Parameters
 
 - `destination` (`Address`): address of the contract to be delegate-called.
-- `payload` (`Hex`): calldata of the delegate call.
+- `payload` (`Hex | Uint8Array`): calldata of the delegate call.
+
+And an optional second parameter:
+
+- `to` (`"hex" | "bytes"`, optional): representation of the encoded data. Defaults to `"hex"`.
 
 ## Return Type
 
-`Hex`: ABI-encoded output data, starting with the `DelegateCallVoucher` function selector (`0x10321e8b`).
+`Hex | Uint8Array`: ABI-encoded output data, starting with the `DelegateCallVoucher` function selector (`0x10321e8b`).
+
+Returns a `Hex` string by default, or a `Uint8Array` when `to` is `"bytes"`.

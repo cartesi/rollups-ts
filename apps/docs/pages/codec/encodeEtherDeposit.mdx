@@ -21,8 +21,14 @@ An `EtherDeposit` object:
 
 - `sender` (`Address`): Ether sender.
 - `value` (`bigint`): amount of Wei being sent.
-- `execLayerData` (`Hex`): additional data to be interpreted by the execution layer.
+- `execLayerData` (`Hex | Uint8Array`): additional data to be interpreted by the execution layer.
+
+And an optional second parameter:
+
+- `to` (`"hex" | "bytes"`, optional): representation of the encoded data. Defaults to `"hex"`.
 
 ## Return Type
 
-`Hex`: packed-encoded deposit payload, with layout `sender (20 bytes) ‖ value (32 bytes) ‖ execLayerData`.
+`Hex | Uint8Array`: packed-encoded deposit payload, with layout `sender (20 bytes) ‖ value (32 bytes) ‖ execLayerData`.
+
+Returns a `Hex` string by default, or a `Uint8Array` when `to` is `"bytes"`.
