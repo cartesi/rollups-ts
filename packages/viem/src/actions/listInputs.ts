@@ -10,14 +10,26 @@ export const listInputs = async (
     client: Client<Transport, undefined, undefined, PublicCartesiRpcSchema>,
     params: ListInputsParams,
 ): Promise<ListInputsReturnType> => {
+    const {
+        application,
+        descending,
+        epochIndex,
+        transactionHash: transaction_hash,
+        limit,
+        offset,
+        sender,
+    } = params;
     const inputs = await client.request({
         method: "cartesi_listInputs",
         params: {
-            ...params,
+            application,
+            descending,
+            limit,
+            offset,
+            sender,
+            transaction_hash,
             epoch_index:
-                params.epochIndex !== undefined
-                    ? numberToHex(params.epochIndex)
-                    : undefined,
+                epochIndex !== undefined ? numberToHex(epochIndex) : undefined,
         },
     });
     return {
