@@ -31,8 +31,14 @@ An `Input` object, with field names and types inferred from the `EvmAdvance` ABI
 - `blockTimestamp` (`bigint`): base layer block timestamp (in seconds) in which the input was added.
 - `prevRandao` (`bigint`): `prevrandao` value of the base layer block in which the input was added.
 - `index` (`bigint`): index of the input in the application input box.
-- `payload` (`Hex`): application-specific payload of the input.
+- `payload` (`Hex | Uint8Array`): application-specific payload of the input.
+
+And an optional second parameter:
+
+- `to` (`"hex" | "bytes"`, optional): representation of the encoded data. Defaults to `"hex"`.
 
 ## Return Type
 
-`Hex`: ABI-encoded input data, starting with the `EvmAdvance` function selector (`0x415bf363`).
+`Hex | Uint8Array`: ABI-encoded input data, starting with the `EvmAdvance` function selector (`0x415bf363`).
+
+Returns a `Hex` string by default, or a `Uint8Array` when `to` is `"bytes"`.

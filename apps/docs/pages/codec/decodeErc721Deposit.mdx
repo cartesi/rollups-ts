@@ -22,7 +22,7 @@ const deposit = decodeErc721Deposit(input.payload);
 
 ## Parameters
 
-- `payload` (`Hex`): packed-encoded deposit payload (the `payload` field of a decoded input).
+- `payload` (`Hex | Uint8Array`): packed-encoded deposit payload (the `payload` field of a decoded input).
 
 ## Return Type
 
@@ -31,10 +31,12 @@ An `Erc721Deposit` object:
 - `token` (`Address`): token contract.
 - `sender` (`Address`): token sender.
 - `tokenId` (`bigint`): token identifier.
-- `baseLayerData` (`Hex`): additional data to be interpreted by the base layer.
-- `execLayerData` (`Hex`): additional data to be interpreted by the execution layer.
+- `baseLayerData` (`Hex | Uint8Array`): additional data to be interpreted by the base layer.
+- `execLayerData` (`Hex | Uint8Array`): additional data to be interpreted by the execution layer.
 
 Addresses are returned checksummed.
+
+Byte fields follow the representation of the encoded data: hex string in, hex string out; byte array in, byte array out. When decoding from a `Uint8Array`, the returned byte fields are zero-copy subarrays of the input — no data is copied.
 
 ## Errors
 

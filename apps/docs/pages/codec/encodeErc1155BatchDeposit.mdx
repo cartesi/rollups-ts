@@ -25,9 +25,15 @@ A `Erc1155BatchDeposit` object:
 - `sender` (`Address`): token sender.
 - `tokenIds` (`readonly bigint[]`): identifiers of the tokens being transferred.
 - `values` (`readonly bigint[]`): transfer amounts per token type.
-- `baseLayerData` (`Hex`): additional data to be interpreted by the base layer.
-- `execLayerData` (`Hex`): additional data to be interpreted by the execution layer.
+- `baseLayerData` (`Hex | Uint8Array`): additional data to be interpreted by the base layer.
+- `execLayerData` (`Hex | Uint8Array`): additional data to be interpreted by the execution layer.
+
+And an optional second parameter:
+
+- `to` (`"hex" | "bytes"`, optional): representation of the encoded data. Defaults to `"hex"`.
 
 ## Return Type
 
-`Hex`: packed-encoded deposit payload, with layout `token (20 bytes) ‖ sender (20 bytes) ‖ abi.encode(tokenIds, values, baseLayerData, execLayerData)`.
+`Hex | Uint8Array`: packed-encoded deposit payload, with layout `token (20 bytes) ‖ sender (20 bytes) ‖ abi.encode(tokenIds, values, baseLayerData, execLayerData)`.
+
+Returns a `Hex` string by default, or a `Uint8Array` when `to` is `"bytes"`.
