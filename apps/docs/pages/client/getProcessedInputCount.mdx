@@ -1,0 +1,32 @@
+# getProcessedInputCount
+
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const processedInputCount = await publicClientL2.getProcessedInputCount({
+  application: "0x...",
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { GetProcessedInputCountParams } from "@cartesi/client";
+// {
+//   application: Address | string;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetProcessedInputCountReturnType } from "@cartesi/client";
+// GetProcessedInputCountReturnType = bigint;
+```

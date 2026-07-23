@@ -1,6 +1,6 @@
 ---
 "@cartesi/react": patch
-"@cartesi/viem": patch
+"@cartesi/client": patch
 ---
 
 excluding several imported contracts

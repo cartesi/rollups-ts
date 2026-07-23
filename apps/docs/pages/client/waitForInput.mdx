@@ -1,0 +1,40 @@
+# waitForInput
+
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const input = await publicClientL2.waitForInput({
+  application: "0x...",
+  inputIndex: 1n,
+  // waitProcessing, rejectErrors, pollingInterval, retryCount, timeout (optional)
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { WaitForInputParams } from "@cartesi/client";
+// {
+//   application: Address | string;
+//   inputIndex: bigint;
+//   waitProcessing?: boolean;
+//   rejectErrors?: boolean;
+//   pollingInterval?: number;
+//   retryCount?: number;
+//   timeout?: number;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { WaitForInputReturnType, Input } from "@cartesi/client";
+// WaitForInputReturnType = Input;
+```

@@ -1,0 +1,199 @@
+# L1 Contract Interactions
+
+Transactions related to Cartesi applications are sent directly to the base layer (L1) as regular contract interactions with the Cartesi Rollups [smart contracts](https://github.com/cartesi/rollups-contracts).
+
+Instead of providing custom actions, this library exports typed ABIs and deployment addresses of all Cartesi Rollups contracts through the `@cartesi/client/abi` entrypoint, to be used with viem's own contract actions, like [writeContract](https://viem.sh/docs/contract/writeContract), [readContract](https://viem.sh/docs/contract/readContract), [simulateContract](https://viem.sh/docs/contract/simulateContract) and [estimateContractGas](https://viem.sh/docs/contract/estimateContractGas).
+
+:::tip
+[Wagmi](https://wagmi.sh) users can use the generated actions and React hooks of `@cartesi/react`, or generate code tailored to their own project using the [`@cartesi/wagmi-plugin`](/wagmi-plugin) plugin for `@wagmi/cli`.
+:::
+
+## Sending inputs
+
+Send a generic input to an application through the `InputBox` contract.
+
+```ts twoslash
+import { http, stringToHex } from "viem";
+import { createWalletClient } from "viem";
+import { inputBoxAbi, inputBoxAddress } from "@cartesi/client/abi";
+import { privateKeyToAccount } from "viem/accounts";
+import { mainnet } from "viem/chains";
+
+const account = privateKeyToAccount("0x...");
+const walletClient = createWalletClient({
+  account,
+  chain: mainnet,
+  transport: http(),
+});
+
+const hash = await walletClient.writeContract({
+  abi: inputBoxAbi,
+  address: inputBoxAddress,
+  functionName: "addInput",
+  args: ["0x...", stringToHex("hello")],
+});
+```
+
+## Depositing assets
+
+Deposit assets to an application through one of the asset portals.
+
+Depositing Ether through the `EtherPortal`:
+
+```ts twoslash
+import { http, parseEther, stringToHex } from "viem";
+import { createWalletClient } from "viem";
+import { etherPortalAbi, etherPortalAddress } from "@cartesi/client/abi";
+import { privateKeyToAccount } from "viem/accounts";
+import { mainnet } from "viem/chains";
+
+const account = privateKeyToAccount("0x...");
+const walletClient = createWalletClient({
+  account,
+  chain: mainnet,
+  transport: http(),
+});
+
+const hash = await walletClient.writeContract({
+  abi: etherPortalAbi,
+  address: etherPortalAddress,
+  functionName: "depositEther",
+  args: ["0x...", stringToHex("hello")],
+  value: parseEther("1"),
+});
+```
+
+Depositing ERC-20 tokens through the `ERC20Portal`. The portal must have an [allowance](https://viem.sh/docs/contract/writeContract) to transfer the tokens on behalf of the depositor, so an `approve` call to the token contract is required beforehand:
+
+```ts twoslash
+import { http, erc20Abi, parseUnits } from "viem";
+import { createWalletClient } from "viem";
+import { erc20PortalAbi, erc20PortalAddress } from "@cartesi/client/abi";
+import { privateKeyToAccount } from "viem/accounts";
+import { mainnet } from "viem/chains";
+
+const account = privateKeyToAccount("0x...");
+const walletClient = createWalletClient({
+  account,
+  chain: mainnet,
+  transport: http(),
+});
+
+const token = "0x..." as const;
+const amount = parseUnits("1", 18);
+
+const approveHash = await walletClient.writeContract({
+  abi: erc20Abi,
+  address: token,
+  functionName: "approve",
+  args: [erc20PortalAddress, amount],
+});
+
+const hash = await walletClient.writeContract({
+  abi: erc20PortalAbi,
+  address: erc20PortalAddress,
+  functionName: "depositERC20Tokens",
+  args: [token, "0x...", amount, "0x"],
+});
+```
+
+Deposits of ERC-721 and ERC-1155 tokens follow the same pattern, using `erc721PortalAbi` / `erc721PortalAddress` (function `depositERC721Token`), `erc1155SinglePortalAbi` / `erc1155SinglePortalAddress` (function `depositSingleERC1155Token`) and `erc1155BatchPortalAbi` / `erc1155BatchPortalAddress` (function `depositBatchERC1155Token`).
+
+## Executing outputs
+
+Outputs (vouchers) are executed through the application contract itself.
+The `toOutputArgs` utility converts an `Output` returned by the Cartesi node API into the arguments expected by `IApplication.executeOutput`.
+
+```ts twoslash
+import { http } from "viem";
+import { createWalletClient } from "viem";
+import { createCartesiPublicClient, toOutputArgs } from "@cartesi/client";
+import { iApplicationAbi } from "@cartesi/client/abi";
+import { privateKeyToAccount } from "viem/accounts";
+import { mainnet } from "viem/chains";
+
+const account = privateKeyToAccount("0x...");
+const application = "0x...";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+const walletClient = createWalletClient({
+  account,
+  chain: mainnet,
+  transport: http(),
+});
+
+// output with proof, returned by the Cartesi node
+const output = await publicClientL2.getOutput({
+  application,
+  outputIndex: 1n,
+});
+
+const hash = await walletClient.writeContract({
+  abi: iApplicationAbi,
+  address: application,
+  functionName: "executeOutput",
+  args: toOutputArgs(output),
+});
+```
+
+`toOutputArgs` throws if the output has no proof yet (`outputHashesSiblings`).
+
+## Validating outputs
+
+An output can be validated without executing it, using the `validateOutput` view method of the application contract.
+
+:::warning
+`IApplication.validateOutput` **reverts** when the output is not valid, instead of returning `false`. Wrap the call in a `try/catch` block if a boolean result is needed.
+:::
+
+```ts twoslash
+import { http } from "viem";
+import { createPublicClient } from "viem";
+import { createCartesiPublicClient, toOutputArgs } from "@cartesi/client";
+import { iApplicationAbi } from "@cartesi/client/abi";
+import { mainnet } from "viem/chains";
+
+const application = "0x...";
+
+const publicClient = createPublicClient({ chain: mainnet, transport: http() });
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const output = await publicClientL2.getOutput({
+  application,
+  outputIndex: 1n,
+});
+
+// reverts if the output is not valid
+await publicClient.readContract({
+  abi: iApplicationAbi,
+  address: application,
+  functionName: "validateOutput",
+  args: toOutputArgs(output),
+});
+```
+
+## Estimating gas
+
+Gas estimation is done with viem's [estimateContractGas](https://viem.sh/docs/contract/estimateContractGas) action.
+Note that viem already estimates gas automatically when sending a transaction without an explicit `gas` value.
+
+```ts twoslash
+import { http, stringToHex } from "viem";
+import { createPublicClient } from "viem";
+import { inputBoxAbi, inputBoxAddress } from "@cartesi/client/abi";
+import { mainnet } from "viem/chains";
+
+const publicClient = createPublicClient({ chain: mainnet, transport: http() });
+
+const gas = await publicClient.estimateContractGas({
+  abi: inputBoxAbi,
+  address: inputBoxAddress,
+  functionName: "addInput",
+  args: ["0x...", stringToHex("hello")],
+  account: "0x...",
+});
+```

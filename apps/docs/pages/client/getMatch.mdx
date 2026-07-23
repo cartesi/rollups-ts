@@ -1,0 +1,38 @@
+# getMatch
+
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const match = await publicClientL2.getMatch({
+  application: "0x...",
+  epochIndex: 1n,
+  tournamentAddress: "0x...",
+  idHash: "0x...",
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { GetMatchParams } from "@cartesi/client";
+// {
+//   application: Address | string;
+//   epochIndex: bigint;
+//   tournamentAddress: Address;
+//   idHash: Hash;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetMatchReturnType, Match } from "@cartesi/client";
+// GetMatchReturnType = Match;
+```

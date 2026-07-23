@@ -4,7 +4,7 @@
   "initialVersions": {
     "@cartesi/docs": "0.0.0",
     "@cartesi/rpc": "1.0.0",
-    "@cartesi/viem": "1.0.0",
+    "@cartesi/client": "1.0.0",
     "@cartesi/react": "1.0.0",
     "@cartesi/wagmi-plugin": "0.0.0",
     "@cartesi/codec": "0.0.0"

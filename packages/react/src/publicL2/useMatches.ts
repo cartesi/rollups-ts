@@ -1,4 +1,4 @@
-import type { CartesiPublicClient, ListMatchesParams } from "@cartesi/viem";
+import type { CartesiPublicClient, ListMatchesParams } from "@cartesi/client";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";

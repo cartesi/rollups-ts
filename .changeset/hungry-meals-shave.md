@@ -1,5 +1,5 @@
 ---
-"@cartesi/viem": patch
+"@cartesi/client": patch
 ---
 
 fix CartesiPublicClient type definition

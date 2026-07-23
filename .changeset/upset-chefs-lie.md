@@ -1,6 +1,6 @@
 ---
 "@cartesi/react": patch
-"@cartesi/viem": patch
+"@cartesi/client": patch
 ---
 
 fix files in package
