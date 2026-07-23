@@ -23,7 +23,7 @@ const config: Config = defineConfig({
             link: "/",
         },
         {
-            text: "Viem Extension",
+            text: "Cartesi Client",
             items: [
                 {
                     text: "Introduction",
