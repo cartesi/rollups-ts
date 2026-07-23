@@ -1,5 +1,5 @@
 ---
-"@cartesi/wagmi": major
+"@cartesi/react": major
 ---
 
 initial version

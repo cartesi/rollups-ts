@@ -9,15 +9,15 @@ Add the library to your existing React project.
 :::code-group
  
 ```bash [pnpm]
-pnpm add @tanstack/react-query @cartesi/wagmi
+pnpm add @tanstack/react-query @cartesi/react
 ```
  
 ```bash [npm]
-npm install @tanstack/react-query @cartesi/wagmi
+npm install @tanstack/react-query @cartesi/react
 ```
  
 ```bash [yarn]
-yarn add @tanstack/react-query @cartesi/wagmi
+yarn add @tanstack/react-query @cartesi/react
 ```
 
 :::
@@ -27,7 +27,7 @@ yarn add @tanstack/react-query @cartesi/wagmi
 Next setup a [TanStack Query](https://tanstack.com/query) provider and a `CartesiProvider` provider in your application root.
 
 ```tsx
-import { CartesiProvider } from "@cartesi/wagmi";
+import { CartesiProvider } from "@cartesi/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Create a query client
@@ -50,7 +50,7 @@ function App() {
 Find below an example of fetching the applications of a Cartesi rollups node.
 
 ```tsx
-import { useApplications } from "@cartesi/wagmi";
+import { useApplications } from "@cartesi/react";
 
 function Home() {
   const { data, isLoading, error } = useApplications();

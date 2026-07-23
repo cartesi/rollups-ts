@@ -1,7 +1,7 @@
 ---
 "@cartesi/rpc": patch
 "@cartesi/viem": patch
-"@cartesi/wagmi": patch
+"@cartesi/react": patch
 ---
 
 lint

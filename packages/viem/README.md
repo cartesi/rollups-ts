@@ -38,7 +38,7 @@ const hash = await walletClient.writeContract({
 });
 ```
 
-Users of [wagmi](https://wagmi.sh) can use the generated actions and React hooks from `@cartesi/wagmi`, or generate their own code using the `@cartesi/wagmi-plugin` plugin for `@wagmi/cli`.
+Users of [wagmi](https://wagmi.sh) can use the generated actions and React hooks from `@cartesi/react`, or generate their own code using the `@cartesi/wagmi-plugin` plugin for `@wagmi/cli`.
 
 ## Utilities
 

@@ -22,7 +22,7 @@ Formatting/linting is Biome (`biome.json` at root): 4-space indent, double quote
 
 ## Architecture
 
-Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/wagmi`, with `@cartesi/wagmi-plugin` supporting codegen.
+Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/react`, with `@cartesi/wagmi-plugin` supporting codegen.
 
 - **packages/rpc (`@cartesi/rpc`)** — Typed JSON-RPC client for the Cartesi node API. `types.ts` and `methods.ts` are hand-written mirrors of the node's `cartesi_*` JSON-RPC methods. Wire types are raw: hex-string quantities and snake_case field names.
 
@@ -32,7 +32,7 @@ Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/wagmi`, with 
   - `src/decorators/` — `publicActionsL2` (Cartesi node RPC schema + actions); `src/clients/createCartesiPublicClient.ts` creates a viem client bound to the Cartesi RPC schema.
   - `src/rollups.ts` is **generated** — do not edit by hand (see Codegen).
 
-- **packages/wagmi (`@cartesi/wagmi`)** — React hooks. `src/publicL2/` wraps each viem L2 action in a TanStack Query hook (`useInput`, `useOutputs`, …), using the `CartesiPublicClient` from `provider.tsx` (`CartesiProvider` / `useCartesiClient`). `src/generated.ts` is **generated** contract hooks.
+- **packages/react (`@cartesi/react`)** — React hooks. `src/publicL2/` wraps each viem L2 action in a TanStack Query hook (`useInput`, `useOutputs`, …), using the `CartesiPublicClient` from `provider.tsx` (`CartesiProvider` / `useCartesiClient`). `src/generated.ts` is **generated** contract hooks.
 
 - **packages/codec (`@cartesi/codec`)** — isomorphic encode/decode of input and output blobs, which are ABI-encoded calls to the rollups contracts `Inputs` (`EvmAdvance`) and `Outputs` (`Notice`, `Voucher`, `DelegateCallVoucher`) interfaces, and of portal deposit payloads (`src/portal.ts`), which are packed-encoded per the rollups contracts `InputEncoding` library. `src/rollups.ts` is **generated** (see Codegen); depends only on viem (peer) and abitype.
 
@@ -40,8 +40,8 @@ Dependency chain: `@cartesi/rpc` → `@cartesi/viem` → `@cartesi/wagmi`, with 
 
 - **apps/docs** — vocs documentation site (`pnpm --filter @cartesi/docs dev`).
 
-### Codegen (viem, wagmi and codec packages)
+### Codegen (viem, react and codec packages)
 
-`pnpm build` in these packages runs `codegen` (= `wagmi generate`) before compiling. Each package's `wagmi.config.ts` uses the `rollupsContracts` plugin from `@cartesi/wagmi-plugin` to produce `src/rollups.ts` (viem, codec) / `src/generated.ts` (wagmi) straight from the pinned rollups-contracts release tarballs; downloads are cached in the OS temp dir.
+`pnpm build` in these packages runs `codegen` (= `wagmi generate`) before compiling. Each package's `wagmi.config.ts` uses the `rollupsContracts` plugin from `@cartesi/wagmi-plugin` to produce `src/rollups.ts` (viem, codec) / `src/generated.ts` (react) straight from the pinned rollups-contracts release tarballs; downloads are cached in the OS temp dir.
 
 Both packages use the plugin's default `artifacts`/`deployments`. To bump the rollups-contracts version, update `DEFAULT_VERSION` and the SHA-256 hashes in `packages/wagmi-plugin/src/plugin.ts`.

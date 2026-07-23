@@ -1,4 +1,4 @@
-# @cartesi/wagmi
+# @cartesi/react
 
 ## 2.0.0-alpha.37
 
