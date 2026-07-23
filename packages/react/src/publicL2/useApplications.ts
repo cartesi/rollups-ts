@@ -1,7 +1,7 @@
 import type {
     CartesiPublicClient,
     ListApplicationsParams,
-} from "@cartesi/viem";
+} from "@cartesi/client";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";

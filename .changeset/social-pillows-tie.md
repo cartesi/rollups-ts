@@ -1,6 +1,6 @@
 ---
 "@cartesi/rpc": patch
-"@cartesi/viem": patch
+"@cartesi/client": patch
 "@cartesi/react": patch
 ---
 

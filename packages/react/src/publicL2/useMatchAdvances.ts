@@ -1,7 +1,7 @@
 import type {
     CartesiPublicClient,
     ListMatchAdvancesParams,
-} from "@cartesi/viem";
+} from "@cartesi/client";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import type { Address, Hash } from "viem";
 import { useCartesiClient } from "./provider.js";

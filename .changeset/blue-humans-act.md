@@ -1,5 +1,5 @@
 ---
-"@cartesi/viem": patch
+"@cartesi/client": patch
 ---
 
 fix missing listTournaments params

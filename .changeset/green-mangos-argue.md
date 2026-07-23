@@ -1,5 +1,5 @@
 ---
-"@cartesi/viem": major
+"@cartesi/client": major
 ---
 
 initial version

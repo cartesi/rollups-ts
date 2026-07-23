@@ -7,7 +7,7 @@
         "url": "https://github.com/cartesi/rollups-ts"
     },
     "dependencies": {
-        "@cartesi/viem": "workspace:*"
+        "@cartesi/client": "workspace:*"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",

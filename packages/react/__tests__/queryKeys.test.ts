@@ -1,7 +1,7 @@
 import {
     type CartesiPublicClient,
     createCartesiPublicClient,
-} from "@cartesi/viem";
+} from "@cartesi/client";
 import { custom, http } from "viem";
 import { describe, expect, it } from "vitest";
 import {

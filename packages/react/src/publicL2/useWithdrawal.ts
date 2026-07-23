@@ -1,4 +1,4 @@
-import type { CartesiPublicClient, GetWithdrawalParams } from "@cartesi/viem";
+import type { CartesiPublicClient, GetWithdrawalParams } from "@cartesi/client";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";

@@ -1,4 +1,4 @@
-import type { CartesiPublicClient } from "@cartesi/viem";
+import type { CartesiPublicClient } from "@cartesi/client";
 
 /**
  * Identity of the Cartesi node a client points at, used to scope query keys.

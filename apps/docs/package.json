@@ -20,7 +20,7 @@
     "devDependencies": {
         "@cartesi/codec": "workspace:*",
         "@cartesi/rpc": "workspace:*",
-        "@cartesi/viem": "workspace:*",
+        "@cartesi/client": "workspace:*",
         "@cartesi/react": "workspace:*",
         "@tanstack/react-query": "^5.101.2",
         "@types/node": "catalog:",
