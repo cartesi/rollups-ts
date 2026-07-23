@@ -6,12 +6,17 @@ import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const lastAcceptedEpochIndexQueryKey = (
+    client: CartesiPublicClient,
+    params: Partial<GetLastAcceptedEpochIndexParams>,
+) => [serverUrl(client), "lastAcceptedEpochIndex", params];
+
 export const lastAcceptedEpochIndexOptions = (
     client: CartesiPublicClient,
     params: Partial<GetLastAcceptedEpochIndexParams>,
 ) =>
     queryOptions({
-        queryKey: [serverUrl(client), "lastAcceptedEpochIndex", params],
+        queryKey: lastAcceptedEpochIndexQueryKey(client, params),
         queryFn:
             params.application !== undefined
                 ? () =>

@@ -6,31 +6,56 @@ import { custom, http } from "viem";
 import { describe, expect, it } from "vitest";
 import {
     applicationOptions,
+    applicationQueryKey,
     applicationsOptions,
+    applicationsQueryKey,
     chainIdOptions,
+    chainIdQueryKey,
     commitmentOptions,
+    commitmentQueryKey,
     commitmentsOptions,
+    commitmentsQueryKey,
     epochOptions,
+    epochQueryKey,
     epochsOptions,
+    epochsQueryKey,
     inputOptions,
+    inputQueryKey,
     inputsOptions,
+    inputsQueryKey,
     lastAcceptedEpochIndexOptions,
+    lastAcceptedEpochIndexQueryKey,
     matchAdvancedOptions,
+    matchAdvancedQueryKey,
     matchAdvancesOptions,
+    matchAdvancesQueryKey,
     matchesOptions,
+    matchesQueryKey,
     matchOptions,
+    matchQueryKey,
     nodeVersionOptions,
+    nodeVersionQueryKey,
     outputOptions,
+    outputQueryKey,
     outputsOptions,
+    outputsQueryKey,
     processedInputCountOptions,
+    processedInputCountQueryKey,
     reportOptions,
+    reportQueryKey,
     reportsOptions,
+    reportsQueryKey,
     serverUrl,
     tournamentOptions,
+    tournamentQueryKey,
     tournamentsOptions,
+    tournamentsQueryKey,
     waitForInputOptions,
+    waitForInputQueryKey,
     withdrawalOptions,
+    withdrawalQueryKey,
     withdrawalsOptions,
+    withdrawalsQueryKey,
 } from "../src/publicL2/index.js";
 
 const urlA = "http://localhost:8080/rpc";
@@ -44,52 +69,110 @@ const clientA2 = createCartesiPublicClient({ transport: http(urlA) });
 const application = "0x0000000000000000000000000000000000000001";
 const tournamentAddress = "0x0000000000000000000000000000000000000002";
 
-// every *Options factory, called with representative params
-const factories: Record<
-    string,
-    (client: CartesiPublicClient) => { queryKey: readonly unknown[] }
-> = {
-    application: (c) => applicationOptions(c, { application }),
-    applications: (c) => applicationsOptions(c, {}),
-    chainId: (c) => chainIdOptions(c),
-    commitment: (c) =>
-        commitmentOptions(c, {
-            application,
-            epochIndex: 1n,
-            tournamentAddress,
-        }),
-    commitments: (c) => commitmentsOptions(c, { application }),
-    epoch: (c) => epochOptions(c, { application, epochIndex: 1n }),
-    epochs: (c) => epochsOptions(c, { application }),
-    input: (c) => inputOptions(c, { application, inputIndex: 2n }),
-    inputs: (c) => inputsOptions(c, { application }),
-    lastAcceptedEpochIndex: (c) =>
-        lastAcceptedEpochIndexOptions(c, { application }),
-    match: (c) =>
-        matchOptions(c, { application, epochIndex: 1n, tournamentAddress }),
-    matchAdvanced: (c) =>
-        matchAdvancedOptions(c, {
-            application,
-            epochIndex: 1n,
-            tournamentAddress,
-        }),
-    matchAdvances: (c) => matchAdvancesOptions(c, { application }),
-    matches: (c) => matchesOptions(c, { application }),
-    nodeVersion: (c) => nodeVersionOptions(c),
-    output: (c) => outputOptions(c, { application, outputIndex: 3n }),
-    outputs: (c) =>
-        outputsOptions(c, { application, epochIndex: 1n, inputIndex: 2n }),
-    processedInputCount: (c) => processedInputCountOptions(c, { application }),
-    report: (c) => reportOptions(c, { application, reportIndex: 4n }),
-    reports: (c) => reportsOptions(c, { application }),
-    tournament: (c) =>
-        tournamentOptions(c, { application, address: tournamentAddress }),
-    tournaments: (c) => tournamentsOptions(c, { application }),
-    waitForInput: (c) =>
-        waitForInputOptions(c, { application, inputIndex: 2n }),
-    withdrawal: (c) => withdrawalOptions(c, { application, accountIndex: 3n }),
-    withdrawals: (c) => withdrawalsOptions(c, { application }),
-};
+interface Case {
+    name: string;
+    options: (client: CartesiPublicClient) => { queryKey: readonly unknown[] };
+    key: (client: CartesiPublicClient) => readonly unknown[];
+}
+
+// bind an *Options factory and its *QueryKey constructor to shared params, so
+// each method's representative params are declared exactly once
+const mk = <P>(
+    name: string,
+    options: (
+        client: CartesiPublicClient,
+        params: P,
+    ) => {
+        queryKey: readonly unknown[];
+    },
+    key: (client: CartesiPublicClient, params: P) => readonly unknown[],
+    params: P,
+): Case => ({
+    name,
+    options: (client) => options(client, params),
+    key: (client) => key(client, params),
+});
+
+const cases: Case[] = [
+    mk("application", applicationOptions, applicationQueryKey, { application }),
+    mk("applications", applicationsOptions, applicationsQueryKey, {}),
+    mk(
+        "chainId",
+        (c) => chainIdOptions(c),
+        (c) => chainIdQueryKey(c),
+        undefined,
+    ),
+    mk("commitment", commitmentOptions, commitmentQueryKey, {
+        application,
+        epochIndex: 1n,
+        tournamentAddress,
+    }),
+    mk("commitments", commitmentsOptions, commitmentsQueryKey, { application }),
+    mk("epoch", epochOptions, epochQueryKey, { application, epochIndex: 1n }),
+    mk("epochs", epochsOptions, epochsQueryKey, { application }),
+    mk("input", inputOptions, inputQueryKey, { application, inputIndex: 2n }),
+    mk("inputs", inputsOptions, inputsQueryKey, { application }),
+    mk(
+        "lastAcceptedEpochIndex",
+        lastAcceptedEpochIndexOptions,
+        lastAcceptedEpochIndexQueryKey,
+        { application },
+    ),
+    mk("match", matchOptions, matchQueryKey, {
+        application,
+        epochIndex: 1n,
+        tournamentAddress,
+    }),
+    mk("matchAdvanced", matchAdvancedOptions, matchAdvancedQueryKey, {
+        application,
+        epochIndex: 1n,
+        tournamentAddress,
+    }),
+    mk("matchAdvances", matchAdvancesOptions, matchAdvancesQueryKey, {
+        application,
+    }),
+    mk("matches", matchesOptions, matchesQueryKey, { application }),
+    mk(
+        "nodeVersion",
+        (c) => nodeVersionOptions(c),
+        (c) => nodeVersionQueryKey(c),
+        undefined,
+    ),
+    mk("output", outputOptions, outputQueryKey, {
+        application,
+        outputIndex: 3n,
+    }),
+    mk("outputs", outputsOptions, outputsQueryKey, {
+        application,
+        epochIndex: 1n,
+        inputIndex: 2n,
+    }),
+    mk(
+        "processedInputCount",
+        processedInputCountOptions,
+        processedInputCountQueryKey,
+        { application },
+    ),
+    mk("report", reportOptions, reportQueryKey, {
+        application,
+        reportIndex: 4n,
+    }),
+    mk("reports", reportsOptions, reportsQueryKey, { application }),
+    mk("tournament", tournamentOptions, tournamentQueryKey, {
+        application,
+        address: tournamentAddress,
+    }),
+    mk("tournaments", tournamentsOptions, tournamentsQueryKey, { application }),
+    mk("waitForInput", waitForInputOptions, waitForInputQueryKey, {
+        application,
+        inputIndex: 2n,
+    }),
+    mk("withdrawal", withdrawalOptions, withdrawalQueryKey, {
+        application,
+        accountIndex: 3n,
+    }),
+    mk("withdrawals", withdrawalsOptions, withdrawalsQueryKey, { application }),
+];
 
 describe("serverUrl", () => {
     it("returns the transport url", () => {
@@ -109,7 +192,7 @@ describe("serverUrl", () => {
     });
 });
 
-describe.each(Object.entries(factories))("%sOptions", (_name, options) => {
+describe.each(cases)("$name", ({ options, key }) => {
     it("prefixes the query key with the server url", () => {
         expect(options(clientA).queryKey[0]).toBe(urlA);
         expect(options(clientB).queryKey[0]).toBe(urlB);
@@ -123,5 +206,28 @@ describe.each(Object.entries(factories))("%sOptions", (_name, options) => {
 
     it("produces identical keys for client instances of the same server", () => {
         expect(options(clientA2).queryKey).toEqual(options(clientA).queryKey);
+    });
+
+    it("*QueryKey matches the key the *Options factory builds", () => {
+        expect(key(clientA)).toEqual(options(clientA).queryKey);
+    });
+});
+
+describe("*QueryKey bigint normalization", () => {
+    it("stringifies bigint params so hand-built bigint keys are unnecessary", () => {
+        const key = inputQueryKey(clientA, { application, inputIndex: 2n });
+        expect(key).toEqual([urlA, "input", { application, inputIndex: "2" }]);
+        // the stored key holds a string, so a raw 2n would not partial-match
+        const params = key[2] as { inputIndex: unknown };
+        expect(typeof params.inputIndex).toBe("string");
+    });
+
+    it("stringifies every bigint field of multi-index keys", () => {
+        const key = outputsQueryKey(clientA, {
+            application,
+            epochIndex: 1n,
+            inputIndex: 2n,
+        });
+        expect(key[2]).toMatchObject({ epochIndex: "1", inputIndex: "2" });
     });
 });

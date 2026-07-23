@@ -3,12 +3,17 @@ import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const applicationQueryKey = (
+    client: CartesiPublicClient,
+    params: Partial<GetApplicationParams>,
+) => [serverUrl(client), "application", params];
+
 export const applicationOptions = (
     client: CartesiPublicClient,
     params: Partial<GetApplicationParams>,
 ) =>
     queryOptions({
-        queryKey: [serverUrl(client), "application", params],
+        queryKey: applicationQueryKey(client, params),
         queryFn:
             params.application !== undefined
                 ? () =>

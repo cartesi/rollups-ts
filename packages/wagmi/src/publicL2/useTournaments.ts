@@ -3,23 +3,27 @@ import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const tournamentsQueryKey = (
+    client: CartesiPublicClient,
+    params: Partial<ListTournamentsParams>,
+) => [
+    serverUrl(client),
+    "tournaments",
+    {
+        ...params,
+        epochIndex: params.epochIndex?.toString(),
+        level: params.level?.toString(),
+        parentTournamentAddress: params.parentTournamentAddress?.toString(),
+        parentMatchIdHash: params.parentMatchIdHash?.toString(),
+    },
+];
+
 export const tournamentsOptions = (
     client: CartesiPublicClient,
     params: Partial<ListTournamentsParams>,
 ) =>
     queryOptions({
-        queryKey: [
-            serverUrl(client),
-            "tournaments",
-            {
-                ...params,
-                epochIndex: params.epochIndex?.toString(),
-                level: params.level?.toString(),
-                parentTournamentAddress:
-                    params.parentTournamentAddress?.toString(),
-                parentMatchIdHash: params.parentMatchIdHash?.toString(),
-            },
-        ],
+        queryKey: tournamentsQueryKey(client, params),
         queryFn:
             params.application !== undefined
                 ? () =>

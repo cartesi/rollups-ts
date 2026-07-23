@@ -4,16 +4,21 @@ import type { Address, Hash } from "viem";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const commitmentQueryKey = (
+    client: CartesiPublicClient,
+    params: Partial<GetCommitmentParams>,
+) => [
+    serverUrl(client),
+    "commitment",
+    { ...params, epochIndex: params.epochIndex?.toString() },
+];
+
 export const commitmentOptions = (
     client: CartesiPublicClient,
     params: Partial<GetCommitmentParams>,
 ) =>
     queryOptions({
-        queryKey: [
-            serverUrl(client),
-            "commitment",
-            { ...params, epochIndex: params.epochIndex?.toString() },
-        ],
+        queryKey: commitmentQueryKey(client, params),
         queryFn:
             params.application !== undefined &&
             params.epochIndex !== undefined &&

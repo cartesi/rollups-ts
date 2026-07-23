@@ -6,12 +6,17 @@ import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const processedInputCountQueryKey = (
+    client: CartesiPublicClient,
+    params: Partial<GetProcessedInputCountParams>,
+) => [serverUrl(client), "processedInputCount", params];
+
 export const processedInputCountOptions = (
     client: CartesiPublicClient,
     params: Partial<GetProcessedInputCountParams>,
 ) =>
     queryOptions({
-        queryKey: [serverUrl(client), "processedInputCount", params],
+        queryKey: processedInputCountQueryKey(client, params),
         queryFn:
             params.application !== undefined
                 ? () =>
