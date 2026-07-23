@@ -1,5 +1,5 @@
 ---
-"@cartesi/wagmi": minor
+"@cartesi/react": minor
 ---
 
 include the server URL in all publicL2 query keys. Every hook's react-query key is now prefixed with the client's node URL (`[serverUrl, method, params]`), so caches no longer collide when an app points at more than one Cartesi node (e.g. a server switcher). The URL comes from the client's transport (falling back to `client.uid` for custom transports without one), so the cache survives provider remounts and revives when switching back to a previously used server.

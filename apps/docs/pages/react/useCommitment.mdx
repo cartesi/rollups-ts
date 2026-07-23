@@ -1,16 +1,16 @@
-# useMatch
+# useCommitment
 
 ## Usage
 
 ```tsx twoslash
-import { useMatch } from "@cartesi/wagmi";
+import { useCommitment } from "@cartesi/react";
 
 function Example() {
-  const { data, isLoading } = useMatch({
+  const { data, isLoading } = useCommitment({
     application: "0x...",
     epochIndex: 1n,
     tournamentAddress: "0x...",
-    idHash: "0x...",
+    commitment: "0x...",
   });
   // render logic
 }
@@ -18,11 +18,11 @@ function Example() {
 
 ## Return Type
 
-The `data` is an `Match`:
+The `data` is an `Commitment`:
 
 ```ts twoslash
 import {
-  type Match,
-  type GetMatchReturnType,
+  type Commitment,
+  type GetCommitmentReturnType,
 } from "@cartesi/viem";
 ```

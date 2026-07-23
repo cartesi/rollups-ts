@@ -1,5 +1,5 @@
 ---
-"@cartesi/wagmi": patch
+"@cartesi/react": patch
 ---
 
 add useWaitForInput hook

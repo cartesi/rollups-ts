@@ -1,5 +1,5 @@
 ---
-"@cartesi/wagmi": patch
+"@cartesi/react": patch
 ---
 
 exposing @tanstack/react-query options to hooks

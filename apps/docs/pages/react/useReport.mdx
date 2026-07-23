@@ -1,14 +1,14 @@
-# useInput
+# useReport
 
 ## Usage
 
 ```tsx twoslash
-import { useInput } from "@cartesi/wagmi";
+import { useReport } from "@cartesi/react";
 
 function Example() {
-  const { data, isLoading } = useInput({
+  const { data, isLoading } = useReport({
     application: "0x...",
-    inputIndex: 2n,
+    reportIndex: 2n,
   });
   // render logic
 }
@@ -16,11 +16,11 @@ function Example() {
 
 ## Return Type
 
-The `data` is an `Input`:
+The `data` is a `Report`:
 
 ```ts twoslash
 import type {
-  Input,
-  GetInputReturnType,
+  Report,
+  GetReportReturnType,
 } from "@cartesi/viem";
 ```

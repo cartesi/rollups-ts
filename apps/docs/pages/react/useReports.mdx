@@ -1,18 +1,18 @@
-# useTournaments
+# useReports
 
 ## Usage
 
 ```tsx twoslash
-import { useTournaments } from "@cartesi/wagmi";
+import { useReports } from "@cartesi/react";
 
 function Example() {
-  const { data, isLoading } = useTournaments({
+  const { data, isLoading } = useReports({
     application: "0x...",
     limit: 50,
     offset: 0,
     // ...other filters
   });
-  const { data: tournaments, pagination } = data || {};
+  const { data: reports, pagination } = data || {};
   // render logic
 }
 ```
@@ -23,22 +23,24 @@ The hook can filter results by:
 
 - `application: Address | string`
 - `epochIndex?: bigint`
-- `level?: bigint`
+- `inputIndex?: bigint`
 
 ```ts twoslash
 import type {
-  ListTournamentsParams,
+  ListReportsParams,
 } from "@cartesi/viem";
 ```
 
 ## Return Type
 
-The `data` is an array of `Tournament`:
+The `data` is an array of `Report`:
 
 ```ts twoslash
 import type {
-  Tournament,
-  ListTournamentsReturnType,
+  Report,
+  ListReportsReturnType,
   Pagination,
 } from "@cartesi/viem";
 ```
+
+For more information about pagination refer to the [pagination section](/react#index).

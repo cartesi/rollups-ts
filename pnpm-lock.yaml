@@ -63,15 +63,15 @@ importers:
       '@cartesi/codec':
         specifier: workspace:*
         version: link:../../packages/codec
+      '@cartesi/react':
+        specifier: workspace:*
+        version: link:../../packages/react
       '@cartesi/rpc':
         specifier: workspace:*
         version: link:../../packages/rpc
       '@cartesi/viem':
         specifier: workspace:*
         version: link:../../packages/viem
-      '@cartesi/wagmi':
-        specifier: workspace:*
-        version: link:../../packages/wagmi
       '@tanstack/react-query':
         specifier: ^5.101.2
         version: 5.101.2(react@19.2.7)
@@ -124,6 +124,55 @@ importers:
       vitest:
         specifier: ^4.1.10
         version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
+
+  packages/react:
+    dependencies:
+      '@cartesi/viem':
+        specifier: workspace:*
+        version: link:../viem
+      react:
+        specifier: ^19.0.0
+        version: 19.2.7
+      wagmi:
+        specifier: ^3.0.0
+        version: 3.5.0(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.17)(ox@0.14.30(typescript@6.0.3)(zod@4.3.6))(react@19.2.7)(typescript@6.0.3)(viem@2.55.0(typescript@6.0.3)(zod@4.3.6))
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.5.3
+      '@cartesi/wagmi-plugin':
+        specifier: workspace:*
+        version: link:../wagmi-plugin
+      '@tanstack/react-query':
+        specifier: ^5.0.0
+        version: 5.101.2(react@19.2.7)
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.1.1
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.17
+      '@vitest/coverage-v8':
+        specifier: ^4.1.10
+        version: 4.1.10(vitest@4.1.10)
+      '@wagmi/cli':
+        specifier: ^2.10.0
+        version: 2.10.0(typescript@6.0.3)
+      npm-run-all:
+        specifier: ^4.1.5
+        version: 4.1.5
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.22.4(tsx@4.23.0)(typescript@6.0.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      viem:
+        specifier: 'catalog:'
+        version: 2.55.0(typescript@6.0.3)(zod@4.3.6)
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
 
   packages/rpc:
     dependencies:
@@ -180,55 +229,6 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
-      vitest:
-        specifier: ^4.1.10
-        version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
-
-  packages/wagmi:
-    dependencies:
-      '@cartesi/viem':
-        specifier: workspace:*
-        version: link:../viem
-      react:
-        specifier: ^19.0.0
-        version: 19.2.7
-      wagmi:
-        specifier: ^3.0.0
-        version: 3.5.0(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.17)(ox@0.14.30(typescript@6.0.3)(zod@4.3.6))(react@19.2.7)(typescript@6.0.3)(viem@2.55.0(typescript@6.0.3)(zod@4.3.6))
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 'catalog:'
-        version: 2.5.3
-      '@cartesi/wagmi-plugin':
-        specifier: workspace:*
-        version: link:../wagmi-plugin
-      '@tanstack/react-query':
-        specifier: ^5.0.0
-        version: 5.101.2(react@19.2.7)
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.1.1
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.2.17
-      '@vitest/coverage-v8':
-        specifier: ^4.1.10
-        version: 4.1.10(vitest@4.1.10)
-      '@wagmi/cli':
-        specifier: ^2.10.0
-        version: 2.10.0(typescript@6.0.3)
-      npm-run-all:
-        specifier: ^4.1.5
-        version: 4.1.5
-      tsdown:
-        specifier: 'catalog:'
-        version: 0.22.4(tsx@4.23.0)(typescript@6.0.3)
-      typescript:
-        specifier: 'catalog:'
-        version: 6.0.3
-      viem:
-        specifier: 'catalog:'
-        version: 2.55.0(typescript@6.0.3)(zod@4.3.6)
       vitest:
         specifier: ^4.1.10
         version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.1.3(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
