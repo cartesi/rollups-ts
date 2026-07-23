@@ -1,5 +1,15 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.24
+
+### Minor Changes
+
+-   58f793a: align types with the node's OpenRPC schema: rename `Input.transaction_reference` to `transaction_hash`, add `Input.log_index`, add `Report.epochIndex` to the viem `Report` type, make `Commitment.submitterAddress` non-nullable, and tighten `chain_id`, `prev_randao` and `cartesi_getChainId` result types to hex-encoded values
+
+### Patch Changes
+
+-   45043f5: Add new cartesi_listInputs optional query parameter transaction_hash.
+
 ## 2.0.0-alpha.23
 
 ### Patch Changes

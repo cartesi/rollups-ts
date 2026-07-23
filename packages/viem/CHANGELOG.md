@@ -1,5 +1,26 @@
 # @cartesi/viem
 
+## 2.0.0-alpha.33
+
+### Major Changes
+
+-   6b3cf3b: Remove custom L1 actions in favor of plain viem contract actions.
+
+    The `addInput`, `depositEther`, `depositERC20Tokens`, `depositERC721Token`, `depositSingleERC1155Token`, `depositBatchERC1155Token`, `executeOutput`, `validateOutput` actions, all `estimate*Gas` actions, and the `walletActionsL1` / `publicActionsL1` decorators were removed. Use viem's own `writeContract` / `readContract` / `estimateContractGas` with the typed ABIs and addresses exported by `@cartesi/viem/abi`, the generated actions and hooks of `@cartesi/wagmi`, or generate your own code with `@cartesi/wagmi-plugin`.
+
+    The new `toOutputArgs` export converts an `Output` returned by the node API into the arguments of `IApplication.executeOutput` / `IApplication.validateOutput`. Note that `IApplication.validateOutput` reverts when the output is invalid, unlike the removed `validateOutput` action which returned `false`.
+
+### Minor Changes
+
+-   58f793a: align types with the node's OpenRPC schema: rename `Input.transaction_reference` to `transaction_hash`, add `Input.log_index`, add `Report.epochIndex` to the viem `Report` type, make `Commitment.submitterAddress` non-nullable, and tighten `chain_id`, `prev_randao` and `cartesi_getChainId` result types to hex-encoded values
+
+### Patch Changes
+
+-   45043f5: Add new cartesi_listInputs optional query parameter transaction_hash.
+-   Updated dependencies [45043f5]
+-   Updated dependencies [58f793a]
+    -   @cartesi/rpc@2.0.0-alpha.24
+
 ## 2.0.0-alpha.32
 
 ### Patch Changes
