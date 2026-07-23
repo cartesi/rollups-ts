@@ -4,9 +4,14 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const chainIdQueryKey = (client: CartesiPublicClient) => [
+    serverUrl(client),
+    "chainId",
+];
+
 export const chainIdOptions = (client: CartesiPublicClient) =>
     queryOptions({
-        queryKey: [serverUrl(client), "chainId"],
+        queryKey: chainIdQueryKey(client),
         queryFn: () => client.getChainId(),
     });
 

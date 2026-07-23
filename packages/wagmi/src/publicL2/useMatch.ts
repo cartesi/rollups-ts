@@ -4,16 +4,21 @@ import type { Address, Hash } from "viem";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const matchQueryKey = (
+    client: CartesiPublicClient,
+    params: Partial<GetMatchParams>,
+) => [
+    serverUrl(client),
+    "match",
+    { ...params, epochIndex: params.epochIndex?.toString() },
+];
+
 export const matchOptions = (
     client: CartesiPublicClient,
     params: Partial<GetMatchParams>,
 ) =>
     queryOptions({
-        queryKey: [
-            serverUrl(client),
-            "match",
-            { ...params, epochIndex: params.epochIndex?.toString() },
-        ],
+        queryKey: matchQueryKey(client, params),
         queryFn:
             params.application !== undefined &&
             params.epochIndex !== undefined &&

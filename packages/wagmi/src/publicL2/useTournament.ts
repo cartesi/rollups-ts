@@ -4,12 +4,17 @@ import type { Address } from "viem";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const tournamentQueryKey = (
+    client: CartesiPublicClient,
+    params: Partial<GetTournamentParams>,
+) => [serverUrl(client), "tournament", params];
+
 export const tournamentOptions = (
     client: CartesiPublicClient,
     params: Partial<GetTournamentParams>,
 ) =>
     queryOptions({
-        queryKey: [serverUrl(client), "tournament", params],
+        queryKey: tournamentQueryKey(client, params),
         queryFn:
             params.application !== undefined && params.address !== undefined
                 ? () =>

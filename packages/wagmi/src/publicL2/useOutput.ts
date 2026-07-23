@@ -3,16 +3,21 @@ import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const outputQueryKey = (
+    client: CartesiPublicClient,
+    params: Partial<GetOutputParams>,
+) => [
+    serverUrl(client),
+    "output",
+    { ...params, outputIndex: params.outputIndex?.toString() },
+];
+
 export const outputOptions = (
     client: CartesiPublicClient,
     params: Partial<GetOutputParams>,
 ) =>
     queryOptions({
-        queryKey: [
-            serverUrl(client),
-            "output",
-            { ...params, outputIndex: params.outputIndex?.toString() },
-        ],
+        queryKey: outputQueryKey(client, params),
         queryFn:
             params.application !== undefined && params.outputIndex !== undefined
                 ? () =>

@@ -6,12 +6,17 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const applicationsQueryKey = (
+    client: CartesiPublicClient,
+    params?: Partial<ListApplicationsParams>,
+) => [serverUrl(client), "applications", params];
+
 export const applicationsOptions = (
     client: CartesiPublicClient,
     params?: Partial<ListApplicationsParams>,
 ) =>
     queryOptions({
-        queryKey: [serverUrl(client), "applications", params],
+        queryKey: applicationsQueryKey(client, params),
         queryFn: () => client.listApplications(params),
     });
 

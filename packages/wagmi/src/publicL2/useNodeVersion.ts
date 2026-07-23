@@ -4,9 +4,14 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const nodeVersionQueryKey = (client: CartesiPublicClient) => [
+    serverUrl(client),
+    "nodeVersion",
+];
+
 export const nodeVersionOptions = (client: CartesiPublicClient) =>
     queryOptions({
-        queryKey: [serverUrl(client), "nodeVersion"],
+        queryKey: nodeVersionQueryKey(client),
         queryFn: () => client.getNodeVersion(),
     });
 

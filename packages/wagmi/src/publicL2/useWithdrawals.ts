@@ -3,22 +3,27 @@ import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
+export const withdrawalsQueryKey = (
+    client: CartesiPublicClient,
+    params: Partial<ListWithdrawalsParams>,
+) => [
+    serverUrl(client),
+    "withdrawals",
+    {
+        application: params.application,
+        accountIndex: params.accountIndex?.toString(),
+        limit: params.limit,
+        offset: params.offset,
+        descending: params.descending,
+    },
+];
+
 export const withdrawalsOptions = (
     client: CartesiPublicClient,
     params: Partial<ListWithdrawalsParams>,
 ) =>
     queryOptions({
-        queryKey: [
-            serverUrl(client),
-            "withdrawals",
-            {
-                application: params.application,
-                accountIndex: params.accountIndex?.toString(),
-                limit: params.limit,
-                offset: params.offset,
-                descending: params.descending,
-            },
-        ],
+        queryKey: withdrawalsQueryKey(client, params),
         queryFn:
             params.application !== undefined
                 ? () =>
