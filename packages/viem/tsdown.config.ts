@@ -8,6 +8,7 @@ export default defineConfig({
         "src/chains.ts",
         "src/index.ts",
         "src/rollups.ts",
+        "src/sequencer/index.ts",
     ],
     fixedExtension: false,
     format: ["cjs", "esm"],

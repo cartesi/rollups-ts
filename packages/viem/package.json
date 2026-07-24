@@ -66,6 +66,16 @@
                 "types": "./dist/chains.d.cts",
                 "require": "./dist/chains.cjs"
             }
+        },
+        "./sequencer": {
+            "import": {
+                "types": "./dist/sequencer/index.d.ts",
+                "import": "./dist/sequencer/index.js"
+            },
+            "require": {
+                "types": "./dist/sequencer/index.d.cts",
+                "require": "./dist/sequencer/index.cjs"
+            }
         }
     },
     "files": [

@@ -1,6 +1,6 @@
 # L1 Contract Interactions
 
-Transactions related to Cartesi applications are sent directly to the base layer (L1) as regular contract interactions with the Cartesi Rollups [smart contracts](https://github.com/cartesi/rollups-contracts).
+Base-layer operations related to Cartesi applications, such as depositing assets and executing outputs, are regular contract interactions with the Cartesi Rollups [smart contracts](https://github.com/cartesi/rollups-contracts).
 
 Instead of providing custom actions, this library exports typed ABIs and deployment addresses of all Cartesi Rollups contracts through the `@cartesi/viem/abi` entrypoint, to be used with viem's own contract actions, like [writeContract](https://viem.sh/docs/contract/writeContract), [readContract](https://viem.sh/docs/contract/readContract), [simulateContract](https://viem.sh/docs/contract/simulateContract) and [estimateContractGas](https://viem.sh/docs/contract/estimateContractGas).
 
@@ -11,6 +11,10 @@ Instead of providing custom actions, this library exports typed ABIs and deploym
 ## Sending inputs
 
 Send a generic input to an application through the `InputBox` contract.
+
+:::note
+This is the direct L1 input path. To sign an application transaction with a Wallet Client and submit it through a Cartesi sequencer instead, see [Sequencer Transactions](/viem/sequencer).
+:::
 
 ```ts twoslash
 import { http, stringToHex } from "viem";
