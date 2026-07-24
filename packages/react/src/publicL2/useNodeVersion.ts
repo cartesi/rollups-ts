@@ -16,7 +16,10 @@ export const nodeVersionOptions = (client: CartesiPublicClient) =>
     });
 
 export const useNodeVersion = (
-    params: Omit<ReturnType<typeof nodeVersionOptions>, "queryKey" | "queryFn">,
+    params?: Omit<
+        ReturnType<typeof nodeVersionOptions>,
+        "queryKey" | "queryFn"
+    >,
 ) => {
     const client = useCartesiClient();
     return useQuery({
