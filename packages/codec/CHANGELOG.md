@@ -1,5 +1,11 @@
 # @cartesi/codec
 
+## 1.0.0-alpha.1
+
+### Patch Changes
+
+-   b4de9f1: bump dependencies
+
 ## 1.0.0-alpha.0
 
 ### Major Changes

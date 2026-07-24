@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.25
+
+### Patch Changes
+
+-   b4de9f1: bump dependencies
+
 ## 2.0.0-alpha.24
 
 ### Minor Changes

@@ -1,5 +1,19 @@
 # @cartesi/react
 
+## 2.0.0-alpha.38
+
+### Minor Changes
+
+-   1facfb5: Rename the package from `@cartesi/wagmi` to `@cartesi/react`. Update imports from `@cartesi/wagmi` to `@cartesi/react`; the exported hooks, providers, and query-key helpers are unchanged. The `@cartesi/wagmi-plugin` package (the `@wagmi/cli` plugin) is unaffected and keeps its name.
+
+### Patch Changes
+
+-   b4de9f1: bump dependencies
+-   dfeccf7: Make the `params` argument optional for `useChainId` and `useNodeVersion`, so they can be called with no argument (`useChainId()` instead of `useChainId({})`). Both hooks only accept the optional query-options object, so the empty object was never required. The change is backward compatible.
+-   Updated dependencies [b4de9f1]
+-   Updated dependencies [e4cf760]
+    -   @cartesi/client@2.0.0-alpha.34
+
 ## 2.0.0-alpha.37
 
 ### Minor Changes
