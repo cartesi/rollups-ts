@@ -16,7 +16,7 @@ export const chainIdOptions = (client: CartesiPublicClient) =>
     });
 
 export const useChainId = (
-    params: Omit<ReturnType<typeof chainIdOptions>, "queryKey" | "queryFn">,
+    params?: Omit<ReturnType<typeof chainIdOptions>, "queryKey" | "queryFn">,
 ) => {
     const client = useCartesiClient();
     return useQuery({
