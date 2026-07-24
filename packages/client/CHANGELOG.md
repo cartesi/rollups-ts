@@ -1,5 +1,17 @@
 # @cartesi/client
 
+## 2.0.0-alpha.34
+
+### Minor Changes
+
+-   e4cf760: Rename the package from `@cartesi/viem` to `@cartesi/client`. Update imports from `@cartesi/viem` to `@cartesi/client`, including the subpath entrypoints (`@cartesi/client/abi`, `@cartesi/client/actions`, `@cartesi/client/chains`); the exported actions, clients, decorators, and types are unchanged.
+
+### Patch Changes
+
+-   b4de9f1: bump dependencies
+-   Updated dependencies [b4de9f1]
+    -   @cartesi/rpc@2.0.0-alpha.25
+
 ## 2.0.0-alpha.33
 
 ### Major Changes
