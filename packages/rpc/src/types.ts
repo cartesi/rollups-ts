@@ -16,6 +16,8 @@ export type Pagination = {
     offset: number;
 };
 
+type NonEmptyArray<T> = [T, ...T[]];
+
 type PaginatedReturnType<T> = {
     data: T[];
     pagination: Pagination;
@@ -259,7 +261,9 @@ export type ListApplicationsReturnType = PaginatedReturnType<Application>;
 
 export type ListEpochsParams = PaginationParams & {
     application: string | Address;
-    status?: EpochStatus;
+    status?: EpochStatus | NonEmptyArray<EpochStatus>;
+    from?: HexNumber;
+    to?: HexNumber;
 };
 
 export type ListEpochsReturnType = PaginatedReturnType<Epoch>;
