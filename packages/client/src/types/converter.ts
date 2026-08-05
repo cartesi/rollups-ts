@@ -15,7 +15,6 @@ import type {
     Withdrawal as WithdrawalRpc,
 } from "@cartesi/rpc";
 import { type Hex, decodeFunctionData, getAddress, hexToBigInt } from "viem";
-import { dataAvailabilityAbi } from "../rollups.js";
 import type {
     Application,
     Commitment,
@@ -41,6 +40,31 @@ export const paginationConverter = (pagination: PaginationRpc): Pagination => {
         totalCount: pagination.total_count,
     };
 };
+
+// the node reports the data availability of an application as a call to one
+// of these functions; rollups-contracts dropped the `DataAvailability` library
+// in 3.0.0-alpha.7 (applications now advertise their input box directly), so
+// the ABI is kept here instead of being generated from the contracts
+const dataAvailabilityAbi = [
+    {
+        type: "function",
+        name: "InputBox",
+        inputs: [{ name: "inputBox", type: "address" }],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "InputBoxAndEspresso",
+        inputs: [
+            { name: "inputBox", type: "address" },
+            { name: "fromBlock", type: "uint256" },
+            { name: "namespaceId", type: "uint32" },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+] as const;
 
 const parseDataAvailability = (data: Hex): DataAvailability => {
     const { functionName, args } = decodeFunctionData({
