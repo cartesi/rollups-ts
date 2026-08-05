@@ -1,0 +1,14 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
+    "extends": "//",
+    "files": {
+        "includes": [
+            "**",
+            "!build",
+            "!deps",
+            "!dist",
+            "!prebuilds",
+            "!test/machine/work"
+        ]
+    }
+}

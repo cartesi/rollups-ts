@@ -258,6 +258,66 @@ const config: Config = defineConfig({
             ],
         },
         {
+            text: "Rollup",
+            items: [
+                {
+                    text: "Introduction",
+                    link: "/rollup",
+                },
+                {
+                    text: "Getting Started",
+                    link: "/rollup/getting-started",
+                },
+                {
+                    text: "Guide",
+                    collapsed: true,
+                    items: [
+                        {
+                            text: "Handling Requests",
+                            link: "/rollup/handling-requests",
+                        },
+                        {
+                            text: "Emitting Outputs",
+                            link: "/rollup/emitting-outputs",
+                        },
+                        {
+                            text: "Testing on the Host",
+                            link: "/rollup/testing",
+                        },
+                        {
+                            text: "Running in the Cartesi Machine",
+                            link: "/rollup/cartesi-machine",
+                        },
+                    ],
+                },
+                {
+                    text: "API",
+                    collapsed: true,
+                    items: [
+                        { text: "new Rollup", link: "/rollup/Rollup" },
+                        { text: "finish", link: "/rollup/finish" },
+                        { text: "run", link: "/rollup/run" },
+                        { text: "emitVoucher", link: "/rollup/emitVoucher" },
+                        {
+                            text: "emitDelegateCallVoucher",
+                            link: "/rollup/emitDelegateCallVoucher",
+                        },
+                        { text: "emitNotice", link: "/rollup/emitNotice" },
+                        { text: "emitReport", link: "/rollup/emitReport" },
+                        {
+                            text: "emitException",
+                            link: "/rollup/emitException",
+                        },
+                        { text: "progress", link: "/rollup/progress" },
+                        { text: "gio", link: "/rollup/gio" },
+                        { text: "merkle", link: "/rollup/merkle" },
+                        { text: "close", link: "/rollup/close" },
+                        { text: "Types & Constants", link: "/rollup/types" },
+                    ],
+                },
+            ],
+        },
+        {
             text: "RPC Client",
             items: [
                 {

@@ -13,12 +13,147 @@ permissions:
     pull-requests: write
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
-    release:
-        name: release
+    # @cartesi/rollup is a native addon and must be published with prebuilds for
+    # every supported platform. Building them is only worth it when the package
+    # is actually about to be published, i.e. when its package.json version is
+    # not yet on npm: false both on Version-PR runs (not bumped yet) and on
+    # already-published versions. (Counting .changeset/*.md does not work: in
+    # changesets pre mode the .md files persist after `changeset version`.)
+    detect:
+        name: detect native package publish
+        runs-on: ubuntu-latest
+        outputs:
+            publish: ${{ steps.check.outputs.publish }}
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup Node.js 24
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 24.x
+
+            - id: check
+              run: |
+                  LOCAL=$(node -p "require('./packages/rollup/package.json').version")
+                  if npm view "@cartesi/rollup@${LOCAL}" version >/dev/null 2>&1; then
+                      echo "publish=false" >> "$GITHUB_OUTPUT"
+                      echo "@cartesi/rollup@${LOCAL} already on npm -> skip prebuilds."
+                  else
+                      echo "publish=true" >> "$GITHUB_OUTPUT"
+                      echo "@cartesi/rollup@${LOCAL} not yet published -> build prebuilds."
+                  fi
+
+    # @cartesi/rollup native prebuilds, built from the exact commit being
+    # published. Each job uploads a prebuilds-<os> artifact the release job
+    # collects into the package before it is packed.
+    prebuild:
+        name: prebuild ${{ matrix.os }}
+        needs: detect
+        if: needs.detect.outputs.publish == 'true'
+        strategy:
+            matrix:
+                include:
+                    - os: ubuntu-latest # linux-x64
+                    - os: ubuntu-24.04-arm # linux-arm64
+                    - os: macos-15-intel # darwin-x64
+                    - os: macos-latest # darwin-arm64
+        runs-on: ${{ matrix.os }}
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  # the addon compiles libcmt from the machine-guest-tools
+                  # submodule (packages/rollup/deps/machine-guest-tools)
+                  submodules: recursive
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+            - name: Setup Node.js 24
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 24.x
+                  cache: "pnpm"
+
+            - name: Install Dependencies
+              run: pnpm i
+
+            - name: Build prebuild
+              run: pnpm --filter @cartesi/rollup prebuild:native
+
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: prebuilds-${{ matrix.os }}
+                  if-no-files-found: error
+                  path: packages/rollup/prebuilds/
+
+    prebuild-riscv64:
+        name: prebuild linux-riscv64 (cross)
+        needs: detect
+        if: needs.detect.outputs.publish == 'true'
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Repo
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  submodules: recursive
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+            - name: Setup Node.js 24
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 24.x
+                  cache: "pnpm"
+
+            - name: Install Dependencies
+              run: pnpm i
+
+            # libcmt bundles the `cmio` ioctl ABI since machine-guest-tools
+            # 0.18.0, so the Cartesi Linux headers are no longer needed here.
+            - name: Install riscv64 cross toolchain
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y --no-install-recommends gcc-riscv64-linux-gnu g++-riscv64-linux-gnu
+
+            - name: Cross-build libcmt (real IO driver)
+              working-directory: packages/rollup
+              run: make -C deps/machine-guest-tools/sys-utils/libcmt libcmt TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+
+            - name: Prebuild riscv64 addon
+              env:
+                  CC: riscv64-linux-gnu-gcc
+                  CXX: riscv64-linux-gnu-g++
+                  LIBCMT_LIB: ${{ github.workspace }}/packages/rollup/deps/machine-guest-tools/sys-utils/libcmt/build/riscv64/libcmt.a
+              run: pnpm --filter @cartesi/rollup prebuild:native --strip-bin riscv64-linux-gnu-strip --platform linux --arch riscv64
+
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: prebuilds-riscv64
+                  if-no-files-found: error
+                  path: packages/rollup/prebuilds/
+
+    release:
+        name: release
+        needs: [detect, prebuild, prebuild-riscv64]
+        # Run when creating the Version PR (publish=false, prebuilds skipped), or
+        # when publishing AND every prebuild succeeded. Never publish the native
+        # package without its prebuilds: a prebuild failure blocks the release
+        # (re-runnable).
+        if: >-
+            always() && needs.detect.result == 'success' &&
+            (needs.detect.outputs.publish == 'false' ||
+             (needs.prebuild.result == 'success' && needs.prebuild-riscv64.result == 'success'))
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  # @cartesi/rollup's native addon compiles libcmt from the
+                  # machine-guest-tools submodule during `pnpm i`
+                  submodules: recursive
 
             - name: Setup pnpm
               uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
@@ -40,6 +175,18 @@ jobs:
 
             - name: Install Dependencies
               run: pnpm i
+
+            # Collect all platform prebuilds into the package so
+            # `changeset publish` packs @cartesi/rollup with them instead of
+            # forcing consumers to compile from source. Only present when
+            # publishing.
+            - name: Collect prebuilds
+              if: needs.detect.outputs.publish == 'true'
+              uses: actions/download-artifact@v8
+              with:
+                  pattern: prebuilds-*
+                  merge-multiple: true
+                  path: packages/rollup/prebuilds
 
             - name: Create Release Pull Request or Publish to npm
               uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0

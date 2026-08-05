@@ -1,0 +1,3 @@
+[submodule "packages/rollup/deps/machine-guest-tools"]
+	path = packages/rollup/deps/machine-guest-tools
+	url = https://github.com/cartesi/machine-guest-tools
