@@ -63,7 +63,7 @@ const hash = await walletClient.writeContract({
 });
 ```
 
-Depositing ERC-20 tokens through the `ERC20Portal`. The portal must have an [allowance](https://viem.sh/docs/contract/writeContract) to transfer the tokens on behalf of the depositor, so an `approve` call to the token contract is required beforehand:
+Depositing ERC-20 tokens through the `Erc20Portal`. The portal must have an [allowance](https://viem.sh/docs/contract/writeContract) to transfer the tokens on behalf of the depositor, so an `approve` call to the token contract is required beforehand:
 
 ```ts twoslash
 import { http, erc20Abi, parseUnits } from "viem";
@@ -92,12 +92,12 @@ const approveHash = await walletClient.writeContract({
 const hash = await walletClient.writeContract({
   abi: erc20PortalAbi,
   address: erc20PortalAddress,
-  functionName: "depositERC20Tokens",
+  functionName: "depositErc20Tokens",
   args: [token, "0x...", amount, "0x"],
 });
 ```
 
-Deposits of ERC-721 and ERC-1155 tokens follow the same pattern, using `erc721PortalAbi` / `erc721PortalAddress` (function `depositERC721Token`), `erc1155SinglePortalAbi` / `erc1155SinglePortalAddress` (function `depositSingleERC1155Token`) and `erc1155BatchPortalAbi` / `erc1155BatchPortalAddress` (function `depositBatchERC1155Token`).
+Deposits of ERC-721 and ERC-1155 tokens follow the same pattern, using `erc721PortalAbi` / `erc721PortalAddress` (function `depositErc721Token`), `erc1155SinglePortalAbi` / `erc1155SinglePortalAddress` (function `depositSingleErc1155Token`) and `erc1155BatchPortalAbi` / `erc1155BatchPortalAddress` (function `depositBatchErc1155Token`).
 
 ## Executing outputs
 
