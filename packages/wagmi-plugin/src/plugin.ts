@@ -11,7 +11,7 @@ export type ContractFilter = string | RegExp;
  * rollups-contracts version used by default when `artifacts` and
  * `deployments` are omitted.
  */
-export const DEFAULT_VERSION = "3.0.0-alpha.6";
+export const DEFAULT_VERSION = "3.0.0-alpha.7";
 
 const defaultReleaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${DEFAULT_VERSION}`;
 
@@ -20,8 +20,8 @@ const defaultReleaseUrl = `https://github.com/cartesi/rollups-contracts/releases
  * rollups-contracts `DEFAULT_VERSION` GitHub release, hash-verified.
  */
 export const DEFAULT_ARTIFACTS: TarballSource = {
-    url: `${defaultReleaseUrl}/rollups-contracts-${DEFAULT_VERSION}-artifacts.tar.gz`,
-    sha256: "ad1e0880766d25419fc6da1858ea4e7b9074b400e9d9ef68da88b12f4a8bba45",
+    url: `${defaultReleaseUrl}/cartesi-rollups-contracts-${DEFAULT_VERSION}-artifacts.tar.gz`,
+    sha256: "c4b2250a0ee3e8ba960d348d3c19f8e4312f2b78fa98ffe2c0ba58f5f0b10874",
 };
 
 /**
@@ -29,14 +29,14 @@ export const DEFAULT_ARTIFACTS: TarballSource = {
  * `DEFAULT_VERSION` GitHub release, hash-verified.
  */
 export const DEFAULT_DEPLOYMENTS: TarballSource = {
-    url: `${defaultReleaseUrl}/rollups-contracts-${DEFAULT_VERSION}-deployment-addresses.tar.gz`,
-    sha256: "bd6ee9b339e0541ce464ea3368e5e70595627b35fe0a68c6f5e044ef433ab895",
+    url: `${defaultReleaseUrl}/cartesi-rollups-contracts-${DEFAULT_VERSION}-deployment-addresses.tar.gz`,
+    sha256: "15b9987f48e819c8aa4190c41ec09c28ef16f89ee3afa56e50136915f021b4f0",
 };
 
 export interface RollupsContractsOptions {
     /**
      * URL of the rollups-contracts foundry build artifacts tarball, i.e.
-     * `rollups-contracts-<version>-artifacts.tar.gz`. Optionally with an
+     * `cartesi-rollups-contracts-<version>-artifacts.tar.gz`. Optionally with an
      * expected SHA-256 hash for integrity verification.
      * Defaults to `DEFAULT_ARTIFACTS`, the tarball of the rollups-contracts
      * `DEFAULT_VERSION` GitHub release.
@@ -44,7 +44,7 @@ export interface RollupsContractsOptions {
     artifacts?: TarballSource;
     /**
      * URL of the rollups-contracts deployment addresses tarball, i.e.
-     * `rollups-contracts-<version>-deployment-addresses.tar.gz`. Optionally
+     * `cartesi-rollups-contracts-<version>-deployment-addresses.tar.gz`. Optionally
      * with an expected SHA-256 hash for integrity verification.
      * Defaults to `DEFAULT_DEPLOYMENTS`, the tarball of the rollups-contracts
      * `DEFAULT_VERSION` GitHub release.
