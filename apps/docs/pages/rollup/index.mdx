@@ -1,0 +1,54 @@
+# Rollup
+
+Build Cartesi applications in Node.js, talking directly to the machine — no HTTP server in between.
+
+A Cartesi application receives **inputs** from the blockchain, processes them inside a deterministic Linux virtual machine (the Cartesi Machine), and produces verifiable **outputs**. The `@cartesi/rollup` package is a native binding to [libcmt](https://github.com/cartesi/machine-guest-tools/tree/main/sys-utils/libcmt), the guest-side rollup library, so your Node.js code can process inputs and emit outputs with a few function calls:
+
+```ts twoslash
+import { Rollup } from "@cartesi/rollup";
+
+const rollup = new Rollup();
+
+await rollup.run({
+    advance(request, rollup) {
+        // an input arrived from the blockchain — echo it back as a notice
+        rollup.emitNotice(request.payload);
+        return true; // accept
+    },
+    inspect(request, rollup) {
+        // an off-chain query — answer with a report
+        rollup.emitReport(request.payload);
+    },
+});
+```
+
+The same code runs unchanged in two environments:
+
+- **Your development machine** — the binding embeds libcmt's _mock_ IO driver: inputs come from local files, outputs are written next to them. Instant feedback, no emulator needed.
+- **Inside the Cartesi Machine** — the binding talks to the real rollup device of the emulated riscv64 machine. A prebuilt binary ships in the package, so nothing is compiled at install time.
+
+This is the guest side of the rollups protocol: the blobs this package emits and receives are the same ones [`@cartesi/codec`](/codec) encodes and decodes off-chain.
+
+## Installation
+
+:::code-group
+
+```sh [npm]
+npm install @cartesi/rollup
+```
+
+```sh [pnpm]
+pnpm add @cartesi/rollup
+```
+
+```sh [yarn]
+yarn add @cartesi/rollup
+```
+
+:::
+
+## Where to go next
+
+- [Getting Started](/rollup/getting-started) — install the package and run your first application.
+- [Handling Requests](/rollup/handling-requests) — how the request cycle works.
+- [Reference](/rollup/Rollup) — every binding method, fully typed.

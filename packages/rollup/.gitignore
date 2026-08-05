@@ -1,0 +1,6 @@
+# native addon build outputs (node-gyp / prebuildify)
+prebuilds/
+*.node
+
+# cartesi machine end-to-end test artifacts
+test/machine/work/

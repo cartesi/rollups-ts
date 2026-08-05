@@ -14,6 +14,10 @@ Viem extension library that provides L1 public actions and L1 wallet actions rel
 
 Isomorphic utility functions to decode (and encode, for testing) data compliant with the Cartesi Rollups [`Inputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Inputs.sol) and [`Outputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Outputs.sol) interfaces.
 
+## @cartesi/rollup
+
+Node.js bindings for [libcmt](https://github.com/cartesi/machine-guest-tools/tree/main/sys-utils/libcmt), the Cartesi Machine guest rollup library, so applications running *inside* a Cartesi Machine can handle advance and inspect requests and emit vouchers, notices, reports and exceptions — without going through the rollup HTTP server.
+
 ## @cartesi/rpc
 
 This library provides a typed JSON-RPC client for the Cartesi Rollups v2 [JSON-RPC API](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/cartesi/rollups-node/refs/tags/v2.0.0-alpha.10/internal/jsonrpc/jsonrpc-discover.json&uiSchema[appBar][ui:title]=Cartesi&uiSchema[appBar][ui:logoUrl]=https://cartesi.io/favicon.svg&uiSchema[appBar][ui:transports]=false&uiSchema[appBar][ui:input]=false&uiSchema[appBar][ui:edit]=false&uiSchema[appBar][ui:examplesDropdown]=false&uiSchema[appBar][ui:splitView]=false).

@@ -1,0 +1,65 @@
+name: machine
+# End-to-end validation of @cartesi/rollup's linux-riscv64 addon inside a real
+# Cartesi Machine. The host build is already exercised by the package's own test
+# suite (libcmt's mock IO driver); the riscv64 addon can only be validated under
+# emulation, which is slow, so this runs on demand and weekly instead of on
+# every push.
+on:
+    workflow_dispatch:
+    schedule:
+        # Mondays 06:00 UTC
+        - cron: "0 6 * * 1"
+permissions:
+    contents: read
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    rollup-riscv64:
+        name: rollup riscv64 machine test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  submodules: recursive
+
+            - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 24.x
+                  cache: "pnpm"
+
+            - uses: docker/setup-qemu-action@v3
+              with:
+                  platforms: riscv64
+
+            - name: Install Dependencies
+              run: pnpm i
+
+            # libcmt bundles the `cmio` ioctl ABI since machine-guest-tools
+            # 0.18.0, so the Cartesi Linux headers are no longer needed here.
+            - name: Install riscv64 cross toolchain
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y --no-install-recommends gcc-riscv64-linux-gnu g++-riscv64-linux-gnu
+
+            - name: Cross-build libcmt (real IO driver)
+              working-directory: packages/rollup
+              run: make -C deps/machine-guest-tools/sys-utils/libcmt libcmt TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+
+            - name: Prebuild riscv64 addon
+              env:
+                  CC: riscv64-linux-gnu-gcc
+                  CXX: riscv64-linux-gnu-g++
+                  LIBCMT_LIB: ${{ github.workspace }}/packages/rollup/deps/machine-guest-tools/sys-utils/libcmt/build/riscv64/libcmt.a
+              run: pnpm --filter @cartesi/rollup prebuild:native --strip-bin riscv64-linux-gnu-strip --platform linux --arch riscv64
+
+            # the prebuild above is what the test would otherwise cross-build in
+            # docker, so reuse it
+            - name: Run end-to-end test inside cartesi-machine
+              working-directory: packages/rollup
+              run: |
+                  CARTESI_MACHINE="docker run --rm -u $(id -u):$(id -g) -v $PWD:/mnt -w /mnt cartesi/machine-emulator:0.21.0 cartesi-machine" \
+                  SKIP_PREBUILD=1 test/machine/run.sh

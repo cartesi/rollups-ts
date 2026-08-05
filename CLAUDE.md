@@ -6,16 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 pnpm + Turborepo monorepo of Cartesi Rollups TypeScript libraries. Requires Node >= 22 and pnpm (see `packageManager` in package.json). Shared dependency versions are pinned in the `catalog:` section of `pnpm-workspace.yaml`.
 
+`@cartesi/rollup` is a native addon whose libcmt sources come from the `packages/rollup/deps/machine-guest-tools` git submodule, and its `install` script compiles that addon. So a clone needs `git submodule update --init` before `pnpm install`, and CI checkouts need `submodules: recursive`.
+
 ## Commands
 
 - `pnpm build` — build all packages (turbo; for client/react this runs codegen first, see below)
 - `pnpm dev` — watch mode (tsdown --watch) across packages
 - `pnpm lint` — `biome check` in each package
 - `pnpm check-types` — TypeScript type checking
-- Tests (`@cartesi/client` and `@cartesi/codec` have tests, via vitest):
+- Tests (`@cartesi/client`, `@cartesi/codec` and `@cartesi/rollup` have tests, via vitest):
   - `pnpm --filter @cartesi/client test` — watch mode
   - `pnpm --filter @cartesi/client test:coverage` — single run with coverage
   - Single test: `pnpm --filter @cartesi/client exec vitest run __tests__/converter.test.ts`
+  - `@cartesi/rollup` is the exception: its `test` builds first and then runs vitest once, because the suite loads `dist/` (the native addon is resolved relative to the package root)
 - Releases use changesets: `pnpm changeset` to add one; versioning/publishing is `pnpm version-packages` / `pnpm release`. Packages are currently on 2.0.0-alpha prereleases.
 
 Formatting/linting is Biome (`biome.json` at root): 4-space indent, double quotes. All packages are ESM (`"type": "module"`) and use `.js` extensions on relative imports (NodeNext resolution). Builds are done with tsdown, emitting dual ESM/CJS to `dist/`.
@@ -35,6 +38,8 @@ Dependency chain: `@cartesi/rpc` → `@cartesi/client` → `@cartesi/react`, wit
 - **packages/react (`@cartesi/react`)** — React hooks. `src/publicL2/` wraps each viem L2 action in a TanStack Query hook (`useInput`, `useOutputs`, …), using the `CartesiPublicClient` from `provider.tsx` (`CartesiProvider` / `useCartesiClient`). `src/generated.ts` is **generated** contract hooks.
 
 - **packages/codec (`@cartesi/codec`)** — isomorphic encode/decode of input and output blobs, which are ABI-encoded calls to the rollups contracts `Inputs` (`EvmAdvance`) and `Outputs` (`Notice`, `Voucher`, `DelegateCallVoucher`) interfaces, and of portal deposit payloads (`src/portal.ts`), which are packed-encoded per the rollups contracts `InputEncoding` library. `src/rollups.ts` is **generated** (see Codegen); depends only on viem (peer) and abitype.
+
+- **packages/rollup (`@cartesi/rollup`)** — Node-API native addon over [libcmt](https://github.com/cartesi/machine-guest-tools/tree/main/sys-utils/libcmt), the guest rollup library, for applications running *inside* a Cartesi Machine (the guest side of what `@cartesi/codec` encodes off-chain). Imported from `@deroll/cmio`. The C++ half is `src/addon.cc` (raw N-API surface, exact-length Buffers, errno-carrying errors); the TypeScript half wraps it in the `Rollup` class (`src/rollup.ts`), coercing bytes/addresses/u256 in `src/convert.ts` and normalizing libcmt failures into `RollupError` in `src/errors.ts`. `binding.gyp` selects the flavor by target arch: on riscv64 it links the real libcmt (`-l:libcmt.a`, override with `LIBCMT_LIB`), everywhere else it compiles libcmt's mock IO driver from the submodule into the addon (`LIBCMT_DIR`). The API is synchronous on purpose — `finish`/`gio` yield the machine, pausing the whole guest. Prebuilds for linux-x64/arm64/riscv64 and darwin-x64/arm64 are built by the release workflow and collected into the package before it is packed; `test/machine/` is an end-to-end test of the riscv64 build inside a real Cartesi Machine, run by the `machine` workflow.
 
 - **packages/wagmi-plugin (`@cartesi/wagmi-plugin`)** — the `rollupsContracts` `@wagmi/cli` plugin, which downloads a rollups-contracts release (build artifacts + deployment addresses tarballs, hash-verified) into the OS temp dir and emits contracts with ABIs and addresses (single address when identical across chains, per-chain otherwise). `artifacts`/`deployments` default to the release pinned by `DEFAULT_VERSION` in `src/plugin.ts`. Supports `include`/`exclude` by contract name (or regex), applied to all contracts alike: when neither is given all contracts in the artifacts are included, `include` narrows the set, and `exclude` is applied after `include`.
 

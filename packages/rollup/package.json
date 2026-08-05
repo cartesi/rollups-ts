@@ -1,0 +1,82 @@
+{
+    "name": "@cartesi/rollup",
+    "description": "Node.js bindings for libcmt, the Cartesi Machine guest rollup library",
+    "version": "0.0.0",
+    "keywords": [
+        "cartesi",
+        "rollups",
+        "libcmt",
+        "riscv64"
+    ],
+    "license": "Apache-2.0",
+    "author": "Cartesi",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cartesi/rollups-ts"
+    },
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "require": "./dist/index.cjs"
+            }
+        },
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "binding.gyp",
+        "dist/**",
+        "prebuilds/**",
+        "src/addon.cc",
+        "deps/machine-guest-tools/sys-utils/libcmt/include/**",
+        "deps/machine-guest-tools/sys-utils/libcmt/src/**"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "tsdown",
+        "build:native": "node-gyp rebuild",
+        "check-types": "tsc --noEmit",
+        "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf build && rm -rf prebuilds",
+        "dev": "tsdown --watch",
+        "install": "node-gyp-build",
+        "lint": "biome check",
+        "prebuild:native": "prebuildify --napi --strip",
+        "test": "run-s build test:run",
+        "test:coverage": "run-s build test:coverage:run",
+        "test:coverage:run": "vitest run --coverage",
+        "test:run": "vitest run"
+    },
+    "dependencies": {
+        "node-addon-api": "^8.3.0",
+        "node-gyp-build": "^4.8.4"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@types/node": "catalog:",
+        "@vitest/coverage-v8": "^4.1.10",
+        "node-gyp": "^13.0.0",
+        "npm-run-all": "^4.1.5",
+        "prebuildify": "^6.0.1",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "^4.1.10"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "binary": {
+        "napi_versions": [
+            8
+        ]
+    }
+}
