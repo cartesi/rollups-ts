@@ -4,17 +4,32 @@ Inside the Cartesi Machine — the deterministic riscv64 Linux VM your applicati
 
 ## What your machine image needs
 
-1. **Node.js for riscv64** — Debian's `nodejs` package works out of the box.
+1. **Node.js for riscv64** — use the [`cartesi/node`](https://hub.docker.com/r/cartesi/node) image (see below).
 2. **Your application and its dependencies** — installed with npm as usual. The package's linux-riscv64 prebuild is picked up automatically; no compiler or libcmt development files are needed inside the image.
 
-A minimal Dockerfile for a machine rootfs:
+### Node.js for riscv64
+
+Node.js publishes no official riscv64 builds, so Cartesi builds them and publishes them to Docker Hub as [`cartesi/node`](https://hub.docker.com/r/cartesi/node) (built from [cartesi/docker-node](https://github.com/cartesi/docker-node)). Prefer it over the distribution's own `nodejs` package, which lags well behind: Debian trixie ships Node 20, Ubuntu noble Node 18.
+
+Tags follow `<version>-<ubuntu codename>[-slim]`, and the images are riscv64-only:
+
+| Tag | Node |
+| --- | --- |
+| `cartesi/node:22-noble-slim` | 22.x on Ubuntu 24.04 |
+| `cartesi/node:24-noble-slim` | 24.x on Ubuntu 24.04 |
+
+Minor and patch versions (`22.23`, `22.23.0`), the non-`slim` variants, and older `jammy` (Ubuntu 22.04) builds are published too. There is no `latest` tag — pick an explicit one.
+
+Any of these work with this package: the addon is a Node-API addon built against API version 8, so a single riscv64 prebuild is ABI-stable across Node major versions.
+
+### A minimal Dockerfile for a machine rootfs
 
 ```dockerfile
-FROM --platform=linux/riscv64 debian:trixie-slim
+FROM --platform=linux/riscv64 cartesi/node:22-noble-slim
 ARG GUEST_TOOLS_VERSION=v0.18.0
 ADD https://github.com/cartesi/machine-guest-tools/releases/download/${GUEST_TOOLS_VERSION}/machine-guest-tools_riscv64.deb /tmp/
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends nodejs /tmp/machine-guest-tools_riscv64.deb \
+    && apt-get install -y --no-install-recommends /tmp/machine-guest-tools_riscv64.deb \
     && rm -rf /var/lib/apt/lists/* /tmp/machine-guest-tools_riscv64.deb
 COPY app /opt/app
 ENTRYPOINT ["node", "/opt/app/index.mjs"]
