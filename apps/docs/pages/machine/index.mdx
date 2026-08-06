@@ -1,0 +1,36 @@
+# Cartesi Machine + Node.js
+
+The [Cartesi machine emulator](https://github.com/cartesi/machine-emulator) is a C++ library with a C API. This package binds it to Node.js as a native N-API addon linked against the static libraries of the official emulator distribution (currently [0.21.0](https://github.com/cartesi/machine-emulator/releases/tag/v0.21.0)). Prebuilt platform packages bundle everything — including the `cartesi-jsonrpc-machine` server executable used by [spawn](/machine/spawn) — so **no emulator installation is required** for the supported platforms.
+
+It provides a fully typed and ergonomic TypeScript API for the Cartesi Machine C API and the Cartesi Machine JSON-RPC API, which allows you to create, manage, and interact with local or remote Cartesi machines from TypeScript/JavaScript applications.
+
+## Features
+
+- **Self-contained**: prebuilt binaries per platform, no emulator installation needed;
+- **Comprehensive**: Complete API, for any use case, including [local](/machine/local) and [remote](/machine/remote) machines;
+- **Full Type Safety**: Complete TypeScript definitions for all C API functions and types;
+- **High-Level Wrapper**: Easy-to-use [CartesiMachine](/machine/CartesiMachine) and [RemoteCartesiMachine](/machine/RemoteCartesiMachine) interfaces that wraps the C API;
+- **Error Handling**: Easy [error handling](/machine/error-handling) with detailed error messages.
+
+## Installation
+
+:::code-group
+
+```bash [pnpm]
+pnpm add @cartesi/machine
+```
+
+```bash [npm]
+npm install @cartesi/machine
+```
+
+```bash [yarn]
+yarn add @cartesi/machine
+```
+:::
+
+On Linux (x64, arm64) and macOS (x64, arm64) this installs a prebuilt platform package (`@cartesi/machine-<platform>-<arch>`) containing the native addon and the JSON-RPC server executable — no compiler needed.
+
+On other platforms the install script compiles the addon from source, which requires a C++ compiler and an installed cartesi-machine emulator distribution (the `machine-emulator` `.deb` from the [official releases](https://github.com/cartesi/machine-emulator/releases) on Debian/Ubuntu, or `brew install cartesi/tap/cartesi-machine-emulator` on macOS).
+
+Check the [troubleshooting](/machine/troubleshooting) section in case of problems.

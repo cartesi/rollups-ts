@@ -1,0 +1,25 @@
+{
+    "name": "@cartesi/machine-darwin-arm64",
+    "version": "0.0.0",
+    "description": "Prebuilt @cartesi/machine native binaries for darwin-arm64 (Cartesi Machine N-API addon and cartesi-jsonrpc-machine server)",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cartesi/rollups-ts.git"
+    },
+    "license": "(Apache-2.0 AND LGPL-3.0-or-later)",
+    "preferUnplugged": true,
+    "main": "cartesi_machine.node",
+    "os": [
+        "darwin"
+    ],
+    "cpu": [
+        "arm64"
+    ],
+    "files": [
+        "cartesi_machine.node",
+        "cartesi-jsonrpc-machine"
+    ],
+    "publishConfig": {
+        "access": "public"
+    }
+}

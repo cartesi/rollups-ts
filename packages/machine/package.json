@@ -1,0 +1,79 @@
+{
+    "name": "@cartesi/machine",
+    "description": "Node.js bindings for the Cartesi Machine emulator",
+    "version": "0.0.0",
+    "keywords": [
+        "cartesi",
+        "cartesi-machine",
+        "emulator",
+        "bindings"
+    ],
+    "license": "Apache-2.0",
+    "author": "Cartesi",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cartesi/rollups-ts"
+    },
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "require": "./dist/index.cjs"
+            }
+        },
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "binding.gyp",
+        "dist/**",
+        "scripts/find-cartesi.cjs",
+        "scripts/install.cjs",
+        "src/addon.cc",
+        "src/slirp-stubs.c"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "tsdown",
+        "build:native": "node-gyp rebuild",
+        "check-types": "tsc --noEmit",
+        "clean": "rm -rf .turbo node_modules dist build",
+        "dev": "tsdown --watch",
+        "install": "node scripts/install.cjs",
+        "lint": "biome check",
+        "package:platform": "node scripts/package-platform.mjs",
+        "test": "vitest",
+        "test:coverage": "vitest run --coverage"
+    },
+    "dependencies": {
+        "node-addon-api": "^8.3.0",
+        "node-gyp-build": "^4.8.4"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@types/node": "catalog:",
+        "@vitest/coverage-v8": "^4.1.10",
+        "node-gyp": "^13.0.0",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "viem": "catalog:",
+        "vitest": "^4.1.10"
+    },
+    "engines": {
+        "node": ">=22"
+    },
+    "binary": {
+        "napi_versions": [
+            8
+        ]
+    }
+}

@@ -18,11 +18,12 @@
         "waku": "1.0.0-beta.8"
     },
     "devDependencies": {
-        "@cartesi/codec": "workspace:*",
-        "@cartesi/rpc": "workspace:*",
         "@cartesi/client": "workspace:*",
+        "@cartesi/codec": "workspace:*",
+        "@cartesi/machine": "workspace:*",
         "@cartesi/react": "workspace:*",
         "@cartesi/rollup": "workspace:*",
+        "@cartesi/rpc": "workspace:*",
         "@tanstack/react-query": "^5.101.4",
         "@types/node": "catalog:",
         "@types/react": "catalog:",

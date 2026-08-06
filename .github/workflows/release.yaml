@@ -12,6 +12,12 @@ permissions:
     packages: write
     pull-requests: write
 concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+# emulator distribution @cartesi/machine's addon links against; must stay in
+# the series the binding targets (CARTESI_MACHINE_SERIES in its install script)
+env:
+    CARTESI_MACHINE_VERSION: 0.21.0
+
 jobs:
     # @cartesi/rollup is a native addon and must be published with prebuilds for
     # every supported platform. Building them is only worth it when the package
@@ -23,7 +29,8 @@ jobs:
         name: detect native package publish
         runs-on: ubuntu-latest
         outputs:
-            publish: ${{ steps.check.outputs.publish }}
+            publish-rollup: ${{ steps.check-rollup.outputs.publish }}
+            publish-machine: ${{ steps.check-machine.outputs.publish }}
         steps:
             - name: Checkout Repo
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -33,7 +40,7 @@ jobs:
               with:
                   node-version: 24.x
 
-            - id: check
+            - id: check-rollup
               run: |
                   LOCAL=$(node -p "require('./packages/rollup/package.json').version")
                   if npm view "@cartesi/rollup@${LOCAL}" version >/dev/null 2>&1; then
@@ -44,13 +51,24 @@ jobs:
                       echo "@cartesi/rollup@${LOCAL} not yet published -> build prebuilds."
                   fi
 
+            - id: check-machine
+              run: |
+                  LOCAL=$(node -p "require('./packages/machine/package.json').version")
+                  if npm view "@cartesi/machine@${LOCAL}" version >/dev/null 2>&1; then
+                      echo "publish=false" >> "$GITHUB_OUTPUT"
+                      echo "@cartesi/machine@${LOCAL} already on npm -> skip platform packages."
+                  else
+                      echo "publish=true" >> "$GITHUB_OUTPUT"
+                      echo "@cartesi/machine@${LOCAL} not yet published -> build platform packages."
+                  fi
+
     # @cartesi/rollup native prebuilds, built from the exact commit being
     # published. Each job uploads a prebuilds-<os> artifact the release job
     # collects into the package before it is packed.
     prebuild:
         name: prebuild ${{ matrix.os }}
         needs: detect
-        if: needs.detect.outputs.publish == 'true'
+        if: needs.detect.outputs.publish-rollup == 'true'
         strategy:
             matrix:
                 include:
@@ -91,7 +109,7 @@ jobs:
     prebuild-riscv64:
         name: prebuild linux-riscv64 (cross)
         needs: detect
-        if: needs.detect.outputs.publish == 'true'
+        if: needs.detect.outputs.publish-rollup == 'true'
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Repo
@@ -135,17 +153,78 @@ jobs:
                   if-no-files-found: error
                   path: packages/rollup/prebuilds/
 
+    # @cartesi/machine per-platform prebuilt packages
+    # (@cartesi/machine-<platform>-<arch>), assembled from the exact commit
+    # being published. Each job compiles the N-API addon against the installed
+    # emulator's static libcartesi, bundles that installation's
+    # cartesi-jsonrpc-machine server, and uploads the whole npm/ tree
+    # (package-platform stamps every scaffold identically, so the artifacts
+    # merge cleanly).
+    machine-platform:
+        name: machine platform package ${{ matrix.os }}
+        needs: detect
+        if: needs.detect.outputs.publish-machine == 'true'
+        strategy:
+            matrix:
+                include:
+                    - os: ubuntu-latest # linux-x64
+                    - os: ubuntu-24.04-arm # linux-arm64
+                    - os: macos-15-intel # darwin-x64
+                    - os: macos-latest # darwin-arm64
+        runs-on: ${{ matrix.os }}
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  submodules: recursive
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+            - name: Setup Node.js 24
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 24.x
+                  cache: "pnpm"
+
+            # the emulator distribution the addon links against; its
+            # cartesi-jsonrpc-machine server is bundled into the platform package
+            - name: Install cartesi-machine emulator (linux)
+              if: runner.os == 'Linux'
+              run: |
+                  wget -O /tmp/machine-emulator.deb "https://github.com/cartesi/machine-emulator/releases/download/v${CARTESI_MACHINE_VERSION}/machine-emulator_$(dpkg --print-architecture).deb"
+                  sudo apt-get update && sudo apt-get install -y /tmp/machine-emulator.deb
+
+            - name: Install cartesi-machine emulator (macos)
+              if: runner.os == 'macOS'
+              run: brew install cartesi/tap/cartesi-machine-emulator
+
+            # the install script compiles the addon against the emulator above
+            - name: Install Dependencies
+              run: pnpm i
+
+            - name: Assemble platform package
+              run: pnpm --filter @cartesi/machine package:platform
+
+            - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+              with:
+                  name: machine-platform-${{ matrix.os }}
+                  if-no-files-found: error
+                  path: packages/machine/npm/
+
     release:
         name: release
-        needs: [detect, prebuild, prebuild-riscv64]
+        needs: [detect, prebuild, prebuild-riscv64, machine-platform]
         # Run when creating the Version PR (publish=false, prebuilds skipped), or
-        # when publishing AND every prebuild succeeded. Never publish the native
-        # package without its prebuilds: a prebuild failure blocks the release
+        # when publishing AND every prebuild succeeded. Never publish a native
+        # package without its binaries: a prebuild failure blocks the release
         # (re-runnable).
         if: >-
             always() && needs.detect.result == 'success' &&
-            (needs.detect.outputs.publish == 'false' ||
-             (needs.prebuild.result == 'success' && needs.prebuild-riscv64.result == 'success'))
+            (needs.detect.outputs.publish-rollup == 'false' ||
+             (needs.prebuild.result == 'success' && needs.prebuild-riscv64.result == 'success')) &&
+            (needs.detect.outputs.publish-machine == 'false' ||
+             needs.machine-platform.result == 'success')
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Repo
@@ -181,12 +260,23 @@ jobs:
             # forcing consumers to compile from source. Only present when
             # publishing.
             - name: Collect prebuilds
-              if: needs.detect.outputs.publish == 'true'
+              if: needs.detect.outputs.publish-rollup == 'true'
               uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   pattern: prebuilds-*
                   merge-multiple: true
                   path: packages/rollup/prebuilds
+
+            # Collect the assembled @cartesi/machine-<platform>-<arch> packages
+            # so `pnpm release` can publish them right before @cartesi/machine
+            # itself, which references them as optionalDependencies.
+            - name: Collect machine platform packages
+              if: needs.detect.outputs.publish-machine == 'true'
+              uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+              with:
+                  pattern: machine-platform-*
+                  merge-multiple: true
+                  path: packages/machine/npm
 
             - name: Create Release Pull Request or Publish to npm
               uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
