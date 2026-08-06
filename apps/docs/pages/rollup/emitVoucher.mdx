@@ -33,7 +33,7 @@ rollup.emitVoucher({
 
 ## Returns
 
-`number` — the output index: the voucher's position among all provable outputs ever emitted by the application. Off-chain components use it to fetch the voucher's proof for execution.
+`bigint` — the output index: the voucher's position among all provable outputs ever emitted by the application. Off-chain components use it to fetch the voucher's proof for execution — it is the `outputIndex` of [`@cartesi/client`](/client/getOutput).
 
 ## Parameters
 
