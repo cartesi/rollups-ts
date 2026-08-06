@@ -1,0 +1,5 @@
+# waku's fs-router type declarations, regenerated from pages/ on every build
+pages.gen.ts
+
+# vocs build cache
+.vocs/
