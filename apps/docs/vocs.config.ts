@@ -63,13 +63,25 @@ const config: Config = defineConfig({
             "https://github.com/cartesi/rollups-ts/edit/main/apps/docs/pages/:path",
         text: "Edit on GitHub",
     },
-    sidebar: [
+    topNav: [
         {
-            text: "Introduction",
-            link: "/",
+            text: "Frontend",
+            items: [
+                { text: "Client (viem)", link: "/client" },
+                { text: "React (hooks)", link: "/react" },
+                { text: "RPC (JSON-RPC)", link: "/rpc" },
+            ],
         },
         {
-            text: "Cartesi Client",
+            text: "Bindings",
+            items: [{ text: "Rollup (libcmt)", link: "/rollup" }],
+        },
+        { text: "Encoding", link: "/codec" },
+        { text: "Codegen", link: "/wagmi-plugin" },
+    ],
+    sidebar: {
+        "/client/": {
+            backLink: true,
             items: [
                 {
                     text: "Introduction",
@@ -81,7 +93,6 @@ const config: Config = defineConfig({
                 },
                 {
                     text: "Public L2 Actions",
-                    collapsed: true,
                     items: [
                         {
                             text: "listApplications",
@@ -97,12 +108,18 @@ const config: Config = defineConfig({
                             text: "listTournaments",
                             link: "/client/listTournaments",
                         },
-                        { text: "getTournament", link: "/client/getTournament" },
+                        {
+                            text: "getTournament",
+                            link: "/client/getTournament",
+                        },
                         {
                             text: "listCommitments",
                             link: "/client/listCommitments",
                         },
-                        { text: "getCommitment", link: "/client/getCommitment" },
+                        {
+                            text: "getCommitment",
+                            link: "/client/getCommitment",
+                        },
                         { text: "listMatches", link: "/client/listMatches" },
                         { text: "getMatch", link: "/client/getMatch" },
                         {
@@ -127,18 +144,21 @@ const config: Config = defineConfig({
                             text: "getLastAcceptedEpochIndex",
                             link: "/client/getLastAcceptedEpochIndex",
                         },
-                        { text: "getWithdrawal", link: "/client/getWithdrawal" },
+                        {
+                            text: "getWithdrawal",
+                            link: "/client/getWithdrawal",
+                        },
                         {
                             text: "listWithdrawals",
                             link: "/client/listWithdrawals",
                         },
-                        { text: "waitForInput", link: "client/waitForInput" },
+                        { text: "waitForInput", link: "/client/waitForInput" },
                     ],
                 },
             ],
         },
-        {
-            text: "React Hooks",
+        "/react/": {
+            backLink: true,
             items: [
                 {
                     text: "Introduction",
@@ -146,7 +166,6 @@ const config: Config = defineConfig({
                 },
                 {
                     text: "Public L2 Hooks",
-                    collapsed: true,
                     items: [
                         {
                             text: "useApplication",
@@ -213,158 +232,8 @@ const config: Config = defineConfig({
                 },
             ],
         },
-        {
-            text: "Wagmi CLI Plugin",
-            items: [
-                {
-                    text: "Introduction",
-                    link: "/wagmi-plugin",
-                },
-            ],
-        },
-        {
-            text: "Codec",
-            items: [
-                {
-                    text: "Introduction",
-                    link: "/codec",
-                },
-                {
-                    text: "Decode Functions",
-                    collapsed: true,
-                    items: [
-                        { text: "decodeInput", link: "/codec/decodeInput" },
-                        { text: "decodeOutput", link: "/codec/decodeOutput" },
-                    ],
-                },
-                {
-                    text: "Encode Functions",
-                    collapsed: true,
-                    items: [
-                        { text: "encodeInput", link: "/codec/encodeInput" },
-                        { text: "encodeOutput", link: "/codec/encodeOutput" },
-                        { text: "encodeNotice", link: "/codec/encodeNotice" },
-                        { text: "encodeVoucher", link: "/codec/encodeVoucher" },
-                        {
-                            text: "encodeDelegateCallVoucher",
-                            link: "/codec/encodeDelegateCallVoucher",
-                        },
-                    ],
-                },
-                {
-                    text: "Portal Deposits",
-                    collapsed: true,
-                    items: [
-                        {
-                            text: "decodeDeposit",
-                            link: "/codec/decodeDeposit",
-                        },
-                        {
-                            text: "decodeEtherDeposit",
-                            link: "/codec/decodeEtherDeposit",
-                        },
-                        {
-                            text: "encodeEtherDeposit",
-                            link: "/codec/encodeEtherDeposit",
-                        },
-                        {
-                            text: "decodeErc20Deposit",
-                            link: "/codec/decodeErc20Deposit",
-                        },
-                        {
-                            text: "encodeErc20Deposit",
-                            link: "/codec/encodeErc20Deposit",
-                        },
-                        {
-                            text: "decodeErc721Deposit",
-                            link: "/codec/decodeErc721Deposit",
-                        },
-                        {
-                            text: "encodeErc721Deposit",
-                            link: "/codec/encodeErc721Deposit",
-                        },
-                        {
-                            text: "decodeErc1155SingleDeposit",
-                            link: "/codec/decodeErc1155SingleDeposit",
-                        },
-                        {
-                            text: "encodeErc1155SingleDeposit",
-                            link: "/codec/encodeErc1155SingleDeposit",
-                        },
-                        {
-                            text: "decodeErc1155BatchDeposit",
-                            link: "/codec/decodeErc1155BatchDeposit",
-                        },
-                        {
-                            text: "encodeErc1155BatchDeposit",
-                            link: "/codec/encodeErc1155BatchDeposit",
-                        },
-                    ],
-                },
-            ],
-        },
-        {
-            text: "Rollup",
-            items: [
-                {
-                    text: "Introduction",
-                    link: "/rollup",
-                },
-                {
-                    text: "Getting Started",
-                    link: "/rollup/getting-started",
-                },
-                {
-                    text: "Guide",
-                    collapsed: true,
-                    items: [
-                        {
-                            text: "Handling Requests",
-                            link: "/rollup/handling-requests",
-                        },
-                        {
-                            text: "Emitting Outputs",
-                            link: "/rollup/emitting-outputs",
-                        },
-                        {
-                            text: "Testing on the Host",
-                            link: "/rollup/testing",
-                        },
-                        {
-                            text: "Running in the Cartesi Machine",
-                            link: "/rollup/cartesi-machine",
-                        },
-                    ],
-                },
-                {
-                    text: "API",
-                    collapsed: true,
-                    items: [
-                        { text: "new Rollup", link: "/rollup/Rollup" },
-                        { text: "finish", link: "/rollup/finish" },
-                        { text: "run", link: "/rollup/run" },
-                        { text: "emitVoucher", link: "/rollup/emitVoucher" },
-                        {
-                            text: "emitDelegateCallVoucher",
-                            link: "/rollup/emitDelegateCallVoucher",
-                        },
-                        { text: "emitNotice", link: "/rollup/emitNotice" },
-                        { text: "emitReport", link: "/rollup/emitReport" },
-                        {
-                            text: "emitException",
-                            link: "/rollup/emitException",
-                        },
-                        { text: "progress", link: "/rollup/progress" },
-                        { text: "gio", link: "/rollup/gio" },
-                        { text: "merkle", link: "/rollup/merkle" },
-                        { text: "close", link: "/rollup/close" },
-                        { text: "Types & Constants", link: "/rollup/types" },
-                    ],
-                },
-            ],
-        },
-        {
-            text: "RPC Client",
+        "/rpc/": {
+            backLink: true,
             items: [
                 {
                     text: "Introduction",
@@ -372,7 +241,6 @@ const config: Config = defineConfig({
                 },
                 {
                     text: "API",
-                    collapsed: true,
                     items: [
                         {
                             text: "createClient",
@@ -382,7 +250,6 @@ const config: Config = defineConfig({
                 },
                 {
                     text: "Methods",
-                    collapsed: true,
                     items: [
                         {
                             text: "cartesi_listApplications",
@@ -476,7 +343,143 @@ const config: Config = defineConfig({
                 },
             ],
         },
-    ],
+        "/codec/": {
+            backLink: true,
+            items: [
+                {
+                    text: "Introduction",
+                    link: "/codec",
+                },
+                {
+                    text: "Decode Functions",
+                    items: [
+                        { text: "decodeInput", link: "/codec/decodeInput" },
+                        { text: "decodeOutput", link: "/codec/decodeOutput" },
+                    ],
+                },
+                {
+                    text: "Encode Functions",
+                    items: [
+                        { text: "encodeInput", link: "/codec/encodeInput" },
+                        { text: "encodeOutput", link: "/codec/encodeOutput" },
+                        { text: "encodeNotice", link: "/codec/encodeNotice" },
+                        { text: "encodeVoucher", link: "/codec/encodeVoucher" },
+                        {
+                            text: "encodeDelegateCallVoucher",
+                            link: "/codec/encodeDelegateCallVoucher",
+                        },
+                    ],
+                },
+                {
+                    text: "Portal Deposits",
+                    items: [
+                        {
+                            text: "decodeDeposit",
+                            link: "/codec/decodeDeposit",
+                        },
+                        {
+                            text: "decodeEtherDeposit",
+                            link: "/codec/decodeEtherDeposit",
+                        },
+                        {
+                            text: "encodeEtherDeposit",
+                            link: "/codec/encodeEtherDeposit",
+                        },
+                        {
+                            text: "decodeErc20Deposit",
+                            link: "/codec/decodeErc20Deposit",
+                        },
+                        {
+                            text: "encodeErc20Deposit",
+                            link: "/codec/encodeErc20Deposit",
+                        },
+                        {
+                            text: "decodeErc721Deposit",
+                            link: "/codec/decodeErc721Deposit",
+                        },
+                        {
+                            text: "encodeErc721Deposit",
+                            link: "/codec/encodeErc721Deposit",
+                        },
+                        {
+                            text: "decodeErc1155SingleDeposit",
+                            link: "/codec/decodeErc1155SingleDeposit",
+                        },
+                        {
+                            text: "encodeErc1155SingleDeposit",
+                            link: "/codec/encodeErc1155SingleDeposit",
+                        },
+                        {
+                            text: "decodeErc1155BatchDeposit",
+                            link: "/codec/decodeErc1155BatchDeposit",
+                        },
+                        {
+                            text: "encodeErc1155BatchDeposit",
+                            link: "/codec/encodeErc1155BatchDeposit",
+                        },
+                    ],
+                },
+            ],
+        },
+        "/rollup/": {
+            backLink: true,
+            items: [
+                {
+                    text: "Introduction",
+                    link: "/rollup",
+                },
+                {
+                    text: "Getting Started",
+                    link: "/rollup/getting-started",
+                },
+                {
+                    text: "Guide",
+                    items: [
+                        {
+                            text: "Handling Requests",
+                            link: "/rollup/handling-requests",
+                        },
+                        {
+                            text: "Emitting Outputs",
+                            link: "/rollup/emitting-outputs",
+                        },
+                        {
+                            text: "Testing on the Host",
+                            link: "/rollup/testing",
+                        },
+                        {
+                            text: "Running in the Cartesi Machine",
+                            link: "/rollup/cartesi-machine",
+                        },
+                    ],
+                },
+                {
+                    text: "API",
+                    items: [
+                        { text: "new Rollup", link: "/rollup/Rollup" },
+                        { text: "finish", link: "/rollup/finish" },
+                        { text: "run", link: "/rollup/run" },
+                        { text: "emitVoucher", link: "/rollup/emitVoucher" },
+                        {
+                            text: "emitDelegateCallVoucher",
+                            link: "/rollup/emitDelegateCallVoucher",
+                        },
+                        { text: "emitNotice", link: "/rollup/emitNotice" },
+                        { text: "emitReport", link: "/rollup/emitReport" },
+                        {
+                            text: "emitException",
+                            link: "/rollup/emitException",
+                        },
+                        { text: "progress", link: "/rollup/progress" },
+                        { text: "gio", link: "/rollup/gio" },
+                        { text: "merkle", link: "/rollup/merkle" },
+                        { text: "close", link: "/rollup/close" },
+                        { text: "Types & Constants", link: "/rollup/types" },
+                    ],
+                },
+            ],
+        },
+    },
 });
 
 export default config;

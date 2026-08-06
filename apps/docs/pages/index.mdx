@@ -1,23 +1,53 @@
-# Cartesi
+# Cartesi TypeScript libraries
 
-Cartesi provides some TypeScript libraries that helps users to develop Cartesi applications.
+A set of libraries for building [Cartesi](https://cartesi.io) applications in TypeScript — from the code that runs *inside* the Cartesi Machine to the frontend that talks to a Cartesi node.
 
-## @cartesi/client
+Pick the layer you are working on:
 
-Viem extension library that provides L1 public actions and L1 wallet actions related to Cartesi smart contracts infrastructure, and L2 public actions related to the Cartesi Rollups v2 [JSON-RPC API](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/cartesi/rollups-node/refs/tags/v2.0.0-alpha.10/internal/jsonrpc/jsonrpc-discover.json&uiSchema[appBar][ui:title]=Cartesi&uiSchema[appBar][ui:logoUrl]=https://cartesi.io/favicon.svg&uiSchema[appBar][ui:transports]=false&uiSchema[appBar][ui:input]=false&uiSchema[appBar][ui:edit]=false&uiSchema[appBar][ui:examplesDropdown]=false&uiSchema[appBar][ui:splitView]=false).
+## Frontend
 
-## @cartesi/wagmi-plugin
+Talk to a Cartesi node and to the rollups contracts on the base layer.
 
-[Wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates code (ABIs and deployment addresses) for the [Cartesi Rollups smart contracts](https://github.com/cartesi/rollups-contracts) directly from an official release.
+### [@cartesi/client](/client)
 
-## @cartesi/codec
+A [viem](https://viem.sh) extension. L2 public actions for the Cartesi Rollups node [JSON-RPC API](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/cartesi/rollups-node/refs/tags/v2.0.0-alpha.10/internal/jsonrpc/jsonrpc-discover.json&uiSchema[appBar][ui:title]=Cartesi&uiSchema[appBar][ui:logoUrl]=https://cartesi.io/favicon.svg&uiSchema[appBar][ui:transports]=false&uiSchema[appBar][ui:input]=false&uiSchema[appBar][ui:edit]=false&uiSchema[appBar][ui:examplesDropdown]=false&uiSchema[appBar][ui:splitView]=false) — read inputs, outputs, reports and epochs — plus the typed ABIs and deployment addresses for [L1 contract interactions](/client/l1).
 
-Isomorphic utility functions to decode (and encode, for testing) data compliant with the Cartesi Rollups [`Inputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Inputs.sol) and [`Outputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Outputs.sol) interfaces.
+**Start with** [the introduction](/client), or jump to [`getInput`](/client/getInput) · [`listOutputs`](/client/listOutputs) · [`waitForInput`](/client/waitForInput).
 
-## @cartesi/rollup
+### [@cartesi/react](/react)
 
-Node.js bindings for [libcmt](https://github.com/cartesi/machine-guest-tools/tree/main/sys-utils/libcmt), the Cartesi Machine guest rollup library, so applications running *inside* a Cartesi Machine can handle advance and inspect requests and emit vouchers, notices, reports and exceptions — without going through the rollup HTTP server.
+The same L2 actions as React hooks, built on [TanStack Query](https://tanstack.com/query): [`useInput`](/react/useInput), [`useOutputs`](/react/useOutputs), [`useWaitForInput`](/react/useWaitForInput) and one per action.
 
-## @cartesi/rpc
+**Start with** [the introduction](/react).
 
-This library provides a typed JSON-RPC client for the Cartesi Rollups v2 [JSON-RPC API](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/cartesi/rollups-node/refs/tags/v2.0.0-alpha.10/internal/jsonrpc/jsonrpc-discover.json&uiSchema[appBar][ui:title]=Cartesi&uiSchema[appBar][ui:logoUrl]=https://cartesi.io/favicon.svg&uiSchema[appBar][ui:transports]=false&uiSchema[appBar][ui:input]=false&uiSchema[appBar][ui:edit]=false&uiSchema[appBar][ui:examplesDropdown]=false&uiSchema[appBar][ui:splitView]=false).
+### [@cartesi/rpc](/rpc)
+
+The typed JSON-RPC client underneath `@cartesi/client`. Use it directly when you want the raw `cartesi_*` methods and wire types rather than viem.
+
+**Start with** [the introduction](/rpc), or see [`createClient`](/rpc/createClient).
+
+## Bindings
+
+Native addons for the Cartesi Machine. Prebuilt binaries ship for linux and macOS, so there is nothing to compile.
+
+### [@cartesi/rollup](/rollup)
+
+Bindings for [libcmt](https://github.com/cartesi/machine-guest-tools/tree/main/sys-utils/libcmt), the guest rollup library, for applications running **inside** a Cartesi Machine: handle advance and inspect requests and emit vouchers, notices, reports and exceptions, without the rollup HTTP server. The same code runs on your development host against a mock.
+
+**Start with** [Getting Started](/rollup/getting-started), then [Handling Requests](/rollup/handling-requests).
+
+## Encoding
+
+### [@cartesi/codec](/codec)
+
+Isomorphic encoding and decoding of the blobs that cross the machine boundary: inputs ([`EvmAdvance`](/codec/decodeInput)), outputs ([`Notice`, `Voucher`, `DelegateCallVoucher`](/codec/decodeOutput)) and [portal deposits](/codec/decodeDeposit). Browser and Node.js, depends only on viem.
+
+**Start with** [the introduction](/codec).
+
+## Codegen
+
+### [@cartesi/wagmi-plugin](/wagmi-plugin)
+
+A [Wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates ABIs and deployment addresses for the [Cartesi Rollups contracts](https://github.com/cartesi/rollups-contracts) straight from an official release.
+
+**Start with** [the introduction](/wagmi-plugin).
