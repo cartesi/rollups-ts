@@ -1,10 +1,56 @@
 import { type Config, defineConfig } from "vocs/config";
 
+/** Minimal structural view of the hast nodes this plugin walks. */
+type HastNode = {
+    type: string;
+    tagName?: string;
+    properties?: Record<string, unknown>;
+    children?: HastNode[];
+};
+
+/**
+ * Point viem's JSDoc links at viem.sh.
+ *
+ * Most links in viem's JSDoc are absolute, but a few are relative to its own
+ * site — `createPublicClient` documents "[Public Actions](/docs/actions/public/
+ * introduction)". Twoslash renders that JSDoc into the hover popups of our code
+ * blocks, so those hrefs become links to `/docs/...` pages of *this* site, which
+ * do not exist: they render with the dead link styling and are reported by
+ * `checkDeadlinks` on every build.
+ *
+ * Rewriting them makes the tooltips link where they mean to. Only links inside
+ * a `<pre>` are touched, which is exactly the hover content twoslash injected —
+ * an authored `/docs/...` link in prose would still be reported as dead.
+ *
+ * Runs between vocs' twoslash rendering and its dead link check (see the rehype
+ * plugin order in vocs' `internal/mdx.ts`).
+ */
+const rehypeViemDocLinks = () => (tree: HastNode) => {
+    const visit = (node: HastNode, inCode: boolean): void => {
+        const code = inCode || node.tagName === "pre";
+        if (code && node.tagName === "a") {
+            const href = node.properties?.href;
+            if (typeof href === "string" && href.startsWith("/docs/")) {
+                node.properties = {
+                    ...node.properties,
+                    href: `https://viem.sh${href}`,
+                };
+            }
+        }
+        for (const child of node.children ?? []) visit(child, code);
+    };
+    visit(tree, false);
+};
+
 const config: Config = defineConfig({
     rootDir: ".",
     srcDir: ".",
-    // twoslash renders viem's JSDoc, which contains viem.sh-relative links
+    // dead links are reported but do not fail the build; set to `true` (vocs'
+    // default) to make them an error
     checkDeadlinks: "warn",
+    markdown: {
+        rehypePlugins: [rehypeViemDocLinks],
+    },
     // GitHub Pages deployment requires fully static output
     renderStrategy: "full-static",
     title: "Cartesi",
