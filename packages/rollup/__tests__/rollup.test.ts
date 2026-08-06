@@ -1,80 +1,27 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { type Input, decodeOutput, encodeInput } from "@cartesi/codec";
+import { getAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
 // the suite exercises the built package: the native addon is located relative
 // to the package root, and `dist` is what consumers actually load
 import { Rollup, RollupError } from "../dist/index.js";
 
+// Inputs are encoded and outputs decoded with @cartesi/codec, whose codecs are
+// derived from the rollups-contracts ABIs. libcmt encodes and decodes the same
+// blobs in C, so every assertion here doubles as a conformance check between
+// the two implementations.
+
 // keep mock by-product files (none.gio-0.bin etc.) out of the repo
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cartesi-rollup-"));
 process.chdir(tmp);
 
-// minimal EVM-ABI helpers, enough to encode the EvmAdvance input and decode
-// the Voucher/Notice outputs produced by libcmt
-const SELECTOR = {
-    evmAdvance: "415bf363", // EvmAdvance(uint256,address,address,uint256,uint256,uint256,uint256,bytes)
-    voucher: "237a816f", // Voucher(address,uint256,bytes)
-    delegateCallVoucher: "10321e8b", // DelegateCallVoucher(address,bytes)
-    notice: "c258d6e5", // Notice(bytes)
-};
-
-const word = (value: bigint | number): Buffer => {
-    let v = BigInt(value);
-    const bytes = Buffer.alloc(32);
-    for (let i = 31; i >= 0 && v > 0n; i--) {
-        bytes[i] = Number(v & 0xffn);
-        v >>= 8n;
-    }
-    return bytes;
-};
-
-const addressWord = (hex: string): Buffer =>
-    Buffer.concat([Buffer.alloc(12), Buffer.from(hex.slice(2), "hex")]);
-
-const pad32 = (bytes: Buffer): Buffer =>
-    Buffer.concat([bytes, Buffer.alloc((32 - (bytes.length % 32)) % 32)]);
-
-interface EvmAdvance {
-    chainId: bigint;
-    appContract: `0x${string}`;
-    msgSender: `0x${string}`;
-    blockNumber: bigint;
-    blockTimestamp: bigint;
-    prevRandao: bigint;
-    index: bigint;
-    payload: Buffer;
-}
-
-const encodeEvmAdvance = ({
-    chainId,
-    appContract,
-    msgSender,
-    blockNumber,
-    blockTimestamp,
-    prevRandao,
-    index,
-    payload,
-}: EvmAdvance): Buffer =>
-    Buffer.concat([
-        Buffer.from(SELECTOR.evmAdvance, "hex"),
-        word(chainId),
-        addressWord(appContract),
-        addressWord(msgSender),
-        word(blockNumber),
-        word(blockTimestamp),
-        word(prevRandao),
-        word(index),
-        word(8 * 32), // offset of the payload `bytes` field
-        word(payload.length),
-        pad32(payload),
-    ]);
-
-const ADVANCE: EvmAdvance = {
+const ADVANCE: Input<Uint8Array> = {
     chainId: 31337n,
-    appContract: `0x${"02".repeat(20)}`,
-    msgSender: `0x${"03".repeat(20)}`,
+    appContract: getAddress(`0x${"02".repeat(20)}`),
+    msgSender: getAddress(`0x${"03".repeat(20)}`),
     blockNumber: 456n,
     blockTimestamp: 1700000000n,
     prevRandao: 0xdeadbeefn,
@@ -82,9 +29,12 @@ const ADVANCE: EvmAdvance = {
     payload: Buffer.from("hello from the chain"),
 };
 
+const advanceInput = (payload?: Buffer): Uint8Array =>
+    encodeInput(payload ? { ...ADVANCE, payload } : ADVANCE, "bytes");
+
 const writeInputs = (
     name: string,
-    inputs: [number, string, Buffer][],
+    inputs: [number, string, Uint8Array][],
 ): string => {
     const dir = path.join(tmp, name);
     fs.mkdirSync(dir, { recursive: true });
@@ -99,6 +49,12 @@ const writeInputs = (
     return dir;
 };
 
+/** Decode the output libcmt wrote while handling the input in `dir`. */
+const readOutput = (dir: string, index: number) =>
+    decodeOutput(
+        fs.readFileSync(path.join(dir, `advance.output-${index}.bin`)),
+    );
+
 /** Run `fn`, expecting it to throw, and return the error it threw. */
 const captureError = (fn: () => unknown): unknown => {
     try {
@@ -112,7 +68,7 @@ const captureError = (fn: () => unknown): unknown => {
 describe("rollup", () => {
     it("handles an advance request, outputs and reports", () => {
         const dir = writeInputs("advance", [
-            [0, "advance.bin", encodeEvmAdvance(ADVANCE)],
+            [0, "advance.bin", advanceInput()],
         ]);
         const rollup = new Rollup();
 
@@ -120,13 +76,14 @@ describe("rollup", () => {
         expect(request.type).toBe("advance");
         if (request.type !== "advance") return;
         expect(request.chainId).toBe(ADVANCE.chainId);
-        expect(request.appContract).toBe(ADVANCE.appContract);
-        expect(request.msgSender).toBe(ADVANCE.msgSender);
+        // the binding returns addresses lowercased, the codec checksums them
+        expect(request.appContract).toBe(ADVANCE.appContract.toLowerCase());
+        expect(request.msgSender).toBe(ADVANCE.msgSender.toLowerCase());
         expect(request.blockNumber).toBe(ADVANCE.blockNumber);
         expect(request.blockTimestamp).toBe(ADVANCE.blockTimestamp);
         expect(request.prevRandao).toBe(ADVANCE.prevRandao);
         expect(request.index).toBe(ADVANCE.index);
-        expect(request.payload).toEqual(ADVANCE.payload);
+        expect(request.payload).toEqual(Buffer.from(ADVANCE.payload));
 
         const destination = `0x${"aa".repeat(20)}` as const;
         const voucherPayload = Buffer.from("voucher-payload");
@@ -145,15 +102,19 @@ describe("rollup", () => {
         rollup.progress(500);
 
         // outputs are EVM-ABI encoded by libcmt and stored next to the input file
-        const voucher = fs.readFileSync(path.join(dir, "advance.output-0.bin"));
-        expect(voucher.subarray(0, 4).toString("hex")).toBe(SELECTOR.voucher);
-        expect(voucher.includes(addressWord(destination))).toBe(true);
-        expect(voucher.includes(word(1000n))).toBe(true);
-        expect(voucher.includes(voucherPayload)).toBe(true);
+        const voucher = readOutput(dir, 0);
+        expect(voucher.type).toBe("Voucher");
+        if (voucher.type === "Voucher") {
+            expect(voucher.destination).toBe(getAddress(destination));
+            expect(voucher.value).toBe(1000n);
+            expect(Buffer.from(voucher.payload)).toEqual(voucherPayload);
+        }
 
-        const notice = fs.readFileSync(path.join(dir, "advance.output-1.bin"));
-        expect(notice.subarray(0, 4).toString("hex")).toBe(SELECTOR.notice);
-        expect(notice.includes(noticePayload)).toBe(true);
+        const notice = readOutput(dir, 1);
+        expect(notice.type).toBe("Notice");
+        if (notice.type === "Notice") {
+            expect(Buffer.from(notice.payload)).toEqual(noticePayload);
+        }
 
         // reports are raw
         expect(fs.readFileSync(path.join(dir, "advance.report-0.bin"))).toEqual(
@@ -187,9 +148,7 @@ describe("rollup", () => {
     });
 
     it("emits a delegate call voucher", () => {
-        const dir = writeInputs("dcv", [
-            [0, "advance.bin", encodeEvmAdvance(ADVANCE)],
-        ]);
+        const dir = writeInputs("dcv", [[0, "advance.bin", advanceInput()]]);
         const rollup = new Rollup();
         rollup.finish();
 
@@ -199,18 +158,18 @@ describe("rollup", () => {
             0,
         );
 
-        const output = fs.readFileSync(path.join(dir, "advance.output-0.bin"));
-        expect(output.subarray(0, 4).toString("hex")).toBe(
-            SELECTOR.delegateCallVoucher,
-        );
-        expect(output.includes(addressWord(destination))).toBe(true);
-        expect(output.includes(payload)).toBe(true);
+        const output = readOutput(dir, 0);
+        expect(output.type).toBe("DelegateCallVoucher");
+        if (output.type === "DelegateCallVoucher") {
+            expect(output.destination).toBe(getAddress(destination));
+            expect(Buffer.from(output.payload)).toEqual(payload);
+        }
         rollup.close();
     });
 
     it("emits an exception", () => {
         const dir = writeInputs("exception", [
-            [0, "advance.bin", encodeEvmAdvance(ADVANCE)],
+            [0, "advance.bin", advanceInput()],
         ]);
         const rollup = new Rollup();
         rollup.finish();
@@ -238,7 +197,7 @@ describe("rollup", () => {
     });
 
     it("saves, resets and loads the merkle tree", () => {
-        writeInputs("merkle", [[0, "advance.bin", encodeEvmAdvance(ADVANCE)]]);
+        writeInputs("merkle", [[0, "advance.bin", advanceInput()]]);
         const rollup = new Rollup();
         rollup.finish();
         rollup.emitNotice(Buffer.from("leaf"));
@@ -271,16 +230,8 @@ describe("rollup", () => {
             Buffer.from("input-1"),
         ] as const;
         writeInputs("run", [
-            [
-                0,
-                "a.bin",
-                encodeEvmAdvance({ ...ADVANCE, payload: payloads[0] }),
-            ],
-            [
-                0,
-                "b.bin",
-                encodeEvmAdvance({ ...ADVANCE, payload: payloads[1] }),
-            ],
+            [0, "a.bin", advanceInput(payloads[0])],
+            [0, "b.bin", advanceInput(payloads[1])],
         ]);
         const rollup = new Rollup();
 
@@ -297,9 +248,7 @@ describe("rollup", () => {
     });
 
     it("validates its arguments", () => {
-        writeInputs("validation", [
-            [0, "advance.bin", encodeEvmAdvance(ADVANCE)],
-        ]);
+        writeInputs("validation", [[0, "advance.bin", advanceInput()]]);
         const rollup = new Rollup();
         rollup.finish();
 

@@ -62,6 +62,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
+        "@cartesi/codec": "workspace:*",
         "@types/node": "catalog:",
         "@vitest/coverage-v8": "^4.1.10",
         "node-gyp": "^13.0.0",
@@ -69,6 +70,7 @@
         "prebuildify": "^6.0.1",
         "tsdown": "catalog:",
         "typescript": "catalog:",
+        "viem": "catalog:",
         "vitest": "^4.1.10"
     },
     "engines": {
