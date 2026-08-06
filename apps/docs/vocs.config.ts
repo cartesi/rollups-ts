@@ -74,7 +74,10 @@ const config: Config = defineConfig({
         },
         {
             text: "Bindings",
-            items: [{ text: "Rollup (libcmt)", link: "/rollup" }],
+            items: [
+                { text: "Rollup (libcmt)", link: "/rollup" },
+                { text: "Machine (cartesi-machine)", link: "/machine" },
+            ],
         },
         { text: "Encoding", link: "/codec" },
         { text: "Codegen", link: "/wagmi-plugin" },
@@ -416,6 +419,54 @@ const config: Config = defineConfig({
                         {
                             text: "encodeErc1155BatchDeposit",
                             link: "/codec/encodeErc1155BatchDeposit",
+                        },
+                    ],
+                },
+            ],
+        },
+        "/machine/": {
+            backLink: true,
+            items: [
+                { text: "Introduction", link: "/machine" },
+                {
+                    text: "Guide",
+                    items: [
+                        { text: "Local Machine", link: "/machine/local" },
+                        { text: "Remote Machine", link: "/machine/remote" },
+                        {
+                            text: "Rollups Machines",
+                            link: "/machine/rollups-machines",
+                        },
+                        {
+                            text: "Error Handling",
+                            link: "/machine/error-handling",
+                        },
+                        {
+                            text: "Troubleshooting",
+                            link: "/machine/troubleshooting",
+                        },
+                    ],
+                },
+                {
+                    text: "API",
+                    items: [
+                        { text: "create", link: "/machine/create" },
+                        { text: "load", link: "/machine/load" },
+                        { text: "empty", link: "/machine/empty" },
+                        { text: "spawn", link: "/machine/spawn" },
+                        { text: "connect", link: "/machine/connect" },
+                        { text: "rollups", link: "/machine/rollups" },
+                        {
+                            text: "CartesiMachine",
+                            link: "/machine/CartesiMachine",
+                        },
+                        {
+                            text: "RemoteCartesiMachine",
+                            link: "/machine/RemoteCartesiMachine",
+                        },
+                        {
+                            text: "RollupsMachine",
+                            link: "/machine/RollupsMachine",
                         },
                     ],
                 },

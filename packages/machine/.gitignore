@@ -1,0 +1,11 @@
+# native addon build outputs (node-gyp)
+prebuilds/
+*.node
+
+# artifacts collected into the per-platform packages by scripts/package-platform.mjs
+npm/*/cartesi_machine.node
+npm/*/cartesi-jsonrpc-machine
+
+# cartesi machine test artifacts
+__tests__/snapshot/
+snapshots/

@@ -66,6 +66,9 @@ importers:
       '@cartesi/codec':
         specifier: workspace:*
         version: link:../../packages/codec
+      '@cartesi/machine':
+        specifier: workspace:*
+        version: link:../../packages/machine
       '@cartesi/react':
         specifier: workspace:*
         version: link:../../packages/react
@@ -158,6 +161,40 @@ importers:
       npm-run-all:
         specifier: ^4.1.5
         version: 4.1.5
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.22.14(tsx@4.23.0)(typescript@6.0.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      viem:
+        specifier: ^2.55.7
+        version: 2.55.7(typescript@6.0.3)(zod@4.3.6)
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
+
+  packages/machine:
+    dependencies:
+      node-addon-api:
+        specifier: ^8.3.0
+        version: 8.9.1
+      node-gyp-build:
+        specifier: ^4.8.4
+        version: 4.8.4
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.5.7
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.1.1
+      '@vitest/coverage-v8':
+        specifier: ^4.1.10
+        version: 4.1.10(vitest@4.1.10)
+      node-gyp:
+        specifier: ^13.0.0
+        version: 13.0.1
       tsdown:
         specifier: 'catalog:'
         version: 0.22.14(tsx@4.23.0)(typescript@6.0.3)
@@ -8211,7 +8248,7 @@ snapshots:
       '@vue/shared': 3.5.39
       estree-walker: 2.0.2
       magic-string: 0.30.21
-      postcss: 8.5.22
+      postcss: 8.5.25
       source-map-js: 1.2.1
 
   '@vue/compiler-ssr@3.5.39':
@@ -12719,7 +12756,7 @@ snapshots:
       browserslist: 4.28.1
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.24.2
-      es-module-lexer: 2.3.0
+      es-module-lexer: 2.3.1
       eslint-scope: 5.1.1
       events: 3.3.0
       graceful-fs: 4.2.11
