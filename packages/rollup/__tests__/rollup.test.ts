@@ -96,8 +96,8 @@ describe("rollup", () => {
                 value: 1000n,
                 payload: voucherPayload,
             }),
-        ).toBe(0);
-        expect(rollup.emitNotice(noticePayload)).toBe(1);
+        ).toBe(0n);
+        expect(rollup.emitNotice(noticePayload)).toBe(1n);
         rollup.emitReport(reportPayload);
         rollup.progress(500);
 
@@ -155,7 +155,7 @@ describe("rollup", () => {
         const destination = `0x${"bb".repeat(20)}` as const;
         const payload = Buffer.from("delegate-payload");
         expect(rollup.emitDelegateCallVoucher({ destination, payload })).toBe(
-            0,
+            0n,
         );
 
         const output = readOutput(dir, 0);

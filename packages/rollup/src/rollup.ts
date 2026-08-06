@@ -51,15 +51,17 @@ export class Rollup {
         return { type: "inspect", payload: request.payload };
     }
 
-    /** Emit a voucher (Voucher(address,uint256,bytes)). Returns the output index. */
-    emitVoucher({ destination, value = 0n, payload = EMPTY }: Voucher): number {
-        return Number(
-            bindingCall(() =>
-                this.#native.emitVoucher(
-                    toAddress(destination, "destination"),
-                    toU256(value, "value"),
-                    toBytes(payload, "payload"),
-                ),
+    /**
+     * Emit a voucher (Voucher(address,uint256,bytes)). Returns the output
+     * index, as the `uint64` libcmt reports it — like every other index in
+     * the rollups libraries, a bigint.
+     */
+    emitVoucher({ destination, value = 0n, payload = EMPTY }: Voucher): bigint {
+        return bindingCall(() =>
+            this.#native.emitVoucher(
+                toAddress(destination, "destination"),
+                toU256(value, "value"),
+                toBytes(payload, "payload"),
             ),
         );
     }
@@ -68,23 +70,19 @@ export class Rollup {
     emitDelegateCallVoucher({
         destination,
         payload = EMPTY,
-    }: DelegateCallVoucher): number {
-        return Number(
-            bindingCall(() =>
-                this.#native.emitDelegateCallVoucher(
-                    toAddress(destination, "destination"),
-                    toBytes(payload, "payload"),
-                ),
+    }: DelegateCallVoucher): bigint {
+        return bindingCall(() =>
+            this.#native.emitDelegateCallVoucher(
+                toAddress(destination, "destination"),
+                toBytes(payload, "payload"),
             ),
         );
     }
 
     /** Emit a notice (Notice(bytes)). Returns the output index. */
-    emitNotice(payload: BytesLike): number {
-        return Number(
-            bindingCall(() =>
-                this.#native.emitNotice(toBytes(payload, "payload")),
-            ),
+    emitNotice(payload: BytesLike): bigint {
+        return bindingCall(() =>
+            this.#native.emitNotice(toBytes(payload, "payload")),
         );
     }
 
