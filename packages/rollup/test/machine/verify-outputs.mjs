@@ -1,5 +1,7 @@
 // Verifies the outputs/reports produced by the cartesi-machine run against
-// what test/machine/app.mjs is expected to emit for the inputs from abi.mjs.
+// what test/machine/app.mjs is expected to emit for the inputs in fixtures.mjs.
+// The outputs are decoded with @cartesi/codec, so this also checks that the
+// blobs libcmt encoded in C match the rollups-contracts ABIs.
 //
 //   node test/machine/verify-outputs.mjs test/machine/work
 
@@ -7,7 +9,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-import { ADVANCES, QUERY, encodeNotice, encodeVoucher } from "./abi.mjs";
+import { decodeOutput } from "@cartesi/codec";
+import { getAddress } from "viem";
+
+import { ADVANCES, QUERY } from "./fixtures.mjs";
 
 const dir = process.argv[2];
 if (!dir) {
@@ -32,18 +37,37 @@ const outputsOf = (i) =>
 
 ADVANCES.forEach((advance, i) => {
     // app.mjs emits, in order: notice, voucher, report 0
-    const [notice, voucher, ...rest] = outputsOf(i);
+    const [notice, voucher, ...rest] = outputsOf(i).map(decodeOutput);
     assert.equal(rest.length, 0, `input ${i}: unexpected extra outputs`);
-    assert.deepEqual(notice, encodeNotice(advance.payload), `input ${i}: notice mismatch`);
+
+    assert.equal(notice.type, "Notice", `input ${i}: output 0 is not a notice`);
     assert.deepEqual(
-        voucher,
-        encodeVoucher({
-            destination: advance.msgSender,
-            value: advance.index,
-            payload: advance.payload,
-        }),
-        `input ${i}: voucher mismatch`,
+        Buffer.from(notice.payload),
+        advance.payload,
+        `input ${i}: notice payload mismatch`,
     );
+
+    assert.equal(
+        voucher.type,
+        "Voucher",
+        `input ${i}: output 1 is not a voucher`,
+    );
+    assert.equal(
+        voucher.destination,
+        getAddress(advance.msgSender),
+        `input ${i}: voucher destination mismatch`,
+    );
+    assert.equal(
+        voucher.value,
+        advance.index,
+        `input ${i}: voucher value mismatch`,
+    );
+    assert.deepEqual(
+        Buffer.from(voucher.payload),
+        advance.payload,
+        `input ${i}: voucher payload mismatch`,
+    );
+
     // the "%o" of the report pattern is still the per-input report index
     assert.equal(
         read(`input-${i}-report-0.bin`).toString(),

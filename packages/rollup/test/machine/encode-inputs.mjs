@@ -6,7 +6,9 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { ADVANCES, QUERY, encodeEvmAdvance } from "./abi.mjs";
+import { encodeInput } from "@cartesi/codec";
+
+import { ADVANCES, QUERY } from "./fixtures.mjs";
 
 const dir = process.argv[2];
 if (!dir) {
@@ -16,7 +18,7 @@ if (!dir) {
 
 ADVANCES.forEach((advance, i) => {
     const file = path.join(dir, `input-${i}.bin`);
-    fs.writeFileSync(file, encodeEvmAdvance(advance));
+    fs.writeFileSync(file, encodeInput(advance, "bytes"));
     console.log(`wrote ${file} (${advance.payload.length}-byte payload)`);
 });
 
