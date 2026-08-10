@@ -85,6 +85,7 @@
         "dev": "tsdown --watch",
         "lint": "biome check",
         "test": "vitest",
+        "test:run": "vitest run",
         "test:coverage": "vitest run --coverage"
     }
 }
