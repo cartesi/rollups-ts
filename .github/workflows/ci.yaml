@@ -1,9 +1,9 @@
 name: ci
-# Test suites of every package, on each platform the native packages are
-# published for (the same matrix the release workflow prebuilds). The suites of
-# @cartesi/machine and @cartesi/rollup exercise native addons, so they are
-# platform-specific; the pure TypeScript ones are cheap enough to just run
-# everywhere too.
+# Test suites of every package, on the platforms the native packages are
+# published for, minus darwin-x64: the release workflow still prebuilds it, but
+# no Intel macOS runner is used here. The suites of @cartesi/machine and
+# @cartesi/rollup exercise native addons, so they are platform-specific; the
+# pure TypeScript ones are cheap enough to just run everywhere too.
 on:
     pull_request:
     push:
@@ -32,7 +32,6 @@ jobs:
                 include:
                     - os: ubuntu-latest # linux-x64
                     - os: ubuntu-24.04-arm # linux-arm64
-                    - os: macos-15-intel # darwin-x64
                     - os: macos-latest # darwin-arm64
         runs-on: ${{ matrix.os }}
         timeout-minutes: 30
