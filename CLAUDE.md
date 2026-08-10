@@ -22,7 +22,7 @@ pnpm + Turborepo monorepo of Cartesi Rollups TypeScript libraries. Requires Node
   - Single test: `pnpm --filter @cartesi/client exec vitest run __tests__/converter.test.ts`
   - `@cartesi/rollup` is the exception: its `test` builds first and then runs vitest once, because the suite loads `dist/` (the native addon is resolved relative to the package root)
   - `@cartesi/machine`'s suite needs an installed cartesi-machine emulator distribution (its addon links against it and the tests spawn its JSON-RPC server); without one `pnpm i` skips the native build and the suite fails to load
-  - CI (`.github/workflows/ci.yaml`) runs all of it on every PR, across the same platform matrix the release workflow prebuilds for (linux x64/arm64, darwin x64/arm64). The riscv64 end-to-end test is not part of it — it runs under emulation in the `machine` workflow.
+  - CI (`.github/workflows/ci.yaml`) runs all of it on every PR, on linux x64/arm64 and darwin arm64. Two platforms the release workflow prebuilds for are deliberately not covered: darwin-x64 (no Intel macOS runner) and riscv64, whose end-to-end test runs under emulation in the `machine` workflow.
 - Releases use changesets: `pnpm changeset` to add one; versioning/publishing is `pnpm version-packages` / `pnpm release`. Packages are currently on 2.0.0-alpha prereleases.
 
 Formatting/linting is Biome (`biome.json` at root): 4-space indent, double quotes. All packages are ESM (`"type": "module"`) and use `.js` extensions on relative imports (NodeNext resolution). Builds are done with tsdown, emitting dual ESM/CJS to `dist/`.
