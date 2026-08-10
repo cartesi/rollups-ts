@@ -1,0 +1,76 @@
+name: ci
+# Test suites of every package, on each platform the native packages are
+# published for (the same matrix the release workflow prebuilds). The suites of
+# @cartesi/machine and @cartesi/rollup exercise native addons, so they are
+# platform-specific; the pure TypeScript ones are cheap enough to just run
+# everywhere too.
+on:
+    pull_request:
+    push:
+        branches:
+            - main
+            - release/*
+            - prerelease/*
+permissions:
+    contents: read
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+# emulator distribution @cartesi/machine's addon links against; must stay in
+# the series the binding targets (CARTESI_MACHINE_SERIES in its install script)
+env:
+    CARTESI_MACHINE_VERSION: 0.21.0
+
+jobs:
+    test:
+        name: test ${{ matrix.os }}
+        strategy:
+            # one platform failing should not hide the state of the others
+            fail-fast: false
+            matrix:
+                include:
+                    - os: ubuntu-latest # linux-x64
+                    - os: ubuntu-24.04-arm # linux-arm64
+                    - os: macos-15-intel # darwin-x64
+                    - os: macos-latest # darwin-arm64
+        runs-on: ${{ matrix.os }}
+        timeout-minutes: 30
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  # @cartesi/rollup's addon compiles libcmt from the
+                  # machine-guest-tools submodule during `pnpm i`
+                  submodules: recursive
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+            - name: Setup Node.js 24
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 24.x
+                  cache: "pnpm"
+
+            # @cartesi/machine's addon links against this distribution and its
+            # tests spawn its cartesi-jsonrpc-machine server, so it has to be
+            # installed before `pnpm i` compiles the addon — without it the
+            # install skips the native build and the suite cannot run.
+            - name: Install cartesi-machine emulator (linux)
+              if: runner.os == 'Linux'
+              run: |
+                  wget -O /tmp/machine-emulator.deb "https://github.com/cartesi/machine-emulator/releases/download/v${CARTESI_MACHINE_VERSION}/machine-emulator_$(dpkg --print-architecture).deb"
+                  sudo apt-get update && sudo apt-get install -y /tmp/machine-emulator.deb
+
+            - name: Install cartesi-machine emulator (macos)
+              if: runner.os == 'macOS'
+              run: brew install cartesi/tap/cartesi-machine-emulator
+
+            - name: Install Dependencies
+              run: pnpm i
+
+            # `test:run` builds what each suite needs first (codegen for the
+            # packages with generated contracts, dist/ for @cartesi/rollup)
+            - name: Run tests
+              run: pnpm test
