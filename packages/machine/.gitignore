@@ -6,6 +6,5 @@ prebuilds/
 npm/*/cartesi_machine.node
 npm/*/cartesi-jsonrpc-machine
 
-# cartesi machine test artifacts
-__tests__/snapshot/
-snapshots/
+# cartesi machine test artifacts (step logs, stored machines)
+__tests__/artifacts/

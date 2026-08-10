@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import path from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
     type CartesiMachine,
@@ -14,6 +15,12 @@ import {
     verifyStep,
 } from "../src/cartesi-machine";
 import { NodeCartesiMachine } from "../src/node/cartesi-machine";
+
+// step logs and stored machines are written here instead of the package root,
+// which is where relative filenames would land (the cwd is the package). the
+// directory is gitignored, so leftovers from a failed run stay out of the repo
+const artifacts = path.join(import.meta.dirname, "artifacts");
+fs.mkdirSync(artifacts, { recursive: true });
 
 describe("CartesiMachine", () => {
     let machine: CartesiMachine;
@@ -85,7 +92,7 @@ describe("CartesiMachine", () => {
         });
 
         it("should store and load machine", () => {
-            const testDir = "./test-machine-state";
+            const testDir = path.join(artifacts, "machine-state");
 
             // Store the machine
             expect(() => machine.store(testDir)).not.toThrow();
@@ -241,7 +248,7 @@ describe("CartesiMachine", () => {
 
     describe("Logging Operations", () => {
         it("should log steps", (ctx) => {
-            const logFilename = `./log-${ctx.task.id}`;
+            const logFilename = path.join(artifacts, `log-${ctx.task.id}`);
             const breakReason = machine.logStep(10n, logFilename);
             expect(typeof breakReason).toBe("number");
             expect(Object.values(BreakReason)).toContain(breakReason);
@@ -267,7 +274,7 @@ describe("CartesiMachine", () => {
 
     describe("Verification Operations", () => {
         it("should verify steps", (ctx) => {
-            const logFilename = `./log-${ctx.task.id}`;
+            const logFilename = path.join(artifacts, `log-${ctx.task.id}`);
             const rootHashBefore = machine.getRootHash();
             const mcycleCount = 10n;
 
