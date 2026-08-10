@@ -9,6 +9,8 @@
         "dev": "turbo run dev",
         "lint": "turbo run lint",
         "release": "turbo build && node packages/machine/scripts/inject-platform-deps.mjs && node packages/machine/scripts/publish-platform-packages.mjs && changeset publish",
+        "test": "turbo run test:run --filter=\"./packages/*\"",
+        "test:coverage": "turbo run test:coverage --filter=\"./packages/*\"",
         "version-packages": "changeset version"
     },
     "devDependencies": {

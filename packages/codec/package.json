@@ -62,6 +62,7 @@
         "lint": "biome check",
         "prepack": "run-s build",
         "test": "vitest",
+        "test:run": "vitest run",
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
