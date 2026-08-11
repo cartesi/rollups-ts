@@ -34,10 +34,10 @@
     "files": [
         "binding.gyp",
         "dist/**",
+        "native/addon.cc",
+        "native/slirp-stubs.c",
         "scripts/find-cartesi.cjs",
-        "scripts/install.cjs",
-        "src/addon.cc",
-        "src/slirp-stubs.c"
+        "scripts/install.cjs"
     ],
     "publishConfig": {
         "access": "public"

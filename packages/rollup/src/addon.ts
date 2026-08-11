@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import nodeGypBuild from "node-gyp-build";
 
 /**
- * Raw N-API surface (see src/addon.cc). Byte arguments must already be
+ * Raw N-API surface (see native/addon.cc). Byte arguments must already be
  * Buffers/Uint8Arrays of the exact length libcmt expects, output indexes come
  * back as bigint, and failures throw an Error carrying `errno` (the negative
  * libcmt errno) and `syscall` (the libcmt call that failed).

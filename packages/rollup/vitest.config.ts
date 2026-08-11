@@ -15,7 +15,10 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             reporter: ["text", "lcov"],
-            include: ["**/src"],
+            // anchored at the package root: `**/src` would also pick up the
+            // vendored libcmt C sources under deps/ and node-gyp's dependency
+            // files under build/, which the coverage provider cannot parse
+            include: ["src/**"],
         },
     },
 });

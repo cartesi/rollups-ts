@@ -5,9 +5,11 @@ import { type Input, decodeOutput, encodeInput } from "@cartesi/codec";
 import { getAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
-// the suite exercises the built package: the native addon is located relative
-// to the package root, and `dist` is what consumers actually load
-import { Rollup, RollupError } from "../dist/index.js";
+// the suite runs against the sources, so coverage maps onto them directly;
+// `src/addon.ts` walks up to the package root to find the addon, so it loads
+// the same `.node` `dist` would. `test/machine/` covers the packed `dist` end
+// to end inside a real Cartesi Machine.
+import { Rollup, RollupError } from "../src/index.js";
 
 // Inputs are encoded and outputs decoded with @cartesi/codec, whose codecs are
 // derived from the rollups-contracts ABIs. libcmt encodes and decodes the same
