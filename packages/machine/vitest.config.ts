@@ -16,7 +16,9 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             reporter: ["text", "lcov"],
-            include: ["**/src"],
+            // anchored at the package root, so node-gyp's dependency files
+            // under build/ stay out of the coverage provider's parser
+            include: ["src/**"],
         },
     },
 });

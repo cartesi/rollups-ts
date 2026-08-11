@@ -12,7 +12,7 @@
         {
             "target_name": "libcmt",
             "sources": [
-                "src/addon.cc"
+                "native/addon.cc"
             ],
             "include_dirs": [
                 "<!@(node -p \"require('node-addon-api').include_dir\")",

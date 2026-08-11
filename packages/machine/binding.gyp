@@ -15,7 +15,7 @@
     "targets": [
         {
             "target_name": "cartesi_machine",
-            "sources": ["src/addon.cc"],
+            "sources": ["native/addon.cc"],
             "include_dirs": [
                 "<!@(node -p \"require('node-addon-api').include_dir\")",
                 "<(cartesi_inc)"
@@ -34,7 +34,7 @@
                     # brew/system libslirp lives next to libcartesi.a
                     "libraries": ["-L<(cartesi_lib)", "-lslirp"]
                 }, {
-                    "sources": ["src/slirp-stubs.c"]
+                    "sources": ["native/slirp-stubs.c"]
                 }],
                 ["OS=='linux'", {
                     # libcartesi.a is built with OpenMP
