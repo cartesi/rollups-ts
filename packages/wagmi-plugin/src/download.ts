@@ -20,24 +20,17 @@ export const resolveSource = (source: TarballSource) =>
     typeof source === "string" ? { url: source } : source;
 
 /**
- * Download a tar.gz and extract it to a directory under the OS temporary
- * directory, keyed by the URL (and expected hash). Extraction is cached:
- * if the same tarball was fully extracted before, nothing is downloaded.
- * @returns the directory the tarball was extracted to
+ * Download a tar.gz and extract it to a fresh directory under the OS
+ * temporary directory. Nothing is kept between runs: these tarballs are a few
+ * hundred KB, and caching them saved less time than the cache took to keep
+ * correct.
+ * @returns the directory the tarball was extracted to, which the caller owns
+ * and should remove once done with it
  */
 export const downloadAndExtract = async (
     source: TarballSource,
 ): Promise<string> => {
     const { url, sha256 } = resolveSource(source);
-    const key = createHash("sha256")
-        .update(`${url}\n${sha256 ?? ""}`)
-        .digest("hex")
-        .slice(0, 16);
-    const destination = path.join(os.tmpdir(), "cartesi-wagmi-plugin", key);
-    const marker = path.join(destination, ".complete");
-    if (fs.existsSync(marker)) {
-        return destination;
-    }
 
     console.info(`Downloading ${url}`);
     const response = await fetch(url);
@@ -55,29 +48,19 @@ export const downloadAndExtract = async (
         }
     }
 
-    // extract to a staging directory and rename, so a concurrent or aborted
-    // run never sees a half-extracted destination
-    const staging = `${destination}.${process.pid}`;
-    fs.mkdirSync(staging, { recursive: true });
+    const destination = fs.mkdtempSync(
+        path.join(os.tmpdir(), "cartesi-wagmi-plugin-"),
+    );
     try {
         // unpackTar defends against tar-slip attacks by default
         await pipeline(
             Readable.from(buffer),
             createGunzip(),
-            unpackTar(staging),
+            unpackTar(destination),
         );
-        fs.writeFileSync(path.join(staging, ".complete"), url);
-        fs.renameSync(staging, destination);
     } catch (err) {
-        fs.rmSync(staging, { recursive: true, force: true });
-        if (fs.existsSync(marker)) {
-            // lost a race against a concurrent extraction of the same tarball
-            return destination;
-        }
-        throw new Error(`Failed to download and extract ${url}`, {
-            cause: err,
-        });
+        fs.rmSync(destination, { recursive: true, force: true });
+        throw new Error(`Failed to extract ${url}`, { cause: err });
     }
-    console.info(`Extracted ${url} to ${destination}`);
     return destination;
 };
