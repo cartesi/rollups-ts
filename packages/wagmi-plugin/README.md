@@ -76,7 +76,7 @@ rollupsContracts({
 
 ## Behavior
 
-- Tarballs are downloaded and extracted to the OS temporary directory and cached across runs.
+- Tarballs are downloaded on every run, verified against their expected hash, and extracted to a temporary directory that is removed once the contracts have been read. Codegen therefore needs network access.
 - Deployed contracts get their address on every chain: a single address when it is identical across chains, or a per-chain record otherwise.
 
 See the [documentation](https://cartesi.github.io/rollups-ts/) for more details.

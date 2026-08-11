@@ -176,9 +176,9 @@ const collapseAddress = (
 /**
  * Wagmi plugin that generates contracts from a rollups-contracts release:
  * ABIs from the foundry build artifacts tarball, addresses from the
- * deployment addresses tarball. Both tarballs are downloaded and extracted
- * to the OS temporary directory (cached across runs). When `artifacts` and
- * `deployments` are omitted, the tarballs of the rollups-contracts
+ * deployment addresses tarball. Both tarballs are downloaded and extracted on
+ * every run, so generating contracts needs network access. When `artifacts`
+ * and `deployments` are omitted, the tarballs of the rollups-contracts
  * `DEFAULT_VERSION` GitHub release are used.
  *
  * Deployed contracts get their address across all chains: a single address
@@ -208,51 +208,60 @@ export const rollupsContracts = (
                 downloadAndExtract(deploymentsSource),
             ]);
 
-            // tarballs contain the `out` (resp. `deployments`) directory
-            // contents either at the root or nested under that directory
-            const resolveRoot = (dir: string, nested: string) =>
-                fs.existsSync(path.join(dir, nested))
-                    ? path.join(dir, nested)
-                    : dir;
+            try {
+                // tarballs contain the `out` (resp. `deployments`) directory
+                // contents either at the root or nested under that directory
+                const resolveRoot = (dir: string, nested: string) =>
+                    fs.existsSync(path.join(dir, nested))
+                        ? path.join(dir, nested)
+                        : dir;
 
-            const artifacts = findArtifacts(resolveRoot(artifactsDir, "out"));
-            const deployments = readDeployments(
-                resolveRoot(deploymentsDir, "deployments"),
-            );
+                const artifacts = findArtifacts(
+                    resolveRoot(artifactsDir, "out"),
+                );
+                const deployments = readDeployments(
+                    resolveRoot(deploymentsDir, "deployments"),
+                );
 
-            for (const name of deployments.keys()) {
-                if (included(name) && !artifacts.has(name)) {
-                    throw new Error(
-                        `Deployed contract ${name} has no build artifact`,
-                    );
-                }
-            }
-
-            return [...artifacts.entries()]
-                .filter(([name]) => included(name))
-                .sort(([a], [b]) => a.localeCompare(b))
-                .flatMap(([name, artifactPath]) => {
-                    const abi = readAbi(artifactPath, name);
-                    const addresses = deployments.get(name);
-                    if (abi.length === 0) {
-                        if (addresses) {
-                            throw new Error(
-                                `Deployed contract ${name} has an empty ABI`,
-                            );
-                        }
-                        // pure libraries have empty ABIs; nothing to generate
-                        return [];
+                for (const name of deployments.keys()) {
+                    if (included(name) && !artifacts.has(name)) {
+                        throw new Error(
+                            `Deployed contract ${name} has no build artifact`,
+                        );
                     }
-                    return [
-                        {
-                            name,
-                            abi,
-                            ...(addresses && {
-                                address: collapseAddress(addresses),
-                            }),
-                        },
-                    ];
-                });
+                }
+
+                return [...artifacts.entries()]
+                    .filter(([name]) => included(name))
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .flatMap(([name, artifactPath]) => {
+                        const abi = readAbi(artifactPath, name);
+                        const addresses = deployments.get(name);
+                        if (abi.length === 0) {
+                            if (addresses) {
+                                throw new Error(
+                                    `Deployed contract ${name} has an empty ABI`,
+                                );
+                            }
+                            // pure libraries have empty ABIs; nothing to generate
+                            return [];
+                        }
+                        return [
+                            {
+                                name,
+                                abi,
+                                ...(addresses && {
+                                    address: collapseAddress(addresses),
+                                }),
+                            },
+                        ];
+                    });
+            } finally {
+                // the extractions are only needed while the contracts are
+                // read out of them; the tarballs they came from stay cached
+                fs.rmSync(artifactsDir, { recursive: true, force: true });
+                fs.rmSync(deploymentsDir, { recursive: true, force: true });
+            }
         },
     };
 };
