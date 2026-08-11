@@ -8,7 +8,7 @@ allowBuilds:
     vue-demi: true
 
 catalog:
-    "@biomejs/biome": 2.5.7
+    "@biomejs/biome": 2.5.10
     "@types/node": ^26
     "@types/react": ^19.2.17
     tsdown: ^0.22.14
@@ -24,3 +24,21 @@ onlyBuiltDependencies:
     - keccak
     - protobufjs
     - utf-8-validate
+
+# changesets v3 is newer than pnpm's minimumReleaseAge window; drop these once
+# the packages age out
+minimumReleaseAgeExclude:
+    - "@changesets/apply-release-plan@8.0.0"
+    - "@changesets/assemble-release-plan@7.0.0"
+    - "@changesets/changelog-git@1.0.0"
+    - "@changesets/cli@3.0.0"
+    - "@changesets/config@4.0.0"
+    - "@changesets/errors@1.0.0"
+    - "@changesets/get-dependents-graph@3.0.0"
+    - "@changesets/git@4.0.0"
+    - "@changesets/parse@1.0.0"
+    - "@changesets/pre@3.0.0"
+    - "@changesets/read@1.0.0"
+    - "@changesets/should-skip-package@1.0.0"
+    - "@changesets/types@7.0.0"
+    - "@changesets/write@1.0.0"
