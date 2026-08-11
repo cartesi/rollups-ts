@@ -90,6 +90,14 @@ if (!compiled) {
     }
 }
 
-execFileSync(process.execPath, [require.resolve("node-gyp-build/bin.js")], {
-    stdio: "inherit",
-});
+// node-gyp-build inherits stdio, so a build failure has already printed its
+// own diagnostics (compiler output, or a Python/gyp traceback). execFileSync
+// would throw on top of that with a bare "Command failed: <argv>" and an
+// internal stack, burying the real error — just propagate the exit code.
+try {
+    execFileSync(process.execPath, [require.resolve("node-gyp-build/bin.js")], {
+        stdio: "inherit",
+    });
+} catch (err) {
+    process.exit(err.status ?? 1);
+}
