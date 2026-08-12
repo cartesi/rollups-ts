@@ -14,8 +14,10 @@ The API is **fully synchronous** on purpose: calls that wait on the emulator (`f
 ## Installation
 
 ```sh
-npm install @cartesi/rollup
+npm install @cartesi/rollup@alpha
 ```
+
+While in pre-release, the library is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
 
 Prebuilt addons are published for linux-x64, linux-arm64, linux-riscv64, darwin-x64 and darwin-arm64. On any other platform the addon is compiled from the libcmt sources shipped in the tarball, which requires a C/C++ toolchain and Python (node-gyp).
 

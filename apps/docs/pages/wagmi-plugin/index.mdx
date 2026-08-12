@@ -11,17 +11,21 @@ Add the plugin and the Wagmi CLI as development dependencies of your project.
 :::code-group
 
 ```bash [pnpm]
-pnpm add -D @cartesi/wagmi-plugin @wagmi/cli
+pnpm add -D @cartesi/wagmi-plugin@alpha @wagmi/cli
 ```
 
 ```bash [npm]
-npm install --save-dev @cartesi/wagmi-plugin @wagmi/cli
+npm install --save-dev @cartesi/wagmi-plugin@alpha @wagmi/cli
 ```
 
 ```bash [yarn]
-yarn add -D @cartesi/wagmi-plugin @wagmi/cli
+yarn add -D @cartesi/wagmi-plugin@alpha @wagmi/cli
 ```
 
+:::
+
+:::warning
+While in pre-release, the plugin is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
 :::
 
 ## Usage

@@ -7,8 +7,10 @@ Inputs delivered to a Cartesi application and outputs produced by it are ABI-enc
 ## Installation
 
 ```sh
-npm install @cartesi/codec viem
+npm install @cartesi/codec@alpha viem
 ```
+
+While in pre-release, the library is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
 
 ## Usage
 
