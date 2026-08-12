@@ -7,7 +7,9 @@
     "@cartesi/client": "1.0.0",
     "@cartesi/react": "1.0.0",
     "@cartesi/wagmi-plugin": "0.0.0",
-    "@cartesi/codec": "0.0.0"
+    "@cartesi/codec": "0.0.0",
+    "@cartesi/machine": "0.0.0",
+    "@cartesi/rollup": "0.0.0"
   },
   "changesets": [
     "angry-horses-cheat",
@@ -55,7 +57,10 @@
     "lucky-meals-shake",
     "many-stars-lay",
     "nice-rocks-wish",
+    "olive-donkeys-invent",
+    "olive-donuts-heal",
     "olive-goats-melt",
+    "olive-pandas-invite",
     "open-hoops-add",
     "plain-towns-glow",
     "plenty-servers-scope",
