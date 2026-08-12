@@ -17,16 +17,20 @@ It provides a fully typed and ergonomic TypeScript API for the Cartesi Machine C
 :::code-group
 
 ```bash [pnpm]
-pnpm add @cartesi/machine
+pnpm add @cartesi/machine@alpha
 ```
 
 ```bash [npm]
-npm install @cartesi/machine
+npm install @cartesi/machine@alpha
 ```
 
 ```bash [yarn]
-yarn add @cartesi/machine
+yarn add @cartesi/machine@alpha
 ```
+:::
+
+:::warning
+While in pre-release, the library is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
 :::
 
 On Linux (x64, arm64) and macOS (x64, arm64) this installs a prebuilt platform package (`@cartesi/machine-<platform>-<arch>`) containing the native addon and the JSON-RPC server executable — no compiler needed.

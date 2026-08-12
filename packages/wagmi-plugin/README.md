@@ -5,8 +5,10 @@ A [wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates code f
 ## Installation
 
 ```bash
-pnpm add -D @cartesi/wagmi-plugin @wagmi/cli
+pnpm add -D @cartesi/wagmi-plugin@alpha @wagmi/cli
 ```
+
+While in pre-release, the plugin is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
 
 ## Usage
 

@@ -14,17 +14,21 @@ The package decodes those blobs into friendly typed objects, and encodes typed o
 :::code-group
 
 ```sh [npm]
-npm install @cartesi/codec viem
+npm install @cartesi/codec@alpha viem
 ```
 
 ```sh [pnpm]
-pnpm add @cartesi/codec viem
+pnpm add @cartesi/codec@alpha viem
 ```
 
 ```sh [yarn]
-yarn add @cartesi/codec viem
+yarn add @cartesi/codec@alpha viem
 ```
 
+:::
+
+:::warning
+While in pre-release, the library is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
 :::
 
 ## Hex strings and byte arrays
