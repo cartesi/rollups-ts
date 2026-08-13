@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import nodeGypBuild from "node-gyp-build";
+import type { RollupDriver } from "./types.js";
 
 /**
  * Raw N-API surface (see native/addon.cc). Byte arguments must already be
@@ -49,6 +50,8 @@ export interface NativeGioResponse {
 
 export interface NativeAddon {
     Rollup: new () => NativeRollup;
+    /** The libcmt IO driver this addon was built against. See {@link driver}. */
+    driver: RollupDriver;
 }
 
 // Package root: walk up from this file (dist/ when bundled, src/ when executed
@@ -68,3 +71,14 @@ const findPackageRoot = (dir: string): string => {
 };
 
 export const addon = nodeGypBuild(findPackageRoot(__dirname)) as NativeAddon;
+
+/**
+ * The libcmt IO driver this addon was built against: `"ioctl"` for the real
+ * Cartesi Machine driver (riscv64), `"mock"` for the file-based simulation used
+ * on development hosts.
+ *
+ * It is decided by `binding.gyp` from the target architecture, at build time —
+ * not by the environment, so it is the truth about which half of libcmt is
+ * running, where `CMT_INPUTS` being set is only a hint.
+ */
+export const driver: RollupDriver = addon.driver;

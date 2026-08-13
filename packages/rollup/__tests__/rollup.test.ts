@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 // `src/addon.ts` walks up to the package root to find the addon, so it loads
 // the same `.node` `dist` would. `test/machine/` covers the packed `dist` end
 // to end inside a real Cartesi Machine.
-import { Rollup, RollupError } from "../src/index.js";
+import { Rollup, RollupError, driver } from "../src/index.js";
 
 // Inputs are encoded and outputs decoded with @cartesi/codec, whose codecs are
 // derived from the rollups-contracts ABIs. libcmt encodes and decodes the same
@@ -226,27 +226,130 @@ describe("rollup", () => {
         another.close();
     });
 
-    it("drives handlers with the run loop until inputs are exhausted", async () => {
+    it("is built against the mock driver on the host", () => {
+        // the whole point of `driver`: it comes from binding.gyp's target
+        // architecture, so it is true regardless of CMT_INPUTS being set
+        expect(driver).toBe("mock");
+    });
+
+    // The mock signals "CMT_INPUTS is exhausted" through cmt_rollup_finish, with
+    // a different errno depending on how the last request ended (io-mock.c:
+    // mock_rx_accepted vs mock_rx_rejected). Both mean the same thing, so both
+    // have to end `run` cleanly — hence one test per route, plus this one
+    // pinning the external behavior the package absorbs.
+    it("reports exhaustion as -ENODATA after an accept and -ENOSYS after a reject", () => {
+        writeInputs("errno-accept", [[0, "advance.bin", advanceInput()]]);
+        const accepted = new Rollup();
+        accepted.finish();
+        const afterAccept = captureError(() =>
+            accepted.finish({ accept: true }),
+        ) as RollupError;
+        expect(afterAccept).toBeInstanceOf(RollupError);
+        expect(afterAccept.syscall).toBe("cmt_rollup_finish");
+        expect(afterAccept.errno).toBe(-os.constants.errno.ENODATA);
+        accepted.close();
+
+        writeInputs("errno-reject", [[0, "advance.bin", advanceInput()]]);
+        const rejected = new Rollup();
+        rejected.finish();
+        const afterReject = captureError(() =>
+            rejected.finish({ accept: false }),
+        ) as RollupError;
+        expect(afterReject).toBeInstanceOf(RollupError);
+        expect(afterReject.syscall).toBe("cmt_rollup_finish");
+        expect(afterReject.errno).toBe(-os.constants.errno.ENOSYS);
+        rejected.close();
+    });
+
+    it("drives handlers with the run loop until the accepted inputs are exhausted", async () => {
         const payloads = [
             Buffer.from("input-0"),
             Buffer.from("input-1"),
         ] as const;
+        const query = Buffer.from("query-0");
         writeInputs("run", [
+            [0, "a.bin", advanceInput(payloads[0])],
+            [0, "b.bin", advanceInput(payloads[1])],
+            [1, "c.bin", query],
+        ]);
+        const rollup = new Rollup();
+
+        const seen: Buffer[] = [];
+        const queried: Buffer[] = [];
+        // accepted final request: exhaustion arrives as -ENODATA
+        await expect(
+            rollup.run({
+                advance: (request) => {
+                    seen.push(request.payload);
+                },
+                inspect: (request) => {
+                    queried.push(request.payload);
+                },
+            }),
+        ).resolves.toBeUndefined();
+        expect(seen).toEqual([...payloads]);
+        expect(queried).toEqual([query]);
+        rollup.close();
+    });
+
+    it("ends the run loop when the rejected final input exhausts the inputs", async () => {
+        const payloads = [
+            Buffer.from("rejected-0"),
+            Buffer.from("rejected-1"),
+        ] as const;
+        writeInputs("run-reject", [
             [0, "a.bin", advanceInput(payloads[0])],
             [0, "b.bin", advanceInput(payloads[1])],
         ]);
         const rollup = new Rollup();
 
         const seen: Buffer[] = [];
+        // rejecting a non-final input just moves on; rejecting the last one is
+        // what turns exhaustion into -ENOSYS
         await expect(
             rollup.run({
                 advance: (request) => {
                     seen.push(request.payload);
+                    return false;
                 },
             }),
-        ).rejects.toThrow(/cmt_rollup_finish failed/);
+        ).resolves.toBeUndefined();
         expect(seen).toEqual([...payloads]);
         rollup.close();
+    });
+
+    it("ends the run loop when the final input's handler throws", async () => {
+        const dir = writeInputs("run-throw", [
+            [0, "advance.bin", advanceInput()],
+        ]);
+        const rollup = new Rollup();
+
+        // a throwing handler rejects the input, so this takes the -ENOSYS route
+        await expect(
+            rollup.run({
+                advance: () => {
+                    throw new Error("handler blew up");
+                },
+            }),
+        ).resolves.toBeUndefined();
+        expect(
+            fs.readFileSync(path.join(dir, "advance.report-0.bin")).toString(),
+        ).toMatch(/handler blew up/);
+        rollup.close();
+    });
+
+    it("rejects the run loop when finish fails for any other reason", async () => {
+        writeInputs("run-error", [[0, "advance.bin", advanceInput()]]);
+        const rollup = new Rollup();
+
+        // closing the device mid-run is a genuine failure, not an end of run
+        await expect(
+            rollup.run({
+                advance: (_request, rollup) => {
+                    rollup.close();
+                },
+            }),
+        ).rejects.toThrow(/closed/);
     });
 
     it("validates its arguments", () => {

@@ -67,7 +67,9 @@ The call is **synchronous and blocking on purpose**: yielding pauses the entire 
 
 ## Errors
 
-| Condition                | Error                                                 |
-| ------------------------ | ----------------------------------------------------- |
-| No more inputs (mock)    | `RollupError` with the negative errno in `errno`      |
-| Device closed            | `Error` (`close()` was called)                        |
+| Condition                | Error                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| No more inputs (mock)    | `RollupError` with `-ENODATA` after an accepted request, `-ENOSYS` after a rejected one  |
+| Device closed            | `Error` (`close()` was called)                                                           |
+
+Both errnos mean the same thing — the [`CMT_INPUTS`](/rollup/testing) list is exhausted — and [`run`](/rollup/run) treats either as the end of a host session.

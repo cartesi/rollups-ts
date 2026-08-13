@@ -20,7 +20,21 @@ The _reason_ selects the request type:
 
 Set `CMT_DEBUG=yes` to make the mock log every operation.
 
-When the input list is exhausted, the next [`finish`](/rollup/finish) call fails and [`run`](/rollup/run) rejects — that is your test's natural end-of-session signal.
+When the input list is exhausted, the next [`finish`](/rollup/finish) call fails — that is your test's natural end-of-session signal. [`run`](/rollup/run) recognizes it and **resolves**, so a test can `await` the loop and then assert on the outputs. Driving `finish` yourself, you see the failure directly as a `RollupError`, whose `errno` depends on how the last request ended: `-ENODATA` if it was accepted, `-ENOSYS` if it was rejected (the mock's two ways of saying the same thing). Rejecting a request that is _not_ the last one just moves on to the next input.
+
+```ts twoslash
+import { constants } from "node:os";
+import { RollupError, driver } from "@cartesi/rollup";
+
+const exhausted = (error: unknown) =>
+    driver === "mock" &&
+    error instanceof RollupError &&
+    error.syscall === "cmt_rollup_finish" &&
+    (error.errno === -constants.errno.ENODATA ||
+        error.errno === -constants.errno.ENOSYS);
+```
+
+`driver` tells you which half of libcmt the binding was built against — `"mock"` on your host, `"ioctl"` inside a Cartesi Machine. It is fixed at build time by the target architecture, so it is a reliable check, unlike looking at `CMT_INPUTS`.
 
 ## Collecting outputs
 
@@ -97,17 +111,15 @@ test("echoes the payload as a notice", async () => {
     process.env.CMT_INPUTS = `0:${input}`;
 
     // the app under test: import it AFTER setting CMT_INPUTS, since the
-    // device opens on construction. run() rejects when inputs run out.
+    // device opens on construction. run() resolves when inputs run out.
     const { Rollup } = await import("@cartesi/rollup");
     const rollup = new Rollup();
-    await rollup
-        .run({
-            advance(request, rollup) {
-                rollup.emitNotice(request.payload);
-                return true;
-            },
-        })
-        .catch(() => {}); // inputs exhausted — session over
+    await rollup.run({
+        advance(request, rollup) {
+            rollup.emitNotice(request.payload);
+            return true;
+        },
+    }); // resolves once the inputs are exhausted — session over
 
     const output = decodeOutput(
         fs.readFileSync(path.join(dir, "input.output-0.bin")),
