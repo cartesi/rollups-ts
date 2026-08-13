@@ -1,0 +1,49 @@
+# broadcast
+
+Composes handlers that **observe** the same request: every one of them is offered it, in order, whatever the others answered.
+
+Use it when several concerns react to the same request independently. See [Composing Handlers](/rollup/composing-handlers) for how it compares to [`chain`](/rollup/chain).
+
+## Usage
+
+```ts twoslash
+// @noErrors
+import { Rollup, broadcast } from "@cartesi/rollup";
+import { app } from "./app.js";
+import { indexer } from "./indexer.js";
+
+const rollup = new Rollup();
+// ---cut---
+await rollup.run({
+    // the indexer sees every input the application processes
+    advance: broadcast(app.handler, indexer.handler),
+});
+```
+
+## Returns
+
+A handler of the same request kind, ready to pass to [`run`](/rollup/run):
+
+- `true` if **any** handler accepted,
+- `false` if they all declined — `run` then **rejects** the input, since nobody claimed it. An empty `broadcast()` declines everything.
+
+Exceptions are not caught: the first one aborts the remaining handlers and propagates to `run`, which rejects the input and emits the error as a report.
+
+## Parameters
+
+### handlers
+
+- Type: `RequestHandler[]` — `AdvanceRequestHandler` or `InspectRequestHandler`
+- Variadic
+
+The handlers, in the order they get offered the request. They may be synchronous or `async`, and always run one after another, never concurrently: they share one device and one application state, and the order in which they emit outputs is part of what the machine proves.
+
+Each must return a real `boolean` — `true` accepts the request, `false` declines it. That is stricter than the handlers [`run`](/rollup/run) takes directly, where returning nothing means accept; [Handlers must answer](/rollup/composing-handlers#handlers-must-answer) explains why.
+
+## Errors
+
+| Condition                                        | Error       |
+| ------------------------------------------------ | ----------- |
+| A handler answers with something other than a boolean | `TypeError` |
+
+Ruled out by the types, so this only reaches JavaScript callers — as a rejected input with the error in a report, rather than a request silently counted as unclaimed.

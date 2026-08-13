@@ -62,3 +62,5 @@ The handler's result decides the request's fate:
 | no handler for the request type  | request **rejected**                                                      |
 
 See [Handling Requests](/rollup/handling-requests) for the semantics of accept/reject.
+
+`run` takes exactly one handler per request type. To split a request kind across several independently written handlers, fold them with [`chain`](/rollup/chain) or [`broadcast`](/rollup/broadcast) — see [Composing Handlers](/rollup/composing-handlers). Those compose handlers that must return a real `boolean`, which is assignable here.

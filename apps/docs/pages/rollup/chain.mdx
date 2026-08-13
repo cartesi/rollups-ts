@@ -1,0 +1,50 @@
+# chain
+
+Composes handlers that **compete** for a request: each is offered it in turn, and the first one to accept wins — the handlers after it never run.
+
+Use it when at most one handler owns a given request. See [Composing Handlers](/rollup/composing-handlers) for how it compares to [`broadcast`](/rollup/broadcast).
+
+## Usage
+
+```ts twoslash
+// @noErrors
+import { Rollup, chain } from "@cartesi/rollup";
+import { wallet } from "./wallet.js";
+import { app } from "./app.js";
+
+const rollup = new Rollup();
+// ---cut---
+await rollup.run({
+    // the wallet claims portal deposits and declines everything else, which
+    // then falls through to the application's own logic
+    advance: chain(wallet.handler, app.handler),
+});
+```
+
+## Returns
+
+A handler of the same request kind, ready to pass to [`run`](/rollup/run):
+
+- `true` as soon as one of the handlers accepts,
+- `false` if they all decline — `run` then **rejects** the input, since nobody claimed it. An empty `chain()` declines everything.
+
+Exceptions are not caught: the first one aborts the remaining handlers and propagates to `run`, which rejects the input and emits the error as a report.
+
+## Parameters
+
+### handlers
+
+- Type: `RequestHandler[]` — `AdvanceRequestHandler` or `InspectRequestHandler`
+- Variadic
+
+The handlers, in the order they get offered the request. They may be synchronous or `async`, and always run one after another, never concurrently.
+
+Each must return a real `boolean` — `true` claims the request, `false` declines it and passes it on. That is stricter than the handlers [`run`](/rollup/run) takes directly, where returning nothing means accept; [Handlers must answer](/rollup/composing-handlers#handlers-must-answer) explains why.
+
+## Errors
+
+| Condition                                        | Error       |
+| ------------------------------------------------ | ----------- |
+| A handler answers with something other than a boolean | `TypeError` |
+
+Ruled out by the types, so this only reaches JavaScript callers — as a rejected input with the error in a report, rather than a silently misrouted request.
