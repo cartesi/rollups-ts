@@ -96,6 +96,8 @@ await rollup.run({
 });
 ```
 
+These are the rules for the handler `run` calls. When that handler is a composition of several — see [Composing Handlers](/rollup/composing-handlers) — the ones inside it answer a narrower question, "did I claim this request?", and only the composition's answer decides the input's fate.
+
 ## Async handlers
 
 Handlers may be `async` — `run` awaits them before finishing the request:

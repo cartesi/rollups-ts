@@ -84,6 +84,34 @@ export interface FinishOptions {
 }
 
 /**
+ * A handler of a single kind of request, as composed by `chain` and
+ * `broadcast`.
+ *
+ * It must *say* whether it accepted the request — `true` claims it, `false`
+ * declines it and leaves it to the other handlers — which is why this is
+ * `boolean` and not the `boolean | void` {@link RunHandlers} takes. The two
+ * answer different questions: a `run` handler decides the input's fate on its
+ * own, so "no answer" can safely mean accept, while a composed handler only
+ * makes a claim and the input is rejected when nobody makes one. There a
+ * missing answer has no sensible default (accepting would swallow the
+ * remaining handlers, declining would drop the request), so a handler that
+ * falls off its end is a type error instead.
+ *
+ * The reverse direction is fine: `boolean` is assignable to `boolean | void`,
+ * so a composed handler goes straight into {@link Rollup.run}.
+ */
+export type RequestHandler<request extends RollupRequest = RollupRequest> = (
+    request: request,
+    rollup: Rollup,
+) => boolean | Promise<boolean>;
+
+/** A {@link RequestHandler} of advance requests. */
+export type AdvanceRequestHandler = RequestHandler<AdvanceRequest>;
+
+/** A {@link RequestHandler} of inspect requests. */
+export type InspectRequestHandler = RequestHandler<InspectRequest>;
+
+/**
  * Handlers for {@link Rollup.run}. A handler accepts the request unless it
  * returns `false`.
  */

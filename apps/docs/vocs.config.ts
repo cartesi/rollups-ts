@@ -491,6 +491,10 @@ const config: Config = defineConfig({
                             link: "/rollup/handling-requests",
                         },
                         {
+                            text: "Composing Handlers",
+                            link: "/rollup/composing-handlers",
+                        },
+                        {
                             text: "Emitting Outputs",
                             link: "/rollup/emitting-outputs",
                         },
@@ -510,6 +514,8 @@ const config: Config = defineConfig({
                         { text: "new Rollup", link: "/rollup/Rollup" },
                         { text: "finish", link: "/rollup/finish" },
                         { text: "run", link: "/rollup/run" },
+                        { text: "chain", link: "/rollup/chain" },
+                        { text: "broadcast", link: "/rollup/broadcast" },
                         { text: "emitVoucher", link: "/rollup/emitVoucher" },
                         {
                             text: "emitDelegateCallVoucher",

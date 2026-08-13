@@ -6,11 +6,14 @@ Everything the package exports besides the [`Rollup`](/rollup/Rollup) class (the
 import type {
     AddressLike,
     AdvanceRequest,
+    AdvanceRequestHandler,
     BytesLike,
     DelegateCallVoucher,
     GioResponse,
     Hex,
     InspectRequest,
+    InspectRequestHandler,
+    RequestHandler,
     RollupDriver,
     RollupRequest,
     RunHandlers,
@@ -70,6 +73,24 @@ if (request.type === "advance") {
 ## Handler types
 
 `RunHandlers` is the parameter of [`run`](/rollup/run) — an optional `advance` and `inspect` handler, each receiving `(request, rollup)` and returning `boolean | void`, possibly wrapped in a `Promise`.
+
+`RequestHandler<request>` is the handler [`chain`](/rollup/chain) and [`broadcast`](/rollup/broadcast) compose: the same `(request, rollup)`, but returning `boolean | Promise<boolean>` — inside a composition, a missing answer has no sensible meaning ([why](/rollup/composing-handlers#handlers-must-answer)). `AdvanceRequestHandler` and `InspectRequestHandler` are it, specialized to one request kind:
+
+```ts twoslash
+import type { AdvanceRequestHandler, InspectRequestHandler } from "@cartesi/rollup";
+
+const advance: AdvanceRequestHandler = (request, rollup) => {
+    rollup.emitNotice(request.payload);
+    return true;
+};
+
+const inspect: InspectRequestHandler = (request, rollup) => {
+    rollup.emitReport(request.payload);
+    return true;
+};
+```
+
+`boolean` is assignable to `boolean | void`, so either of them — composed or not — can be passed to `run` directly.
 
 ## Response types
 

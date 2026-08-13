@@ -1,0 +1,85 @@
+# Composing Handlers
+
+[`run`](/rollup/run) takes one handler per request kind, but an application usually has several independent concerns per kind: a wallet that claims portal deposits, the application's own logic, an indexer that watches everything go by. [`chain`](/rollup/chain) and [`broadcast`](/rollup/broadcast) fold a list of handlers into the single one `run` expects.
+
+```ts twoslash
+// @noErrors
+import { Rollup, chain, broadcast } from "@cartesi/rollup";
+import { wallet } from "./wallet.js";
+import { app } from "./app.js";
+import { indexer } from "./indexer.js";
+
+const rollup = new Rollup();
+
+await rollup.run({
+    // the wallet claims deposits; everything else falls through to the app
+    advance: chain(wallet.handler, app.handler),
+    // both answer every query, with a report each
+    inspect: broadcast(wallet.query, indexer.query),
+});
+```
+
+## Competing or observing
+
+The two composers differ in one thing: whether an accepted request is still offered to the handlers that come after.
+
+| Composer                 | Handlers                                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `chain(...handlers)`     | **compete** — offered the request in turn; the first to accept wins and the rest never run          |
+| `broadcast(...handlers)` | **observe** — every one is offered the request, in order, whatever the others answered              |
+
+Reach for `chain` when at most one handler owns a given request (routing by `msgSender`, by a command in the payload, by a portal address), and for `broadcast` when several concerns react to the same request independently.
+
+Both are ordinary functions returning a handler, so they nest: `chain(wallet.handler, broadcast(app.handler, metrics.handler))` gives the wallet first refusal and lets the other two share whatever it declined.
+
+The handlers always run one after another, never concurrently — they share one device and one application state, and the order in which they emit outputs is part of what the machine proves.
+
+## Accepting, declining, rejecting
+
+Inside a composition, a handler's `boolean` is a **claim**, not a verdict: `true` accepts the request, `false` declines it and leaves it to the others. Only the composed handler's answer reaches `run`, and that is what decides the input's fate — both composers return `true` if any handler accepted and `false` if none did, so a request nobody claimed is [rejected](/rollup/handling-requests#accepting-and-rejecting).
+
+Exceptions are not caught. The first one aborts the remaining handlers and propagates to `run`, which rejects the input and emits the error as a report — which is exactly what you want, and why neither composer needs a `catch`.
+
+## Handlers must answer
+
+A composed handler must return a real `boolean`. This is stricter than `run`, which reads a handler that returns nothing as an accept:
+
+```ts twoslash
+// @errors: 2345
+import { chain } from "@cartesi/rollup";
+import type { AdvanceRequest, AdvanceRequestHandler, Rollup } from "@cartesi/rollup";
+
+const echo: AdvanceRequestHandler = (request, rollup) => {
+    rollup.emitNotice(request.payload);
+    return true;
+};
+
+// what a handler written for `run` looks like: no return statement
+const notAnswering = (request: AdvanceRequest, rollup: Rollup) => {
+    rollup.emitNotice(request.payload);
+};
+
+// ---cut---
+chain(echo, notAnswering);
+```
+
+The strictness is deliberate, and it is not the same question being answered twice. A handler passed to `run` decides the input's fate by itself, so "no answer" can safely mean accept — there is nobody else to ask. A handler inside a composition only claims the request, and there is no sensible default for a missing claim: reading it as an accept would silently swallow every handler after it, reading it as a decline would silently drop the request and reject an input `run` would have accepted. So the composers refuse to guess — the type rules it out, and for JavaScript callers a `TypeError` at runtime does, which `run` reports like any other handler failure.
+
+In practice this means a handler you want to compose declares its answer up front:
+
+```ts twoslash
+import type { AdvanceRequestHandler } from "@cartesi/rollup";
+
+const DEPOSIT = "0x0000000000000000000000000000000000000001";
+
+// a handler that only claims what it recognizes
+const wallet: AdvanceRequestHandler = (request, rollup) => {
+    if (request.msgSender !== DEPOSIT) {
+        return false; // not mine — the next handler gets it
+    }
+    rollup.emitReport(Buffer.from("deposit credited"));
+    return true;
+};
+```
+
+`AdvanceRequestHandler` and `InspectRequestHandler` (both `RequestHandler` specialized to a request kind — see [Types](/rollup/types#handler-types)) name that contract. They are assignable to the matching `run` handler, so a composed handler drops straight into `run` with no adapter.

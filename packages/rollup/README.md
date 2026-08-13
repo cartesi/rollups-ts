@@ -77,6 +77,30 @@ The JavaScript half of the binding is written in TypeScript (`src/*.ts`) and bun
 | `close()`                                          | Releases the device.                                                                                                 |
 | `run({ advance, inspect })`                        | Convenience loop over `finish`; handlers may be async. Handler exceptions reject the input and are emitted as reports. |
 
+### Composing handlers
+
+`run` takes one handler per request kind, but applications usually have several independent concerns per kind. Two composers fold a list of handlers into one:
+
+```js
+import { broadcast, chain } from "@cartesi/rollup";
+
+await rollup.run({
+    advance: chain(wallet.handler, app.handler), // first to accept wins
+    inspect: broadcast(balances.query, health.query), // all of them run
+});
+```
+
+| Function                | Description                                                                                                   |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `chain(...handlers)`     | Handlers **compete**: each is offered the request in turn, and the first to return `true` wins — the rest never run. |
+| `broadcast(...handlers)` | Handlers **observe**: every one is offered the request, in order, whatever the others answered.                |
+
+Both accept the request if any handler accepted and decline (so `run` rejects the input) if none did. Neither catches exceptions — they propagate to `run`, which rejects the input and reports them.
+
+Composed handlers must return a real `boolean`, unlike the ones `run` takes directly: `true` claims the request, `false` declines it and passes it on. The two are different questions — a `run` handler decides the input's fate by itself, so returning nothing can safely mean accept, while a handler inside a composition only makes a claim, and the input is rejected when nobody claims it. A missing answer has no sensible default there (accepting would swallow the remaining handlers, declining would drop the request), so it is a type error, and a `TypeError` at runtime for callers without types.
+
+The `AdvanceRequestHandler` and `InspectRequestHandler` types name that contract; both are assignable to the corresponding `run` handler, which is why a composed handler drops straight into `run`.
+
 The package also exports `driver`, the libcmt IO driver the addon was built against: `"ioctl"` inside the machine, `"mock"` on the host. It is decided at build time by the target architecture, so it is a reliable "am I running for real?" check.
 
 Failed libcmt calls throw a `RollupError` with the negative errno in `error.errno` and the failed call in `error.syscall`.
