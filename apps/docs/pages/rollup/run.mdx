@@ -22,7 +22,12 @@ await rollup.run({
 
 ## Returns
 
-`Promise<never>` — the loop runs until `finish` fails (inputs exhausted on the mock, or device closed), and the promise rejects with that error. It never resolves.
+`Promise<void>`, and where it settles depends on which side you are running:
+
+- **Inside a Cartesi Machine** the loop never ends on its own — the application is meant to keep serving requests forever. The promise only settles if `finish` fails (for example the device was [closed](/rollup/close)), and then it **rejects** with that error.
+- **On the host mock** it also **resolves** once the inputs listed in `CMT_INPUTS` run out, which is the natural end of a [test session](/rollup/testing). Any other `finish` failure still rejects.
+
+So a host test can simply `await rollup.run(...)` and then assert on the outputs, with no `catch` in the way.
 
 ## Parameters
 

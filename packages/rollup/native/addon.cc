@@ -14,6 +14,21 @@ extern "C" {
 #include <libcmt/rollup.h>
 }
 
+// Which libcmt IO driver got compiled/linked in is decided by binding.gyp from
+// the target architecture: the real kernel driver on riscv64, the mock (files +
+// CMT_INPUTS) everywhere else. It defines exactly one of these, and the addon
+// reports it back to JS so the TypeScript half never has to guess from the
+// environment.
+#if defined(CMT_IO_DRIVER_MOCK) == defined(CMT_IO_DRIVER_IOCTL)
+#error "binding.gyp must define exactly one of CMT_IO_DRIVER_MOCK / CMT_IO_DRIVER_IOCTL"
+#endif
+
+#if defined(CMT_IO_DRIVER_MOCK)
+#define CMT_IO_DRIVER_NAME "mock"
+#else
+#define CMT_IO_DRIVER_NAME "ioctl"
+#endif
+
 namespace {
 
 Napi::Error errno_error(Napi::Env env, const char *what, int rc) {
@@ -387,6 +402,7 @@ Napi::Object Rollup::Init(Napi::Env env, Napi::Object exports) {
 }
 
 Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
+    exports.Set("driver", Napi::String::New(env, CMT_IO_DRIVER_NAME));
     return Rollup::Init(env, exports);
 }
 

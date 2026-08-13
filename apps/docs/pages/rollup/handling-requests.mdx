@@ -148,4 +148,6 @@ The request is a discriminated union — narrowing on `type` gives you the right
 
 ## When the loop ends
 
-`run` returns a `Promise<never>`: under normal operation inside the machine, the loop never ends. It rejects when `finish` fails — for example when the mock runs out of inputs during [host testing](/rollup/testing), or after [`close`](/rollup/close) is called. Let the rejection propagate (the process exits), or catch it if you have cleanup to do.
+`run` returns a `Promise<void>`, but under normal operation inside the machine the loop never ends — the promise simply never settles. It **rejects** when `finish` fails for a real reason, such as after [`close`](/rollup/close) is called: let that propagate (the process exits) or catch it if you have cleanup to do.
+
+It **resolves** in exactly one case: the host mock ran out of the inputs listed in `CMT_INPUTS`, the normal end of a [test session](/rollup/testing). That is decided by the driver the binding was built against, not by the environment, so inside a real machine an exhaustion-looking errno is still an error.

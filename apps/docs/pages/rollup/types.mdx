@@ -11,6 +11,7 @@ import type {
     GioResponse,
     Hex,
     InspectRequest,
+    RollupDriver,
     RollupRequest,
     RunHandlers,
     U256Like,
@@ -83,6 +84,15 @@ ADDRESS_LENGTH;
 // ^?
 
 U256_LENGTH;
+// ^?
+```
+
+`driver` (typed `RollupDriver`) reports which libcmt IO driver the native addon was built against — `"ioctl"` for the real Cartesi Machine kernel driver on riscv64, `"mock"` for the file-based [host simulation](/rollup/testing). The choice is made at build time from the target architecture, so it is the honest answer to "am I running inside a machine?", where `CMT_INPUTS` being set is only a hint:
+
+```ts twoslash
+import { driver } from "@cartesi/rollup";
+
+driver;
 // ^?
 ```
 

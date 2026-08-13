@@ -33,10 +33,15 @@
                 ["target_arch=='riscv64'", {
                     # Inside the Cartesi Machine: link the real driver build of
                     # libcmt installed by the machine-guest-tools package.
-                    "libraries": ["<(libcmt_lib)"]
+                    "libraries": ["<(libcmt_lib)"],
+                    # Which IO driver the addon ends up with is decided right
+                    # here, at build time; the define lets addon.cc report it
+                    # back to JS (`addon.driver`) without guessing.
+                    "defines": ["CMT_IO_DRIVER_IOCTL"]
                 }, {
                     # Host (development): compile libcmt sources with the mock
                     # IO driver directly into the addon.
+                    "defines": ["CMT_IO_DRIVER_MOCK"],
                     "sources": [
                         "<(libcmt_dir)/src/abi.c",
                         "<(libcmt_dir)/src/buf.c",

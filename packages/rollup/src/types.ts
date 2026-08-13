@@ -3,6 +3,13 @@ import type { Rollup } from "./rollup.js";
 /** 0x-prefixed hex string. Compatible with viem's `Hex` and `Address`. */
 export type Hex = `0x${string}`;
 
+/**
+ * libcmt IO driver the native addon was built against: `"ioctl"` (the real
+ * Cartesi Machine kernel driver, riscv64) or `"mock"` (the file-based host
+ * simulation driven by `CMT_INPUTS`).
+ */
+export type RollupDriver = "ioctl" | "mock";
+
 /** Bytes input: 0x-prefixed hex string, Buffer or Uint8Array. */
 export type BytesLike = Hex | Uint8Array;
 

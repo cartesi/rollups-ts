@@ -77,6 +77,8 @@ The JavaScript half of the binding is written in TypeScript (`src/*.ts`) and bun
 | `close()`                                          | Releases the device.                                                                                                 |
 | `run({ advance, inspect })`                        | Convenience loop over `finish`; handlers may be async. Handler exceptions reject the input and are emitted as reports. |
 
+The package also exports `driver`, the libcmt IO driver the addon was built against: `"ioctl"` inside the machine, `"mock"` on the host. It is decided at build time by the target architecture, so it is a reliable "am I running for real?" check.
+
 Failed libcmt calls throw a `RollupError` with the negative errno in `error.errno` and the failed call in `error.syscall`.
 
 The blobs this package emits and receives are the same ones [`@cartesi/codec`](../codec) encodes and decodes off-chain.
@@ -90,7 +92,9 @@ CMT_INPUTS="0:advance.bin,1:inspect.bin" node my-app.js
 # -> advance.output-0.bin, advance.report-0.bin, ...
 ```
 
-Reason `0` is advance (EVM-ABI encoded `EvmAdvance`), `1` is inspect (raw payload); any other reason is a gio reply with that response code. Set `CMT_DEBUG=yes` for verbose logging. See the [libcmt README](https://github.com/cartesi/machine-guest-tools/tree/main/sys-utils/libcmt#testing) for how to generate inputs with foundry's `cast`, or `__tests__/rollup.test.ts` here for a pure-JS encoder.
+Reason `0` is advance (EVM-ABI encoded `EvmAdvance`), `1` is inspect (raw payload); any other reason is a gio reply with that response code. Set `CMT_DEBUG=yes` for verbose logging.
+
+When the inputs run out, the next `finish` fails — that is the end of a host session, so `run()` resolves there and the process exits normally. The mock reports it as `-ENODATA` if the last request was accepted and `-ENOSYS` if it was rejected; both are recognized, and only when the addon was built against the mock, so an `-ENOSYS` coming from a real device is never mistaken for an end of run. Driving `finish` yourself, you get the `RollupError` and decide. See the [libcmt README](https://github.com/cartesi/machine-guest-tools/tree/main/sys-utils/libcmt#testing) for how to generate inputs with foundry's `cast`, or `__tests__/rollup.test.ts` here for a pure-JS encoder.
 
 ## Testing inside a Cartesi Machine
 

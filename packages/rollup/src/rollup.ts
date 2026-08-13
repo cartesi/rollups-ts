@@ -1,6 +1,7 @@
-import { type NativeRollup, addon } from "./addon.js";
+import { constants } from "node:os";
+import { type NativeRollup, addon, driver } from "./addon.js";
 import { toAddress, toBytes, toHex, toU256 } from "./convert.js";
-import { bindingCall } from "./errors.js";
+import { RollupError, bindingCall } from "./errors.js";
 import type {
     BytesLike,
     DelegateCallVoucher,
@@ -13,6 +14,40 @@ import type {
 } from "./types.js";
 
 const EMPTY = Buffer.alloc(0);
+
+/**
+ * Negative errnos the *mock* IO driver uses to report "the CMT_INPUTS list is
+ * exhausted" out of `cmt_rollup_finish`. It picks one or the other depending on
+ * how the last request ended (io-mock.c): `-ENODATA` when it was accepted, and
+ * `-ENOSYS` when it was rejected — same condition, two codes, so a fix that
+ * only knows about one of them still crashes rejecting applications.
+ *
+ * errno values are platform-specific (ENODATA is 61 on Linux and 96 on macOS),
+ * hence node:os rather than literals; anything missing on a given platform is
+ * dropped instead of matching `-undefined`.
+ */
+const MOCK_EXHAUSTED_ERRNOS = new Set(
+    [constants.errno.ENODATA, constants.errno.ENOSYS]
+        .filter((errno): errno is number => typeof errno === "number")
+        .map((errno) => -errno),
+);
+
+/**
+ * Whether a failed `finish` is the mock driver saying it ran out of inputs,
+ * which is how a host test run ends normally.
+ *
+ * Gated on the driver the addon was *built* against, so the `-ENOSYS` case in
+ * particular ("function not implemented" — a plausible genuine failure from the
+ * real device or an old kernel driver) can never be swallowed inside a Cartesi
+ * Machine: there the addon links the ioctl driver and this is unreachable. And
+ * running out of inputs is a mock-only concept anyway — in a real machine the
+ * loop is meant to run forever, so even `-ENODATA` is a genuine error there.
+ */
+const isMockInputsExhausted = (error: unknown): boolean =>
+    driver === "mock" &&
+    error instanceof RollupError &&
+    error.syscall === "cmt_rollup_finish" &&
+    MOCK_EXHAUSTED_ERRNOS.has(error.errno);
 
 export class Rollup {
     #native: NativeRollup;
@@ -131,13 +166,25 @@ export class Rollup {
     /**
      * Convenience request loop. Handlers receive (request, rollup), may be
      * async, and accept the request unless they return false (exceptions
-     * reject and are reported). Runs until finish fails (e.g. mock inputs are
-     * exhausted, or the device is closed), which rejects with that error.
+     * reject and are reported).
+     *
+     * Inside a Cartesi Machine the loop never ends: it only settles if `finish`
+     * fails (e.g. the device was closed), and then it rejects with that error.
+     * On the host mock it also resolves when the inputs listed in `CMT_INPUTS`
+     * run out, which is the normal end of a test run.
      */
-    async run(handlers: RunHandlers = {}): Promise<never> {
+    async run(handlers: RunHandlers = {}): Promise<void> {
         let accept = true;
         for (;;) {
-            const request = this.finish({ accept });
+            let request: RollupRequest;
+            try {
+                request = this.finish({ accept });
+            } catch (error) {
+                if (isMockInputsExhausted(error)) {
+                    return;
+                }
+                throw error;
+            }
             try {
                 if (request.type === "advance") {
                     accept = handlers.advance
