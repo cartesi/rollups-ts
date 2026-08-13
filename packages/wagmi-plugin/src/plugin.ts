@@ -47,7 +47,9 @@ export interface RollupsContractsOptions {
      * `cartesi-rollups-contracts-<version>-deployment-addresses.tar.gz`. Optionally
      * with an expected SHA-256 hash for integrity verification.
      * Defaults to `DEFAULT_DEPLOYMENTS`, the tarball of the rollups-contracts
-     * `DEFAULT_VERSION` GitHub release.
+     * `DEFAULT_VERSION` GitHub release. Addresses are read from the plaintext
+     * deployment files, so the tarball must come from rollups-contracts
+     * 3.0.0-alpha.8 or later.
      */
     deployments?: TarballSource;
     /**
@@ -96,45 +98,9 @@ const findArtifacts = (directory: string): Map<string, string> => {
 };
 
 /**
- * Read a deployment file holding nothing but the address, whose contract name
- * is the file name (`<Contract>.txt`).
- */
-const readPlaintextDeployment = (
-    deploymentPath: string,
-): { address: Address; name: string } => ({
-    address: fs.readFileSync(deploymentPath, "utf8").trim() as Address,
-    name: path.basename(deploymentPath, ".txt"),
-});
-
-/**
- * Read a deployment file holding a JSON object with the address and the
- * contract name (`<Contract>.json`). These are deprecated since
- * rollups-contracts 3.0.0-alpha.8, in favour of the plaintext ones.
- */
-const readJsonDeployment = (
-    deploymentPath: string,
-): { address: Address; name: string } => {
-    let deployment: { address: Address; contractName: string };
-    try {
-        deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"));
-    } catch (error) {
-        throw new Error(`Failed to parse deployment file: ${deploymentPath}`, {
-            cause: error,
-        });
-    }
-    if (!deployment.contractName) {
-        throw new Error(
-            `Deployment file ${deploymentPath} is missing contractName`,
-        );
-    }
-    return { address: deployment.address, name: deployment.contractName };
-};
-
-/**
  * Read all deployment files from a deployments directory laid out as
- * `<chainId>/<Contract>.txt` (or `<chainId>/<Contract>.json`, for releases
- * older than rollups-contracts 3.0.0-alpha.8), mapping contract name to its
- * address on each chain.
+ * `<chainId>/<Contract>.txt`, each holding nothing but the address, mapping
+ * contract name to its address on each chain.
  */
 const readDeployments = (
     directory: string,
@@ -146,16 +112,19 @@ const readDeployments = (
     for (const chain of chains) {
         const chainId = Number(chain.name);
         const chainDir = path.join(directory, chain.name);
-        const entries = fs.readdirSync(chainDir);
-        const plaintext = entries.filter((file) => file.endsWith(".txt"));
-        const files = plaintext.length
-            ? plaintext
-            : entries.filter((file) => file.endsWith(".json"));
+        const files = fs
+            .readdirSync(chainDir)
+            .filter((file) => file.endsWith(".txt"));
+        if (files.length === 0) {
+            throw new Error(
+                `No deployment addresses for chain ${chainId}: ${chainDir} has no plaintext deployment file, so it predates rollups-contracts 3.0.0-alpha.8`,
+            );
+        }
         for (const file of files) {
-            const deploymentPath = path.join(chainDir, file);
-            const { address, name } = file.endsWith(".txt")
-                ? readPlaintextDeployment(deploymentPath)
-                : readJsonDeployment(deploymentPath);
+            const name = path.basename(file, ".txt");
+            const address = fs
+                .readFileSync(path.join(chainDir, file), "utf8")
+                .trim();
             if (!isAddress(address)) {
                 throw new Error(
                     `${name} has an invalid address on chain ${chainId}: ${address}`,
