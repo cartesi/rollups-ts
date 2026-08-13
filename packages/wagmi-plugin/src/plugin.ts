@@ -11,7 +11,7 @@ export type ContractFilter = string | RegExp;
  * rollups-contracts version used by default when `artifacts` and
  * `deployments` are omitted.
  */
-export const DEFAULT_VERSION = "3.0.0-alpha.7";
+export const DEFAULT_VERSION = "3.0.0-alpha.8";
 
 const defaultReleaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${DEFAULT_VERSION}`;
 
@@ -21,7 +21,7 @@ const defaultReleaseUrl = `https://github.com/cartesi/rollups-contracts/releases
  */
 export const DEFAULT_ARTIFACTS: TarballSource = {
     url: `${defaultReleaseUrl}/cartesi-rollups-contracts-${DEFAULT_VERSION}-artifacts.tar.gz`,
-    sha256: "c4b2250a0ee3e8ba960d348d3c19f8e4312f2b78fa98ffe2c0ba58f5f0b10874",
+    sha256: "b52154c47835d9fdd7a9899c4b52de3ef6b2868fb60b05669b9f42857c1f050c",
 };
 
 /**
@@ -30,7 +30,7 @@ export const DEFAULT_ARTIFACTS: TarballSource = {
  */
 export const DEFAULT_DEPLOYMENTS: TarballSource = {
     url: `${defaultReleaseUrl}/cartesi-rollups-contracts-${DEFAULT_VERSION}-deployment-addresses.tar.gz`,
-    sha256: "15b9987f48e819c8aa4190c41ec09c28ef16f89ee3afa56e50136915f021b4f0",
+    sha256: "e9dce37e6ee827a56df1ae4819189475f67e5f5eb50de58677e2ea24da9ce343",
 };
 
 export interface RollupsContractsOptions {
@@ -96,9 +96,45 @@ const findArtifacts = (directory: string): Map<string, string> => {
 };
 
 /**
+ * Read a deployment file holding nothing but the address, whose contract name
+ * is the file name (`<Contract>.txt`).
+ */
+const readPlaintextDeployment = (
+    deploymentPath: string,
+): { address: Address; name: string } => ({
+    address: fs.readFileSync(deploymentPath, "utf8").trim() as Address,
+    name: path.basename(deploymentPath, ".txt"),
+});
+
+/**
+ * Read a deployment file holding a JSON object with the address and the
+ * contract name (`<Contract>.json`). These are deprecated since
+ * rollups-contracts 3.0.0-alpha.8, in favour of the plaintext ones.
+ */
+const readJsonDeployment = (
+    deploymentPath: string,
+): { address: Address; name: string } => {
+    let deployment: { address: Address; contractName: string };
+    try {
+        deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"));
+    } catch (error) {
+        throw new Error(`Failed to parse deployment file: ${deploymentPath}`, {
+            cause: error,
+        });
+    }
+    if (!deployment.contractName) {
+        throw new Error(
+            `Deployment file ${deploymentPath} is missing contractName`,
+        );
+    }
+    return { address: deployment.address, name: deployment.contractName };
+};
+
+/**
  * Read all deployment files from a deployments directory laid out as
- * `<chainId>/<Contract>.json`, mapping contract name to its address on each
- * chain.
+ * `<chainId>/<Contract>.txt` (or `<chainId>/<Contract>.json`, for releases
+ * older than rollups-contracts 3.0.0-alpha.8), mapping contract name to its
+ * address on each chain.
  */
 const readDeployments = (
     directory: string,
@@ -110,35 +146,23 @@ const readDeployments = (
     for (const chain of chains) {
         const chainId = Number(chain.name);
         const chainDir = path.join(directory, chain.name);
-        const files = fs
-            .readdirSync(chainDir)
-            .filter((file) => file.endsWith(".json"));
+        const entries = fs.readdirSync(chainDir);
+        const plaintext = entries.filter((file) => file.endsWith(".txt"));
+        const files = plaintext.length
+            ? plaintext
+            : entries.filter((file) => file.endsWith(".json"));
         for (const file of files) {
             const deploymentPath = path.join(chainDir, file);
-            let deployment: { address: Address; contractName: string };
-            try {
-                deployment = JSON.parse(
-                    fs.readFileSync(deploymentPath, "utf8"),
-                );
-            } catch (error) {
+            const { address, name } = file.endsWith(".txt")
+                ? readPlaintextDeployment(deploymentPath)
+                : readJsonDeployment(deploymentPath);
+            if (!isAddress(address)) {
                 throw new Error(
-                    `Failed to parse deployment file: ${deploymentPath}`,
-                    { cause: error },
-                );
-            }
-            const name = deployment.contractName;
-            if (!name) {
-                throw new Error(
-                    `Deployment file ${deploymentPath} is missing contractName`,
-                );
-            }
-            if (!isAddress(deployment.address)) {
-                throw new Error(
-                    `${name} has an invalid address on chain ${chainId}: ${deployment.address}`,
+                    `${name} has an invalid address on chain ${chainId}: ${address}`,
                 );
             }
             const addresses = deployments.get(name) ?? {};
-            addresses[chainId] = deployment.address;
+            addresses[chainId] = address;
             deployments.set(name, addresses);
         }
     }

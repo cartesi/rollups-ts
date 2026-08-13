@@ -12,7 +12,7 @@ While in pre-release, the plugin is published under the `alpha` npm tag. The `@a
 
 ## Usage
 
-Add the plugin to your `wagmi.config.ts`. By default it uses the tarballs of the rollups-contracts `v3.0.0-alpha.7` GitHub release, verified against known SHA-256 hashes.
+Add the plugin to your `wagmi.config.ts`. By default it uses the tarballs of the rollups-contracts `v3.0.0-alpha.8` GitHub release, verified against known SHA-256 hashes.
 
 ```ts
 import { rollupsContracts } from "@cartesi/wagmi-plugin";
