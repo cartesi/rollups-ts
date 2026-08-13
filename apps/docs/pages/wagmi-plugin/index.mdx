@@ -30,7 +30,7 @@ While in pre-release, the plugin is published under the `alpha` npm tag. The `@a
 
 ## Usage
 
-Add the plugin to your [wagmi.config.ts](https://wagmi.sh/cli/configuration). With no options, it uses the tarballs of the rollups-contracts `v3.0.0-alpha.7` GitHub release, verified against known SHA-256 hashes.
+Add the plugin to your [wagmi.config.ts](https://wagmi.sh/cli/configuration). With no options, it uses the tarballs of the rollups-contracts `v3.0.0-alpha.8` GitHub release, verified against known SHA-256 hashes.
 
 ```ts [wagmi.config.ts]
 import { rollupsContracts } from "@cartesi/wagmi-plugin";
@@ -141,7 +141,7 @@ export default defineConfig({
 
 | Option        | Type                                                | Description                                                                                                                                    |
 | ------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `artifacts`   | `string \| { url: string; sha256?: string }`        | Source of the foundry build artifacts tarball. Defaults to the rollups-contracts `v3.0.0-alpha.7` release tarball, hash-verified.               |
-| `deployments` | `string \| { url: string; sha256?: string }`        | Source of the deployment addresses tarball. Defaults to the rollups-contracts `v3.0.0-alpha.7` release tarball, hash-verified.                  |
+| `artifacts`   | `string \| { url: string; sha256?: string }`        | Source of the foundry build artifacts tarball. Defaults to the rollups-contracts `v3.0.0-alpha.8` release tarball, hash-verified.               |
+| `deployments` | `string \| { url: string; sha256?: string }`        | Source of the deployment addresses tarball. Defaults to the rollups-contracts `v3.0.0-alpha.8` release tarball, hash-verified.                  |
 | `include`     | `(string \| RegExp)[]`                              | Contracts (by name or regular expression) to include, deployed or not. When omitted, all contracts in the artifacts are included.               |
 | `exclude`     | `(string \| RegExp)[]`                              | Contracts (by name or regular expression) to exclude, deployed or not. Applied after `include`.                                                 |
