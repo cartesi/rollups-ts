@@ -35,20 +35,22 @@ pnpm wagmi generate
 Point `artifacts` and `deployments` at the tarballs of another rollups-contracts release, optionally with an expected SHA-256 hash for integrity verification:
 
 ```ts
-const version = "3.0.0-alpha.6";
+const version = "3.0.0-alpha.8";
 const releaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${version}`;
 
 rollupsContracts({
     artifacts: {
-        url: `${releaseUrl}/rollups-contracts-${version}-artifacts.tar.gz`,
-        sha256: "ad1e0880766d25419fc6da1858ea4e7b9074b400e9d9ef68da88b12f4a8bba45",
+        url: `${releaseUrl}/cartesi-rollups-contracts-${version}-artifacts.tar.gz`,
+        sha256: "b52154c47835d9fdd7a9899c4b52de3ef6b2868fb60b05669b9f42857c1f050c",
     },
     deployments: {
-        url: `${releaseUrl}/rollups-contracts-${version}-deployment-addresses.tar.gz`,
-        sha256: "bd6ee9b339e0541ce464ea3368e5e70595627b35fe0a68c6f5e044ef433ab895",
+        url: `${releaseUrl}/cartesi-rollups-contracts-${version}-deployment-addresses.tar.gz`,
+        sha256: "e9dce37e6ee827a56df1ae4819189475f67e5f5eb50de58677e2ea24da9ce343",
     },
 });
 ```
+
+Addresses are read from the plaintext deployment files, which rollups-contracts publishes since `v3.0.0-alpha.8`, so `deployments` must point at that release or a later one.
 
 ### Selecting contracts
 
