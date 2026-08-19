@@ -30,7 +30,7 @@ While in pre-release, the plugin is published under the `alpha` npm tag. The `@a
 
 ## Usage
 
-Add the plugin to your [wagmi.config.ts](https://wagmi.sh/cli/configuration). With no options, it uses the tarballs of the rollups-contracts `v3.0.0-alpha.8` GitHub release, verified against known SHA-256 hashes.
+Add the plugin to your [wagmi.config.ts](https://wagmi.sh/cli/configuration). With no options, it uses the tarballs of the rollups-contracts `v3.0.0-alpha.9` GitHub release, verified against known SHA-256 hashes.
 
 ```ts [wagmi.config.ts]
 import { rollupsContracts } from "@cartesi/wagmi-plugin";
@@ -50,6 +50,24 @@ pnpm wagmi generate
 
 The generated file exports one ABI per contract, plus its deployment address on every supported chain: a single address when it is identical across chains, or a per-chain record otherwise.
 
+## Devnet addresses
+
+Besides the supported livenets, the addresses cover the local devnet (chain 31337), read from the release's anvil tarball — the same tarball that carries the anvil state dump the devnet is started from. That is also where the devnet-only test tokens (`TestFungibleToken`, `TestNonFungibleToken`, `TestMultiToken`, `TestUsdc`) and the devnet USD withdrawal output builder are deployed.
+
+The core contracts are deployed deterministically, so their devnet address is the same as on every livenet and they still collapse to a single address.
+
+To leave the devnet out, set `anvil` to `false`:
+
+```ts [wagmi.config.ts]
+import { rollupsContracts } from "@cartesi/wagmi-plugin";
+import { defineConfig } from "@wagmi/cli";
+
+export default defineConfig({
+    out: "src/generated.ts",
+    plugins: [rollupsContracts({ anvil: false })],
+});
+```
+
 ## Using a different release
 
 To generate code from another rollups-contracts release, point `artifacts` and `deployments` at that release's tarballs. Each accepts a plain URL string, or an object with an expected SHA-256 hash of the tarball for integrity verification (recommended).
@@ -58,7 +76,7 @@ To generate code from another rollups-contracts release, point `artifacts` and `
 import { rollupsContracts } from "@cartesi/wagmi-plugin";
 import { defineConfig } from "@wagmi/cli";
 
-const version = "3.0.0-alpha.8";
+const version = "3.0.0-alpha.9";
 const releaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${version}`;
 
 export default defineConfig({
@@ -67,11 +85,11 @@ export default defineConfig({
         rollupsContracts({
             artifacts: {
                 url: `${releaseUrl}/cartesi-rollups-contracts-${version}-artifacts.tar.gz`,
-                sha256: "b52154c47835d9fdd7a9899c4b52de3ef6b2868fb60b05669b9f42857c1f050c",
+                sha256: "c2ddbdf04878bc6b4ca0b6ee3fa5503908acb8d18e010c926192381f487d6da4",
             },
             deployments: {
                 url: `${releaseUrl}/cartesi-rollups-contracts-${version}-deployment-addresses.tar.gz`,
-                sha256: "e9dce37e6ee827a56df1ae4819189475f67e5f5eb50de58677e2ea24da9ce343",
+                sha256: "b4064848c0bcf399589274094bb1e663e0b3326200fdf5174b0f572ab8085fc5",
             },
         }),
     ],
@@ -145,7 +163,8 @@ export default defineConfig({
 
 | Option        | Type                                                | Description                                                                                                                                    |
 | ------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `artifacts`   | `string \| { url: string; sha256?: string }`        | Source of the foundry build artifacts tarball. Defaults to the rollups-contracts `v3.0.0-alpha.8` release tarball, hash-verified.               |
-| `deployments` | `string \| { url: string; sha256?: string }`        | Source of the deployment addresses tarball. Defaults to the rollups-contracts `v3.0.0-alpha.8` release tarball, hash-verified.                  |
+| `artifacts`   | `string \| { url: string; sha256?: string }`        | Source of the foundry build artifacts tarball. Defaults to the rollups-contracts `v3.0.0-alpha.9` release tarball, hash-verified.               |
+| `deployments` | `string \| { url: string; sha256?: string }`        | Source of the deployment addresses tarball. Defaults to the rollups-contracts `v3.0.0-alpha.9` release tarball, hash-verified.                  |
+| `anvil`       | `string \| { url: string; sha256?: string } \| false` | Source of the anvil devnet tarball, which carries the addresses on chain 31337. Defaults to the rollups-contracts `v3.0.0-alpha.9` release tarball, hash-verified. `false` skips it. |
 | `include`     | `(string \| RegExp)[]`                              | Contracts (by name or regular expression) to include, deployed or not. When omitted, all contracts in the artifacts are included.               |
 | `exclude`     | `(string \| RegExp)[]`                              | Contracts (by name or regular expression) to exclude, deployed or not. Applied after `include`.                                                 |

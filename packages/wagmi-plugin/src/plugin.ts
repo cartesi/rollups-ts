@@ -11,7 +11,7 @@ export type ContractFilter = string | RegExp;
  * rollups-contracts version used by default when `artifacts` and
  * `deployments` are omitted.
  */
-export const DEFAULT_VERSION = "3.0.0-alpha.8";
+export const DEFAULT_VERSION = "3.0.0-alpha.9";
 
 const defaultReleaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${DEFAULT_VERSION}`;
 
@@ -21,7 +21,7 @@ const defaultReleaseUrl = `https://github.com/cartesi/rollups-contracts/releases
  */
 export const DEFAULT_ARTIFACTS: TarballSource = {
     url: `${defaultReleaseUrl}/cartesi-rollups-contracts-${DEFAULT_VERSION}-artifacts.tar.gz`,
-    sha256: "b52154c47835d9fdd7a9899c4b52de3ef6b2868fb60b05669b9f42857c1f050c",
+    sha256: "c2ddbdf04878bc6b4ca0b6ee3fa5503908acb8d18e010c926192381f487d6da4",
 };
 
 /**
@@ -30,7 +30,25 @@ export const DEFAULT_ARTIFACTS: TarballSource = {
  */
 export const DEFAULT_DEPLOYMENTS: TarballSource = {
     url: `${defaultReleaseUrl}/cartesi-rollups-contracts-${DEFAULT_VERSION}-deployment-addresses.tar.gz`,
-    sha256: "e9dce37e6ee827a56df1ae4819189475f67e5f5eb50de58677e2ea24da9ce343",
+    sha256: "b4064848c0bcf399589274094bb1e663e0b3326200fdf5174b0f572ab8085fc5",
+};
+
+/**
+ * Anvil version the devnet tarball of the `DEFAULT_VERSION` release was
+ * dumped with. It is part of the asset name, so it must be bumped alongside
+ * `DEFAULT_VERSION` whenever a release changes its foundry version.
+ */
+export const DEFAULT_ANVIL_VERSION = "1.5.1";
+
+/**
+ * Default source of the anvil devnet tarball: the rollups-contracts
+ * `DEFAULT_VERSION` GitHub release, hash-verified. Besides the anvil state
+ * dump, it carries the deployment addresses on the devnet (chain 31337),
+ * including the devnet-only test tokens.
+ */
+export const DEFAULT_ANVIL: TarballSource = {
+    url: `${defaultReleaseUrl}/cartesi-rollups-contracts-${DEFAULT_VERSION}-anvil-${DEFAULT_ANVIL_VERSION}.tar.gz`,
+    sha256: "e09861a2fc9de723f5be3f88fa77beab700d99f535ed97f462c6acf39c8b994b",
 };
 
 export interface RollupsContractsOptions {
@@ -52,6 +70,16 @@ export interface RollupsContractsOptions {
      * 3.0.0-alpha.8 or later.
      */
     deployments?: TarballSource;
+    /**
+     * URL of the rollups-contracts anvil devnet tarball, i.e.
+     * `cartesi-rollups-contracts-<version>-anvil-<anvilVersion>.tar.gz`, whose
+     * deployment addresses cover the devnet (chain 31337). Optionally with an
+     * expected SHA-256 hash for integrity verification.
+     * Defaults to `DEFAULT_ANVIL`, the tarball of the rollups-contracts
+     * `DEFAULT_VERSION` GitHub release. Pass `false` to generate only the
+     * addresses of the chains the `deployments` tarball covers.
+     */
+    anvil?: TarballSource | false;
     /**
      * Contracts (by name or regular expression) to include, deployed or not.
      * When omitted, all contracts in the artifacts are included.
@@ -138,6 +166,49 @@ const readDeployments = (
     return deployments;
 };
 
+/**
+ * Deployments named after the role they play rather than after the contract
+ * they are an instance of, mapped to the artifact holding their ABI. The
+ * devnet USD withdrawal output builder is deployed through the
+ * `UsdWithdrawalOutputBuilderFactory`, and the release publishes no artifact
+ * for the concrete contract, only for the interface it implements.
+ */
+const artifactAliases: Record<string, string> = {
+    TestUsdWithdrawalOutputBuilder: "IUsdWithdrawalOutputBuilder",
+};
+
+/**
+ * Give each aliased deployment the artifact of the interface it implements,
+ * so that it is generated with an ABI like any other deployed contract.
+ */
+const applyArtifactAliases = (
+    artifacts: Map<string, string>,
+    deployments: Map<string, Record<number, Address>>,
+): void => {
+    for (const [name, artifactName] of Object.entries(artifactAliases)) {
+        const artifactPath = artifacts.get(artifactName);
+        if (deployments.has(name) && !artifacts.has(name) && artifactPath) {
+            artifacts.set(name, artifactPath);
+        }
+    }
+};
+
+/**
+ * Merge deployment maps of disjoint chains, as read from the deployment
+ * addresses and the anvil devnet tarballs.
+ */
+const mergeDeployments = (
+    maps: Map<string, Record<number, Address>>[],
+): Map<string, Record<number, Address>> => {
+    const merged = new Map<string, Record<number, Address>>();
+    for (const map of maps) {
+        for (const [name, addresses] of map) {
+            merged.set(name, { ...merged.get(name), ...addresses });
+        }
+    }
+    return merged;
+};
+
 const readAbi = (artifactPath: string, name: string): Abi => {
     let artifact: { abi: Abi };
     try {
@@ -188,6 +259,7 @@ export const rollupsContracts = (
     const {
         artifacts: artifactsSource = DEFAULT_ARTIFACTS,
         deployments: deploymentsSource = DEFAULT_DEPLOYMENTS,
+        anvil: anvilSource = DEFAULT_ANVIL,
         include,
         exclude,
     } = options;
@@ -196,9 +268,10 @@ export const rollupsContracts = (
     return {
         name: "rollupsContracts",
         contracts: async () => {
-            const [artifactsDir, deploymentsDir] = await Promise.all([
+            const [artifactsDir, deploymentsDir, anvilDir] = await Promise.all([
                 downloadAndExtract(artifactsSource),
                 downloadAndExtract(deploymentsSource),
+                anvilSource ? downloadAndExtract(anvilSource) : undefined,
             ]);
 
             try {
@@ -212,9 +285,18 @@ export const rollupsContracts = (
                 const artifacts = findArtifacts(
                     resolveRoot(artifactsDir, "out"),
                 );
-                const deployments = readDeployments(
-                    resolveRoot(deploymentsDir, "deployments"),
-                );
+                const deployments = mergeDeployments([
+                    readDeployments(resolveRoot(deploymentsDir, "deployments")),
+                    ...(anvilDir
+                        ? [
+                              readDeployments(
+                                  resolveRoot(anvilDir, "deployments"),
+                              ),
+                          ]
+                        : []),
+                ]);
+
+                applyArtifactAliases(artifacts, deployments);
 
                 for (const name of deployments.keys()) {
                     if (included(name) && !artifacts.has(name)) {
@@ -254,6 +336,9 @@ export const rollupsContracts = (
                 // read out of them; the tarballs they came from stay cached
                 fs.rmSync(artifactsDir, { recursive: true, force: true });
                 fs.rmSync(deploymentsDir, { recursive: true, force: true });
+                if (anvilDir) {
+                    fs.rmSync(anvilDir, { recursive: true, force: true });
+                }
             }
         },
     };
