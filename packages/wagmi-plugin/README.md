@@ -1,6 +1,6 @@
 # Cartesi wagmi CLI plugin
 
-A [wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates code for the [Cartesi Rollups smart contracts](https://github.com/cartesi/rollups-contracts) straight from an official release: ABIs come from the foundry build artifacts tarball, and deployment addresses from the deployment addresses tarball.
+A [wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates code for the [Cartesi Rollups smart contracts](https://github.com/cartesi/rollups-contracts) straight from an official release: ABIs come from the foundry build artifacts tarball, and deployment addresses from the deployment addresses and anvil devnet tarballs.
 
 ## Installation
 
@@ -12,7 +12,7 @@ While in pre-release, the plugin is published under the `alpha` npm tag. The `@a
 
 ## Usage
 
-Add the plugin to your `wagmi.config.ts`. By default it uses the tarballs of the rollups-contracts `v3.0.0-alpha.8` GitHub release, verified against known SHA-256 hashes.
+Add the plugin to your `wagmi.config.ts`. By default it uses the tarballs of the rollups-contracts `v3.0.0-alpha.9` GitHub release, verified against known SHA-256 hashes.
 
 ```ts
 import { rollupsContracts } from "@cartesi/wagmi-plugin";
@@ -35,17 +35,17 @@ pnpm wagmi generate
 Point `artifacts` and `deployments` at the tarballs of another rollups-contracts release, optionally with an expected SHA-256 hash for integrity verification:
 
 ```ts
-const version = "3.0.0-alpha.8";
+const version = "3.0.0-alpha.9";
 const releaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${version}`;
 
 rollupsContracts({
     artifacts: {
         url: `${releaseUrl}/cartesi-rollups-contracts-${version}-artifacts.tar.gz`,
-        sha256: "b52154c47835d9fdd7a9899c4b52de3ef6b2868fb60b05669b9f42857c1f050c",
+        sha256: "c2ddbdf04878bc6b4ca0b6ee3fa5503908acb8d18e010c926192381f487d6da4",
     },
     deployments: {
         url: `${releaseUrl}/cartesi-rollups-contracts-${version}-deployment-addresses.tar.gz`,
-        sha256: "e9dce37e6ee827a56df1ae4819189475f67e5f5eb50de58677e2ea24da9ce343",
+        sha256: "b4064848c0bcf399589274094bb1e663e0b3326200fdf5174b0f572ab8085fc5",
     },
 });
 ```
@@ -82,5 +82,6 @@ rollupsContracts({
 
 - Tarballs are downloaded on every run, verified against their expected hash, and extracted to a temporary directory that is removed once the contracts have been read. Codegen therefore needs network access.
 - Deployed contracts get their address on every chain: a single address when it is identical across chains, or a per-chain record otherwise.
+- Addresses cover the supported livenets and the devnet (chain 31337), the latter read from the anvil tarball, which is also where the devnet-only test tokens come from. Set `anvil: false` to generate livenet addresses only.
 
 See the [documentation](https://cartesi.github.io/rollups-ts/) for more details.
