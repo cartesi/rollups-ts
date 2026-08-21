@@ -1,0 +1,98 @@
+name: license
+# Dependency licence gate: resolves every coordinate pinned in pnpm-lock.yaml
+# at its locked version — not the registry's `latest` — and enforces
+# .license-policy.json.
+on:
+    pull_request:
+        paths:
+            - pnpm-lock.yaml
+            - package.json
+            - packages/*/package.json
+            - apps/*/package.json
+            - .license-policy.json
+            - scripts/audit-licenses.mjs
+            - scripts/render-license-report.mjs
+            - .github/workflows/license-check.yaml
+    push:
+        branches:
+            - main
+            - release/*
+            - prerelease/*
+    release:
+        types:
+            - published
+    # Weekly, to catch a dependency relicensed at an unchanged pin.
+    schedule:
+        - cron: "0 6 * * 1"
+    workflow_dispatch:
+permissions:
+    contents: read
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    license-check:
+        name: license check
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  # @cartesi/rollup redistributes libcmt from this submodule
+                  submodules: recursive
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+            - name: Setup Node.js 24
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 24.x
+                  cache: "pnpm"
+
+            # --ignore-scripts skips the native build, which the gate never needs.
+            # The install is what lets most licences be read off disk.
+            - name: Install Dependencies
+              run: pnpm install --frozen-lockfile --ignore-scripts
+
+            # Reads licences from node_modules/.pnpm, fetching only the ~180
+            # optional deps pnpm skips as platform-incompatible. Anything else
+            # missing is a broken install and fails (exit 2) rather than being
+            # resolved from the registry.
+            - name: Check licenses
+              run: node scripts/audit-licenses.mjs --check --format=github
+
+            # Full evidence behind whatever the gate flagged.
+            - name: Upload license data
+              if: always()
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+              with:
+                  name: license-data-${{ github.sha }}
+                  path: rollups-ts-license-data.json
+                  retention-days: 14
+
+            # Browsable version of the same data.
+            - name: Render license report
+              if: always()
+              run: |
+                  node scripts/render-license-report.mjs \
+                      --rev "${{ github.run_number }}" \
+                      --commit "${{ github.sha }}"
+
+            - name: Upload license report
+              if: always()
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+              with:
+                  name: license-report-${{ github.sha }}
+                  path: rollups-ts-license-report.html
+                  retention-days: 14
+# Exit codes from audit-licenses.mjs --check:
+#   0  clean
+#   1  policy violations      -> a real finding; fix the dependency or the policy
+#   2  unresolved coordinates -> tooling problem, NOT a licence problem
+#   3  bad or missing policy file
+# The job fails on any non-zero. The codes matter for anything downstream of
+# this workflow: reporting a broken install as "licence violation" is how teams
+# learn to ignore a gate.
