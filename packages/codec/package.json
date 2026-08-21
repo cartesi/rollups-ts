@@ -2,6 +2,7 @@
     "name": "@cartesi/codec",
     "description": "Codec for Cartesi Rollups inputs and outputs",
     "version": "1.0.0-alpha.2",
+    "license": "Apache-2.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/cartesi/rollups-ts"
@@ -45,6 +46,8 @@
         }
     },
     "files": [
+        "LICENSE",
+        "NOTICE",
         "dist/**"
     ],
     "peerDependencies": {

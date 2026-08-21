@@ -2,6 +2,7 @@
     "name": "@cartesi/client",
     "description": "Cartesi viem extension",
     "version": "2.0.0-alpha.35",
+    "license": "Apache-2.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/cartesi/rollups-ts"
@@ -69,6 +70,8 @@
         }
     },
     "files": [
+        "LICENSE",
+        "NOTICE",
         "dist/**"
     ],
     "peerDependencies": {

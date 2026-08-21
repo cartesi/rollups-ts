@@ -2,6 +2,7 @@
     "name": "@cartesi/wagmi-plugin",
     "description": "wagmi CLI plugin for Cartesi Rollups contracts",
     "version": "1.0.0-alpha.4",
+    "license": "Apache-2.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/cartesi/rollups-ts"
@@ -40,6 +41,8 @@
         }
     },
     "files": [
+        "LICENSE",
+        "NOTICE",
         "dist/**"
     ],
     "scripts": {
