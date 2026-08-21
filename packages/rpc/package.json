@@ -1,6 +1,7 @@
 {
     "name": "@cartesi/rpc",
     "version": "2.0.0-alpha.25",
+    "license": "Apache-2.0",
     "description": "Cartesi JSON-RPC Client",
     "repository": {
         "type": "git",
@@ -21,6 +22,8 @@
         }
     },
     "files": [
+        "LICENSE",
+        "NOTICE",
         "dist/**"
     ],
     "scripts": {

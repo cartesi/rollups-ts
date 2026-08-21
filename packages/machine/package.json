@@ -32,6 +32,8 @@
         "./package.json": "./package.json"
     },
     "files": [
+        "LICENSE",
+        "NOTICE",
         "binding.gyp",
         "dist/**",
         "native/addon.cc",
