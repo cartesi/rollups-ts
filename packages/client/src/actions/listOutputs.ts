@@ -5,35 +5,23 @@ import { outputsAbi } from "../rollups.js";
 import type {
     ListOutputsParams,
     ListOutputsReturnType,
+    NonEmptyArray,
     OutputType,
 } from "../types/actions.js";
 import { outputConverter, paginationConverter } from "../types/converter.js";
 
-const toOutputType = (outputType?: OutputType): Hex | undefined => {
-    switch (outputType) {
-        case "Notice":
-            return toFunctionSelector(
-                getAbiItem({
-                    abi: outputsAbi,
-                    name: "Notice",
-                }),
-            );
-        case "Voucher":
-            return toFunctionSelector(
-                getAbiItem({
-                    abi: outputsAbi,
-                    name: "Voucher",
-                }),
-            );
-        case "DelegateCallVoucher":
-            return toFunctionSelector(
-                getAbiItem({
-                    abi: outputsAbi,
-                    name: "DelegateCallVoucher",
-                }),
-            );
-    }
-    return undefined;
+const toOutputSelector = (outputType: OutputType): Hex =>
+    toFunctionSelector(getAbiItem({ abi: outputsAbi, name: outputType }));
+
+const toOutputType = (
+    outputType?: OutputType | NonEmptyArray<OutputType>,
+): Hex | NonEmptyArray<Hex> | undefined => {
+    if (outputType === undefined) return undefined;
+    if (typeof outputType === "string") return toOutputSelector(outputType);
+    // mapped through the head separately so the result stays a non-empty
+    // array for the type checker, which `Array.prototype.map` would widen
+    const [first, ...rest] = outputType;
+    return [toOutputSelector(first), ...rest.map(toOutputSelector)];
 };
 
 export const listOutputs = async (
@@ -55,6 +43,11 @@ export const listOutputs = async (
                     : undefined,
             output_type,
             voucher_address: params.voucherAddress,
+            from:
+                params.from !== undefined
+                    ? numberToHex(params.from)
+                    : undefined,
+            to: params.to !== undefined ? numberToHex(params.to) : undefined,
         },
     });
     return {

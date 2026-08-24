@@ -1,12 +1,12 @@
-# useMatchAdvanced
+# useMatchAdvance
 
 ## Usage
 
 ```tsx twoslash
-import { useMatchAdvanced } from "@cartesi/react";
+import { useMatchAdvance } from "@cartesi/react";
 
 function Example() {
-  const { data, isLoading } = useMatchAdvanced({
+  const { data, isLoading } = useMatchAdvance({
     application: "0x...",
     epochIndex: 1n,
     tournamentAddress: "0x...",
@@ -24,6 +24,6 @@ The `data` is an `MatchAdvanced`:
 ```ts twoslash
 import {
   type MatchAdvanced,
-  type GetMatchAdvancedReturnType,
+  type GetMatchAdvanceReturnType,
 } from "@cartesi/client";
 ```

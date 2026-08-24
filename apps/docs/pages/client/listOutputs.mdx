@@ -14,7 +14,7 @@ const { data, pagination } = await publicClientL2.listOutputs({
   application: "0x...",
   limit: 10,
   offset: 0,
-  // epochIndex, inputIndex, outputType, voucherAddress (optional)
+  // epochIndex, inputIndex, outputType, voucherAddress, from, to, executed (optional)
 });
 ```
 
@@ -26,13 +26,44 @@ import type { ListOutputsParams } from "@cartesi/client";
 //   application: Address | string;
 //   epochIndex?: bigint;
 //   inputIndex?: bigint;
-//   outputType?: OutputType;
+//   outputType?: OutputType | NonEmptyArray<OutputType>;
 //   voucherAddress?: Address;
+//   from?: bigint;
+//   to?: bigint;
+//   executed?: boolean;
 //   limit?: number;
 //   offset?: number;
 //   descending?: boolean;
 // }
 ```
+
+`outputType` accepts a list, and `executed` filters by execution status, so the
+outputs still waiting to be executed can be fetched in one call. The node
+rejects an empty list with invalid params, so the list is typed as a non-empty
+array — `outputType: []` is a compile error rather than a failed request:
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+// ---cut---
+const { data: pending } = await publicClientL2.listOutputs({
+  application: "0x...",
+  outputType: ["Voucher", "DelegateCallVoucher"],
+  executed: false,
+});
+```
+
+::::warning
+Executions happen out of index order — an old voucher can be executed long after
+newer ones — so a resume cursor keyed on the output index over this filter
+silently skips those late executions. Poll
+[`getExecutedOutputCount`](/client/getExecutedOutputCount) for change detection
+instead.
+::::
 
 ## Return Type
 

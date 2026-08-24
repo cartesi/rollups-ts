@@ -15,6 +15,7 @@ export const chainIdOptions = (client: CartesiPublicClient) =>
         queryFn: () => client.getChainId(),
     });
 
+/** @deprecated use `useNodeInfo` instead. */
 export const useChainId = (
     params?: Omit<ReturnType<typeof chainIdOptions>, "queryKey" | "queryFn">,
 ) => {

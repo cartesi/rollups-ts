@@ -1,4 +1,4 @@
-import type { Client, Transport } from "viem";
+import { type Client, type Transport, numberToHex } from "viem";
 import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import type {
     ListEpochsParams,
@@ -12,7 +12,14 @@ export const listEpochs = async (
 ): Promise<ListEpochsReturnType> => {
     const epochs = await client.request({
         method: "cartesi_listEpochs",
-        params,
+        params: {
+            ...params,
+            from:
+                params.from !== undefined
+                    ? numberToHex(params.from)
+                    : undefined,
+            to: params.to !== undefined ? numberToHex(params.to) : undefined,
+        },
     });
     return {
         data: epochs.data.map(epochConverter),

@@ -1,17 +1,17 @@
-import { getAddress, numberToHex, type Client, type Transport } from "viem";
+import { type Client, type Transport, getAddress, numberToHex } from "viem";
 import type { PublicCartesiRpcSchema } from "../decorators/publicL2.js";
 import type {
-    GetMatchAdvancedParams,
-    GetMatchAdvancedReturnType,
+    GetMatchAdvanceParams,
+    GetMatchAdvanceReturnType,
 } from "../types/actions.js";
 import { matchAdvancedConverter } from "../types/converter.js";
 
-export const getMatchAdvanced = async (
+export const getMatchAdvance = async (
     client: Client<Transport, undefined, undefined, PublicCartesiRpcSchema>,
-    params: GetMatchAdvancedParams,
-): Promise<GetMatchAdvancedReturnType> => {
+    params: GetMatchAdvanceParams,
+): Promise<GetMatchAdvanceReturnType> => {
     const { data: matchAdvanced } = await client.request({
-        method: "cartesi_getMatchAdvanced",
+        method: "cartesi_getMatchAdvance",
         params: {
             application: params.application,
             epoch_index: numberToHex(params.epochIndex),

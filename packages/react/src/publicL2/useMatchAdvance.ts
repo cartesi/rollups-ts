@@ -1,27 +1,27 @@
 import type {
     CartesiPublicClient,
-    GetMatchAdvancedParams,
+    GetMatchAdvanceParams,
 } from "@cartesi/client";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import type { Address, Hash } from "viem";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";
 
-export const matchAdvancedQueryKey = (
+export const matchAdvanceQueryKey = (
     client: CartesiPublicClient,
-    params: Partial<GetMatchAdvancedParams>,
+    params: Partial<GetMatchAdvanceParams>,
 ) => [
     serverUrl(client),
-    "matchAdvanced",
+    "matchAdvance",
     { ...params, epochIndex: params.epochIndex?.toString() },
 ];
 
-export const matchAdvancedOptions = (
+export const matchAdvanceOptions = (
     client: CartesiPublicClient,
-    params: Partial<GetMatchAdvancedParams>,
+    params: Partial<GetMatchAdvanceParams>,
 ) =>
     queryOptions({
-        queryKey: matchAdvancedQueryKey(client, params),
+        queryKey: matchAdvanceQueryKey(client, params),
         queryFn:
             params.application !== undefined &&
             params.epochIndex !== undefined &&
@@ -29,7 +29,7 @@ export const matchAdvancedOptions = (
             params.idHash !== undefined &&
             params.parent !== undefined
                 ? () =>
-                      client.getMatchAdvanced({
+                      client.getMatchAdvance({
                           application: params.application as string,
                           epochIndex: params.epochIndex as bigint,
                           tournamentAddress:
@@ -40,13 +40,13 @@ export const matchAdvancedOptions = (
                 : skipToken,
     });
 
-export const useMatchAdvanced = (
-    params: Partial<GetMatchAdvancedParams> &
-        Omit<ReturnType<typeof matchAdvancedOptions>, "queryKey" | "queryFn">,
+export const useMatchAdvance = (
+    params: Partial<GetMatchAdvanceParams> &
+        Omit<ReturnType<typeof matchAdvanceOptions>, "queryKey" | "queryFn">,
 ) => {
     const client = useCartesiClient();
     return useQuery({
-        ...matchAdvancedOptions(client, params),
+        ...matchAdvanceOptions(client, params),
         ...params,
     });
 };

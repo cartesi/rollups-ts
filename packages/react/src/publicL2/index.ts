@@ -22,7 +22,17 @@ export {
     useCommitments,
 } from "./useCommitments.js";
 export { epochOptions, epochQueryKey, useEpoch } from "./useEpoch.js";
+export {
+    epochByVirtualIndexOptions,
+    epochByVirtualIndexQueryKey,
+    useEpochByVirtualIndex,
+} from "./useEpochByVirtualIndex.js";
 export { epochsOptions, epochsQueryKey, useEpochs } from "./useEpochs.js";
+export {
+    executedOutputCountOptions,
+    executedOutputCountQueryKey,
+    useExecutedOutputCount,
+} from "./useExecutedOutputCount.js";
 export { inputOptions, inputQueryKey, useInput } from "./useInput.js";
 export { inputsOptions, inputsQueryKey, useInputs } from "./useInputs.js";
 export {
@@ -32,10 +42,10 @@ export {
 } from "./useLastAcceptedEpochIndex.js";
 export { matchOptions, matchQueryKey, useMatch } from "./useMatch.js";
 export {
-    matchAdvancedOptions,
-    matchAdvancedQueryKey,
-    useMatchAdvanced,
-} from "./useMatchAdvanced.js";
+    matchAdvanceOptions,
+    matchAdvanceQueryKey,
+    useMatchAdvance,
+} from "./useMatchAdvance.js";
 export {
     matchAdvancesOptions,
     matchAdvancesQueryKey,
@@ -43,12 +53,22 @@ export {
 } from "./useMatchAdvances.js";
 export { matchesOptions, matchesQueryKey, useMatches } from "./useMatches.js";
 export {
+    nodeInfoOptions,
+    nodeInfoQueryKey,
+    useNodeInfo,
+} from "./useNodeInfo.js";
+export {
     nodeVersionOptions,
     nodeVersionQueryKey,
     useNodeVersion,
 } from "./useNodeVersion.js";
 export { outputOptions, outputQueryKey, useOutput } from "./useOutput.js";
 export { outputsOptions, outputsQueryKey, useOutputs } from "./useOutputs.js";
+export {
+    pendingExecutableOutputCountOptions,
+    pendingExecutableOutputCountQueryKey,
+    usePendingExecutableOutputCount,
+} from "./usePendingExecutableOutputCount.js";
 export {
     processedInputCountOptions,
     processedInputCountQueryKey,

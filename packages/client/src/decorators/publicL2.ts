@@ -4,19 +4,26 @@ import type {
     GetChainIdReturnType as GetChainIdReturnTypeRpc,
     GetCommitmentParams as GetCommitmentParamsRpc,
     GetCommitmentReturnType as GetCommitmentReturnTypeRpc,
+    GetEpochByVirtualIndexParams as GetEpochByVirtualIndexParamsRpc,
+    GetEpochByVirtualIndexReturnType as GetEpochByVirtualIndexReturnTypeRpc,
     GetEpochParams as GetEpochParamsRpc,
     GetEpochReturnType as GetEpochReturnTypeRpc,
+    GetExecutedOutputCountParams as GetExecutedOutputCountParamsRpc,
+    GetExecutedOutputCountReturnType as GetExecutedOutputCountReturnTypeRpc,
     GetInputParams as GetInputParamsRpc,
     GetInputReturnType as GetInputReturnTypeRpc,
     GetLastAcceptedEpochIndexParams as GetLastAcceptedEpochIndexParamsRpc,
     GetLastAcceptedEpochIndexReturnType as GetLastAcceptedEpochIndexReturnTypeRpc,
-    GetMatchAdvancedParams as GetMatchAdvancedParamsRpc,
-    GetMatchAdvancedReturnType as GetMatchAdvancedReturnTypeRpc,
+    GetMatchAdvanceParams as GetMatchAdvanceParamsRpc,
+    GetMatchAdvanceReturnType as GetMatchAdvanceReturnTypeRpc,
     GetMatchParams as GetMatchParamsRpc,
     GetMatchReturnType as GetMatchReturnTypeRpc,
+    GetNodeInfoReturnType as GetNodeInfoReturnTypeRpc,
     GetNodeVersionReturnType as GetNodeVersionReturnTypeRpc,
     GetOutputParams as GetOutputParamsRpc,
     GetOutputReturnType as GetOutputReturnTypeRpc,
+    GetPendingExecutableOutputCountParams as GetPendingExecutableOutputCountParamsRpc,
+    GetPendingExecutableOutputCountReturnType as GetPendingExecutableOutputCountReturnTypeRpc,
     GetProcessedInputCountParams as GetProcessedInputCountParamsRpc,
     GetProcessedInputCountReturnType as GetProcessedInputCountReturnTypeRpc,
     GetReportParams as GetReportParamsRpc,
@@ -53,12 +60,16 @@ import {
     getChainId,
     getCommitment,
     getEpoch,
+    getEpochByVirtualIndex,
+    getExecutedOutputCount,
     getInput,
     getLastAcceptedEpochIndex,
     getMatch,
-    getMatchAdvanced,
+    getMatchAdvance,
+    getNodeInfo,
     getNodeVersion,
     getOutput,
+    getPendingExecutableOutputCount,
     getProcessedInputCount,
     getReport,
     getTournament,
@@ -81,19 +92,26 @@ import type {
     GetChainIdReturnType,
     GetCommitmentParams,
     GetCommitmentReturnType,
+    GetEpochByVirtualIndexParams,
+    GetEpochByVirtualIndexReturnType,
     GetEpochParams,
     GetEpochReturnType,
+    GetExecutedOutputCountParams,
+    GetExecutedOutputCountReturnType,
     GetInputParams,
     GetInputReturnType,
     GetLastAcceptedEpochIndexParams,
     GetLastAcceptedEpochIndexReturnType,
-    GetMatchAdvancedParams,
-    GetMatchAdvancedReturnType,
+    GetMatchAdvanceParams,
+    GetMatchAdvanceReturnType,
     GetMatchParams,
     GetMatchReturnType,
+    GetNodeInfoReturnType,
     GetNodeVersionReturnType,
     GetOutputParams,
     GetOutputReturnType,
+    GetPendingExecutableOutputCountParams,
+    GetPendingExecutableOutputCountReturnType,
     GetProcessedInputCountParams,
     GetProcessedInputCountReturnType,
     GetReportParams,
@@ -148,6 +166,11 @@ export type PublicCartesiRpcSchema = [
         ReturnType: GetEpochReturnTypeRpc;
     },
     {
+        Method: "cartesi_getEpochByVirtualIndex";
+        Parameters: GetEpochByVirtualIndexParamsRpc;
+        ReturnType: GetEpochByVirtualIndexReturnTypeRpc;
+    },
+    {
         Method: "cartesi_listTournaments";
         Parameters: ListTournamentsParamsRpc;
         ReturnType: ListTournamentsReturnTypeRpc;
@@ -183,9 +206,9 @@ export type PublicCartesiRpcSchema = [
         ReturnType: ListMatchAdvancesReturnTypeRpc;
     },
     {
-        Method: "cartesi_getMatchAdvanced";
-        Parameters: GetMatchAdvancedParamsRpc;
-        ReturnType: GetMatchAdvancedReturnTypeRpc;
+        Method: "cartesi_getMatchAdvance";
+        Parameters: GetMatchAdvanceParamsRpc;
+        ReturnType: GetMatchAdvanceReturnTypeRpc;
     },
     {
         Method: "cartesi_getLastAcceptedEpochIndex";
@@ -208,6 +231,16 @@ export type PublicCartesiRpcSchema = [
         ReturnType: GetProcessedInputCountReturnTypeRpc;
     },
     {
+        Method: "cartesi_getExecutedOutputCount";
+        Parameters: GetExecutedOutputCountParamsRpc;
+        ReturnType: GetExecutedOutputCountReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_getPendingExecutableOutputCount";
+        Parameters: GetPendingExecutableOutputCountParamsRpc;
+        ReturnType: GetPendingExecutableOutputCountReturnTypeRpc;
+    },
+    {
         Method: "cartesi_listOutputs";
         Parameters: ListOutputsParamsRpc;
         ReturnType: ListOutputsReturnTypeRpc;
@@ -226,6 +259,10 @@ export type PublicCartesiRpcSchema = [
         Method: "cartesi_getReport";
         Parameters: GetReportParamsRpc;
         ReturnType: GetReportReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_getNodeInfo";
+        ReturnType: GetNodeInfoReturnTypeRpc;
     },
     {
         Method: "cartesi_getChainId";
@@ -271,8 +308,13 @@ export type PublicActionsL2 = {
     getApplication: (
         params: GetApplicationParams,
     ) => Promise<GetApplicationReturnType>;
+    /** @deprecated use `getNodeInfo` instead. */
     getChainId: () => Promise<GetChainIdReturnType>;
+    getNodeInfo: () => Promise<GetNodeInfoReturnType>;
     getEpoch: (params: GetEpochParams) => Promise<GetEpochReturnType>;
+    getEpochByVirtualIndex: (
+        params: GetEpochByVirtualIndexParams,
+    ) => Promise<GetEpochByVirtualIndexReturnType>;
     getTournament: (
         params: GetTournamentParams,
     ) => Promise<GetTournamentReturnType>;
@@ -280,9 +322,10 @@ export type PublicActionsL2 = {
         params: GetCommitmentParams,
     ) => Promise<GetCommitmentReturnType>;
     getMatch: (params: GetMatchParams) => Promise<GetMatchReturnType>;
-    getMatchAdvanced: (
-        params: GetMatchAdvancedParams,
-    ) => Promise<GetMatchAdvancedReturnType>;
+    getMatchAdvance: (
+        params: GetMatchAdvanceParams,
+    ) => Promise<GetMatchAdvanceReturnType>;
+    /** @deprecated use `getNodeInfo` instead. */
     getNodeVersion: () => Promise<GetNodeVersionReturnType>;
     getInput: (params: GetInputParams) => Promise<GetInputReturnType>;
     getOutput: (params: GetOutputParams) => Promise<GetOutputReturnType>;
@@ -294,6 +337,12 @@ export type PublicActionsL2 = {
     getProcessedInputCount: (
         params: GetProcessedInputCountParams,
     ) => Promise<GetProcessedInputCountReturnType>;
+    getExecutedOutputCount: (
+        params: GetExecutedOutputCountParams,
+    ) => Promise<GetExecutedOutputCountReturnType>;
+    getPendingExecutableOutputCount: (
+        params: GetPendingExecutableOutputCountParams,
+    ) => Promise<GetPendingExecutableOutputCountReturnType>;
     getLastAcceptedEpochIndex: (
         params: GetLastAcceptedEpochIndexParams,
     ) => Promise<GetLastAcceptedEpochIndexReturnType>;
@@ -316,6 +365,8 @@ export const publicActionsL2 =
         getApplication: (params) => getApplication(client, params),
         listEpochs: (params) => listEpochs(client, params),
         getEpoch: (params) => getEpoch(client, params),
+        getEpochByVirtualIndex: (params) =>
+            getEpochByVirtualIndex(client, params),
         listTournaments: (params) => listTournaments(client, params),
         getTournament: (params) => getTournament(client, params),
         listCommitments: (params) => listCommitments(client, params),
@@ -323,7 +374,8 @@ export const publicActionsL2 =
         listMatches: (params) => listMatches(client, params),
         getMatch: (params) => getMatch(client, params),
         listMatchAdvances: (params) => listMatchAdvances(client, params),
-        getMatchAdvanced: (params) => getMatchAdvanced(client, params),
+        getMatchAdvance: (params) => getMatchAdvance(client, params),
+        getNodeInfo: () => getNodeInfo(client),
         getChainId: () => getChainId(client),
         getNodeVersion: () => getNodeVersion(client),
         listInputs: (params) => listInputs(client, params),
@@ -334,6 +386,10 @@ export const publicActionsL2 =
         getReport: (params) => getReport(client, params),
         getProcessedInputCount: (params) =>
             getProcessedInputCount(client, params),
+        getExecutedOutputCount: (params) =>
+            getExecutedOutputCount(client, params),
+        getPendingExecutableOutputCount: (params) =>
+            getPendingExecutableOutputCount(client, params),
         getLastAcceptedEpochIndex: (params) =>
             getLastAcceptedEpochIndex(client, params),
         waitForInput: (params) => waitForInput(client, params),

@@ -1,0 +1,23 @@
+# cartesi_getEpochByVirtualIndex
+
+Fetches a single epoch by its virtual index, which is the epoch's dense
+insertion rank — 0, 1, 2, … with no gaps by construction. Use it to walk the
+epochs of an application contiguously, where the epoch index itself can skip
+values.
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data: epoch } = await client.request("cartesi_getEpochByVirtualIndex", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    virtual_index: "0x2A",
+});
+```
+
+## Return Type
+
+```ts twoslash
+import { type Epoch, type GetEpochByVirtualIndexReturnType } from "@cartesi/rpc";
+```

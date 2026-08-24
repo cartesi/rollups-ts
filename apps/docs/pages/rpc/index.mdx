@@ -11,7 +11,7 @@ cartesi_getEpoch
 cartesi_getTournament
 cartesi_getCommitment
 cartesi_getMatch
-cartesi_getMatchAdvanced
+cartesi_getMatchAdvance
 cartesi_getInput
 cartesi_getOutput
 cartesi_getReport
@@ -73,13 +73,69 @@ Reports are pieces of information with no attached proof.
 
 ## State changes
 
-Two additional methods are provided by the API that are useful for identifying state changes: `cartesi_getLastAcceptedEpochIndex` and `cartesi_getProcessedInputCount`.
+Additional methods are provided by the API that are useful for identifying state changes: [`cartesi_getLastAcceptedEpochIndex`](/rpc/cartesi_getLastAcceptedEpochIndex), [`cartesi_getProcessedInputCount`](/rpc/cartesi_getProcessedInputCount) and [`cartesi_getExecutedOutputCount`](/rpc/cartesi_getExecutedOutputCount).
 These can be used for example by polling mechanisms to detect application state changes, to then take further actions.
+They are all monotone, so an unchanged value means nothing new happened.
+
+[`cartesi_getPendingExecutableOutputCount`](/rpc/cartesi_getPendingExecutableOutputCount) is *not* one of them: it is a gauge that grows with new vouchers and shrinks with executions, so it can return to a previous value while work happened in between.
+
+## Node information
+
+[`cartesi_getNodeInfo`](/rpc/cartesi_getNodeInfo) returns the chain ID, the semantic node version and the blockchain block tag the node reads the base layer at.
+It replaces `cartesi_getChainId` and `cartesi_getNodeVersion`, which are both deprecated.
+
+## Errors
+
+Every method documents the errors it can return, and clients can dispatch on the error code.
+
+| Code | Meaning |
+| --- | --- |
+| `-32700` | Parse error (JSON-RPC 2.0) |
+| `-32600` | Invalid request (JSON-RPC 2.0) |
+| `-32601` | Method not found (JSON-RPC 2.0) |
+| `-32602` | Invalid params (JSON-RPC 2.0) |
+| `-32603` | Internal error — a node-side failure to alarm on or back off from |
+| `-32040` | Invalid batch: empty, or larger than 100 entries |
+| `-32070` | The request was not processed within the node's time limit |
+| `-31001` | Resource not found in the method's scope |
+| `-31002` | The application identifier is unknown to this node |
+| `-31003` | The response-size budget was exhausted |
+| `-31004` | The batch exceeded the list-work budget |
+
+`-32603` is never used for missing resources, and `-31001` on a forward-looking resource (the next epoch, input or output index) is the documented "not created yet" signal, so it is safe to poll.
+
+The codes are exported as the `errorCodes` object, alongside the batch limits:
+
+```ts twoslash
+import {
+    errorCodes,
+    type ErrorCode,
+    maxBatchSize,
+    maxBatchListWork,
+    defaultListLimit,
+} from "@cartesi/rpc";
+```
+
+## Batch requests
+
+The node accepts JSON-RPC 2.0 batch arrays of up to `maxBatchSize` (100) entries.
+Entries execute sequentially and responses come back in request order, with every entry answered — including entries without an `id`, which are answered with `id: null` rather than suppressed as the specification would have it.
+Two budgets apply beyond the entry count.
+
+A 10 MB response-size budget applies per HTTP request, cumulatively across a batch. An entry whose response would exceed the remaining budget is discarded without consuming it and gets `-31003`; the budget is then *closed*, so every later entry gets `-31003` too, even one that would still have fit. Affected entries can be retried individually or in a smaller batch.
+
+A list-work budget bounds a batch's row-fetch work to that of one maximal list request. Before dispatching anything, the node sums the effective `limit` of every list entry — counting an omitted or zero limit as `defaultListLimit` (50) and capping each entry at `maxBatchListWork` (10 000). A total above `maxBatchListWork` rejects the whole batch with a single `-31004` and dispatches nothing. `-31004` is a batch-level error raised before dispatch, so it is not attributed to any one method.
+
+The budget bounds row-fetch work only. Neither the `COUNT` queries behind `pagination` nor offset traversal is metered, so a deep `offset` over a broad filter can still make the database scan and discard rows before the requested page. Broad list filters are worth avoiding regardless. `offset` itself is bounded to a signed 64-bit integer.
+
+Because execution is sequential and bounded by the node's time limit, heavy list calls are better kept outside large batches.
 
 ## Pagination
 
 All the list methods, [cartesi_listApplications](/rpc/cartesi_listApplications), [cartesi_listEpochs](/rpc/cartesi_listEpochs), [cartesi_listInputs](/rpc/cartesi_listInputs), [cartesi_listOutputs](/rpc/cartesi_listOutputs) and [cartesi_listReports](/rpc/cartesi_listReports), are paginated.
 They all receive a `limit` and an `offset` number param in the request, and return a `pagination` object in the return, in addition to a `data` array of entity objects.
+
+The methods listing entities indexed by a sequential number — epochs, inputs, outputs and reports — additionally accept `from` and `to`, an inclusive range on that index.
 
 ```ts
 type Pagination = {

@@ -14,6 +14,8 @@ export const listInputs = async (
         application,
         descending,
         epochIndex,
+        from,
+        to,
         transactionHash: transaction_hash,
         limit,
         offset,
@@ -30,6 +32,8 @@ export const listInputs = async (
             transaction_hash,
             epoch_index:
                 epochIndex !== undefined ? numberToHex(epochIndex) : undefined,
+            from: from !== undefined ? numberToHex(from) : undefined,
+            to: to !== undefined ? numberToHex(to) : undefined,
         },
     });
     return {

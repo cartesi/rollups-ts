@@ -15,30 +15,38 @@ import {
     commitmentQueryKey,
     commitmentsOptions,
     commitmentsQueryKey,
+    epochByVirtualIndexOptions,
+    epochByVirtualIndexQueryKey,
     epochOptions,
     epochQueryKey,
     epochsOptions,
     epochsQueryKey,
+    executedOutputCountOptions,
+    executedOutputCountQueryKey,
     inputOptions,
     inputQueryKey,
     inputsOptions,
     inputsQueryKey,
     lastAcceptedEpochIndexOptions,
     lastAcceptedEpochIndexQueryKey,
-    matchAdvancedOptions,
-    matchAdvancedQueryKey,
+    matchAdvanceOptions,
+    matchAdvanceQueryKey,
     matchAdvancesOptions,
     matchAdvancesQueryKey,
     matchesOptions,
     matchesQueryKey,
     matchOptions,
     matchQueryKey,
+    nodeInfoOptions,
+    nodeInfoQueryKey,
     nodeVersionOptions,
     nodeVersionQueryKey,
     outputOptions,
     outputQueryKey,
     outputsOptions,
     outputsQueryKey,
+    pendingExecutableOutputCountOptions,
+    pendingExecutableOutputCountQueryKey,
     processedInputCountOptions,
     processedInputCountQueryKey,
     reportOptions,
@@ -109,9 +117,33 @@ const cases: Case[] = [
     }),
     mk("commitments", commitmentsOptions, commitmentsQueryKey, { application }),
     mk("epoch", epochOptions, epochQueryKey, { application, epochIndex: 1n }),
-    mk("epochs", epochsOptions, epochsQueryKey, { application }),
+    mk(
+        "epochByVirtualIndex",
+        epochByVirtualIndexOptions,
+        epochByVirtualIndexQueryKey,
+        {
+            application,
+            virtualIndex: 1n,
+        },
+    ),
+    mk("epochs", epochsOptions, epochsQueryKey, {
+        application,
+        status: ["OPEN", "CLOSED"],
+        from: 1n,
+        to: 5n,
+    }),
+    mk(
+        "executedOutputCount",
+        executedOutputCountOptions,
+        executedOutputCountQueryKey,
+        { application },
+    ),
     mk("input", inputOptions, inputQueryKey, { application, inputIndex: 2n }),
-    mk("inputs", inputsOptions, inputsQueryKey, { application }),
+    mk("inputs", inputsOptions, inputsQueryKey, {
+        application,
+        from: 1n,
+        to: 5n,
+    }),
     mk(
         "lastAcceptedEpochIndex",
         lastAcceptedEpochIndexOptions,
@@ -123,7 +155,7 @@ const cases: Case[] = [
         epochIndex: 1n,
         tournamentAddress,
     }),
-    mk("matchAdvanced", matchAdvancedOptions, matchAdvancedQueryKey, {
+    mk("matchAdvance", matchAdvanceOptions, matchAdvanceQueryKey, {
         application,
         epochIndex: 1n,
         tournamentAddress,
@@ -132,6 +164,12 @@ const cases: Case[] = [
         application,
     }),
     mk("matches", matchesOptions, matchesQueryKey, { application }),
+    mk(
+        "nodeInfo",
+        (c) => nodeInfoOptions(c),
+        (c) => nodeInfoQueryKey(c),
+        undefined,
+    ),
     mk(
         "nodeVersion",
         (c) => nodeVersionOptions(c),
@@ -146,7 +184,17 @@ const cases: Case[] = [
         application,
         epochIndex: 1n,
         inputIndex: 2n,
+        outputType: ["Voucher", "DelegateCallVoucher"],
+        executed: false,
+        from: 1n,
+        to: 5n,
     }),
+    mk(
+        "pendingExecutableOutputCount",
+        pendingExecutableOutputCountOptions,
+        pendingExecutableOutputCountQueryKey,
+        { application },
+    ),
     mk(
         "processedInputCount",
         processedInputCountOptions,
@@ -157,7 +205,11 @@ const cases: Case[] = [
         application,
         reportIndex: 4n,
     }),
-    mk("reports", reportsOptions, reportsQueryKey, { application }),
+    mk("reports", reportsOptions, reportsQueryKey, {
+        application,
+        from: 1n,
+        to: 5n,
+    }),
     mk("tournament", tournamentOptions, tournamentQueryKey, {
         application,
         address: tournamentAddress,
@@ -229,5 +281,17 @@ describe("*QueryKey bigint normalization", () => {
             inputIndex: 2n,
         });
         expect(key[2]).toMatchObject({ epochIndex: "1", inputIndex: "2" });
+    });
+
+    it("stringifies the inclusive range bounds of every listing key", () => {
+        const range = { application, from: 1n, to: 5n };
+        for (const key of [
+            epochsQueryKey(clientA, range),
+            inputsQueryKey(clientA, range),
+            outputsQueryKey(clientA, range),
+            reportsQueryKey(clientA, range),
+        ]) {
+            expect(key[2]).toMatchObject({ from: "1", to: "5" });
+        }
     });
 });

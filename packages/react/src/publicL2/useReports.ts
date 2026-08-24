@@ -13,6 +13,8 @@ export const reportsQueryKey = (
         ...params,
         epochIndex: params.epochIndex?.toString(),
         inputIndex: params.inputIndex?.toString(),
+        from: params.from?.toString(),
+        to: params.to?.toString(),
     },
 ];
 

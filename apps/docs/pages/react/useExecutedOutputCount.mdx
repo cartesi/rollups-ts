@@ -1,0 +1,32 @@
+# useExecutedOutputCount
+
+Number of outputs of an application that were already executed. The count is
+monotone, which makes it a sound change signal to poll — on change, re-query
+[`useOutputs`](/react/useOutputs) with `executed: false` and
+`outputType: ["Voucher", "DelegateCallVoucher"]` and diff that pending set
+against the previous result to identify the executions.
+
+Neither this count, nor an output index, nor a pagination offset is a valid
+resume cursor: executions are observed out of output-index order, so a late
+execution can land behind one.
+
+## Usage
+
+```tsx twoslash
+import { useExecutedOutputCount } from "@cartesi/react";
+
+function Example() {
+  const { data, isLoading } = useExecutedOutputCount({
+    application: "0x...",
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is the executed output count (bigint):
+
+```ts twoslash
+import type { GetExecutedOutputCountReturnType } from "@cartesi/client";
+```

@@ -37,15 +37,13 @@ export const waitForInput = async (
                 throw new Error("Input is not processed");
             }
 
+            // every terminal status other than ACCEPTED; the node collapsed its
+            // resource-limit statuses into these
             if (
                 rejectErrors &&
-                (input.status === "CYCLE_LIMIT_EXCEEDED" ||
-                    input.status === "EXCEPTION" ||
+                (input.status === "EXCEPTION" ||
                     input.status === "MACHINE_HALTED" ||
-                    input.status === "PAYLOAD_LENGTH_LIMIT_EXCEEDED" ||
-                    input.status === "REJECTED" ||
-                    input.status === "TIME_LIMIT_EXCEEDED" ||
-                    input.status === "OUTPUTS_LIMIT_EXCEEDED")
+                    input.status === "REJECTED")
             ) {
                 throw new AbortError(`Input status: ${input.status}`);
             }

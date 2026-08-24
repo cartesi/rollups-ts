@@ -6,6 +6,7 @@ import type {
     Input as InputRpc,
     MatchAdvanced as MatchAdvancedRpc,
     Match as MatchRpc,
+    NodeInfo as NodeInfoRpc,
     Notice as NoticeRpc,
     Output as OutputRpc,
     Pagination as PaginationRpc,
@@ -14,7 +15,13 @@ import type {
     Voucher as VoucherRpc,
     Withdrawal as WithdrawalRpc,
 } from "@cartesi/rpc";
-import { type Hex, decodeFunctionData, getAddress, hexToBigInt } from "viem";
+import {
+    type Hex,
+    decodeFunctionData,
+    getAddress,
+    hexToBigInt,
+    hexToNumber,
+} from "viem";
 import type {
     Application,
     Commitment,
@@ -24,6 +31,7 @@ import type {
     Input,
     Match,
     MatchAdvanced,
+    NodeInfo,
     Notice,
     Output,
     Pagination,
@@ -312,6 +320,7 @@ export const inputConverter = (input: InputRpc): Input => {
               }
             : null,
         status: input.status,
+        exceptionData: input.exception_data,
         machineHash: input.machine_hash,
         outputsHash: input.outputs_hash,
         transactionHash: input.transaction_hash,
@@ -374,6 +383,14 @@ export const reportConverter = (report: ReportRpc): Report => {
         rawData: report.raw_data,
         createdAt: new Date(report.created_at),
         updatedAt: new Date(report.updated_at),
+    };
+};
+
+export const nodeInfoConverter = (nodeInfo: NodeInfoRpc): NodeInfo => {
+    return {
+        chainId: hexToNumber(nodeInfo.chain_id),
+        version: nodeInfo.version,
+        defaultBlock: nodeInfo.default_block,
     };
 };
 

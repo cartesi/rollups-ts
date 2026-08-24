@@ -1,0 +1,27 @@
+# useNodeInfo
+
+Fetches the chain ID, the semantic node version and the blockchain block tag the
+node reads the base layer at, in a single call.
+
+It replaces [`useChainId`](/react/useChainId) and
+[`useNodeVersion`](/react/useNodeVersion), which are both deprecated.
+
+## Usage
+
+```tsx twoslash
+import { useNodeInfo } from "@cartesi/react";
+
+function Example() {
+  const { data, isLoading } = useNodeInfo();
+  const { chainId, version, defaultBlock } = data || {};
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is a `NodeInfo`:
+
+```ts twoslash
+import type { NodeInfo, GetNodeInfoReturnType } from "@cartesi/client";
+```

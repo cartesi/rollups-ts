@@ -1,0 +1,30 @@
+# usePendingExecutableOutputCount
+
+Number of executable outputs of an application that are still pending execution.
+
+This is a gauge, not a change signal or a resume cursor: it grows with new
+executable outputs and shrinks with executions, so it can return to a previous
+value while work happened in between. Use
+[`useExecutedOutputCount`](/react/useExecutedOutputCount) instead and diff the
+pending set on change.
+
+## Usage
+
+```tsx twoslash
+import { usePendingExecutableOutputCount } from "@cartesi/react";
+
+function Example() {
+  const { data, isLoading } = usePendingExecutableOutputCount({
+    application: "0x...",
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is the pending executable output count (bigint):
+
+```ts twoslash
+import type { GetPendingExecutableOutputCountReturnType } from "@cartesi/client";
+```

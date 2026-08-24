@@ -2,6 +2,7 @@ import type {
     Application,
     Epoch,
     Input,
+    NodeInfo,
     Output,
     Report,
     Withdrawal,
@@ -12,6 +13,7 @@ import {
     applicationConverter,
     epochConverter,
     inputConverter,
+    nodeInfoConverter,
     outputConverter,
     reportConverter,
     withdrawalConverter,
@@ -489,6 +491,7 @@ describe("converter", () => {
                 payload: "0xdeadbeef",
             },
             status: "ACCEPTED",
+            exception_data: null,
             machine_hash: null,
             outputs_hash: null,
             transaction_hash:
@@ -504,6 +507,7 @@ describe("converter", () => {
         expect(input.blockNumber).toBe(hexToBigInt(rpcInput.block_number));
         expect(input.rawData).toBe(rpcInput.raw_data);
         expect(input.status).toBe(rpcInput.status);
+        expect(input.exceptionData).toBeNull();
         expect(input.machineHash).toBeNull();
         expect(input.outputsHash).toBeNull();
         expect(input.transactionHash).toBe(rpcInput.transaction_hash);
@@ -526,6 +530,30 @@ describe("converter", () => {
         expect(input.updatedAt).toStrictEqual(new Date(rpcInput.updated_at));
     });
 
+    it("should carry the exception data of a failed input", () => {
+        const rpcInput: Input = {
+            epoch_index: "0x1",
+            index: "0x8",
+            block_number: "0x1f5",
+            raw_data: "0x415bf363",
+            decoded_data: null,
+            status: "EXCEPTION",
+            exception_data: "0x6f6f7073",
+            machine_hash: null,
+            outputs_hash: null,
+            transaction_hash:
+                "0x8f2c9ab4d7e15c30b6f18a4ee2d9037c4a1f5d2e9b7c63a0d4e8f1b25c7a9d3e",
+            log_index: "0x3",
+            created_at: "2025-04-11T10:00:00.000Z",
+            updated_at: "2025-04-11T10:05:00.000Z",
+        };
+
+        const input = inputConverter(rpcInput);
+        expect(input.status).toBe("EXCEPTION");
+        // passed through as raw bytes, not decoded
+        expect(input.exceptionData).toBe("0x6f6f7073");
+    });
+
     it("should convert the report", () => {
         const rpcReport: Report = {
             epoch_index: "0x1",
@@ -543,6 +571,26 @@ describe("converter", () => {
         expect(report.rawData).toBe(rpcReport.raw_data);
         expect(report.createdAt).toStrictEqual(new Date(rpcReport.created_at));
         expect(report.updatedAt).toStrictEqual(new Date(rpcReport.updated_at));
+    });
+
+    it("should convert the node info", () => {
+        const rpcNodeInfo: NodeInfo = {
+            chain_id: "0x7a69",
+            version: "2.0.0-alpha.1",
+            default_block: "FINALIZED",
+        };
+
+        const nodeInfo = nodeInfoConverter(rpcNodeInfo);
+
+        const props = Object.keys(nodeInfo);
+        expect(props).toHaveLength(3);
+        expect(props).toEqual(
+            expect.arrayContaining(["chainId", "version", "defaultBlock"]),
+        );
+
+        expect(nodeInfo.chainId).toBe(31337);
+        expect(nodeInfo.version).toBe(rpcNodeInfo.version);
+        expect(nodeInfo.defaultBlock).toBe(rpcNodeInfo.default_block);
     });
 
     it("should convert the withdrawal", () => {

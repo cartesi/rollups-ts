@@ -1,7 +1,35 @@
 export type PaginationParams = {
     limit?: number;
+    /**
+     * Number of items to skip. Bounded by the node to a signed 64-bit integer,
+     * comfortably above `Number.MAX_SAFE_INTEGER`; a larger value is rejected
+     * with invalid params.
+     *
+     * The node does not meter the cost of traversing an offset, so a deep one
+     * over a broad filter can still make the database scan and discard rows
+     * before the requested page.
+     */
     offset?: number;
     descending?: boolean;
+};
+
+/**
+ * An array with at least one element.
+ *
+ * The node rejects an empty filter list with invalid params, so the list-valued
+ * filters use this instead of a plain array to turn that into a type error.
+ */
+export type NonEmptyArray<T> = [T, ...T[]];
+
+/**
+ * Inclusive index range shared by the listing methods that are indexed by a
+ * sequential number (epochs, inputs, outputs and reports).
+ */
+export type RangeParams = {
+    /** Inclusive lower bound on the index (hex encoded). */
+    from?: HexNumber;
+    /** Inclusive upper bound on the index (hex encoded). */
+    to?: HexNumber;
 };
 
 export type Address = `0x${string}`;
@@ -32,19 +60,30 @@ export type EpochStatus =
     | "CLAIM_REJECTED"
     | "CLAIM_FORECLOSED";
 
+/**
+ * Outcome of running an input through the machine. `NONE` means the input has
+ * not completed yet; the rest are terminal.
+ *
+ * The node collapsed its former resource-limit statuses
+ * (`OUTPUTS_LIMIT_EXCEEDED`, `REPORTS_LIMIT_EXCEEDED`, `CYCLE_LIMIT_EXCEEDED`,
+ * `TIME_LIMIT_EXCEEDED`, `PAYLOAD_LENGTH_LIMIT_EXCEEDED`) into the outcomes
+ * below, so they are no longer part of the union.
+ */
 export type InputStatus =
     | "NONE"
     | "ACCEPTED"
     | "REJECTED"
     | "EXCEPTION"
-    | "MACHINE_HALTED"
-    | "OUTPUTS_LIMIT_EXCEEDED"
-    | "REPORTS_LIMIT_EXCEEDED"
-    | "CYCLE_LIMIT_EXCEEDED"
-    | "TIME_LIMIT_EXCEEDED"
-    | "PAYLOAD_LENGTH_LIMIT_EXCEEDED";
+    | "MACHINE_HALTED";
 
 export type ConsensusType = "AUTHORITY" | "QUORUM" | "PRT";
+
+/**
+ * The node's finality contract for blockchain-derived data: the block tag up to
+ * which it reads and acts on chain state. Data exposed by the node carries the
+ * stability guarantees of this tag.
+ */
+export type DefaultBlock = "FINALIZED" | "SAFE" | "LATEST" | "PENDING";
 
 export type ApplicationStatus = "OK" | "FAILED" | "DIVERGED" | "CORRUPTED";
 
@@ -150,6 +189,15 @@ export type GetEpochReturnType = {
     data: Epoch;
 };
 
+export type GetEpochByVirtualIndexParams = {
+    application: string | Address;
+    virtual_index: HexNumber;
+};
+
+export type GetEpochByVirtualIndexReturnType = {
+    data: Epoch;
+};
+
 export type GetLastAcceptedEpochIndexParams = { application: string | Address };
 
 export type GetLastAcceptedEpochIndexReturnType = {
@@ -177,6 +225,11 @@ export type Input = {
         payload: Hex;
     } | null;
     status: InputStatus;
+    /**
+     * Raw guest-provided CMIO exception payload. Non-null only when `status` is
+     * `EXCEPTION`; an empty payload is encoded as `0x`.
+     */
+    exception_data: Hex | null;
     machine_hash: Hash | null;
     outputs_hash: Hash | null;
     transaction_hash: Hash;
@@ -235,6 +288,20 @@ export type GetProcessedInputCountReturnType = {
     data: HexNumber;
 };
 
+export type GetExecutedOutputCountParams = { application: string | Address };
+
+export type GetExecutedOutputCountReturnType = {
+    data: HexNumber;
+};
+
+export type GetPendingExecutableOutputCountParams = {
+    application: string | Address;
+};
+
+export type GetPendingExecutableOutputCountReturnType = {
+    data: HexNumber;
+};
+
 export type GetReportParams = {
     application: string | Address;
     report_index: HexNumber;
@@ -257,10 +324,15 @@ export type ListApplicationsParams = PaginationParams;
 
 export type ListApplicationsReturnType = PaginatedReturnType<Application>;
 
-export type ListEpochsParams = PaginationParams & {
-    application: string | Address;
-    status?: EpochStatus;
-};
+export type ListEpochsParams = PaginationParams &
+    RangeParams & {
+        application: string | Address;
+        /**
+         * Filter by one status or by a non-empty list of statuses (OR
+         * semantics).
+         */
+        status?: EpochStatus | NonEmptyArray<EpochStatus>;
+    };
 
 export type ListEpochsReturnType = PaginatedReturnType<Epoch>;
 
@@ -387,7 +459,7 @@ export type MatchAdvanced = {
 
 export type ListMatchAdvancesReturnType = PaginatedReturnType<MatchAdvanced>;
 
-export type GetMatchAdvancedParams = {
+export type GetMatchAdvanceParams = {
     application: string | Address;
     epoch_index: HexNumber;
     tournament_address: Address;
@@ -395,41 +467,70 @@ export type GetMatchAdvancedParams = {
     parent: Hash;
 };
 
-export type GetMatchAdvancedReturnType = {
+export type GetMatchAdvanceReturnType = {
     data: MatchAdvanced;
 };
 
-export type ListInputsParams = PaginationParams & {
-    application: string | Address;
-    epoch_index?: HexNumber;
-    sender?: Address;
-    transaction_hash?: Hash;
-};
+export type ListInputsParams = PaginationParams &
+    RangeParams & {
+        application: string | Address;
+        epoch_index?: HexNumber;
+        sender?: Address;
+        transaction_hash?: Hash;
+    };
 
 export type ListInputsReturnType = PaginatedReturnType<Input>;
 
-export type ListOutputsParams = PaginationParams & {
-    application: string | Address;
-    epoch_index?: HexNumber;
-    input_index?: HexNumber;
-    output_type?: Hex;
-    voucher_address?: Address;
-};
+export type ListOutputsParams = PaginationParams &
+    RangeParams & {
+        application: string | Address;
+        epoch_index?: HexNumber;
+        input_index?: HexNumber;
+        /**
+         * Filter by one output type selector (the first 4 bytes of the raw
+         * data) or by a non-empty list of selectors (OR semantics).
+         */
+        output_type?: Hex | NonEmptyArray<Hex>;
+        voucher_address?: Address;
+        /**
+         * Filter by execution status: `true` selects outputs with an execution
+         * transaction hash, `false` selects outputs without one.
+         *
+         * Executions are observed out of output-index order, so no resume
+         * cursor over this filter — output index, pagination offset or executed
+         * count alike — is sound. Poll `cartesi_getExecutedOutputCount` and
+         * diff the pending set on change instead.
+         */
+        executed?: boolean;
+    };
 
 export type ListOutputsReturnType = PaginatedReturnType<Output>;
 
-export type ListReportsParams = PaginationParams & {
-    application: string | Address;
-    epoch_index?: HexNumber;
-    input_index?: HexNumber;
-};
+export type ListReportsParams = PaginationParams &
+    RangeParams & {
+        application: string | Address;
+        epoch_index?: HexNumber;
+        input_index?: HexNumber;
+    };
 
 export type ListReportsReturnType = PaginatedReturnType<Report>;
 
+export type NodeInfo = {
+    chain_id: HexNumber;
+    version: string;
+    default_block: DefaultBlock;
+};
+
+export type GetNodeInfoReturnType = {
+    data: NodeInfo;
+};
+
+/** @deprecated use `GetNodeInfoReturnType` (`cartesi_getNodeInfo`) instead. */
 export type GetChainIdReturnType = {
     data: HexNumber;
 };
 
+/** @deprecated use `GetNodeInfoReturnType` (`cartesi_getNodeInfo`) instead. */
 export type GetNodeVersionReturnType = {
     data: string;
 };

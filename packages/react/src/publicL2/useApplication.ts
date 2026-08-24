@@ -1,4 +1,7 @@
-import type { CartesiPublicClient, GetApplicationParams } from "@cartesi/client";
+import type {
+    CartesiPublicClient,
+    GetApplicationParams,
+} from "@cartesi/client";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { useCartesiClient } from "./provider.js";
 import { serverUrl } from "./serverUrl.js";

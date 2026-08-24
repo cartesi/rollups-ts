@@ -22,7 +22,10 @@ function Example() {
 The hook can filter results by:
 
 - `application: Address | string`
-- `status?: EpochStatus`
+- `status?: EpochStatus | NonEmptyArray<EpochStatus>` — an empty list is not a
+  valid filter, and does not compile
+- `from?: bigint` — inclusive lower bound on the epoch index
+- `to?: bigint` — inclusive upper bound on the epoch index
 
 ```ts twoslash
 import type {

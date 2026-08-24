@@ -18,12 +18,33 @@ The request can filter results by:
 
 - `epoch_index: HexNumber`
 - `input_index: HexNumber`
-- `output_type: Hex`
+- `output_type: Hex | NonEmptyArray<Hex>` — one output type selector (the first
+  4 bytes of the raw data), or a list of selectors combined with OR semantics.
+  The node rejects an empty list, so the type is a non-empty array and
+  `output_type: []` does not compile
 - `voucher_address: Address`
+- `from: HexNumber` — inclusive lower bound on the output index
+- `to: HexNumber` — inclusive upper bound on the output index
+- `executed: boolean` — `true` selects outputs with an execution transaction
+  hash, `false` selects outputs without one
 
 ```ts twoslash
-import { type Address, type HexNumber } from "@cartesi/rpc"
+import {
+    type Address,
+    type Hex,
+    type HexNumber,
+    type NonEmptyArray,
+} from "@cartesi/rpc"
 ```
+
+::::warning
+Executions happen out of index order — an old voucher can be executed long after
+newer ones — so a resume cursor keyed on the output index (or on an
+executed-count offset) over the `executed` filter silently skips those late
+executions. Poll [`cartesi_getExecutedOutputCount`](/rpc/cartesi_getExecutedOutputCount)
+for change detection instead, and on change query the bounded working set with
+`executed: false`.
+::::
 
 ## Return Type
 

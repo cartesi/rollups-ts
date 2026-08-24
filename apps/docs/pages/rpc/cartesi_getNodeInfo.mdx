@@ -1,0 +1,26 @@
+# cartesi_getNodeInfo
+
+Fetches the chain ID, the semantic node version and the blockchain block tag the
+node reads the base layer at, in a single call.
+
+It replaces `cartesi_getChainId` and `cartesi_getNodeVersion`, which are both
+deprecated.
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data: nodeInfo } = await client.request("cartesi_getNodeInfo");
+```
+
+## Return Type
+
+```ts twoslash
+import { type NodeInfo, type GetNodeInfoReturnType } from "@cartesi/rpc";
+// NodeInfo = {
+//   chain_id: HexNumber;
+//   version: string;
+//   default_block: DefaultBlock; // FINALIZED | SAFE | LATEST | PENDING
+// }
+```

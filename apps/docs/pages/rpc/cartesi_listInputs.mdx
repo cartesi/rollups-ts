@@ -19,6 +19,8 @@ The request can filter results by:
 - `epoch_index: HexNumber`
 - `sender: Address`
 - `transaction_hash: Hash`
+- `from: HexNumber` — inclusive lower bound on the input index
+- `to: HexNumber` — inclusive upper bound on the input index
 
 ```ts twoslash
 import { type Address, type HexNumber, type Hash } from "@cartesi/rpc";
