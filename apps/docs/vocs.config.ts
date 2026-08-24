@@ -1,4 +1,62 @@
+import { createRequire } from "node:module";
+import * as path from "node:path";
 import { type Config, defineConfig } from "vocs/config";
+
+const require = createRequire(import.meta.url);
+
+/**
+ * The TypeScript module twoslash type-checks the code blocks with.
+ *
+ * vocs would otherwise `require("typescript")` from this package, which the
+ * workspace catalog pins to v7. v7 is the native compiler: its entry point
+ * only exports `version`/`versionMajorMinor`, so twoslash's `ts.sys.readFile`
+ * throws and every code block fails to render. v6 is the last line shipping
+ * the JavaScript compiler API twoslash drives.
+ *
+ * It is aliased rather than pinning this package to v6, so that `typescript`
+ * itself stays on the catalog version: viem declares an optional `typescript`
+ * peer, so a v6 pin here would resolve a second viem instance whose types are
+ * distinct from the one `@cartesi/client` was built against, and every snippet
+ * mixing the two would fail to typecheck.
+ */
+type TsModule = NonNullable<
+    NonNullable<Extract<Config["twoslash"], object>>["twoslashOptions"]
+>["tsModule"];
+
+const typescript = require("typescript-v6") as TsModule;
+
+/**
+ * The directory twoslash's virtual file system reads `lib.*.d.ts` from.
+ *
+ * `@typescript/vfs` defaults it to `dirname(require.resolve("typescript"))`,
+ * which resolves to the v7 package — whose `lib` holds no `lib.*.d.ts` at all,
+ * so every snippet fails with `TSVFS: A request was made for lib.es2020.d.ts`.
+ * Point it at the v6 lib next to the compiler above.
+ */
+const tsLibDirectory = path.dirname(require.resolve("typescript-v6"));
+
+/**
+ * Twoslash options carrying the compiler above, with `tsModule` hidden from
+ * `Object.keys`.
+ *
+ * vocs ships the resolved config to the browser through `serializeFunctions`,
+ * which walks every enumerable key and rewrites each function it finds as
+ * source text for the client to `eval`. An enumerable `tsModule` would drag
+ * the whole TypeScript module into that walk, and its functions close over
+ * bundler-internal names, so each one throws `ReferenceError` while rendering.
+ *
+ * Non-enumerable keeps it out of the walk while leaving it readable where it
+ * matters: vocs resolves the config with a shallow spread, and reads
+ * `twoslashOptions.tsModule` directly before handing it to `createTwoslasher`.
+ * The `checkOnly` path re-spreads these options instead, and would drop it —
+ * so leave `twoslash.checkOnly` off.
+ */
+const twoslashOptions = Object.defineProperty({ tsLibDirectory }, "tsModule", {
+    value: typescript,
+    enumerable: false,
+    writable: true,
+    configurable: true,
+}) as { tsLibDirectory: string; tsModule: TsModule };
 
 /** Minimal structural view of the hast nodes this plugin walks. */
 type HastNode = {
@@ -51,6 +109,7 @@ const config: Config = defineConfig({
     markdown: {
         rehypePlugins: [rehypeViemDocLinks],
     },
+    twoslash: { twoslashOptions },
     // GitHub Pages deployment requires fully static output
     renderStrategy: "full-static",
     title: "Cartesi",

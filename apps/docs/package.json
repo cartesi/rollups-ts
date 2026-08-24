@@ -28,6 +28,7 @@
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "typescript": "catalog:",
+        "typescript-v6": "npm:typescript@^6.0.3",
         "viem": "catalog:"
     },
     "engines": {
