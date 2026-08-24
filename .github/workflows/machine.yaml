@@ -38,6 +38,9 @@ jobs:
             - name: Install Dependencies
               run: pnpm i
 
+            - name: Build
+              run: pnpm build --filter @cartesi/rollup
+
             # libcmt bundles the `cmio` ioctl ABI since machine-guest-tools
             # 0.18.0, so the Cartesi Linux headers are no longer needed here.
             - name: Install riscv64 cross toolchain
