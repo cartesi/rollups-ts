@@ -1,6 +1,7 @@
 import { JSONRPCClient, type TypedJSONRPCClient } from "json-rpc-2.0";
 import type { Methods } from "./methods.js";
 
+export * from "./errors.js";
 export * from "./types.js";
 
 export type ClientOptions = {

@@ -1,0 +1,27 @@
+# cartesi_getPendingExecutableOutputCount
+
+Returns the number of executable outputs of an application that are still
+pending execution.
+
+This is a gauge, not a change signal or a resume cursor: it grows with new
+executable outputs and shrinks with executions, so it can return to a previous
+value while work happened in between. Poll
+[`cartesi_getExecutedOutputCount`](/rpc/cartesi_getExecutedOutputCount) instead
+and diff the pending set on change.
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data: count } = await client.request(
+    "cartesi_getPendingExecutableOutputCount",
+    { application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366" },
+);
+```
+
+## Return Type
+
+```ts twoslash
+import { type GetPendingExecutableOutputCountReturnType } from "@cartesi/rpc";
+```

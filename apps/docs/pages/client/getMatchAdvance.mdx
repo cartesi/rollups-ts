@@ -1,4 +1,4 @@
-# getMatchAdvanced
+# getMatchAdvance
 
 ## Usage
 
@@ -10,7 +10,7 @@ const publicClientL2 = createCartesiPublicClient({
   transport: http("http://127.0.0.1:6751/rpc"),
 });
 
-const matchAdvanced = await publicClientL2.getMatchAdvanced({
+const matchAdvance = await publicClientL2.getMatchAdvance({
   application: "0x...",
   epochIndex: 1n,
   tournamentAddress: "0x...",
@@ -22,7 +22,7 @@ const matchAdvanced = await publicClientL2.getMatchAdvanced({
 ## Parameters
 
 ```ts twoslash
-import type { GetMatchAdvancedParams } from "@cartesi/client";
+import type { GetMatchAdvanceParams } from "@cartesi/client";
 // {
 //   application: Address | string;
 //   epochIndex: bigint;
@@ -35,6 +35,6 @@ import type { GetMatchAdvancedParams } from "@cartesi/client";
 ## Return Type
 
 ```ts twoslash
-import type { GetMatchAdvancedReturnType, MatchAdvanced } from "@cartesi/client";
-// GetMatchAdvancedReturnType = MatchAdvanced;
+import type { GetMatchAdvanceReturnType, MatchAdvanced } from "@cartesi/client";
+// GetMatchAdvanceReturnType = MatchAdvanced;
 ```

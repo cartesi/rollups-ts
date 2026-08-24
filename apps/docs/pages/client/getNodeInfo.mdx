@@ -1,0 +1,30 @@
+# getNodeInfo
+
+Fetches the chain ID, the semantic node version and the blockchain block tag the
+node reads the base layer at, in a single call.
+
+It replaces `getChainId` and `getNodeVersion`, which are both deprecated.
+
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const { chainId, version, defaultBlock } = await publicClientL2.getNodeInfo();
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetNodeInfoReturnType, NodeInfo } from "@cartesi/client";
+// NodeInfo = {
+//   chainId: number;
+//   version: string;
+//   defaultBlock: DefaultBlock; // FINALIZED | SAFE | LATEST | PENDING
+// }
+```

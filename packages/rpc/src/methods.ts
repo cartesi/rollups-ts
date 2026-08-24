@@ -4,19 +4,26 @@ import type {
     GetChainIdReturnType,
     GetCommitmentParams,
     GetCommitmentReturnType,
+    GetEpochByVirtualIndexParams,
+    GetEpochByVirtualIndexReturnType,
     GetEpochParams,
     GetEpochReturnType,
+    GetExecutedOutputCountParams,
+    GetExecutedOutputCountReturnType,
     GetInputParams,
     GetInputReturnType,
     GetLastAcceptedEpochIndexParams,
     GetLastAcceptedEpochIndexReturnType,
-    GetMatchAdvancedParams,
-    GetMatchAdvancedReturnType,
+    GetMatchAdvanceParams,
+    GetMatchAdvanceReturnType,
     GetMatchParams,
     GetMatchReturnType,
+    GetNodeInfoReturnType,
     GetNodeVersionReturnType,
     GetOutputParams,
     GetOutputReturnType,
+    GetPendingExecutableOutputCountParams,
+    GetPendingExecutableOutputCountReturnType,
     GetProcessedInputCountParams,
     GetProcessedInputCountReturnType,
     GetReportParams,
@@ -56,6 +63,9 @@ export type Methods = {
     ): GetApplicationReturnType;
     cartesi_listEpochs(params: ListEpochsParams): ListEpochsReturnType;
     cartesi_getEpoch(params: GetEpochParams): GetEpochReturnType;
+    cartesi_getEpochByVirtualIndex(
+        params: GetEpochByVirtualIndexParams,
+    ): GetEpochByVirtualIndexReturnType;
     cartesi_getLastAcceptedEpochIndex(
         params: GetLastAcceptedEpochIndexParams,
     ): GetLastAcceptedEpochIndexReturnType;
@@ -72,19 +82,28 @@ export type Methods = {
     cartesi_listMatchAdvances(
         params: ListMatchAdvancesParams,
     ): ListMatchAdvancesReturnType;
-    cartesi_getMatchAdvanced(
-        params: GetMatchAdvancedParams,
-    ): GetMatchAdvancedReturnType;
+    cartesi_getMatchAdvance(
+        params: GetMatchAdvanceParams,
+    ): GetMatchAdvanceReturnType;
     cartesi_listInputs(params: ListInputsParams): ListInputsReturnType;
     cartesi_getInput(params: GetInputParams): GetInputReturnType;
     cartesi_getProcessedInputCount(
         params: GetProcessedInputCountParams,
     ): GetProcessedInputCountReturnType;
+    cartesi_getExecutedOutputCount(
+        params: GetExecutedOutputCountParams,
+    ): GetExecutedOutputCountReturnType;
+    cartesi_getPendingExecutableOutputCount(
+        params: GetPendingExecutableOutputCountParams,
+    ): GetPendingExecutableOutputCountReturnType;
     cartesi_listOutputs(params: ListOutputsParams): ListOutputsReturnType;
     cartesi_getOutput(params: GetOutputParams): GetOutputReturnType;
     cartesi_listReports(params: ListReportsParams): ListReportsReturnType;
     cartesi_getReport(params: GetReportParams): GetReportReturnType;
+    cartesi_getNodeInfo(): GetNodeInfoReturnType;
+    /** @deprecated use `cartesi_getNodeInfo` instead. */
     cartesi_getChainId(): GetChainIdReturnType;
+    /** @deprecated use `cartesi_getNodeInfo` instead. */
     cartesi_getNodeVersion(): GetNodeVersionReturnType;
     cartesi_listWithdrawals(
         params: ListWithdrawalsParams,

@@ -22,6 +22,11 @@ export const listReports = async (
                 params.inputIndex !== undefined
                     ? numberToHex(params.inputIndex)
                     : undefined,
+            from:
+                params.from !== undefined
+                    ? numberToHex(params.from)
+                    : undefined,
+            to: params.to !== undefined ? numberToHex(params.to) : undefined,
         },
     });
     return {

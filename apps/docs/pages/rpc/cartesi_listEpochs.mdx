@@ -16,10 +16,40 @@ const { data, pagination } = await client.request("cartesi_listEpochs", {
 
 The request can filter results by:
 
-- `status: EpochStatus`
+- `status: EpochStatus | NonEmptyArray<EpochStatus>` — one status, or a list of
+  statuses combined with OR semantics. The node rejects an empty list, so the
+  type is a non-empty array and `status: []` does not compile
+- `from: HexNumber` — inclusive lower bound on the epoch index
+- `to: HexNumber` — inclusive upper bound on the epoch index
 
 ```ts twoslash
-import { type EpochStatus } from "@cartesi/rpc"
+import {
+    type EpochStatus,
+    type HexNumber,
+    type NonEmptyArray,
+} from "@cartesi/rpc"
+```
+
+To stay in sync, keep discovery and refresh separate: advance `from` to the next
+unseen epoch index to discover new epochs, and refresh the epochs already seen by
+filtering them on the non-terminal statuses. Terminal statuses
+(`CLAIM_ACCEPTED`, `CLAIM_REJECTED` and `CLAIM_FORECLOSED`) never regress, so a
+settled epoch can be dropped from the refresh set for good:
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data: unsettled } = await client.request("cartesi_listEpochs", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    status: [
+        "OPEN",
+        "CLOSED",
+        "INPUTS_PROCESSED",
+        "CLAIM_COMPUTED",
+        "CLAIM_SUBMITTED",
+        "CLAIM_STAGED",
+    ],
+});
 ```
 
 ## Return Type

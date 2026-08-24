@@ -15,6 +15,7 @@ export const nodeVersionOptions = (client: CartesiPublicClient) =>
         queryFn: () => client.getNodeVersion(),
     });
 
+/** @deprecated use `useNodeInfo` instead. */
 export const useNodeVersion = (
     params?: Omit<
         ReturnType<typeof nodeVersionOptions>,

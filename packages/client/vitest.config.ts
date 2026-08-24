@@ -6,6 +6,11 @@ export default defineConfig({
         exclude: ["node_modules/**"],
         environment: "node",
         globals: true,
+        // the *.test-d.ts suites assert on types only, so they need tsc
+        typecheck: {
+            enabled: true,
+            include: ["**/*.test-d.ts"],
+        },
         coverage: {
             provider: "v8",
             reporter: ["text", "lcov"],

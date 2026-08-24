@@ -9,7 +9,12 @@ export const inputsQueryKey = (
 ) => [
     serverUrl(client),
     "inputs",
-    { ...params, epochIndex: params.epochIndex?.toString() },
+    {
+        ...params,
+        epochIndex: params.epochIndex?.toString(),
+        from: params.from?.toString(),
+        to: params.to?.toString(),
+    },
 ];
 
 export const inputsOptions = (

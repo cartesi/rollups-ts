@@ -1,0 +1,29 @@
+# useEpochByVirtualIndex
+
+Fetches a single epoch by its virtual index, which is the epoch's dense
+insertion rank — 0, 1, 2, … with no gaps by construction.
+
+## Usage
+
+```tsx twoslash
+import { useEpochByVirtualIndex } from "@cartesi/react";
+
+function Example() {
+  const { data, isLoading } = useEpochByVirtualIndex({
+    application: "0x...",
+    virtualIndex: 42n,
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is an `Epoch`:
+
+```ts twoslash
+import type {
+  Epoch,
+  GetEpochByVirtualIndexReturnType,
+} from "@cartesi/client";
+```

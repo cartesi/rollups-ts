@@ -14,7 +14,7 @@ const { data, pagination } = await publicClientL2.listEpochs({
   application: "0x...",
   limit: 10,
   offset: 0,
-  // status (optional)
+  // status, from, to (optional)
 });
 ```
 
@@ -24,7 +24,9 @@ const { data, pagination } = await publicClientL2.listEpochs({
 import type { ListEpochsParams } from "@cartesi/client";
 // {
 //   application: Address | string;
-//   status?: EpochStatus;
+//   status?: EpochStatus | NonEmptyArray<EpochStatus>;
+//   from?: bigint;
+//   to?: bigint;
 //   limit?: number;
 //   offset?: number;
 //   descending?: boolean;
@@ -40,3 +42,7 @@ import type { ListEpochsReturnType, Epoch, Pagination } from "@cartesi/client";
 //   pagination: Pagination;
 // }
 ```
+
+The node rejects an empty status list with invalid params, so `status` is typed
+as a non-empty array — `status: []` is a compile error rather than a failed
+request.

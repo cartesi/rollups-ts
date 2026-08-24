@@ -22,14 +22,27 @@ function Example() {
 The hook can filter results by:
 
 - `application: Address | string`
-- `epochIndex?: bigitn`
+- `epochIndex?: bigint`
 - `inputIndex?: bigint`
-- `outputType?: OutputType`
+- `outputType?: OutputType | NonEmptyArray<OutputType>` — an empty list is not
+  a valid filter, and does not compile
 - `voucherAddress?: Address`
+- `from?: bigint` — inclusive lower bound on the output index
+- `to?: bigint` — inclusive upper bound on the output index
+- `executed?: boolean` — `true` selects outputs already executed, `false`
+  selects the ones that are not
 
 ```ts twoslash
 import { type ListOutputsParams } from "@cartesi/client"
 ```
+
+::::warning
+Executions happen out of index order — an old voucher can be executed long after
+newer ones — so a resume cursor keyed on the output index over the `executed`
+filter silently skips those late executions. Poll
+[`useExecutedOutputCount`](/react/useExecutedOutputCount) for change detection
+instead.
+::::
 
 ## Return Type
 

@@ -108,6 +108,10 @@ const config: Config = defineConfig({
                         { text: "listEpochs", link: "/client/listEpochs" },
                         { text: "getEpoch", link: "/client/getEpoch" },
                         {
+                            text: "getEpochByVirtualIndex",
+                            link: "/client/getEpochByVirtualIndex",
+                        },
+                        {
                             text: "listTournaments",
                             link: "/client/listTournaments",
                         },
@@ -130,8 +134,8 @@ const config: Config = defineConfig({
                             link: "/client/listMatchAdvances",
                         },
                         {
-                            text: "getMatchAdvanced",
-                            link: "/client/getMatchAdvanced",
+                            text: "getMatchAdvance",
+                            link: "/client/getMatchAdvance",
                         },
                         { text: "listInputs", link: "/client/listInputs" },
                         { text: "getInput", link: "/client/getInput" },
@@ -143,6 +147,15 @@ const config: Config = defineConfig({
                             text: "getProcessedInputCount",
                             link: "/client/getProcessedInputCount",
                         },
+                        {
+                            text: "getExecutedOutputCount",
+                            link: "/client/getExecutedOutputCount",
+                        },
+                        {
+                            text: "getPendingExecutableOutputCount",
+                            link: "/client/getPendingExecutableOutputCount",
+                        },
+                        { text: "getNodeInfo", link: "/client/getNodeInfo" },
                         {
                             text: "getLastAcceptedEpochIndex",
                             link: "/client/getLastAcceptedEpochIndex",
@@ -180,6 +193,10 @@ const config: Config = defineConfig({
                         },
                         { text: "useChainId", link: "/react/useChainId" },
                         { text: "useEpoch", link: "/react/useEpoch" },
+                        {
+                            text: "useEpochByVirtualIndex",
+                            link: "/react/useEpochByVirtualIndex",
+                        },
                         { text: "useEpochs", link: "/react/useEpochs" },
                         { text: "useTournament", link: "/react/useTournament" },
                         {
@@ -194,8 +211,8 @@ const config: Config = defineConfig({
                         { text: "useMatch", link: "/react/useMatch" },
                         { text: "useMatches", link: "/react/useMatches" },
                         {
-                            text: "useMatchAdvanced",
-                            link: "/react/useMatchAdvanced",
+                            text: "useMatchAdvance",
+                            link: "/react/useMatchAdvance",
                         },
                         {
                             text: "useMatchAdvances",
@@ -207,6 +224,7 @@ const config: Config = defineConfig({
                             text: "useLastAcceptedEpochIndex",
                             link: "/react/useLastAcceptedEpochIndex",
                         },
+                        { text: "useNodeInfo", link: "/react/useNodeInfo" },
                         {
                             text: "useNodeVersion",
                             link: "/react/useNodeVersion",
@@ -216,6 +234,14 @@ const config: Config = defineConfig({
                         {
                             text: "useProcessedInputCount",
                             link: "/react/useProcessedInputCount",
+                        },
+                        {
+                            text: "useExecutedOutputCount",
+                            link: "/react/useExecutedOutputCount",
+                        },
+                        {
+                            text: "usePendingExecutableOutputCount",
+                            link: "/react/usePendingExecutableOutputCount",
                         },
                         { text: "useReport", link: "/react/useReport" },
                         { text: "useReports", link: "/react/useReports" },
@@ -299,6 +325,10 @@ const config: Config = defineConfig({
                             link: "/rpc/cartesi_getEpoch",
                         },
                         {
+                            text: "cartesi_getEpochByVirtualIndex",
+                            link: "/rpc/cartesi_getEpochByVirtualIndex",
+                        },
+                        {
                             text: "cartesi_getTournament",
                             link: "/rpc/cartesi_getTournament",
                         },
@@ -311,8 +341,8 @@ const config: Config = defineConfig({
                             link: "/rpc/cartesi_getMatch",
                         },
                         {
-                            text: "cartesi_getMatchAdvanced",
-                            link: "/rpc/cartesi_getMatchAdvanced",
+                            text: "cartesi_getMatchAdvance",
+                            link: "/rpc/cartesi_getMatchAdvance",
                         },
                         {
                             text: "cartesi_getLastAcceptedEpochIndex",
@@ -325,6 +355,14 @@ const config: Config = defineConfig({
                         {
                             text: "cartesi_getProcessedInputCount",
                             link: "/rpc/cartesi_getProcessedInputCount",
+                        },
+                        {
+                            text: "cartesi_getExecutedOutputCount",
+                            link: "/rpc/cartesi_getExecutedOutputCount",
+                        },
+                        {
+                            text: "cartesi_getPendingExecutableOutputCount",
+                            link: "/rpc/cartesi_getPendingExecutableOutputCount",
                         },
                         {
                             text: "cartesi_getOutput",
@@ -341,6 +379,10 @@ const config: Config = defineConfig({
                         {
                             text: "cartesi_listWithdrawals",
                             link: "/rpc/cartesi_listWithdrawals",
+                        },
+                        {
+                            text: "cartesi_getNodeInfo",
+                            link: "/rpc/cartesi_getNodeInfo",
                         },
                     ],
                 },

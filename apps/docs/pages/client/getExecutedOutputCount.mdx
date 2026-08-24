@@ -1,0 +1,46 @@
+# getExecutedOutputCount
+
+Number of outputs of an application that were already executed.
+
+The count is monotone, so an unchanged value means no new executions have been
+observed and it is a sound change signal to poll. When it changes, re-query the
+bounded executable-output working set with
+[`listOutputs`](/client/listOutputs) using `executed: false` and
+`outputType: ["Voucher", "DelegateCallVoucher"]`, then diff that pending set
+against the previous result to identify the executions.
+
+Neither this count, nor an output index, nor a pagination offset is a valid
+resume cursor: executions are observed out of output-index order, so a late
+execution can land behind one. The node documents a race-free execution cursor
+as expected in a future ingestion API.
+
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const executedOutputCount = await publicClientL2.getExecutedOutputCount({
+  application: "0x...",
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { GetExecutedOutputCountParams } from "@cartesi/client";
+// {
+//   application: Address | string;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetExecutedOutputCountReturnType } from "@cartesi/client";
+// GetExecutedOutputCountReturnType = bigint;
+```

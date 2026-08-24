@@ -25,6 +25,8 @@ The hook can filter results by:
 - `epochIndex?: bigint`
 - `sender?: Address`
 - `transactionHash?: Hash`
+- `from?: bigint` — inclusive lower bound on the input index
+- `to?: bigint` — inclusive upper bound on the input index
 
 ```ts twoslash
 import type { ListInputsParams } from "@cartesi/client";

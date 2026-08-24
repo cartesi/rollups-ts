@@ -6,7 +6,15 @@ import { serverUrl } from "./serverUrl.js";
 export const epochsQueryKey = (
     client: CartesiPublicClient,
     params: Partial<ListEpochsParams>,
-) => [serverUrl(client), "epochs", params];
+) => [
+    serverUrl(client),
+    "epochs",
+    {
+        ...params,
+        from: params.from?.toString(),
+        to: params.to?.toString(),
+    },
+];
 
 export const epochsOptions = (
     client: CartesiPublicClient,

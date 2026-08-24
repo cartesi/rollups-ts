@@ -1,0 +1,40 @@
+# getPendingExecutableOutputCount
+
+Number of executable outputs of an application that are still pending execution.
+
+This is a gauge, not a change signal or a resume cursor: it grows with new
+executable outputs and shrinks with executions, so it can return to a previous
+value while work happened in between. Poll
+[`getExecutedOutputCount`](/client/getExecutedOutputCount) instead and diff the
+pending set on change.
+
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const pending = await publicClientL2.getPendingExecutableOutputCount({
+  application: "0x...",
+});
+```
+
+## Parameters
+
+```ts twoslash
+import type { GetPendingExecutableOutputCountParams } from "@cartesi/client";
+// {
+//   application: Address | string;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetPendingExecutableOutputCountReturnType } from "@cartesi/client";
+// GetPendingExecutableOutputCountReturnType = bigint;
+```

@@ -1,0 +1,31 @@
+# cartesi_getExecutedOutputCount
+
+Returns the number of outputs of an application that were already executed.
+
+The count is monotone, so an unchanged value means no new executions have been
+observed and it is a sound change signal to poll. When it changes, re-query the
+bounded executable-output working set with
+[`cartesi_listOutputs`](/rpc/cartesi_listOutputs) using `executed: false` and
+`output_type` set to the voucher selectors, then diff that pending set against
+the previous result to identify the executions.
+
+Neither this count, nor an output index, nor a pagination offset is a valid
+resume cursor: executions are observed out of output-index order, so a late
+execution can land behind one. The node documents a race-free execution cursor
+as expected in a future ingestion API.
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data: count } = await client.request("cartesi_getExecutedOutputCount", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+});
+```
+
+## Return Type
+
+```ts twoslash
+import { type GetExecutedOutputCountReturnType } from "@cartesi/rpc";
+```

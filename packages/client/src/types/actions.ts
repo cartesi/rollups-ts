@@ -1,9 +1,11 @@
 import type {
     ApplicationStatus,
     ConsensusType,
+    DefaultBlock,
     DeletionReason,
     EpochStatus,
     InputStatus,
+    NonEmptyArray,
     SnapshotPolicy,
     WinnerCommitment,
 } from "@cartesi/rpc";
@@ -14,17 +16,39 @@ import type { outputsAbi } from "../rollups";
 export type {
     ApplicationStatus,
     ConsensusType,
+    DefaultBlock,
     DeletionReason,
     EpochStatus,
     InputStatus,
+    NonEmptyArray,
     SnapshotPolicy,
     WinnerCommitment,
 };
 
 export type PaginationParams = {
     limit?: number;
+    /**
+     * Number of items to skip. Bounded by the node to a signed 64-bit integer,
+     * comfortably above `Number.MAX_SAFE_INTEGER`; a larger value is rejected
+     * with invalid params.
+     *
+     * The node does not meter the cost of traversing an offset, so a deep one
+     * over a broad filter can still make the database scan and discard rows
+     * before the requested page.
+     */
     offset?: number;
     descending?: boolean;
+};
+
+/**
+ * Inclusive index range shared by the listing actions that are indexed by a
+ * sequential number (epochs, inputs, outputs and reports).
+ */
+export type RangeParams = {
+    /** Inclusive lower bound on the index. */
+    from?: bigint;
+    /** Inclusive upper bound on the index. */
+    to?: bigint;
 };
 
 export type Pagination = {
@@ -107,8 +131,23 @@ export type Application = {
 };
 export type GetApplicationReturnType = Application;
 
+export type NodeInfo = {
+    chainId: number;
+    version: string;
+    /**
+     * The node's finality contract: the block tag up to which it reads and acts
+     * on chain state. Everything the node exposes carries that tag's stability
+     * guarantees.
+     */
+    defaultBlock: DefaultBlock;
+};
+
+export type GetNodeInfoReturnType = NodeInfo;
+
+/** @deprecated use `getNodeInfo` instead. */
 export type GetChainIdReturnType = number;
 
+/** @deprecated use `getNodeInfo` instead. */
 export type GetNodeVersionReturnType = string;
 
 export type GetEpochParams = {
@@ -137,6 +176,14 @@ export type Epoch = {
 };
 
 export type GetEpochReturnType = Epoch;
+
+export type GetEpochByVirtualIndexParams = {
+    application: Address | string;
+    /** Dense insertion rank of the epoch: 0, 1, 2, … with no gaps. */
+    virtualIndex: bigint;
+};
+
+export type GetEpochByVirtualIndexReturnType = Epoch;
 
 export type GetTournamentParams = {
     application: Address | string;
@@ -220,7 +267,7 @@ export type MatchAdvanced = {
     updatedAt: Date;
 };
 
-export type GetMatchAdvancedParams = {
+export type GetMatchAdvanceParams = {
     application: Address | string;
     epochIndex: bigint;
     tournamentAddress: Address;
@@ -228,7 +275,7 @@ export type GetMatchAdvancedParams = {
     parent: Hash;
 };
 
-export type GetMatchAdvancedReturnType = MatchAdvanced;
+export type GetMatchAdvanceReturnType = MatchAdvanced;
 
 export type GetInputParams = {
     application: Address | string;
@@ -251,6 +298,11 @@ export type Input = {
         payload: Hex;
     } | null;
     status: InputStatus;
+    /**
+     * Raw guest-provided CMIO exception payload. Non-null only when `status` is
+     * `EXCEPTION`; an empty payload is `0x`.
+     */
+    exceptionData: Hex | null;
     machineHash: Hash | null;
     outputsHash: Hash | null;
     transactionHash: Hash;
@@ -305,6 +357,16 @@ export type GetProcessedInputCountParams = { application: Address | string };
 
 export type GetProcessedInputCountReturnType = bigint;
 
+export type GetExecutedOutputCountParams = { application: Address | string };
+
+export type GetExecutedOutputCountReturnType = bigint;
+
+export type GetPendingExecutableOutputCountParams = {
+    application: Address | string;
+};
+
+export type GetPendingExecutableOutputCountReturnType = bigint;
+
 export type GetReportParams = {
     application: Address | string;
     reportIndex: bigint;
@@ -326,10 +388,22 @@ export type ListApplicationsReturnType = {
     pagination: Pagination;
 };
 
-export type ListEpochsParams = PaginationParams & {
-    application: Address | string;
-    status?: EpochStatus;
-};
+export type ListEpochsParams = PaginationParams &
+    RangeParams & {
+        application: Address | string;
+        /**
+         * Filter by one status or by a non-empty list of statuses (OR
+         * semantics).
+         *
+         * To stay in sync, keep discovery and refresh separate: advance `from`
+         * to the next unseen epoch index to discover new epochs, and refresh
+         * the epochs already seen by filtering them on the non-terminal
+         * statuses. Terminal statuses (`CLAIM_ACCEPTED`, `CLAIM_REJECTED` and
+         * `CLAIM_FORECLOSED`) never regress, so a settled epoch can be dropped
+         * from the refresh set for good.
+         */
+        status?: EpochStatus | NonEmptyArray<EpochStatus>;
+    };
 
 export type ListEpochsReturnType = {
     data: Epoch[];
@@ -383,12 +457,13 @@ export type ListMatchAdvancesReturnType = {
     pagination: Pagination;
 };
 
-export type ListInputsParams = PaginationParams & {
-    application: Address | string;
-    epochIndex?: bigint;
-    sender?: Address;
-    transactionHash?: Hash;
-};
+export type ListInputsParams = PaginationParams &
+    RangeParams & {
+        application: Address | string;
+        epochIndex?: bigint;
+        sender?: Address;
+        transactionHash?: Hash;
+    };
 
 export type ListInputsReturnType = {
     data: Input[];
@@ -397,24 +472,44 @@ export type ListInputsReturnType = {
 
 export type OutputType = ExtractAbiFunctionNames<typeof outputsAbi>;
 
-export type ListOutputsParams = PaginationParams & {
-    application: Address | string;
-    epochIndex?: bigint;
-    inputIndex?: bigint;
-    outputType?: OutputType;
-    voucherAddress?: Address;
-};
+export type ListOutputsParams = PaginationParams &
+    RangeParams & {
+        application: Address | string;
+        epochIndex?: bigint;
+        inputIndex?: bigint;
+        /**
+         * Filter by one output type or by a non-empty list of output types (OR
+         * semantics).
+         */
+        outputType?: OutputType | NonEmptyArray<OutputType>;
+        voucherAddress?: Address;
+        /**
+         * Filter by execution status: `true` selects outputs already executed,
+         * `false` selects outputs that are not.
+         *
+         * Executions are observed out of output-index order — an old voucher
+         * can execute after newer outputs — so no resume cursor over this
+         * filter is sound, whether keyed on the output index, a pagination
+         * offset or the executed count; each would silently skip late
+         * executions. Poll `getExecutedOutputCount` instead and, on change,
+         * diff the working set returned with `executed: false` and
+         * `outputType: ["Voucher", "DelegateCallVoucher"]` against its previous
+         * result.
+         */
+        executed?: boolean;
+    };
 
 export type ListOutputsReturnType = {
     data: Output[];
     pagination: Pagination;
 };
 
-export type ListReportsParams = PaginationParams & {
-    application: Address | string;
-    epochIndex?: bigint;
-    inputIndex?: bigint;
-};
+export type ListReportsParams = PaginationParams &
+    RangeParams & {
+        application: Address | string;
+        epochIndex?: bigint;
+        inputIndex?: bigint;
+    };
 
 export type ListReportsReturnType = {
     data: Report[];
