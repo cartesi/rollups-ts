@@ -1,6 +1,5 @@
 ---
 "@cartesi/rollup": major
-"@cartesi/docs": patch
 ---
 
 `Rollup.run` now resolves when the host mock runs out of inputs, instead of rejecting.
