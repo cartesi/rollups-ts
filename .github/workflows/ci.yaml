@@ -21,6 +21,8 @@ concurrency:
 # the series the binding targets (CARTESI_MACHINE_SERIES in its install script)
 env:
     CARTESI_MACHINE_VERSION: 0.21.0
+    # apps/cm-playground is a Next.js app; nothing here should phone home
+    NEXT_TELEMETRY_DISABLED: 1
 
 jobs:
     test:
@@ -112,3 +114,13 @@ jobs:
 
             - name: Run wasm tests
               run: pnpm --filter @cartesi/machine test:wasm
+
+            # The playground depends on the published @cartesi/machine, not on
+            # this workspace's, so it needs nothing built first — and what it
+            # covers is the app, not the module built above. It runs here
+            # because this job is the one that already exists on a single
+            # platform; the wasm suites are what exercise the fresh module.
+            - name: Build the playground
+              run: |
+                  pnpm --filter @cartesi/cm-playground check-types
+                  pnpm --filter @cartesi/cm-playground build
