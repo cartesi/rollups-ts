@@ -1,7 +1,7 @@
 {
     "name": "@cartesi/rollup",
     "description": "Node.js bindings for libcmt, the Cartesi Machine guest rollup library",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0-alpha.2",
     "keywords": [
         "cartesi",
         "rollups",
