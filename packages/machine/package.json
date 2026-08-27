@@ -20,6 +20,10 @@
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
+            "browser": {
+                "types": "./dist/browser.d.ts",
+                "default": "./dist/browser.js"
+            },
             "import": {
                 "types": "./dist/index.d.ts",
                 "import": "./dist/index.js"
@@ -29,7 +33,20 @@
                 "require": "./dist/index.cjs"
             }
         },
-        "./package.json": "./package.json"
+        "./wasm": {
+            "types": "./dist/browser.d.ts",
+            "import": "./dist/browser.js"
+        },
+        "./package.json": "./package.json",
+        "./worker": {
+            "types": "./dist/browser/worker.d.ts",
+            "import": "./dist/browser/worker.js"
+        },
+        "./jsonrpc": {
+            "types": "./dist/jsonrpc/client.d.ts",
+            "import": "./dist/jsonrpc/client.js",
+            "require": "./dist/jsonrpc/client.cjs"
+        }
     },
     "files": [
         "LICENSE",
@@ -37,7 +54,7 @@
         "binding.gyp",
         "dist/**",
         "native/addon.cc",
-        "native/slirp-stubs.c",
+        "native/slirp-forward.cc",
         "scripts/find-cartesi.cjs",
         "scripts/install.cjs"
     ],
@@ -45,8 +62,9 @@
         "access": "public"
     },
     "scripts": {
-        "build": "tsdown",
+        "build": "tsdown && node scripts/copy-wasm.mjs",
         "build:native": "node-gyp rebuild",
+        "build:wasm": "node scripts/build-wasm.mjs",
         "check-types": "tsc --noEmit",
         "clean": "rm -rf .turbo node_modules dist build",
         "dev": "tsdown --watch",
@@ -54,8 +72,9 @@
         "lint": "biome check",
         "package:platform": "node scripts/package-platform.mjs",
         "test": "vitest",
+        "test:coverage": "vitest run --coverage",
         "test:run": "vitest run",
-        "test:coverage": "vitest run --coverage"
+        "test:wasm": "vitest run --config vitest.wasm.config.ts"
     },
     "dependencies": {
         "node-addon-api": "^8.3.0",

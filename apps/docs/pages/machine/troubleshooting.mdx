@@ -26,3 +26,31 @@ If the spawn fails with a "no such file" flavored error, none of the above resol
 
 Also note the server address does not support DNS.
 So addresses like `localhost:0` are not supported, use `127.0.0.1:0` instead.
+
+## The WebAssembly module is missing
+
+`init()` rejects with `the WebAssembly module is missing` when the module file did not make it next to the code importing it. In a published package it is always there; from a source checkout it is built separately:
+
+```bash
+pnpm --filter @cartesi/machine build:wasm
+```
+
+That runs the Docker build in `wasm/builder.Dockerfile`, which compiles libcartesi with Emscripten and links the module, then `pnpm build` copies it into `dist`. Pass `factory` to [init](/machine/init) to load a copy resolved some other way instead.
+
+A module whose ABI does not match the one the binding expects fails at `init()` too, with a message naming both versions. That means the module and the TypeScript came from different builds — rebuild the module.
+
+## Server calls fail in the browser
+
+`forking a machine server`, `spawning a machine server` and their siblings are thrown by the [WebAssembly build](/machine/browser) for everything that needs a process or a socket: [spawn](/machine/spawn), [connect](/machine/connect), and the server-level methods of [RemoteCartesiMachine](/machine/RemoteCartesiMachine).
+
+To drive a machine *server* from a browser, use [connectHttp](/machine/connectHttp), which reaches the same `cartesi-jsonrpc-machine` over `fetch`. To run a machine *in* the browser, use a local one — [rollups](/machine/rollups) accepts it, and rolls back through a snapshot rather than a fork.
+
+## The page freezes while a machine runs
+
+`run()` occupies the thread it is called on, and there is no yield point in it. Move the module into a worker: [Worker](/machine/worker).
+
+## Out of memory in the browser
+
+The WebAssembly heap grows to at most 4GB, and holds the machine's RAM and flash drives, plus anything unpacked into the module's filesystem — a 128MB snapshot written with `writeSnapshot` occupies 128MB *on top of* the machine loaded from it.
+
+Delete snapshots from the filesystem (`cartesi.fs.unlink`) once loaded, and call `destroy()` on machines you are done with rather than waiting for the garbage collector.

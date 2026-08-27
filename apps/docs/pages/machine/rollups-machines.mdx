@@ -28,7 +28,16 @@ The [RemoteCartesiMachine](/machine/RemoteCartesiMachine) instance is managed by
 
 If the user wants to keep ownership of the [RemoteCartesiMachine](/machine/RemoteCartesiMachine) he can instantiate it himself, and use the [rollups](/machine/rollups) constructor that takes a [RemoteCartesiMachine](/machine/RemoteCartesiMachine) instance instead.
 
-A [RemoteCartesiMachine](/machine/RemoteCartesiMachine) is necessary because `fork` is used to automatically revert rejected inputs.
+## Rollback
+
+A rollups input is all-or-nothing: an application that rejects one must leave the machine exactly as it was, or the next input runs against state the rollups protocol never accepted. The machine is therefore snapshotted before each input, and restored if that input is rejected.
+
+How the snapshot is taken depends on the machine:
+
+- a [RemoteCartesiMachine](/machine/RemoteCartesiMachine) `fork`s its server, so the snapshot costs no memory copy — the operating system shares the pages until one side writes to them. This is what the [rollups](/machine/rollups) constructor that takes a directory sets up;
+- a local machine — including the [WebAssembly](/machine/browser) one, where there is no process to fork — stores itself to a directory instead, and loads that snapshot back on rejection. Pass `snapshotDir` to choose where those go; it defaults to `/tmp/cartesi-rollups`.
+
+Pass `noRollback: true` to skip the snapshot entirely. It is faster, and correct only when every input is known to be accepted — a re-execution of an epoch already validated, for instance.
 
 ## Creating an input
 
@@ -111,7 +120,7 @@ for (const event of machine.advance(input)) {
 
 ## Inspect
 
-Inspects are simpler than advances. The input, called `query` in this case, is just a Buffer with data.
+Inspects are simpler than advances. The input, called `query` in this case, is just a `Uint8Array` with data.
 Inspects can only yield reports, so it yields the reports data itself.
 The example below shows a simple inspect request.
 
@@ -121,7 +130,7 @@ import { stringToBytes } from "viem";
 
 const machine = rollups(".cartesi/image");
 
-for (const report of machine.inspect(Buffer.from(stringToBytes("test")))) {
+for (const report of machine.inspect(stringToBytes("test"))) {
     console.log(report);
 }
 

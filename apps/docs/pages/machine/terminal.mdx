@@ -1,0 +1,140 @@
+# Terminal
+
+A Cartesi Machine boots Linux, and Linux expects a console. The emulator does not go looking for one: it hands both directions to whoever is driving the machine. Configure the console with buffers, and `run` starts returning to say *the guest has printed something* or *the guest is waiting for a keystroke*.
+
+That is all an interactive terminal is. No pseudo-terminal layer, nothing asynchronous, no special build — the same synchronous API, driven in a loop.
+
+## Configuring the console
+
+A machine has two consoles to choose from, and the choice is made in its configuration.
+
+The **VirtIO console** is the one to want. It is a real terminal: the guest learns the window size, gets `SIGWINCH` when it changes, and idles cheaply instead of polling. It is what `cartesi-machine -it` gives you at a command line.
+
+```ts twoslash
+import type { MachineConfig, MachineRuntimeConfig } from "@cartesi/machine";
+
+const config: MachineConfig = {
+    ram: { length: 0x8000000, backing_store: { data_filename: "linux.bin" } },
+    flash_drive: [{ backing_store: { data_filename: "rootfs.ext2" } }],
+    dtb: {
+        entrypoint: "TERM=xterm-256color sh -i",
+        // the guest's console is hvc0 by default, which is the HTIF one; the
+        // VirtIO console is hvc1
+        bootargs:
+            "quiet earlycon=sbi console=hvc1 uio_pdrv_genirq.of_id=generic-uio " +
+            "root=/dev/pmem0 rw init=/usr/sbin/cartesi-init",
+    },
+    virtio: [{ type: "console" }],
+    // what the host types cannot be replayed, so a machine that reads input is
+    // by definition not reproducible
+    processor: { registers: { iunrep: 1 } },
+};
+
+const runtime: MachineRuntimeConfig = {
+    console: {
+        output_destination: "to_buffer",
+        input_source: "from_buffer",
+        // hand output over as it is written, so a prompt with no trailing
+        // newline still arrives
+        output_flush_mode: "every_char",
+        tty_cols: 100,
+        tty_rows: 30,
+    },
+};
+```
+
+The **HTIF console** is the machine's own, always present, and needs no VirtIO device — but it is a character at a time in both directions, with no window size and no signals. A machine is created able to print on it and not to read, so an interactive one has to say otherwise:
+
+```ts twoslash
+import { HtifConsoleMask, type MachineConfig } from "@cartesi/machine";
+
+const config: MachineConfig = {
+    ram: { length: 0x8000000 },
+    dtb: { entrypoint: "sh -i" },
+    processor: {
+        registers: {
+            iunrep: 1,
+            htif: {
+                iconsole: HtifConsoleMask.Putchar | HtifConsoleMask.Getchar,
+            },
+        },
+    },
+};
+```
+
+Either way it is the runtime configuration's `console` that decides where the bytes go. Without `to_buffer`, output goes wherever it points — by default the process's own stdout, which is right for a command line tool and useless on a page. Without `from_buffer` the guest has no input at all.
+
+## The loop
+
+With the buffers in place, [run](/machine/CartesiMachine#run) returns two break reasons it otherwise never would:
+
+- `BreakReason.ConsoleOutput` — the guest has written; drain it with [readConsoleOutput](/machine/CartesiMachine#readconsoleoutput).
+- `BreakReason.ConsoleInput` — the guest is reading and the input buffer is empty. Push whatever has been typed with [writeConsoleInput](/machine/CartesiMachine#writeconsoleinput), or nothing at all, and carry on.
+
+Neither is an error, and neither means the machine is finished: keep running until a reason that does.
+
+```ts twoslash
+// @noErrors
+import { BreakReason, type CartesiMachine, Reg } from "@cartesi/machine";
+declare const machine: CartesiMachine;
+declare const terminal: { write(bytes: Uint8Array): void };
+declare const pending: () => Uint8Array;
+// ---cut---
+const SLICE = 2_000_000n;
+
+for (;;) {
+    const reason = machine.run(machine.readReg(Reg.Mcycle) + SLICE);
+
+    const output = machine.readConsoleOutput();
+    if (output.length > 0) {
+        terminal.write(output);
+    }
+
+    if (reason === BreakReason.ConsoleInput) {
+        // whatever the user typed since the last slice, if anything
+        machine.writeConsoleInput(pending());
+    } else if (
+        reason !== BreakReason.ConsoleOutput &&
+        reason !== BreakReason.ReachedTargetMcycle
+    ) {
+        break; // halted, yielded, out of cycles
+    }
+}
+```
+
+Running in slices is what keeps the loop cooperative: `run` occupies the thread it is called on, so a browser page has to hand control back between slices — `await` a `setTimeout(0)`, or run the machine in a [worker](/machine/worker) and post the bytes out. The machine does not mind being interrupted; it is the same machine, at the same cycle, when the next call resumes it.
+
+## Wiring up xterm.js
+
+[xterm.js](https://xtermjs.org) is a terminal emulator for the browser, and the two halves connect directly:
+
+```ts twoslash
+// @noErrors
+import { Terminal } from "@xterm/xterm";
+import { type CartesiMachine } from "@cartesi/machine";
+declare const machine: CartesiMachine;
+// ---cut---
+// the guest hands over bare line feeds: on a physical terminal the host's own
+// tty driver adds the carriage returns, and here there is no host tty
+const terminal = new Terminal({ convertEol: true });
+terminal.open(document.getElementById("terminal")!);
+
+// keystrokes go to the guest as bytes
+const encoder = new TextEncoder();
+terminal.onData((data) => machine.writeConsoleInput(encoder.encode(data)));
+
+// and the guest's bytes go to the screen, escape sequences and all
+terminal.write(machine.readConsoleOutput());
+```
+
+Do not add a line discipline in between. The guest is running Linux with its own terminal driver: it echoes what it receives, handles backspace, turns `Ctrl+C` into `SIGINT`, and emits the escape sequences xterm.js knows how to render. Anything the host does on top of that is done twice.
+
+The window size is the host's to report: `console.tty_cols` and `console.tty_rows` are what the guest reads. Pass the whole console configuration back through `setRuntimeConfig` when the terminal resizes — a VirtIO console notices the change and interrupts the guest, which is what turns a browser resize into `SIGWINCH` and a redrawn `htop`. The HTIF console has no way to tell the guest, so there the size is fixed at boot.
+
+## Determinism
+
+Console *output* is just bytes leaving the machine; it changes nothing about the machine's execution and works on a reproducible machine.
+
+Console *input* is different, which is why the emulator refuses it unless `iunrep` is set. A machine that reads what a person typed cannot be replayed from its configuration — the keystrokes and their timing are not part of the state. An unreproducible machine also polls for input, and advances `mcycle` from the host clock while it waits.
+
+None of that touches a machine that does not ask for it. The rollups path never sets `iunrep`, never enables a console the guest can read from, and stays bit-for-bit reproducible.

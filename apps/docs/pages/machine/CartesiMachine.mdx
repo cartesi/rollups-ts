@@ -39,11 +39,15 @@ export interface CartesiMachine {
     replaceMemoryRange(rangeConfig: MemoryRangeConfig): void;
     readWord(address: bigint): bigint;
     writeWord(address: bigint, value: bigint): void;
-    readMemory(address: bigint, length: bigint): Buffer;
-    writeMemory(address: bigint, data: Buffer): void;
-    readVirtualMemory(address: bigint, length: bigint): Buffer;
-    writeVirtualMemory(address: bigint, data: Buffer): void;
+    readMemory(address: bigint, length: bigint): Uint8Array;
+    writeMemory(address: bigint, data: Uint8Array): void;
+    readVirtualMemory(address: bigint, length: bigint): Uint8Array;
+    writeVirtualMemory(address: bigint, data: Uint8Array): void;
     translateVirtualAddress(vaddr: bigint): bigint;
+
+    //// Console
+    readConsoleOutput(maxLength?: bigint): Uint8Array;
+    writeConsoleInput(data: Uint8Array): number;
 
     //// Register Operations
     getRegAddress(reg: Reg): bigint;
@@ -56,10 +60,10 @@ export interface CartesiMachine {
     resetUarch(): void;
 
     //// Hash Tree Operations
-    getRootHash(): Buffer;
-    readRevertRootHash(): Buffer;
-    writeRevertRootHash(hash: Buffer): void;
-    getNodeHash(address: bigint, log2Size: number): Buffer;
+    getRootHash(): Uint8Array;
+    readRevertRootHash(): Uint8Array;
+    writeRevertRootHash(hash: Uint8Array): void;
+    getNodeHash(address: bigint, log2Size: number): Uint8Array;
     getProof(address: bigint, log2Size: number, log2RootSize?: number): Proof;
     verifyHashTree(): boolean;
     getHashTreeStats(clear?: boolean): HashTreeStats;
@@ -70,25 +74,25 @@ export interface CartesiMachine {
     logResetUarch(logType: AccessLogType): AccessLog;
     logSendCmioResponse(
         reason: HtifYieldReason,
-        data: Buffer,
+        data: Uint8Array,
         logType: AccessLogType,
-        revertRootHash?: Buffer,
+        revertRootHash?: Uint8Array,
     ): string;
 
     //// Verification
-    verifyStepUarch(rootHashBefore: Buffer, log: AccessLog): Buffer;
-    verifyResetUarch(rootHashBefore: Buffer, log: AccessLog): Buffer;
+    verifyStepUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array;
+    verifyResetUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array;
 
     //// CMIO Operations
     sendCmioResponse(
         reason: HtifYieldReason,
-        data: Buffer,
-        revertRootHash?: Buffer,
+        data: Uint8Array,
+        revertRootHash?: Uint8Array,
     ): void;
     receiveCmioRequest(): {
         cmd: HtifYieldCommand;
         reason: HtifYieldReason;
-        data: Buffer;
+        data: Uint8Array;
     };
 
     //// Address Introspection
@@ -261,7 +265,7 @@ writeWord(address: bigint, value: bigint): void;
 Reads a chunk of data from memory at the given physical address and length.
 
 ```ts
-readMemory(address: bigint, length: bigint): Buffer;
+readMemory(address: bigint, length: bigint): Uint8Array;
 ```
 
 ## writeMemory
@@ -269,7 +273,7 @@ readMemory(address: bigint, length: bigint): Buffer;
 Writes a chunk of data to memory at the given physical address and length.
 
 ```ts
-writeMemory(address: bigint, data: Buffer): void;
+writeMemory(address: bigint, data: Uint8Array): void;
 ```
 
 ## readVirtualMemory
@@ -277,7 +281,7 @@ writeMemory(address: bigint, data: Buffer): void;
 Reads a chunk of data from memory at the given virtual address and length, using the current address mapping.
 
 ```ts
-readVirtualMemory(address: bigint, length: bigint): Buffer;
+readVirtualMemory(address: bigint, length: bigint): Uint8Array;
 ```
 
 ## writeVirtualMemory
@@ -285,7 +289,7 @@ readVirtualMemory(address: bigint, length: bigint): Buffer;
 Writes a chunk of data to memory at the given virtual address and length, using the current address mapping.
 
 ```ts
-writeVirtualMemory(address: bigint, data: Buffer): void;
+writeVirtualMemory(address: bigint, data: Uint8Array): void;
 ```
 
 ## translateVirtualAddress
@@ -294,6 +298,26 @@ Translates a virtual memory address to its corresponding physical memory address
 
 ```ts
 translateVirtualAddress(vaddr: bigint): bigint;
+```
+
+## readConsoleOutput
+
+Reads and consumes bytes the guest has written to its console. Without a `maxLength`, everything currently buffered is returned; an empty result means the guest has written nothing since the last call.
+
+The machine has to be configured for it, with `console.output_destination: "to_buffer"` in its [runtime configuration](/machine/create) — otherwise this throws. See [Terminal](/machine/terminal) for the loop this belongs in.
+
+```ts
+readConsoleOutput(maxLength?: bigint): Uint8Array;
+```
+
+## writeConsoleInput
+
+Appends bytes to the guest's console input, as if they had been typed. Returns how many were accepted: the buffer is finite, so a caller that hands over more than fits keeps the rest for the next call.
+
+The machine has to be configured for it, with `console.input_source: "from_buffer"` in its runtime configuration, and it has to be unreproducible (`processor.registers.iunrep: 1`) — what the host types cannot be replayed.
+
+```ts
+writeConsoleInput(data: Uint8Array): number;
 ```
 
 ## getRegAddress
@@ -351,7 +375,7 @@ resetUarch(): void;
 Obtains the root hash of the current machine state.
 
 ```ts
-getRootHash(): Buffer;
+getRootHash(): Uint8Array;
 ```
 
 ## getNodeHash
@@ -359,7 +383,7 @@ getRootHash(): Buffer;
 Obtains the hash of a node in the machine state hash tree.
 
 ```ts
-getNodeHash(address: bigint, log2Size: number): Buffer;
+getNodeHash(address: bigint, log2Size: number): Uint8Array;
 ```
 
 ## getProof
@@ -417,9 +441,9 @@ Sends a cmio response and returns a log of state accesses. The revert root hash 
 ```ts
 logSendCmioResponse(
     reason: HtifYieldReason,
-    data: Buffer,
+    data: Uint8Array,
     logType: AccessLogType,
-    revertRootHash?: Buffer,
+    revertRootHash?: Uint8Array,
 ): string;
 ```
 
@@ -440,7 +464,7 @@ verifyStep(
 Checks the validity of a state transition produced by a microarchitecture step log and returns the root hash obtained after the step, for the caller to check.
 
 ```ts
-verifyStepUarch(rootHashBefore: Buffer, log: AccessLog): Buffer;
+verifyStepUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array;
 ```
 
 ## verifyResetUarch
@@ -448,7 +472,7 @@ verifyStepUarch(rootHashBefore: Buffer, log: AccessLog): Buffer;
 Checks the validity of a state transition produced by a microarchitecture reset log and returns the root hash obtained after the reset, for the caller to check.
 
 ```ts
-verifyResetUarch(rootHashBefore: Buffer, log: AccessLog): Buffer;
+verifyResetUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array;
 ```
 
 ## sendCmioResponse
@@ -458,8 +482,8 @@ Sends a cmio response. Should only be called as a response to cmio requests with
 ```ts
 sendCmioResponse(
     reason: HtifYieldReason,
-    data: Buffer,
-    revertRootHash?: Buffer,
+    data: Uint8Array,
+    revertRootHash?: Uint8Array,
 ): void;
 ```
 
@@ -471,7 +495,7 @@ Receives a cmio request, including the yield command, reason, and data.
 receiveCmioRequest(): {
     cmd: HtifYieldCommand;
     reason: HtifYieldReason;
-    data: Buffer;
+    data: Uint8Array;
 };
 ```
 
@@ -480,8 +504,8 @@ receiveCmioRequest(): {
 Reads and writes the revert root hash recorded in the shadow state — the root hash verifiers accept for a rejected rollup input.
 
 ```ts
-readRevertRootHash(): Buffer;
-writeRevertRootHash(hash: Buffer): void;
+readRevertRootHash(): Uint8Array;
+writeRevertRootHash(hash: Uint8Array): void;
 ```
 
 ## getAddressName

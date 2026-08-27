@@ -475,6 +475,9 @@ const config: Config = defineConfig({
                     items: [
                         { text: "Local Machine", link: "/machine/local" },
                         { text: "Remote Machine", link: "/machine/remote" },
+                        { text: "Browser", link: "/machine/browser" },
+                        { text: "Worker", link: "/machine/worker" },
+                        { text: "Terminal", link: "/machine/terminal" },
                         {
                             text: "Rollups Machines",
                             link: "/machine/rollups-machines",
@@ -497,6 +500,12 @@ const config: Config = defineConfig({
                         { text: "empty", link: "/machine/empty" },
                         { text: "spawn", link: "/machine/spawn" },
                         { text: "connect", link: "/machine/connect" },
+                        { text: "init", link: "/machine/init" },
+                        {
+                            text: "connectWorker",
+                            link: "/machine/connectWorker",
+                        },
+                        { text: "connectHttp", link: "/machine/connectHttp" },
                         { text: "rollups", link: "/machine/rollups" },
                         {
                             text: "CartesiMachine",

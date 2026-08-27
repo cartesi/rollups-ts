@@ -10,11 +10,16 @@ import {
     ErrorCode,
     getDefaultConfig,
     getLastError,
+    getSlirpVersion,
+    hostfwd,
+    ipv4,
     load,
+    MachineError,
+    NET_USER,
     Reg,
     verifyStep,
-} from "../src/cartesi-machine";
-import { NodeCartesiMachine } from "../src/node/cartesi-machine";
+} from "../src";
+import { CartesiMachineImpl } from "../src/machine-impl";
 
 // step logs and stored machines are written here instead of the package root,
 // which is where relative filenames would land (the cwd is the package). the
@@ -38,14 +43,14 @@ describe("CartesiMachine", () => {
     describe("Static Methods", () => {
         it("should create a new empty machine", () => {
             const emptyMachine = empty();
-            expect(emptyMachine).toBeInstanceOf(NodeCartesiMachine);
+            expect(emptyMachine).toBeInstanceOf(CartesiMachineImpl);
             expect(emptyMachine.isEmpty()).toBe(true);
         });
 
         it("should clone an empty machine", () => {
             const original = empty();
             const cloned = original.cloneEmpty();
-            expect(cloned).toBeInstanceOf(NodeCartesiMachine);
+            expect(cloned).toBeInstanceOf(CartesiMachineImpl);
             expect(cloned.isEmpty()).toBe(true);
         });
 
@@ -99,7 +104,7 @@ describe("CartesiMachine", () => {
 
             // Load the machine
             const loadedMachine = load(testDir);
-            expect(loadedMachine).toBeInstanceOf(NodeCartesiMachine);
+            expect(loadedMachine).toBeInstanceOf(CartesiMachineImpl);
             expect(loadedMachine.isEmpty()).toBe(false);
 
             // Clean up
@@ -237,6 +242,123 @@ describe("CartesiMachine", () => {
         });
     });
 
+    describe("Networking", () => {
+        // A machine with a virtio net-user device sits behind libslirp's NAT.
+        // The library is loaded on demand, so whether these run for real
+        // depends on the host having it — a host without one has to fail
+        // cleanly rather than take the process down, which is the half worth
+        // guarding.
+        const slirp = getSlirpVersion();
+
+        it("should report whether libslirp is there", () => {
+            expect(slirp === null || slirp.length > 0).toBe(true);
+        });
+
+        it.runIf(slirp !== null)(
+            "should create a machine with user networking",
+            () => {
+                const networked = create({
+                    ram: { length: 128 * 1024 * 1024 },
+                    processor: { registers: { iunrep: 1 } },
+                    virtio: [
+                        {
+                            type: "net-user",
+                            hostfwd: [
+                                hostfwd({ hostPort: 8080, guestPort: 80 }),
+                            ],
+                        },
+                    ],
+                });
+                networked.destroy();
+            },
+        );
+
+        it.runIf(slirp === null)(
+            "should refuse user networking without libslirp",
+            () => {
+                expect(() =>
+                    create({
+                        ram: { length: 128 * 1024 * 1024 },
+                        processor: { registers: { iunrep: 1 } },
+                        virtio: [{ type: "net-user" }],
+                    }),
+                ).toThrow(/libslirp/);
+            },
+        );
+
+        it("should refuse a network device on a reproducible machine", () => {
+            // Packets and their timing are not part of the machine state.
+            expect(() =>
+                create({
+                    ram: { length: 128 * 1024 * 1024 },
+                    virtio: [{ type: "net-user" }],
+                }),
+            ).toThrow(MachineError);
+        });
+
+        it("should pack dotted-quad addresses", () => {
+            expect(ipv4("0.0.0.0")).toBe(0);
+            expect(ipv4("127.0.0.1")).toBe(2130706433);
+            // the top bit set: unsigned, not a negative int32
+            expect(ipv4("255.255.255.255")).toBe(4294967295);
+            expect(ipv4("10.0.2.15")).toBe(0x0a00020f);
+            expect(() => ipv4("10.0.2")).toThrow();
+            expect(() => ipv4("10.0.2.256")).toThrow();
+            expect(() => ipv4("10.0.2.x")).toThrow();
+        });
+
+        it("should forward host ports with the guest as the default target", () => {
+            expect(hostfwd({ hostPort: 8080, guestPort: 80 })).toEqual({
+                is_udp: false,
+                host_ip: ipv4("0.0.0.0"),
+                host_port: 8080,
+                guest_ip: ipv4(NET_USER.guest),
+                guest_port: 80,
+            });
+        });
+    });
+
+    describe("Console Buffers", () => {
+        it("should read and write the console buffers", () => {
+            // The host drives the console: output the guest writes is drained
+            // from one buffer and keystrokes are pushed into the other. Input
+            // makes the machine unreproducible, so it has to say so.
+            const buffered = create(
+                {
+                    ram: { length: 128 * 1024 * 1024 },
+                    processor: { registers: { iunrep: 1 } },
+                },
+                {
+                    console: {
+                        output_destination: "to_buffer",
+                        input_source: "from_buffer",
+                        input_buffer_size: 8,
+                    },
+                },
+            );
+
+            expect(buffered.readConsoleOutput().length).toBe(0);
+            expect(
+                buffered.writeConsoleInput(new TextEncoder().encode("ls\n")),
+            ).toBe(3);
+            // the buffer is finite: what did not fit stays with the caller
+            expect(
+                buffered.writeConsoleInput(
+                    new TextEncoder().encode("0123456789"),
+                ),
+            ).toBe(5);
+
+            buffered.destroy();
+        });
+
+        it("should refuse the buffers when the console is pointed elsewhere", () => {
+            expect(() => machine.readConsoleOutput()).toThrow(MachineError);
+            expect(() => machine.writeConsoleInput(new Uint8Array(1))).toThrow(
+                MachineError,
+            );
+        });
+    });
+
     describe("CMIO Operations", () => {
         it("should handle CMIO requests and responses", () => {
             // This test might fail if the machine is not in a yield state
@@ -288,7 +410,7 @@ describe("CartesiMachine", () => {
                 mcycleCount,
             );
 
-            expect(obtainedRootHash.equals(rootHashAfter)).toBe(true);
+            expect(obtainedRootHash).toEqual(rootHashAfter);
             fs.rmSync(logFilename, { force: true });
         });
 
@@ -301,7 +423,7 @@ describe("CartesiMachine", () => {
             const rootHashAfter = machine.getRootHash();
 
             const obtained = machine.verifyStepUarch(rootHashBefore, log);
-            expect(obtained.equals(rootHashAfter)).toBe(true);
+            expect(obtained).toEqual(rootHashAfter);
         });
 
         it("should verify uarch reset", () => {
@@ -313,7 +435,7 @@ describe("CartesiMachine", () => {
             const rootHashAfter = machine.getRootHash();
 
             const obtained = machine.verifyResetUarch(rootHashBefore, log);
-            expect(obtained.equals(rootHashAfter)).toBe(true);
+            expect(obtained).toEqual(rootHashAfter);
         });
     });
 

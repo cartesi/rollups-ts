@@ -1,10 +1,11 @@
 import {
     BreakReason,
     HtifYieldReason,
+    SharingMode,
     type CartesiMachine,
 } from "./cartesi-machine.js";
-import { NodeRemoteCartesiMachine } from "./node/remote-cartesi-machine.js";
-import { spawn, type RemoteCartesiMachine } from "./remote-cartesi-machine.js";
+import { getRemoteSpawner } from "./remote-binding.js";
+import type { RemoteCartesiMachine } from "./remote-cartesi-machine.js";
 import type { MachineRuntimeConfig } from "./types.js";
 
 /**
@@ -32,23 +33,23 @@ export class RollupsInputRejectedError extends Error {
  * The data field contains the output or report data.
  */
 export type AdvanceYield =
-    | { type: "output"; data: Buffer }
-    | { type: "report"; data: Buffer }
+    | { type: "output"; data: Uint8Array }
+    | { type: "report"; data: Uint8Array }
     | { type: "progress"; data: number };
 
-export type AdvanceReturn = Buffer;
+export type AdvanceReturn = Uint8Array;
 
 export type AdvanceResult = {
-    outputs: Buffer[];
-    reports: Buffer[];
-    outputsMerkleRoot: Buffer;
+    outputs: Uint8Array[];
+    reports: Uint8Array[];
+    outputsMerkleRoot: Uint8Array;
 };
 
 export interface RollupsMachine {
-    advance(input: Buffer): IterableIterator<AdvanceYield, AdvanceReturn>;
-    advance(input: Buffer, options: { collect: true }): AdvanceResult;
-    inspect(query: Buffer): IterableIterator<Buffer>;
-    inspect(query: Buffer, options: { collect: true }): Buffer[];
+    advance(input: Uint8Array): IterableIterator<AdvanceYield, AdvanceReturn>;
+    advance(input: Uint8Array, options: { collect: true }): AdvanceResult;
+    inspect(query: Uint8Array): IterableIterator<Uint8Array>;
+    inspect(query: Uint8Array, options: { collect: true }): Uint8Array[];
     shutdown(): void;
     store(dir: string): RollupsMachine;
 }
@@ -58,8 +59,15 @@ export interface RollupsMachine {
  * @param machine - The local machine.
  * @returns A rollups machine.
  */
-function rollupsFromLocal(machine: CartesiMachine): RollupsMachine {
-    return new LocalRollupsMachineImpl(machine);
+function rollupsFromLocal(
+    machine: CartesiMachine,
+    options?: { noRollback?: boolean; snapshotDir?: string },
+): RollupsMachine {
+    return new LocalRollupsMachineImpl(
+        machine,
+        options?.noRollback ?? false,
+        options?.snapshotDir,
+    );
 }
 
 /**
@@ -73,6 +81,34 @@ function rollupsFromRemote(
 ): RollupsMachine {
     return new RemoteRollupsMachineImpl(machine, options?.noRollback ?? false);
 }
+
+/**
+ * Remote machines are the ones that can fork and be shut down; testing for
+ * those two keeps this free of any binding's class.
+ */
+const isRemoteMachine = (
+    machine: CartesiMachine | RemoteCartesiMachine,
+): machine is RemoteCartesiMachine =>
+    typeof (machine as RemoteCartesiMachine).fork === "function" &&
+    typeof (machine as RemoteCartesiMachine).shutdown === "function";
+
+/**
+ * Where local rollups machines keep the snapshot a transaction can roll back
+ * to. /tmp exists both on a host filesystem and in the WebAssembly build's
+ * in-memory one.
+ */
+const DEFAULT_SNAPSHOT_DIR = "/tmp/cartesi-rollups";
+
+let snapshotCounter = 0;
+
+const uniqueName = (): string => {
+    snapshotCounter += 1;
+    const random =
+        typeof globalThis.crypto?.randomUUID === "function"
+            ? globalThis.crypto.randomUUID()
+            : Math.random().toString(36).slice(2);
+    return `snapshot-${snapshotCounter}-${random}`;
+};
 
 const DEFAULT_ADDRESS = "127.0.0.1:0";
 const DEFAULT_TIMEOUT = -1;
@@ -102,7 +138,10 @@ function rollupsFromStore(
     };
     const address = options?.address ?? DEFAULT_ADDRESS;
     const timeout = options?.timeout ?? DEFAULT_TIMEOUT;
-    const machine = spawn(address, timeout).load(dir, runtimeConfig);
+    const machine = getRemoteSpawner()(address, timeout).load(
+        dir,
+        runtimeConfig,
+    );
     return rollupsFromRemote(machine, options);
 }
 
@@ -119,9 +158,14 @@ export function rollups(
 /**
  * Create a rollups machine from a local machine.
  * @param machine - The local machine.
+ * @param options - `noRollback` runs inputs without a snapshot to roll back
+ * to; `snapshotDir` chooses where those snapshots are written.
  * @returns A rollups machine.
  */
-export function rollups(machine: CartesiMachine): RollupsMachine;
+export function rollups(
+    machine: CartesiMachine,
+    options?: { noRollback?: boolean; snapshotDir?: string },
+): RollupsMachine;
 
 /**
  * Create a rollups machine from a store directory.
@@ -149,6 +193,7 @@ export function rollups(
         runtimeConfig?: MachineRuntimeConfig;
         address?: string;
         timeout?: number;
+        snapshotDir?: string;
     },
 ): RollupsMachine {
     options = options ?? {
@@ -159,10 +204,10 @@ export function rollups(
 
     if (typeof arg1 === "string") {
         return rollupsFromStore(arg1, options);
-    } else if (arg1 instanceof NodeRemoteCartesiMachine) {
+    } else if (isRemoteMachine(arg1)) {
         return rollupsFromRemote(arg1, options);
     } else {
-        return rollupsFromLocal(arg1);
+        return rollupsFromLocal(arg1, options);
     }
 }
 
@@ -175,7 +220,7 @@ abstract class RollupsMachineImpl implements RollupsMachine {
     abstract rollbackTransaction(machine: CartesiMachine): void;
 
     // biome-ignore lint/suspicious/noExplicitAny: implementation signature of the `advance` overloads declared on RollupsMachine; callers never see it
-    advance(input: Buffer, options?: { collect: true }): any {
+    advance(input: Uint8Array, options?: { collect: true }): any {
         const generator = function* (
             this: RollupsMachineImpl,
         ): IterableIterator<AdvanceYield, AdvanceReturn> {
@@ -208,7 +253,9 @@ abstract class RollupsMachineImpl implements RollupsMachine {
                                 // exception
                                 this.rollbackTransaction(machine);
 
-                                const description = data.toString("utf-8"); // XXX: is this correct?
+                                const description = new TextDecoder().decode(
+                                    data,
+                                );
                                 throw new RollupsFatalError(description);
                             }
                             default: {
@@ -224,7 +271,11 @@ abstract class RollupsMachineImpl implements RollupsMachine {
                         switch (reason) {
                             case HtifYieldReason.AutomaticProgress: {
                                 try {
-                                    const progress = data.readUInt32LE();
+                                    const progress = new DataView(
+                                        data.buffer,
+                                        data.byteOffset,
+                                        data.byteLength,
+                                    ).getUint32(0, true);
                                     yield {
                                         type: "progress",
                                         data: progress,
@@ -256,8 +307,8 @@ abstract class RollupsMachineImpl implements RollupsMachine {
         }.bind(this);
 
         if (options?.collect) {
-            const outputs: Buffer[] = [];
-            const reports: Buffer[] = [];
+            const outputs: Uint8Array[] = [];
+            const reports: Uint8Array[] = [];
             const rollups = generator();
             while (true) {
                 const event = rollups.next();
@@ -281,10 +332,10 @@ abstract class RollupsMachineImpl implements RollupsMachine {
     }
 
     // biome-ignore lint/suspicious/noExplicitAny: implementation signature of the `inspect` overloads declared on RollupsMachine; callers never see it
-    inspect(query: Buffer, options?: { collect: true }): any {
+    inspect(query: Uint8Array, options?: { collect: true }): any {
         const generator = function* (
             this: RollupsMachineImpl,
-        ): IterableIterator<Buffer> {
+        ): IterableIterator<Uint8Array> {
             const machine = this.startTransaction();
 
             // write query
@@ -311,7 +362,9 @@ abstract class RollupsMachineImpl implements RollupsMachine {
                             case HtifYieldReason.ManualTxException: {
                                 // exception
                                 this.rollbackTransaction(machine);
-                                const description = data.toString("utf-8"); // XXX: is this correct?
+                                const description = new TextDecoder().decode(
+                                    data,
+                                );
                                 throw new RollupsFatalError(description);
                             }
                             default: {
@@ -409,28 +462,69 @@ class RemoteRollupsMachineImpl extends RollupsMachineImpl {
     }
 }
 
+/**
+ * A local machine has no server to fork, so a transaction is a snapshot: the
+ * machine is stored before the input is sent, and a rejected input (or a
+ * failure) loads it back into the same machine object. That costs a copy of
+ * the machine's memory ranges per input, which is the price of rollback
+ * without a second process; `noRollback` skips it for callers that do not
+ * need to survive a rejection.
+ */
 class LocalRollupsMachineImpl extends RollupsMachineImpl {
     private machine: CartesiMachine;
+    private readonly noRollback: boolean;
+    private readonly snapshotDir: string;
+    private snapshot: string | null = null;
 
-    constructor(machine: CartesiMachine) {
+    constructor(
+        machine: CartesiMachine,
+        noRollback: boolean = false,
+        snapshotDir: string = DEFAULT_SNAPSHOT_DIR,
+    ) {
         super();
         this.machine = machine;
+        this.noRollback = noRollback;
+        this.snapshotDir = snapshotDir;
     }
 
     startTransaction(): CartesiMachine {
+        if (!this.noRollback) {
+            this.discardSnapshot();
+            this.snapshot = `${this.snapshotDir}/${uniqueName()}`;
+            // sharing "all" writes the memory ranges out; the default copies
+            // the backing files of the machine's own configuration, which a
+            // machine created from a configuration does not have
+            this.machine.store(this.snapshot, SharingMode.All);
+        }
         return this.machine;
     }
 
-    commitTransaction(machine: CartesiMachine): void {
-        this.machine = machine;
+    commitTransaction(_machine: CartesiMachine): void {
+        this.discardSnapshot();
     }
 
-    rollbackTransaction(machine: CartesiMachine): void {
-        this.machine = machine;
+    rollbackTransaction(_machine: CartesiMachine): void {
+        if (this.snapshot === null) {
+            return;
+        }
+        const snapshot = this.snapshot;
+        this.snapshot = null;
+        // cm_load needs an empty machine object, and reusing this one keeps
+        // every reference the caller holds valid
+        this.machine.destroy();
+        this.machine.load(snapshot);
+        this.machine.removeStored(snapshot);
+    }
+
+    private discardSnapshot(): void {
+        if (this.snapshot !== null) {
+            this.machine.removeStored(this.snapshot);
+            this.snapshot = null;
+        }
     }
 
     shutdown(): void {
-        // no-op
+        this.discardSnapshot();
     }
 
     store(dir: string): RollupsMachine {

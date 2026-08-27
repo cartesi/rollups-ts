@@ -1,0 +1,72 @@
+# connectWorker
+
+Connects to a worker running the [WebAssembly module](/machine/browser) and returns the machine API with every call turned into a promise. This is how a page runs machines without blocking its main thread — see the [Worker](/machine/worker) guide.
+
+## Function Signature
+
+```ts
+connectWorker(endpoint: MessageEndpoint): CartesiMachineClient
+```
+
+- `endpoint`: anything with `postMessage` and `onmessage` — a `Worker`, a `MessagePort`, a `SharedWorker` port.
+
+It returns immediately: the module is instantiated in the worker on the first call.
+
+## Returns
+
+A `CartesiMachineClient`, which is the surface of [init](/machine/init) with the same method names and arguments, minus `module` and `fs` (the module lives in the worker), plus:
+
+- `rollups(machine, options?)`: wraps a machine the worker holds in the [rollups protocol](/machine/rollups-machines), returning a `RemoteRollupsMachine`;
+- `terminate()`: stops the worker, discarding every machine it holds.
+
+Calls that return a machine return a `RemoteMachine` — a proxy for a machine that stays in the worker — with the [CartesiMachine](/machine/CartesiMachine) methods as promises, plus `release()` to drop the worker's reference to it.
+
+Because generators cannot cross a message port, `advance` and `inspect` on a `RemoteRollupsMachine` always collect: they resolve with the full result rather than streaming.
+
+## Example
+
+```ts twoslash
+import { connectWorker } from "@cartesi/machine/wasm";
+
+const worker = new Worker(
+    new URL("@cartesi/machine/worker", import.meta.url),
+    { type: "module" },
+);
+
+const cartesi = connectWorker(worker);
+
+const machine = await cartesi.create({ ram: { length: 0x4000000 } });
+await machine.run(1_000_000n);
+console.log(await machine.getRootHash());
+
+// let the worker drop it; the page's proxy alone cannot tell it to
+await machine.release();
+
+cartesi.terminate();
+```
+
+## serve
+
+The other side of the same facade, and all `@cartesi/machine/worker` does:
+
+```ts
+serve(endpoint: MessageEndpoint, options?: InitOptions): void
+```
+
+- `endpoint`: in a worker, `self`; in a test, either end of a `MessageChannel`;
+- `options`: passed to [init](/machine/init) when the module is instantiated, on the first call.
+
+Use it to run the facade somewhere other than the default worker entry point:
+
+```ts twoslash
+// @filename: my-worker.ts
+import { serve } from "@cartesi/machine/wasm";
+
+serve(self as unknown as Parameters<typeof serve>[0]);
+```
+
+## Errors
+
+Errors thrown in the worker are flattened, sent across, and rebuilt on the page side, so a [MachineError](/machine/error-handling) arrives with its `code` and `description` intact and `instanceof MachineError` holds.
+
+Calling a method on a proxy that was already released rejects with `handle <n> was already released`.

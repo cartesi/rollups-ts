@@ -1,3 +1,7 @@
+// The machine wrapper itself: JSON in and out, byte blobs, error mapping.
+// It talks to a NativeAddon and knows nothing about how that addon reaches
+// libcartesi, so the N-API addon (src/node) and the Emscripten module
+// (src/wasm) share this one implementation.
 import type {
     BreakReason,
     CartesiMachine,
@@ -5,12 +9,13 @@ import type {
     Reg,
     SharingMode,
     UarchBreakReason,
-} from "../cartesi-machine.js";
+} from "./cartesi-machine.js";
 import {
     HtifYieldReason,
     MachineError,
     MAX_MCYCLE,
-} from "../cartesi-machine.js";
+} from "./cartesi-machine.js";
+import type { NativeAddon, NativeMachine } from "./native.js";
 import type {
     AccessLog,
     AccessLogType,
@@ -20,8 +25,7 @@ import type {
     MachineRuntimeConfig,
     MemoryRangeConfig,
     Proof,
-} from "../types.js";
-import { addon, type NativeMachine } from "./addon.js";
+} from "./types.js";
 
 /// Access log types
 enum AccessLogTypeEnum {
@@ -52,84 +56,26 @@ const call = <T>(fn: () => T): T => {
     }
 };
 
-// -----------------------------------------------------------------------------
-// High-level wrapper class
-// -----------------------------------------------------------------------------
-
 /**
  * High-level wrapper for the Cartesi Machine C API
  */
-export class NodeCartesiMachine implements CartesiMachine {
+export class CartesiMachineImpl implements CartesiMachine {
+    protected addon: NativeAddon;
     protected machine: NativeMachine;
-
-    /**
-     * Creates a new local machine object
-     */
-    static new(): CartesiMachine {
-        return new NodeCartesiMachine(call(() => addon.machineNew()));
-    }
 
     /**
      * Clones an empty machine object from an existing one
      */
     cloneEmpty(): CartesiMachine {
-        return new NodeCartesiMachine(call(() => this.machine.cloneEmpty()));
-    }
-
-    /**
-     * Creates a new machine with configuration
-     */
-    static createNew(
-        config: MachineConfig,
-        runtimeConfig?: MachineRuntimeConfig,
-        dir?: string,
-    ): CartesiMachine {
-        return new NodeCartesiMachine(
-            call(() =>
-                addon.machineCreateNew(
-                    JSON.stringify(config),
-                    runtimeConfig ? JSON.stringify(runtimeConfig) : null,
-                    dir ?? null,
-                ),
-            ),
+        return new CartesiMachineImpl(
+            this.addon,
+            call(() => this.machine.cloneEmpty()),
         );
     }
 
-    /**
-     * Loads a machine from a directory
-     */
-    static loadNew(
-        dir: string,
-        runtimeConfig?: MachineRuntimeConfig,
-        sharing?: SharingMode,
-    ): CartesiMachine {
-        return new NodeCartesiMachine(
-            call(() =>
-                addon.machineLoadNew(
-                    dir,
-                    runtimeConfig ? JSON.stringify(runtimeConfig) : null,
-                    sharing,
-                ),
-            ),
-        );
-    }
-
-    constructor(machine: NativeMachine) {
+    constructor(addon: NativeAddon, machine: NativeMachine) {
+        this.addon = addon;
         this.machine = machine;
-    }
-
-    /**
-     * Gets the last error message
-     */
-    static getLastError(): string {
-        return addon.getLastErrorMessage();
-    }
-
-    /**
-     * Gets the emulator version as a number (major * 1000000 + minor * 1000 + patch)
-     */
-    static getVersion(): bigint {
-        return call(() => addon.getVersion());
     }
 
     /**
@@ -142,15 +88,6 @@ export class NodeCartesiMachine implements CartesiMachine {
     }
 
     /**
-     * Gets the default configuration
-     */
-    static getDefaultConfig(): MachineConfig {
-        return JSON.parse(
-            call(() => addon.getDefaultConfig()),
-        ) as MachineConfig;
-    }
-
-    /**
      * Gets the address of a register
      */
     getRegAddress(reg: Reg): bigint {
@@ -158,24 +95,10 @@ export class NodeCartesiMachine implements CartesiMachine {
     }
 
     /**
-     * Gets the address of a register
-     */
-    static getRegAddress(reg: Reg): bigint {
-        return call(() => addon.getRegAddress(reg));
-    }
-
-    /**
      * Gets a description of what is at a given target physical address
      */
     getAddressName(paddr: bigint): string {
         return call(() => this.machine.getAddressName(paddr));
-    }
-
-    /**
-     * Gets a description of what is at a given target physical address
-     */
-    static getAddressName(paddr: bigint): string {
-        return call(() => addon.getAddressName(paddr));
     }
 
     /**
@@ -320,21 +243,21 @@ export class NodeCartesiMachine implements CartesiMachine {
     /**
      * Gets the root hash
      */
-    getRootHash(): Buffer {
+    getRootHash(): Uint8Array {
         return call(() => this.machine.getRootHash());
     }
 
     /**
      * Reads the revert root hash from the shadow state
      */
-    readRevertRootHash(): Buffer {
+    readRevertRootHash(): Uint8Array {
         return call(() => this.machine.readRevertRootHash());
     }
 
     /**
      * Writes the revert root hash to the shadow state
      */
-    writeRevertRootHash(hash: Buffer): void {
+    writeRevertRootHash(hash: Uint8Array): void {
         call(() => this.machine.writeRevertRootHash(hash));
     }
 
@@ -350,7 +273,7 @@ export class NodeCartesiMachine implements CartesiMachine {
     /**
      * Gets the hash of a node in the hash tree
      */
-    getNodeHash(address: bigint, log2Size: number): Buffer {
+    getNodeHash(address: bigint, log2Size: number): Uint8Array {
         return call(() => this.machine.getNodeHash(address, log2Size));
     }
 
@@ -385,29 +308,48 @@ export class NodeCartesiMachine implements CartesiMachine {
     /**
      * Reads memory
      */
-    readMemory(address: bigint, length: bigint): Buffer {
+    readMemory(address: bigint, length: bigint): Uint8Array {
         return call(() => this.machine.readMemory(address, length));
     }
 
     /**
      * Writes memory
      */
-    writeMemory(address: bigint, data: Buffer): void {
+    writeMemory(address: bigint, data: Uint8Array): void {
         call(() => this.machine.writeMemory(address, data));
     }
 
     /**
      * Reads virtual memory
      */
-    readVirtualMemory(address: bigint, length: bigint): Buffer {
+    readVirtualMemory(address: bigint, length: bigint): Uint8Array {
         return call(() => this.machine.readVirtualMemory(address, length));
     }
 
     /**
      * Writes virtual memory
      */
-    writeVirtualMemory(address: bigint, data: Buffer): void {
+    writeVirtualMemory(address: bigint, data: Uint8Array): void {
         call(() => this.machine.writeVirtualMemory(address, data));
+    }
+
+    /**
+     * Reads and consumes the console output buffer, which the runtime config
+     * has to point at with `console.output_destination: "to_buffer"`. Without
+     * a `maxLength`, everything buffered is returned.
+     */
+    readConsoleOutput(maxLength?: bigint): Uint8Array {
+        return call(() => this.machine.readConsoleOutput(maxLength ?? 0n));
+    }
+
+    /**
+     * Appends to the console input buffer, which the runtime config has to
+     * point at with `console.input_source: "from_buffer"`. The buffer is
+     * finite: the return value is how many bytes it took, and the caller keeps
+     * the rest for the next call.
+     */
+    writeConsoleInput(data: Uint8Array): number {
+        return Number(call(() => this.machine.writeConsoleInput(data)));
     }
 
     /**
@@ -444,7 +386,7 @@ export class NodeCartesiMachine implements CartesiMachine {
     receiveCmioRequest(): {
         cmd: HtifYieldCommand;
         reason: HtifYieldReason;
-        data: Buffer;
+        data: Uint8Array;
     } {
         return call(() => this.machine.receiveCmioRequest());
     }
@@ -458,8 +400,8 @@ export class NodeCartesiMachine implements CartesiMachine {
      */
     sendCmioResponse(
         reason: HtifYieldReason,
-        data: Buffer,
-        revertRootHash?: Buffer,
+        data: Uint8Array,
+        revertRootHash?: Uint8Array,
     ): void {
         const hash =
             revertRootHash ??
@@ -501,9 +443,9 @@ export class NodeCartesiMachine implements CartesiMachine {
      */
     logSendCmioResponse(
         reason: HtifYieldReason,
-        data: Buffer,
+        data: Uint8Array,
         logType: AccessLogType,
-        revertRootHash?: Buffer,
+        revertRootHash?: Uint8Array,
     ): string {
         const hash = revertRootHash ?? this.getRootHash();
         return call(() =>
@@ -517,52 +459,20 @@ export class NodeCartesiMachine implements CartesiMachine {
     }
 
     /**
-     * Verifies a step; returns the root hash obtained after the step, for
-     * the caller to check
-     */
-    static verifyStep(
-        rootHashBefore: Buffer,
-        logFilename: string,
-        mcycleCount: bigint,
-    ): Buffer {
-        return call(() =>
-            addon.verifyStep(rootHashBefore, logFilename, mcycleCount),
-        );
-    }
-
-    /**
      * Verifies a uarch step; returns the root hash obtained after the step
      */
-    verifyStepUarch(rootHashBefore: Buffer, log: AccessLog): Buffer {
+    verifyStepUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array {
         return call(() =>
             this.machine.verifyStepUarch(rootHashBefore, JSON.stringify(log)),
         );
     }
 
     /**
-     * Verifies a uarch step; returns the root hash obtained after the step
-     */
-    static verifyStepUarch(rootHashBefore: Buffer, log: AccessLog): Buffer {
-        return call(() =>
-            addon.verifyStepUarch(rootHashBefore, JSON.stringify(log)),
-        );
-    }
-
-    /**
      * Verifies uarch reset; returns the root hash obtained after the reset
      */
-    verifyResetUarch(rootHashBefore: Buffer, log: AccessLog): Buffer {
+    verifyResetUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array {
         return call(() =>
             this.machine.verifyResetUarch(rootHashBefore, JSON.stringify(log)),
-        );
-    }
-
-    /**
-     * Verifies uarch reset; returns the root hash obtained after the reset
-     */
-    static verifyResetUarch(rootHashBefore: Buffer, log: AccessLog): Buffer {
-        return call(() =>
-            addon.verifyResetUarch(rootHashBefore, JSON.stringify(log)),
         );
     }
 
@@ -572,35 +482,13 @@ export class NodeCartesiMachine implements CartesiMachine {
      */
     verifySendCmioResponse(
         reason: HtifYieldReason,
-        data: Buffer,
-        rootHashBefore: Buffer,
+        data: Uint8Array,
+        rootHashBefore: Uint8Array,
         log: AccessLog,
-        revertRootHash: Buffer,
-    ): Buffer {
+        revertRootHash: Uint8Array,
+    ): Uint8Array {
         return call(() =>
             this.machine.verifySendCmioResponse(
-                reason,
-                data,
-                rootHashBefore,
-                JSON.stringify(log),
-                revertRootHash,
-            ),
-        );
-    }
-
-    /**
-     * Verifies CMIO response; returns the root hash obtained after the
-     * response
-     */
-    static verifySendCmioResponse(
-        reason: HtifYieldReason,
-        data: Buffer,
-        rootHashBefore: Buffer,
-        log: AccessLog,
-        revertRootHash: Buffer,
-    ): Buffer {
-        return call(() =>
-            addon.verifySendCmioResponse(
                 reason,
                 data,
                 rootHashBefore,
@@ -626,3 +514,168 @@ export class NodeCartesiMachine implements CartesiMachine {
         ) as HashTreeStats;
     }
 }
+
+/**
+ * The calls that do not belong to a machine — constructors, constants and the
+ * standalone verifiers — bound to one addon. Each entry point (src/index.ts
+ * for Node, src/browser.ts for the browser) exports these under the names the
+ * package's public API uses.
+ */
+export const createMachineApi = (addon: NativeAddon) => ({
+    /**
+     * Creates a new empty machine object
+     */
+    empty(): CartesiMachine {
+        return new CartesiMachineImpl(
+            addon,
+            call(() => addon.machineNew()),
+        );
+    },
+
+    /**
+     * Creates a new machine from a configuration
+     */
+    create(
+        config: MachineConfig,
+        runtimeConfig?: MachineRuntimeConfig,
+        dir?: string,
+    ): CartesiMachine {
+        return new CartesiMachineImpl(
+            addon,
+            call(() =>
+                addon.machineCreateNew(
+                    JSON.stringify(config),
+                    runtimeConfig ? JSON.stringify(runtimeConfig) : null,
+                    dir ?? null,
+                ),
+            ),
+        );
+    },
+
+    /**
+     * Loads a machine from a stored directory
+     */
+    load(
+        dir: string,
+        runtimeConfig?: MachineRuntimeConfig,
+        sharing?: SharingMode,
+    ): CartesiMachine {
+        return new CartesiMachineImpl(
+            addon,
+            call(() =>
+                addon.machineLoadNew(
+                    dir,
+                    runtimeConfig ? JSON.stringify(runtimeConfig) : null,
+                    sharing,
+                ),
+            ),
+        );
+    },
+
+    /**
+     * Gets the last error message
+     */
+    getLastError(): string {
+        return addon.getLastErrorMessage();
+    },
+
+    /**
+     * Gets the emulator version as a number (major * 1000000 + minor * 1000 + patch)
+     */
+    getVersion(): bigint {
+        return call(() => addon.getVersion());
+    },
+
+    /**
+     * The version of libslirp behind virtio `net-user` networking, or null
+     * when this build has none — a machine with a `net-user` device then
+     * fails to create, and one without is unaffected.
+     *
+     * The Node binding loads libslirp on demand, so this answers what is
+     * installed on the host; the WebAssembly build has no networking and
+     * always returns null.
+     */
+    getSlirpVersion(): string | null {
+        return addon.getSlirpVersion?.() ?? null;
+    },
+
+    /**
+     * Gets the default machine configuration
+     */
+    getDefaultConfig(): MachineConfig {
+        return JSON.parse(
+            call(() => addon.getDefaultConfig()),
+        ) as MachineConfig;
+    },
+
+    /**
+     * Gets the address of a register
+     */
+    getRegAddress(reg: Reg): bigint {
+        return call(() => addon.getRegAddress(reg));
+    },
+
+    /**
+     * Gets a description of what is at a given target physical address
+     */
+    getAddressName(paddr: bigint): string {
+        return call(() => addon.getAddressName(paddr));
+    },
+
+    /**
+     * Verifies a step; returns the root hash obtained after the step, for the
+     * caller to check
+     */
+    verifyStep(
+        rootHashBefore: Uint8Array,
+        logFilename: string,
+        mcycleCount: bigint,
+    ): Uint8Array {
+        return call(() =>
+            addon.verifyStep(rootHashBefore, logFilename, mcycleCount),
+        );
+    },
+
+    /**
+     * Verifies a uarch step; returns the root hash obtained after the step
+     */
+    verifyStepUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array {
+        return call(() =>
+            addon.verifyStepUarch(rootHashBefore, JSON.stringify(log)),
+        );
+    },
+
+    /**
+     * Verifies uarch reset; returns the root hash obtained after the reset
+     */
+    verifyResetUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array {
+        return call(() =>
+            addon.verifyResetUarch(rootHashBefore, JSON.stringify(log)),
+        );
+    },
+
+    /**
+     * Verifies a CMIO response; returns the root hash obtained after the
+     * response
+     */
+    verifySendCmioResponse(
+        reason: HtifYieldReason,
+        data: Uint8Array,
+        rootHashBefore: Uint8Array,
+        log: AccessLog,
+        revertRootHash: Uint8Array,
+    ): Uint8Array {
+        return call(() =>
+            addon.verifySendCmioResponse(
+                reason,
+                data,
+                rootHashBefore,
+                JSON.stringify(log),
+                revertRootHash,
+            ),
+        );
+    },
+});
+
+/** The shape src/index.ts and src/browser.ts re-export. */
+export type MachineApi = ReturnType<typeof createMachineApi>;

@@ -1,12 +1,23 @@
-# Cartesi Machine + Node.js
+# Cartesi Machine
 
-The [Cartesi machine emulator](https://github.com/cartesi/machine-emulator) is a C++ library with a C API. This package binds it to Node.js as a native N-API addon linked against the static libraries of the official emulator distribution (currently [0.21.0](https://github.com/cartesi/machine-emulator/releases/tag/v0.21.0)). Prebuilt platform packages bundle everything — including the `cartesi-jsonrpc-machine` server executable used by [spawn](/machine/spawn) — so **no emulator installation is required** for the supported platforms.
+The [Cartesi machine emulator](https://github.com/cartesi/machine-emulator) is a C++ library with a C API. This package binds it to TypeScript — in Node.js, and in the browser — providing a fully typed and ergonomic API to create, manage and interact with Cartesi machines.
 
-It provides a fully typed and ergonomic TypeScript API for the Cartesi Machine C API and the Cartesi Machine JSON-RPC API, which allows you to create, manage, and interact with local or remote Cartesi machines from TypeScript/JavaScript applications.
+There are three ways to reach a machine, and they share one API:
+
+| | how it gets there | where it runs |
+| --- | --- | --- |
+| `@cartesi/machine` | native N-API addon, linked against the emulator distribution | Node.js |
+| [`@cartesi/machine/wasm`](/machine/browser) | libcartesi compiled to WebAssembly by Emscripten | browsers, Node.js, Deno, workers |
+| [`connectHttp()`](/machine/connectHttp) | JSON-RPC over `fetch`, to a `cartesi-jsonrpc-machine` server | anywhere with `fetch` |
+
+The Node.js binding links against the static libraries of the official emulator distribution (currently [0.21.0](https://github.com/cartesi/machine-emulator/releases/tag/v0.21.0)). Prebuilt platform packages bundle everything — including the `cartesi-jsonrpc-machine` server executable used by [spawn](/machine/spawn) — so **no emulator installation is required** for the supported platforms.
+
+The [WebAssembly build](/machine/browser) is the same emulator compiled for a different target, so it is the same machine: identical root hashes, proofs and access logs, at roughly the speed of the native build.
 
 ## Features
 
 - **Self-contained**: prebuilt binaries per platform, no emulator installation needed;
+- **Runs in a browser**: [the same API over WebAssembly](/machine/browser), off the main thread [in a worker](/machine/worker);
 - **Comprehensive**: Complete API, for any use case, including [local](/machine/local) and [remote](/machine/remote) machines;
 - **Full Type Safety**: Complete TypeScript definitions for all C API functions and types;
 - **High-Level Wrapper**: Easy-to-use [CartesiMachine](/machine/CartesiMachine) and [RemoteCartesiMachine](/machine/RemoteCartesiMachine) interfaces that wraps the C API;
@@ -36,5 +47,7 @@ While in pre-release, the library is published under the `alpha` npm tag. The `@
 On Linux (x64, arm64) and macOS (x64, arm64) this installs a prebuilt platform package (`@cartesi/machine-<platform>-<arch>`) containing the native addon and the JSON-RPC server executable — no compiler needed.
 
 On other platforms the install script compiles the addon from source, which requires a C++ compiler and an installed cartesi-machine emulator distribution (the `machine-emulator` `.deb` from the [official releases](https://github.com/cartesi/machine-emulator/releases) on Debian/Ubuntu, or `brew install cartesi/tap/cartesi-machine-emulator` on macOS).
+
+Nothing extra is needed for the browser: the WebAssembly module ships inside the same package, and bundlers pick it up through the `browser` condition. See [Browser](/machine/browser).
 
 Check the [troubleshooting](/machine/troubleshooting) section in case of problems.
