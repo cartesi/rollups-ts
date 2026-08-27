@@ -1,0 +1,542 @@
+:root {
+    --bg: #0b0d11;
+    --panel: #14171d;
+    --panel-2: #191d25;
+    --line: #262b35;
+    --fg: #d7dae0;
+    --dim: #8b93a1;
+    --accent: #63b3ed;
+    --danger: #f08a8a;
+    --ok: #7fd18b;
+    color-scheme: dark;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font:
+        13px / 1.5 ui-sans-serif,
+        system-ui,
+        -apple-system,
+        sans-serif;
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.masthead {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line);
+}
+
+.masthead h1 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.masthead h1 span {
+    color: var(--accent);
+}
+
+.masthead p {
+    margin: 2px 0 0;
+    color: var(--dim);
+}
+
+.columns {
+    display: grid;
+    grid-template-columns: minmax(420px, 1fr) minmax(480px, 1.2fr);
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+}
+
+.column {
+    min-width: 0;
+    overflow: auto;
+}
+
+.column-config {
+    padding: 16px;
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.column-run {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* panels */
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.panel-head h2 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--dim);
+}
+
+.panel-body {
+    padding: 12px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hint {
+    margin: 8px 14px 0;
+    color: var(--dim);
+}
+
+.panel-body .hint {
+    margin: 0;
+}
+
+.error {
+    margin: 0;
+    color: var(--danger);
+}
+
+/* fields */
+
+.row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 120px;
+}
+
+.field-wide {
+    flex: 1;
+}
+
+.field-label {
+    color: var(--dim);
+    font-size: 12px;
+}
+
+.field-hint {
+    color: var(--dim);
+    font-size: 11px;
+}
+
+.input {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--fg);
+    font: inherit;
+    padding: 6px 8px;
+    width: 100%;
+}
+
+.input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+}
+
+.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+textarea.input {
+    resize: vertical;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.toggle input {
+    accent-color: var(--accent);
+}
+
+/* buttons */
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--fg);
+    cursor: pointer;
+    font: inherit;
+    padding: 6px 12px;
+    white-space: nowrap;
+}
+
+.button:hover:not(:disabled) {
+    border-color: var(--accent);
+}
+
+.button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.button-primary {
+    background: var(--accent);
+    border-color: transparent;
+    color: #0b0d11;
+    font-weight: 600;
+}
+
+.button-danger:not(:disabled) {
+    color: var(--danger);
+}
+
+.button-ghost {
+    background: transparent;
+    color: var(--dim);
+}
+
+/* images */
+
+.catalog {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.catalog-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 10px;
+}
+
+.images {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.images th {
+    color: var(--dim);
+    font-size: 11px;
+    font-weight: 500;
+    text-align: left;
+    text-transform: uppercase;
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--line);
+}
+
+.images td {
+    padding: 6px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+}
+
+.images tr:last-child td {
+    border-bottom: none;
+}
+
+.numeric {
+    text-align: right;
+    color: var(--dim);
+    white-space: nowrap;
+}
+
+.slots {
+    display: flex;
+    gap: 6px;
+}
+
+.drive {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.drive-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.json {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    margin: 0;
+    max-height: 320px;
+    overflow: auto;
+    padding: 10px;
+    font-size: 12px;
+}
+
+/* running */
+
+.runbar {
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+}
+
+.runbar-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.runbar-stats {
+    align-items: center;
+    color: var(--dim);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.runbar-stats strong {
+    color: var(--fg);
+    font-weight: 600;
+}
+
+.badge {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 1px 10px;
+    text-transform: lowercase;
+}
+
+.badge-running {
+    border-color: var(--ok);
+    color: var(--ok);
+}
+
+.badge-starting {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.badge-error {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.hash {
+    font-size: 12px;
+}
+
+.terminal {
+    flex: 1;
+    min-height: 240px;
+    padding: 8px 10px;
+    background: #0b0d11;
+}
+
+/* responsive — last, so these override the rules above rather than losing to
+   them on source order */
+
+/*
+ * Narrow: the two panes become one document.
+ *
+ * Side by side, each column scrolls on its own — which is what makes the
+ * terminal stay put while the form moves. Stacked, that same rule gives the
+ * form a letterbox a few hundred pixels tall and hands the rest to a terminal
+ * that is empty until something boots. So below the breakpoint the page
+ * scrolls as a whole, the form takes the height it needs, and the terminal
+ * takes a share of the viewport rather than what is left over.
+ */
+@media (max-width: 1000px) {
+    html,
+    body {
+        height: auto;
+    }
+
+    .app {
+        height: auto;
+        min-height: 100%;
+    }
+
+    .columns {
+        grid-template-columns: 1fr;
+    }
+
+    .column {
+        overflow: visible;
+    }
+
+    .column-config {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .column-run {
+        overflow: visible;
+    }
+
+    /* The controls stay reachable while the terminal is what you are looking
+       at — on a phone the boot button would otherwise be a scroll away. */
+    .runbar {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--bg);
+    }
+
+    .terminal {
+        flex: none;
+        height: 60vh;
+        min-height: 260px;
+    }
+}
+
+/*
+ * Phone. Everything here is about the two things a small screen changes:
+ * there is no room for a second column of anything, and the pointer is a
+ * finger.
+ */
+@media (max-width: 760px) {
+    .masthead {
+        padding: 12px 14px;
+    }
+
+    /* the standfirst is four lines of prose on a phone, above the thing it
+       describes */
+    .masthead p {
+        display: none;
+    }
+
+    .column-config {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .panel-head,
+    .panel-body {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .runbar {
+        padding: 10px 12px;
+    }
+
+    /* A finger needs more than a mouse does, and iOS zooms the page when it
+       focuses an input whose text is under 16px. */
+    .button {
+        min-height: 36px;
+        padding: 8px 14px;
+    }
+
+    .input {
+        font-size: 16px;
+        padding: 8px 10px;
+    }
+
+    .field {
+        min-width: 0;
+    }
+
+    .row > .field {
+        flex: 1 1 100%;
+    }
+
+    /* The image table has four columns and nowhere to put them: as a table it
+       cuts "remove" off the right edge. Each row becomes a card instead —
+       name and size on one line, what it is used as and removing it on the
+       next. */
+    .images thead {
+        display: none;
+    }
+
+    .images,
+    .images tbody,
+    .images td {
+        display: block;
+    }
+
+    .images tr {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 6px 10px;
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        margin-bottom: 8px;
+        padding: 8px 10px;
+    }
+
+    .images td {
+        border-bottom: none;
+        padding: 0;
+    }
+
+    .images td:nth-child(2) {
+        justify-self: end;
+    }
+
+    .images td:nth-child(4) {
+        justify-self: end;
+    }
+
+    /* the description takes the whole line at this width, so the button
+       wraps under it — against the right edge, where it started */
+    .catalog-row {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .catalog-row > :last-child {
+        margin-left: auto;
+    }
+
+    .terminal {
+        height: 55vh;
+        padding: 6px 8px;
+    }
+}

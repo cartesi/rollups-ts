@@ -1,0 +1,32 @@
+{
+    "name": "@cartesi/cm-playground",
+    "version": "0.0.1-alpha.0",
+    "private": true,
+    "description": "A browser playground for configuring, booting and driving Cartesi Machines",
+    "type": "module",
+    "scripts": {
+        "build": "next build",
+        "check-types": "tsc --noEmit",
+        "clean": "rm -rf .turbo node_modules .next",
+        "dev": "next dev",
+        "lint": "biome check",
+        "start": "next start"
+    },
+    "dependencies": {
+        "@cartesi/machine": "1.0.0-alpha.1",
+        "@xterm/addon-fit": "^0.11.0",
+        "@xterm/xterm": "^6.0.0",
+        "next": "^16.3.3",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8"
+    },
+    "devDependencies": {
+        "@types/node": "catalog:",
+        "@types/react": "catalog:",
+        "@types/react-dom": "^19.2.3",
+        "typescript": "catalog:"
+    },
+    "engines": {
+        "node": ">=22"
+    }
+}

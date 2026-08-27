@@ -3,6 +3,11 @@ packages:
     - packages/*
 
 allowBuilds:
+    # The playground uses @cartesi/machine's WebAssembly entry point, which is
+    # bundled in the package; its install script only matters to callers of the
+    # native addon, and letting it run would mean an emulator installation and a
+    # compiler wherever this workspace is installed — a deployment included.
+    '@cartesi/machine': false
     es5-ext: true
     esbuild: true
     vue-demi: true
@@ -42,3 +47,8 @@ minimumReleaseAgeExclude:
     - "@changesets/should-skip-package@1.0.0"
     - "@changesets/types@7.0.0"
     - "@changesets/write@1.0.0"
+    - '@cartesi/machine-darwin-arm64@1.0.0-alpha.1'
+    - '@cartesi/machine-darwin-x64@1.0.0-alpha.1'
+    - '@cartesi/machine-linux-arm64@1.0.0-alpha.1'
+    - '@cartesi/machine-linux-x64@1.0.0-alpha.1'
+    - '@cartesi/machine@1.0.0-alpha.1'

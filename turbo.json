@@ -7,6 +7,11 @@
             "inputs": ["$TURBO_DEFAULT$", ".env*"],
             "outputs": ["dist/**"]
         },
+        "@cartesi/cm-playground#build": {
+            "dependsOn": ["^build"],
+            "inputs": ["$TURBO_DEFAULT$", ".env*"],
+            "outputs": [".next/**", "!.next/cache/**"]
+        },
         "clean": {},
         "lint": {
             "dependsOn": ["^lint"]
