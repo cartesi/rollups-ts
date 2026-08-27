@@ -1,0 +1,112 @@
+# Browser
+
+The emulator is a C++ library, and Emscripten compiles it to WebAssembly as readily as a native toolchain compiles it to a `.so`. `@cartesi/machine/wasm` is that build, driven through the same C API the native addon binds — so it is the same machine, with the same root hashes, proofs and access logs, at roughly the same speed.
+
+It is built for `web`, `worker` and `node` environments, so it runs on a page, in a worker, and in Node.js — anywhere with WebAssembly and no need for a compiler or an emulator installation.
+
+## Importing
+
+```ts
+import { init } from "@cartesi/machine/wasm";
+```
+
+The package's main entry also resolves here through the [`browser` condition](https://nodejs.org/api/packages.html#community-conditions-definitions), so bundlers that honor it — Vite, webpack, Rollup, esbuild with `--platform=browser` — give the WebAssembly build to `import { init } from "@cartesi/machine"` as well. The `/wasm` subpath is the explicit form, and the one to use when the WebAssembly build is wanted *in Node.js*, where the bare specifier resolves to the native addon.
+
+Nothing else is needed at build time: the module is a single ES file with the WebAssembly embedded in it, shipped inside the package.
+
+## Instantiating
+
+WebAssembly is instantiated asynchronously, so unlike the Node.js entry — where the addon is bound at import time — the machine constructors come from `init()`:
+
+```ts twoslash
+import { init } from "@cartesi/machine/wasm";
+
+const cartesi = await init();
+
+// same constructors as the Node.js binding, on the same interface
+const machine = cartesi.create({
+    ram: { length: 0x4000000 },
+});
+
+machine.run(1_000_000n);
+console.log(machine.getRootHash());
+machine.destroy();
+```
+
+The value `init()` resolves to carries [create](/machine/create), [load](/machine/load), [empty](/machine/empty) and the verification functions, plus the two handles that only exist in this build — the module and its filesystem. See [init](/machine/init) for the full surface.
+
+Each call builds an independent module, with its own heap and its own filesystem. Machines from different modules cannot be mixed, and one module is normally all a page needs.
+
+## Snapshots
+
+There is no host filesystem to store to. The module has its own in-memory one, and a stored machine is a directory in it, so a snapshot has to be moved in before it can be loaded and moved out to be kept. `writeSnapshot` and `readSnapshot` do that as a tar archive — the exact bytes `tar` produces from a directory `machine.store()` wrote:
+
+```ts twoslash
+import { init } from "@cartesi/machine/wasm";
+
+const cartesi = await init();
+
+// unpack a snapshot served alongside the page
+const response = await fetch("/app.tar");
+cartesi.writeSnapshot("/machines/app", new Uint8Array(await response.arrayBuffer()));
+
+const machine = cartesi.load("/machines/app");
+machine.run(1_000_000n);
+
+// pack the machine back up, to keep it beyond the life of the page
+machine.store("/machines/app-after");
+const archive = cartesi.readSnapshot("/machines/app-after");
+console.log(archive.byteLength);
+```
+
+`cartesi.fs` is the filesystem itself ([Emscripten's `FS`](https://emscripten.org/docs/api_reference/Filesystem-API.html)) for anything the two helpers do not cover — mounting IndexedDB-backed storage, listing a directory, deleting one.
+
+:::warning
+The filesystem lives in the module's heap, and so does everything in it. A 128MB machine snapshot occupies 128MB of that heap while it is unpacked, on top of the machine loaded from it.
+:::
+
+## Rollups
+
+[Rollups machines](/machine/rollups-machines) work here too, from a machine rather than from a directory:
+
+```ts twoslash
+import { init, rollups } from "@cartesi/machine/wasm";
+import { stringToBytes } from "viem";
+
+const cartesi = await init();
+
+const response = await fetch("/app.tar");
+cartesi.writeSnapshot("/machines/app", new Uint8Array(await response.arrayBuffer()));
+
+const app = rollups(cartesi.load("/machines/app"), {
+    snapshotDir: "/machines/snapshots",
+});
+
+for (const report of app.inspect(stringToBytes("test"), { collect: true })) {
+    console.log(report);
+}
+```
+
+Rejected inputs are rolled back through a snapshot taken in that directory, since there is no process to fork. That is the same code path local machines take in Node.js — see [Rollups Machines](/machine/rollups-machines).
+
+## What is not available
+
+Everything that needs a process or a socket:
+
+- [spawn](/machine/spawn) and [connect](/machine/connect), and the server-level methods of [RemoteCartesiMachine](/machine/RemoteCartesiMachine) — `fork`, `rebind`, `emancipate`, `shutdown`. Calling one throws. To drive a machine *server* from a browser, use [connectHttp](/machine/connectHttp), which speaks the same JSON-RPC over `fetch`;
+- host networking inside the machine (virtio net-user), which is compiled out;
+- concurrency: the build is single-threaded, so hash tree updates are not parallelized.
+
+## Memory
+
+The module starts with 64MB and grows to at most 4GB. A machine's RAM and flash drives are allocated in that heap, which puts a practical ceiling on machine size — and, on 32-bit `wasm32`, a hard one at 4GB for everything at once.
+
+Machines are freed when garbage collected, through a `FinalizationRegistry`, but that is a best-effort backstop: call `destroy()` on a machine you are done with, or the heap keeps its memory ranges until the collector gets around to it.
+
+## Staying responsive
+
+`run()` occupies the thread it is called on, and an advance is seconds of compute — enough to freeze a page. Run the module in a worker instead: [Worker](/machine/worker).
+
+## A terminal on a page
+
+A guest's console is two buffers the host owns, so a WebAssembly machine can be wired straight to a terminal emulator like xterm.js — the guest running Linux on one side, a `<div>` on the other, and a plain synchronous loop in between. See [Terminal](/machine/terminal).

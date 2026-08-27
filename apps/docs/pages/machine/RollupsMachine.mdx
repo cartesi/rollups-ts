@@ -6,8 +6,8 @@ The `RollupsMachine` interface provides the main methods for interacting with a 
 
 ```ts
 interface RollupsMachine {
-    advance(input: Buffer): IterableIterator<AdvanceYield>;
-    inspect(query: Buffer): IterableIterator<Buffer>;
+    advance(input: Uint8Array): IterableIterator<AdvanceYield>;
+    inspect(query: Uint8Array): IterableIterator<Uint8Array>;
     shutdown(): void;
     store(dir: string): RollupsMachine;
 }
@@ -18,11 +18,11 @@ interface RollupsMachine {
 Sends an advance request to the machine. Yields outputs, reports, and progress updates as they are produced.
 
 ```ts
-advance(input: Buffer): IterableIterator<AdvanceYield>
+advance(input: Uint8Array): IterableIterator<AdvanceYield>
 
 type AdvanceYield =
-    | { type: "output"; data: Buffer }
-    | { type: "report"; data: Buffer }
+    | { type: "output"; data: Uint8Array }
+    | { type: "report"; data: Uint8Array }
     | { type: "progress"; data: number };
 ```
 
@@ -31,10 +31,10 @@ type AdvanceYield =
 
 ## inspect
 
-Sends an inspect request to the machine. Yields each report (as a Buffer) produced by the inspect request.
+Sends an inspect request to the machine. Yields each report (as a Uint8Array) produced by the inspect request.
 
 ```ts
-inspect(query: Buffer): IterableIterator<Buffer>
+inspect(query: Uint8Array): IterableIterator<Uint8Array>
 ```
 
 - Throws `RollupsInputRejectedError` if the query is rejected.

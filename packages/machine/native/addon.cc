@@ -34,6 +34,7 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #ifndef _WIN32
@@ -222,6 +223,8 @@ private:
     Napi::Value ReadVirtualMemory(const Napi::CallbackInfo &info);
     Napi::Value WriteVirtualMemory(const Napi::CallbackInfo &info);
     Napi::Value TranslateVirtualAddress(const Napi::CallbackInfo &info);
+    Napi::Value ReadConsoleOutput(const Napi::CallbackInfo &info);
+    Napi::Value WriteConsoleInput(const Napi::CallbackInfo &info);
     Napi::Value Run(const Napi::CallbackInfo &info);
     Napi::Value RunUarch(const Napi::CallbackInfo &info);
     Napi::Value ResetUarch(const Napi::CallbackInfo &info);
@@ -571,6 +574,48 @@ Napi::Value Machine::TranslateVirtualAddress(const Napi::CallbackInfo &info) {
     uint64_t paddr = 0;
     CHECK_CM(env, cm_translate_virtual_address(machine_, vaddr, &paddr));
     return Napi::BigInt::New(env, paddr);
+}
+
+// Reads whatever the guest has written to the console output buffer. A
+// maxLength of zero means "everything there is": the emulator reports the
+// buffered size when handed a null buffer, so ask first and then consume.
+Napi::Value Machine::ReadConsoleOutput(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    uint64_t max_length = 0;
+    if (!get_u64(env, info[0], "maxLength", &max_length)) {
+        return env.Undefined();
+    }
+    uint64_t read_length = 0;
+    if (max_length == 0) {
+        CHECK_CM(env, cm_read_console_output(machine_, nullptr, 0, &max_length));
+        if (max_length == 0) {
+            return Napi::Buffer<uint8_t>::New(env, 0);
+        }
+    }
+    if (max_length > SIZE_MAX) {
+        Napi::RangeError::New(env, "maxLength is too large").ThrowAsJavaScriptException();
+        return env.Undefined();
+    }
+    Napi::Buffer<uint8_t> data = Napi::Buffer<uint8_t>::New(env, static_cast<size_t>(max_length));
+    CHECK_CM(env, cm_read_console_output(machine_, data.Data(), max_length, &read_length));
+    if (read_length == max_length) {
+        return data;
+    }
+    return Napi::Buffer<uint8_t>::Copy(env, data.Data(), static_cast<size_t>(read_length));
+}
+
+// Appends to the console input buffer. The buffer is finite, so the emulator
+// reports how much it took and the caller keeps the rest.
+Napi::Value Machine::WriteConsoleInput(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    const uint8_t *data = nullptr;
+    size_t length = 0;
+    if (!get_bytes(env, info[0], "data", &data, &length)) {
+        return env.Undefined();
+    }
+    uint64_t written_length = 0;
+    CHECK_CM(env, cm_write_console_input(machine_, data, length, &written_length));
+    return Napi::BigInt::New(env, written_length);
 }
 
 Napi::Value Machine::Run(const Napi::CallbackInfo &info) {
@@ -957,6 +1002,8 @@ Napi::Object Machine::Init(Napi::Env env, Napi::Object exports) {
             InstanceMethod<&Machine::ReadVirtualMemory>("readVirtualMemory"),
             InstanceMethod<&Machine::WriteVirtualMemory>("writeVirtualMemory"),
             InstanceMethod<&Machine::TranslateVirtualAddress>("translateVirtualAddress"),
+            InstanceMethod<&Machine::ReadConsoleOutput>("readConsoleOutput"),
+            InstanceMethod<&Machine::WriteConsoleInput>("writeConsoleInput"),
             InstanceMethod<&Machine::Run>("run"),
             InstanceMethod<&Machine::RunUarch>("runUarch"),
             InstanceMethod<&Machine::ResetUarch>("resetUarch"),
@@ -1006,6 +1053,21 @@ Napi::Value GetLastErrorMessage(const Napi::CallbackInfo &info) {
 
 Napi::Value GetVersion(const Napi::CallbackInfo &info) {
     return Napi::BigInt::New(info.Env(), cm_get_version());
+}
+
+// libslirp's own version, or null when the library is not there — which is
+// the same thing as saying whether a virtio net-user device can be created.
+// The symbol resolves either to the real library (CARTESI_SLIRP=yes) or to
+// native/slirp-forward.cc, which answers "none" when it cannot load it.
+extern "C" const char *slirp_version_string(void);
+
+Napi::Value GetSlirpVersion(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    const char *version = slirp_version_string();
+    if (version == nullptr || std::string_view{version} == "none") {
+        return env.Null();
+    }
+    return Napi::String::New(env, version);
 }
 
 Napi::Value MachineNew(const Napi::CallbackInfo &info) {
@@ -1169,6 +1231,7 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
     Machine::Init(env, exports);
     exports.Set("getLastErrorMessage", Napi::Function::New(env, GetLastErrorMessage));
     exports.Set("getVersion", Napi::Function::New(env, GetVersion));
+    exports.Set("getSlirpVersion", Napi::Function::New(env, GetSlirpVersion));
     exports.Set("machineNew", Napi::Function::New(env, MachineNew));
     exports.Set("machineCreateNew", Napi::Function::New(env, MachineCreateNew));
     exports.Set("machineLoadNew", Napi::Function::New(env, MachineLoadNew));

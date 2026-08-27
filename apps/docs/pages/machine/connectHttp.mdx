@@ -1,0 +1,77 @@
+# connectHttp
+
+Drives a machine in a `cartesi-jsonrpc-machine` server over `fetch`. No binding is involved — no native addon, no WebAssembly module — so this works in a browser, in Node.js, and in any runtime with a global `fetch`.
+
+It is the same server [spawn](/machine/spawn) starts and [connect](/machine/connect) talks to, reached over HTTP instead of through the emulator's native client. Calls are asynchronous, so the result mirrors [CartesiMachine](/machine/CartesiMachine) and [RemoteCartesiMachine](/machine/RemoteCartesiMachine) method for method, with each returning a promise.
+
+## Function Signature
+
+```ts
+connectHttp(url: string, options?: ConnectOptions): RemoteMachineClient
+```
+
+- `url`: the server's HTTP address, for example `http://127.0.0.1:8080`;
+- `options.fetch` (optional): the `fetch` to use. Defaults to the global one;
+- `options.fetchOptions` (optional): merged into every request, for credentials, headers, or an `AbortSignal`.
+
+Nothing is sent until the first call, so this cannot tell whether the address answers — `getServerVersion()` is the cheapest way to find out.
+
+## Import
+
+It ships on both entry points, and on a subpath of its own for callers that want neither:
+
+```ts
+import { connectHttp } from "@cartesi/machine";       // Node.js
+import { connectHttp } from "@cartesi/machine/wasm";  // browser
+import { connect } from "@cartesi/machine/jsonrpc";   // just this
+```
+
+## Example
+
+```ts twoslash
+import { connectHttp } from "@cartesi/machine";
+
+const machine = connectHttp("http://127.0.0.1:8080");
+
+console.log(await machine.getServerVersion());
+
+await machine.load("/machines/app");
+const reason = await machine.run();
+console.log(reason, await machine.getRootHash());
+
+await machine.shutdown();
+```
+
+Note the paths are the *server's*: `load` and `store` name directories on the host running `cartesi-jsonrpc-machine`, not on the machine calling it.
+
+## Running the server
+
+```bash
+cartesi-jsonrpc-machine --server-address=127.0.0.1:8080
+```
+
+The server answers JSON-RPC over HTTP and sends `Access-Control-Allow-Origin`, so a page can call it cross-origin. Which also means anyone who can reach it can run machines on it and read files it can read: bind it to a loopback address, or put it behind something that authenticates — `fetchOptions` is where the credentials or headers for that go.
+
+## Forking
+
+`fork()` starts a child server holding a copy of the machine and returns a client for it. That is how a [rollups machine](/machine/rollups-machines) takes a snapshot it can go back to without copying memory, and it works here as it does over the native client:
+
+```ts twoslash
+import { connectHttp } from "@cartesi/machine";
+
+const machine = connectHttp("http://127.0.0.1:8080");
+await machine.load("/machines/app");
+
+const child = await machine.fork();
+await child.run(1_000_000n);
+console.log(await child.getRootHash());
+await child.shutdown();
+```
+
+## Wire encoding
+
+Three things differ between the C API and the JSON-RPC one, and the client absorbs all three: byte blobs and hashes travel as base64, break reasons and registers travel as names rather than numbers, and u64 values arrive as JSON numbers that would lose precision — the client parses them as bigints before `JSON.parse` can round them.
+
+## Errors
+
+A JSON-RPC error carrying an emulator error code is raised as a [MachineError](/machine/error-handling), the same class the bindings throw. A transport failure — the server unreachable, a non-2xx response — is raised as a plain `Error`.

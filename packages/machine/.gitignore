@@ -8,3 +8,8 @@ npm/*/cartesi-jsonrpc-machine
 
 # cartesi machine test artifacts (step logs, stored machines)
 __tests__/artifacts/
+
+# emscripten module built by scripts/build-wasm.mjs (see wasm/)
+wasm/build/
+src/wasm/cartesi-machine.mjs
+src/wasm/cartesi-machine.wasm

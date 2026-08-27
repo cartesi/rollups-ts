@@ -6,7 +6,7 @@ import {
 
 const machine = rollups("snapshot");
 
-const input = Buffer.from([0x00]); // !not a valid advance input
+const input = new Uint8Array([0x00]); // !not a valid advance input
 try {
     for (const event of machine.advance(input)) {
         switch (event.type) {

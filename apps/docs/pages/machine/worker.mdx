@@ -1,0 +1,76 @@
+# Worker
+
+Running a machine occupies the thread it runs on. An advance is seconds of compute, and on a page's main thread that is a frozen tab — no rendering, no input, and eventually an unresponsive-page prompt from the browser.
+
+`@cartesi/machine/worker` is a worker entry point that hosts the [WebAssembly module](/machine/browser), and [connectWorker](/machine/connectWorker) is the page side of it. The API is the same one, with every call returning a promise:
+
+```ts twoslash
+import { connectWorker } from "@cartesi/machine/wasm";
+
+const worker = new Worker(
+    new URL("@cartesi/machine/worker", import.meta.url),
+    { type: "module" },
+);
+
+const cartesi = connectWorker(worker);
+
+const machine = await cartesi.create({ ram: { length: 0x4000000 } });
+await machine.run(1_000_000n);
+console.log(await machine.getRootHash());
+```
+
+`new URL(specifier, import.meta.url)` is the form bundlers recognize as a worker entry, so Vite, webpack and Rollup bundle the worker without configuration.
+
+The module is instantiated in the worker on the first call, so `connectWorker` returns immediately and a page that never touches a machine never pays for one.
+
+## Machines stay in the worker
+
+A machine cannot be copied across a message port, so it stays where it was created and the page gets a proxy for it. Everything that returns a machine — `create`, `load`, `cloneEmpty`, `store` — returns a proxy, and passing one back (to `rollups()`, say) sends the reference rather than trying to clone it:
+
+```ts twoslash
+import { connectWorker } from "@cartesi/machine/wasm";
+
+const worker = new Worker(
+    new URL("@cartesi/machine/worker", import.meta.url),
+    { type: "module" },
+);
+const cartesi = connectWorker(worker);
+
+const snapshot = await fetch("/app.tar").then((r) => r.arrayBuffer());
+await cartesi.writeSnapshot("/machines/app", new Uint8Array(snapshot));
+
+const machine = await cartesi.load("/machines/app");
+const app = await cartesi.rollups(machine, { snapshotDir: "/machines/snapshots" });
+
+const result = await app.advance(new Uint8Array([/* ... */]), { collect: true });
+console.log(result.outputs);
+```
+
+Everything else crosses as data: configs, proofs, hashes and byte arrays are structured-cloneable as they are, and bigints survive the trip. Errors are rebuilt on the page side, so a [MachineError](/machine/error-handling) keeps its `code` and `description`.
+
+### Releasing
+
+The worker holds a machine until the page lets go of it. Call `release()` on a proxy that is no longer needed — machines keep their memory ranges in the module's heap, and the worker cannot tell that the page dropped its proxy:
+
+```ts
+await machine.release();
+```
+
+`cartesi.terminate()` stops the worker outright, discarding every machine it holds.
+
+## Streaming is collected
+
+The direct [RollupsMachine](/machine/RollupsMachine) API yields outputs as they are produced, through a generator. Generators do not cross a message port, so the worker's `advance` and `inspect` always collect: they run to completion and resolve with the full result, as `{ collect: true }` does in-process.
+
+## Serving somewhere else
+
+The worker entry point is three lines — it calls [`serve`](/machine/connectWorker#serve) on the worker's own message port. `serve` takes any endpoint with `postMessage` and `onmessage`, so the same facade works over either end of a `MessageChannel`, a `SharedWorker` port, or an iframe. Use it directly when the default entry point is not what you want to run — to pass [`init` options](/machine/init), for instance, or to serve alongside other work in a worker of your own:
+
+```ts twoslash
+// @filename: my-worker.ts
+import { serve } from "@cartesi/machine/wasm";
+
+serve(self as unknown as Parameters<typeof serve>[0], {
+    moduleOptions: { print: (text: string) => console.log(text) },
+});
+```

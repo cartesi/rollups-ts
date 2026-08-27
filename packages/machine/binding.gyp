@@ -8,8 +8,10 @@
         "cartesi_inc%": "<!(node scripts/find-cartesi.cjs include)",
         "cartesi_lib%": "<!(node scripts/find-cartesi.cjs lib)",
         # libcartesi.a references libslirp (virtio net-user networking). By
-        # default those symbols are stubbed out so the addon has no libslirp
-        # dependency; set CARTESI_SLIRP=yes to link the real library.
+        # default the addon defines those symbols itself and dlopen's the real
+        # library on the first call (native/slirp-forward.cc), so nothing here
+        # depends on libslirp until a machine asks for a virtio net device;
+        # set CARTESI_SLIRP=yes to link it directly instead.
         "cartesi_slirp%": "<!(node -p \"process.env.CARTESI_SLIRP || 'no'\")"
     },
     "targets": [
@@ -25,6 +27,14 @@
                 "NAPI_DISABLE_CPP_EXCEPTIONS",
                 "NODE_ADDON_API_DISABLE_DEPRECATED"
             ],
+            # node-gyp compiles addons with -fno-exceptions. libcartesi throws
+            # internally and catches at its own C API boundary, so that costs
+            # nothing normally — but native/slirp-forward.cc reports a missing
+            # libslirp by throwing from inside libcartesi, which needs a frame
+            # that can. NAPI_DISABLE_CPP_EXCEPTIONS above is unrelated: it is
+            # about node-addon-api's error handling, not the compiler's.
+            "cflags_cc!": ["-fno-exceptions"],
+            "cflags!": ["-fno-exceptions"],
             "libraries": [
                 "<(cartesi_lib)/libcartesi_jsonrpc.a",
                 "<(cartesi_lib)/libcartesi.a"
@@ -34,7 +44,7 @@
                     # brew/system libslirp lives next to libcartesi.a
                     "libraries": ["-L<(cartesi_lib)", "-lslirp"]
                 }, {
-                    "sources": ["native/slirp-stubs.c"]
+                    "sources": ["native/slirp-forward.cc"]
                 }],
                 ["OS=='linux'", {
                     # libcartesi.a is built with OpenMP
@@ -42,6 +52,7 @@
                 }],
                 ["OS=='mac'", {
                     "xcode_settings": {
+                        "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
                         "MACOSX_DEPLOYMENT_TARGET": "12.0",
                         # brew's libomp is keg-only; empty when not installed
                         "OTHER_LDFLAGS": ["<!@(node scripts/find-cartesi.cjs omp)"]

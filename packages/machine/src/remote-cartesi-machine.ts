@@ -1,5 +1,7 @@
+// Public declarations for machines that live in a cartesi-jsonrpc-machine
+// server. Binding-free, like cartesi-machine.ts: src/index.ts exports spawn()
+// and connect() bound to the N-API addon.
 import type { CartesiMachine } from "./cartesi-machine.js";
-import { NodeRemoteCartesiMachine } from "./node/remote-cartesi-machine.js";
 import type { MachineConfig, MachineRuntimeConfig } from "./types.js";
 
 // -----------------------------------------------------------------------------
@@ -40,22 +42,4 @@ export interface RemoteCartesiMachine extends CartesiMachine {
         runtimeConfig?: MachineRuntimeConfig,
     ): RemoteCartesiMachine;
     store(dir: string): RemoteCartesiMachine;
-}
-
-// -----------------------------------------------------------------------------
-// Utility functions
-// -----------------------------------------------------------------------------
-
-export function spawn(
-    address: string = "127.0.0.1:0",
-    timeout: number = -1,
-): RemoteCartesiMachine {
-    return NodeRemoteCartesiMachine.spawn(address, timeout);
-}
-
-export function connect(
-    address: string,
-    timeout: number = -1,
-): RemoteCartesiMachine {
-    return NodeRemoteCartesiMachine.connect(address, timeout);
 }

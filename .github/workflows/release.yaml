@@ -212,19 +212,66 @@ jobs:
                   if-no-files-found: error
                   path: packages/machine/npm/
 
+    # The WebAssembly flavor of @cartesi/machine. Unlike the addon there is
+    # nothing per-platform about it — one module serves every target — so it is
+    # a single job, and it travels inside the @cartesi/machine tarball rather
+    # than in a package of its own. Without this the published package would
+    # have no module at all and `init()` would fail for every browser consumer.
+    machine-wasm:
+        name: machine wasm module
+        needs: detect
+        if: needs.detect.outputs.publish-machine == 'true'
+        runs-on: ubuntu-latest
+        timeout-minutes: 40
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  # `pnpm i` compiles @cartesi/rollup's addon against libcmt
+                  # from the machine-guest-tools submodule
+                  submodules: recursive
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+            - name: Setup Node.js 24
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 24.x
+                  cache: "pnpm"
+
+            # no emulator distribution here, so @cartesi/machine's addon build
+            # is skipped by the install script; the wasm build does not need it
+            - name: Install Dependencies
+              run: pnpm i
+
+            # docker build of wasm/builder.Dockerfile, which pins both the
+            # Emscripten toolchain and the emulator release
+            - name: Build the emscripten module
+              run: pnpm --filter @cartesi/machine build:wasm
+
+            - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+              with:
+                  name: machine-wasm
+                  if-no-files-found: error
+                  path: packages/machine/src/wasm/cartesi-machine.mjs
+
     release:
         name: release
-        needs: [detect, prebuild, prebuild-riscv64, machine-platform]
+        needs:
+            [detect, prebuild, prebuild-riscv64, machine-platform, machine-wasm]
         # Run when creating the Version PR (publish=false, prebuilds skipped), or
         # when publishing AND every prebuild succeeded. Never publish a native
         # package without its binaries: a prebuild failure blocks the release
-        # (re-runnable).
+        # (re-runnable). The same holds for @cartesi/machine's WebAssembly
+        # module, which ships inside its tarball.
         if: >-
             always() && needs.detect.result == 'success' &&
             (needs.detect.outputs.publish-rollup == 'false' ||
              (needs.prebuild.result == 'success' && needs.prebuild-riscv64.result == 'success')) &&
             (needs.detect.outputs.publish-machine == 'false' ||
-             needs.machine-platform.result == 'success')
+             (needs.machine-platform.result == 'success' &&
+              needs.machine-wasm.result == 'success'))
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Repo
@@ -272,8 +319,24 @@ jobs:
                   merge-multiple: true
                   path: packages/machine/npm
 
+            # Put the Emscripten module where `pnpm release`'s build expects
+            # it: tsdown leaves the dynamic import in place and copy-wasm.mjs
+            # copies the module next to whichever bundle holds it, so that
+            # `files: ["dist/**"]` packs it with the rest of the package.
+            - name: Collect machine wasm module
+              if: needs.detect.outputs.publish-machine == 'true'
+              uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+              with:
+                  name: machine-wasm
+                  path: packages/machine/src/wasm
+
             - name: Create Release Pull Request or Publish to npm
               uses: changesets/action@22ccf9aa43179fe9e27dc62e575971d28cce197c # v2.0.0
+              env:
+                  # a build with no module to copy only warns, so that a
+                  # checkout that never ran `build:wasm` still builds. A publish
+                  # is the one case where that must be fatal instead.
+                  CARTESI_REQUIRE_WASM: ${{ needs.detect.outputs.publish-machine }}
               with:
                   # This expects you to have a script called release which does a build for your packages and calls changeset publish
                   publish-script: pnpm release

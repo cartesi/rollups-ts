@@ -30,11 +30,18 @@ const rollup = rollups(dir: string, options?: {
 
 ## From a Local Machine
 
-You can also create a rollups machine from a local CartesiMachine instance.
+You can also create a rollups machine from a local [CartesiMachine](/machine/CartesiMachine) instance — including the [WebAssembly](/machine/browser) one, which is the only form available in a browser.
 
-:::warning
-When using a local machine, rejected inputs do not trigger rollback, so this mode should only be used for test scenarios.
-:::
+```ts
+const rollup = rollups(machine: CartesiMachine, options?: {
+    noRollback?: boolean;
+    snapshotDir?: string;
+}): RollupsMachine;
+```
+
+- `machine`: An instance of `CartesiMachine`.
+- `options.snapshotDir` (default: `/tmp/cartesi-rollups`): Where the per-input snapshots are stored. There is no server to fork here, so the machine stores itself before each input and loads that snapshot back if the input is rejected. See [Rollback](/machine/rollups-machines#rollback).
+- `options.noRollback`: See above.
 
 ```ts
 import { rollups, create } from "@cartesi/machine";
@@ -43,11 +50,11 @@ import { rollups, create } from "@cartesi/machine";
 const config = { ram: { length: 1048576 } };
 const localMachine = create(config);
 
-// create a rollups machine from a local machine (no rollback on rejected inputs)
+// create a rollups machine from it
 const machine = rollups(localMachine);
 ```
 
-This approach is useful for unit tests or simple experiments, but is not recommended for production or integration scenarios, as rejected inputs will leave the machine in an invalid state.
+Rolling back through a snapshot writes the machine's memory ranges to disk, which a `fork` does not, so a remote machine is still the faster choice where a process can be forked.
 
 For the full interface and available methods, see [RollupsMachine](/machine/RollupsMachine).
 
@@ -79,9 +86,9 @@ You can also use the `collect` option to get all outputs and reports as collecti
 
 ```ts
 const { outputs, reports, outputsMerkleRoot } = machine.advance(input, { collect: true });
-// outputs: Buffer[]
-// reports: Buffer[]
-// outputsMerkleRoot: Buffer
+// outputs: Uint8Array[]
+// reports: Uint8Array[]
+// outputsMerkleRoot: Uint8Array
 ```
 
 - Throws `RollupsInputRejectedError` if the input is rejected.
@@ -93,7 +100,7 @@ Preferred usage (generator-based):
 
 ```ts
 for (const report of machine.inspect(query)) {
-    // handle report (Buffer)
+    // handle report (Uint8Array)
 }
 ```
 
@@ -101,7 +108,7 @@ You can also use the `collect` option to get all reports as an array:
 
 ```ts
 const reports = machine.inspect(query, { collect: true });
-// reports: Buffer[]
+// reports: Uint8Array[]
 ```
 
 - Throws `RollupsInputRejectedError` if the query is rejected.

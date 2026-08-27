@@ -3,7 +3,10 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
     test: {
         dir: "./__tests__",
-        exclude: ["node_modules/**"],
+        // the WebAssembly suites need a module that `pnpm build:wasm` produces
+        // in docker, which is too heavy to hang off `pnpm test`; they have
+        // their own config and their own CI job
+        exclude: ["node_modules/**", "wasm/**"],
         environment: "node",
         globals: true,
         // the addon is a process-global resource and the suites spawn machines

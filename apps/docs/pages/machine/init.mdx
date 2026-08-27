@@ -1,0 +1,70 @@
+# init
+
+Instantiates the [WebAssembly build](/machine/browser) of the emulator and binds the machine API to it. This is the entry point of `@cartesi/machine/wasm`, the counterpart of importing the constructors directly from `@cartesi/machine` in Node.js.
+
+## Function Signature
+
+```ts
+init(options?: InitOptions): Promise<CartesiMachineWasm>
+```
+
+- `options.factory` (optional): the Emscripten module factory, for callers that would rather resolve the asset themselves — a bundler-specific import, a URL, a copy served from their own origin. Defaults to the module built into the package.
+- `options.moduleOptions` (optional): passed straight to the Emscripten factory (`locateFile`, `wasmBinary`, `print`, and friends).
+
+Each call builds an independent module, with its own heap and its own filesystem. Machines from different modules cannot be mixed.
+
+## Returns
+
+A `CartesiMachineWasm`: the machine constructors, plus the handles that only exist in this build.
+
+| | |
+| --- | --- |
+| [`create`](/machine/create), [`load`](/machine/load), [`empty`](/machine/empty) | the machine constructors, returning a [CartesiMachine](/machine/CartesiMachine) |
+| `getVersion`, `getDefaultConfig`, `getLastError` | module-level queries |
+| `getRegAddress`, `getAddressName` | register and address range lookups |
+| `verifyStep`, `verifyStepUarch`, `verifyResetUarch`, `verifySendCmioResponse` | stateless verification of access logs |
+| `writeSnapshot(dir, archive)` | unpacks a tar of a stored machine into the module's filesystem |
+| `readSnapshot(dir)` | packs a stored machine back into a tar archive |
+| `module` | the Emscripten module itself |
+| `fs` | its [filesystem](https://emscripten.org/docs/api_reference/Filesystem-API.html), where stored machines live |
+
+[spawn](/machine/spawn) and [connect](/machine/connect) are not part of it: both need a process and a socket. Use [connectHttp](/machine/connectHttp) to reach a machine server from a browser.
+
+## Example
+
+```ts twoslash
+import { init } from "@cartesi/machine/wasm";
+
+const cartesi = await init();
+
+const machine = cartesi.create({
+    ram: { length: 0x4000000 },
+});
+
+machine.run(1_000_000n);
+console.log(machine.getRootHash());
+machine.destroy();
+```
+
+## Loading the module yourself
+
+`init()` imports the module bundled in the package, a single ES file with the WebAssembly embedded in it. Pass `factory` to load a copy of your own instead — one served from your origin, or built with `SINGLE_FILE=0` so the `.wasm` streams separately:
+
+```ts twoslash
+// @noErrors
+import { init } from "@cartesi/machine/wasm";
+import createCartesiMachineModule from "./cartesi-machine.mjs";
+
+const cartesi = await init({
+    factory: createCartesiMachineModule,
+    moduleOptions: {
+        locateFile: (path: string) => `/wasm/${path}`,
+    },
+});
+```
+
+The module's ABI is checked against the one the binding expects, so a mismatched copy fails at `init()` rather than at the first call.
+
+## Errors
+
+`init()` rejects if the module cannot be imported, or if its ABI does not match the one this binding expects. Both are covered in [troubleshooting](/machine/troubleshooting).

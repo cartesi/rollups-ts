@@ -73,3 +73,42 @@ jobs:
             # packages with generated contracts, dist/ for @cartesi/rollup)
             - name: Run tests
               run: pnpm test
+
+    wasm:
+        # The WebAssembly flavor of @cartesi/machine: libcartesi built by
+        # Emscripten instead of linked from the distribution, driven by the same
+        # TypeScript layer. Its own job because it needs neither an installed
+        # emulator nor a platform matrix — the module is the same everywhere.
+        name: wasm
+        runs-on: ubuntu-latest
+        timeout-minutes: 40
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  # `pnpm i` compiles @cartesi/rollup's addon against libcmt
+                  # from the machine-guest-tools submodule
+                  submodules: recursive
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+            - name: Setup Node.js 24
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+              with:
+                  node-version: 24.x
+                  cache: "pnpm"
+
+            # no emulator distribution here, so @cartesi/machine's addon build
+            # is skipped by the install script; the wasm suite does not need it
+            - name: Install Dependencies
+              run: pnpm i
+
+            # docker build of wasm/builder.Dockerfile: compiling the emulator
+            # with emcc dominates this job and is what pins both the toolchain
+            # and the emulator release
+            - name: Build the emscripten module
+              run: pnpm --filter @cartesi/machine build:wasm
+
+            - name: Run wasm tests
+              run: pnpm --filter @cartesi/machine test:wasm

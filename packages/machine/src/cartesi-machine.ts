@@ -1,4 +1,7 @@
-import { NodeCartesiMachine } from "./node/cartesi-machine.js";
+// Public declarations of the machine API: constants, enums, errors and the
+// CartesiMachine interface. Deliberately free of any binding — src/index.ts
+// binds them to the N-API addon, src/browser.ts to the Emscripten module — so
+// importing types never drags a platform's loader into a bundle.
 import type {
     AccessLog,
     AccessLogType,
@@ -129,10 +132,11 @@ export class MachineError extends Error {
     }
 
     /**
-     * Creates a MachineError from an error code, automatically fetching the description
+     * Creates a MachineError from an error code and the emulator's last error
+     * message, which the caller reads from the binding it is using
+     * (`getLastError()`).
      */
-    static fromCode(code: ErrorCode): MachineError {
-        const description = NodeCartesiMachine.getLastError();
+    static fromCode(code: ErrorCode, description: string): MachineError {
         return new MachineError(code, description);
     }
 }
@@ -171,6 +175,23 @@ export enum HtifDevice {
     Console = 1, ///< Console input and output
     Yield = 2, ///< Yield control back to the host
 }
+
+/// Console device commands (CM_HTIF_CONSOLE_CMD_*)
+export enum HtifConsoleCommand {
+    Getchar = 0, ///< The guest reads one character from the console
+    Putchar = 1, ///< The guest writes one character to the console
+}
+
+/**
+ * Bits of the `htif.iconsole` register, which says what the machine answers:
+ * a console command whose bit is clear is silently ignored. A machine is
+ * created with `Putchar` set and `Getchar` clear, so a guest can print but not
+ * read — set both to give it a keyboard.
+ */
+export const HtifConsoleMask = {
+    Getchar: 1 << HtifConsoleCommand.Getchar,
+    Putchar: 1 << HtifConsoleCommand.Putchar,
+} as const;
 
 /// Yield device commands (CM_HTIF_YIELD_CMD_*, formerly CM_CMIO_YIELD_COMMAND_*)
 export enum HtifYieldCommand {
@@ -385,124 +406,46 @@ export interface CartesiMachine {
     getAddressRanges(): AddressRangeDescription[];
     getRegAddress(reg: Reg): bigint;
     getAddressName(paddr: bigint): string;
-    getRootHash(): Buffer;
-    readRevertRootHash(): Buffer;
-    writeRevertRootHash(hash: Buffer): void;
-    getNodeHash(address: bigint, log2Size: number): Buffer;
+    getRootHash(): Uint8Array;
+    readRevertRootHash(): Uint8Array;
+    writeRevertRootHash(hash: Uint8Array): void;
+    getNodeHash(address: bigint, log2Size: number): Uint8Array;
     getProof(address: bigint, log2Size: number, log2RootSize?: number): Proof;
     readWord(address: bigint): bigint;
     writeWord(address: bigint, value: bigint): void;
     readReg(reg: Reg): bigint;
     writeReg(reg: Reg, value: bigint): void;
-    readMemory(address: bigint, length: bigint): Buffer;
-    writeMemory(address: bigint, data: Buffer): void;
-    readVirtualMemory(address: bigint, length: bigint): Buffer;
-    writeVirtualMemory(address: bigint, data: Buffer): void;
+    readMemory(address: bigint, length: bigint): Uint8Array;
+    writeMemory(address: bigint, data: Uint8Array): void;
+    readVirtualMemory(address: bigint, length: bigint): Uint8Array;
+    writeVirtualMemory(address: bigint, data: Uint8Array): void;
     translateVirtualAddress(vaddr: bigint): bigint;
+    readConsoleOutput(maxLength?: bigint): Uint8Array;
+    writeConsoleInput(data: Uint8Array): number;
     run(mcycleEnd?: bigint): BreakReason;
     runUarch(uarchCycleEnd: bigint): UarchBreakReason;
     resetUarch(): void;
     receiveCmioRequest(): {
         cmd: HtifYieldCommand;
         reason: HtifYieldReason;
-        data: Buffer;
+        data: Uint8Array;
     };
     sendCmioResponse(
         reason: HtifYieldReason,
-        data: Buffer,
-        revertRootHash?: Buffer,
+        data: Uint8Array,
+        revertRootHash?: Uint8Array,
     ): void;
     logStep(mcycleCount: bigint, logFilename: string): BreakReason;
     logStepUarch(logType: AccessLogType): AccessLog;
     logResetUarch(logType: AccessLogType): AccessLog;
     logSendCmioResponse(
         reason: HtifYieldReason,
-        data: Buffer,
+        data: Uint8Array,
         logType: AccessLogType,
-        revertRootHash?: Buffer,
+        revertRootHash?: Uint8Array,
     ): string;
-    verifyStepUarch(rootHashBefore: Buffer, log: AccessLog): Buffer;
-    verifyResetUarch(rootHashBefore: Buffer, log: AccessLog): Buffer;
+    verifyStepUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array;
+    verifyResetUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array;
     verifyHashTree(): boolean;
     getHashTreeStats(clear?: boolean): HashTreeStats;
-}
-
-export function empty(): CartesiMachine {
-    return NodeCartesiMachine.new();
-}
-
-export function create(
-    config: MachineConfig,
-    runtimeConfig?: MachineRuntimeConfig,
-): CartesiMachine {
-    return NodeCartesiMachine.createNew(config, runtimeConfig);
-}
-
-export function load(
-    dir: string,
-    runtimeConfig?: MachineRuntimeConfig,
-): CartesiMachine {
-    return NodeCartesiMachine.loadNew(dir, runtimeConfig);
-}
-
-export function getLastError(): string {
-    return NodeCartesiMachine.getLastError();
-}
-
-export function getVersion(): bigint {
-    return NodeCartesiMachine.getVersion();
-}
-
-export function getDefaultConfig(): MachineConfig {
-    return NodeCartesiMachine.getDefaultConfig();
-}
-
-export function getRegAddress(reg: Reg): bigint {
-    return NodeCartesiMachine.getRegAddress(reg);
-}
-
-export function getAddressName(paddr: bigint): string {
-    return NodeCartesiMachine.getAddressName(paddr);
-}
-
-export function verifyStep(
-    rootHashBefore: Buffer,
-    logFilename: string,
-    mcycleCount: bigint,
-): Buffer {
-    return NodeCartesiMachine.verifyStep(
-        rootHashBefore,
-        logFilename,
-        mcycleCount,
-    );
-}
-
-export function verifyStepUarch(
-    rootHashBefore: Buffer,
-    log: AccessLog,
-): Buffer {
-    return NodeCartesiMachine.verifyStepUarch(rootHashBefore, log);
-}
-
-export function verifyResetUarch(
-    rootHashBefore: Buffer,
-    log: AccessLog,
-): Buffer {
-    return NodeCartesiMachine.verifyResetUarch(rootHashBefore, log);
-}
-
-export function verifySendCmioResponse(
-    reason: HtifYieldReason,
-    data: Buffer,
-    rootHashBefore: Buffer,
-    log: AccessLog,
-    revertRootHash: Buffer,
-): Buffer {
-    return NodeCartesiMachine.verifySendCmioResponse(
-        reason,
-        data,
-        rootHashBefore,
-        log,
-        revertRootHash,
-    );
 }
