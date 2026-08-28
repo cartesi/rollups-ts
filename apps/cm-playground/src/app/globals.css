@@ -296,6 +296,9 @@ textarea.input {
     background: var(--panel-2);
     border: 1px solid var(--line);
     border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     padding: 10px;
 }
 
