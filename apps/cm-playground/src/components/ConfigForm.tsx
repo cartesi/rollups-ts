@@ -1,15 +1,18 @@
 // Everything a machine can be told before it boots.
+import type { ReactNode } from "react";
+
 import type { ImageRecord } from "../images/store";
 import {
+    type ConsoleKind,
     type DriveForm,
     type FormatMode,
     type MountMode,
+    mountPointOf,
     newDrive,
     newEnvVar,
     newNvram,
     type NvramForm,
     type PlaygroundConfig,
-    type ConsoleKind,
 } from "../machine/config";
 import type { ConsoleFlushMode } from "@cartesi/machine";
 import {
@@ -28,6 +31,39 @@ const imageOptions = (images: ImageRecord[]) => [
     { value: "", label: "empty" },
     ...images.map((image) => ({ value: image.id, label: image.name })),
 ];
+
+// A drive and an NVRAM are the same card: a name, the two things one does to a
+// range as a whole, and its fields on a grid underneath.
+const RangeCard = ({
+    name,
+    readOnly,
+    onReadOnly,
+    onRemove,
+    children,
+}: {
+    name: string;
+    readOnly: boolean;
+    onReadOnly: (readOnly: boolean) => void;
+    onRemove: () => void;
+    children: ReactNode;
+}) => (
+    <div className="range">
+        <div className="range-head">
+            <span className="range-name">{name}</span>
+            <div className="range-actions">
+                <Toggle
+                    label="read only"
+                    checked={readOnly}
+                    onChange={onReadOnly}
+                />
+                <Button kind="ghost" onClick={onRemove}>
+                    remove
+                </Button>
+            </div>
+        </div>
+        {children}
+    </div>
+);
 
 export const MachineSection = ({
     config,
@@ -73,13 +109,14 @@ export const MachineSection = ({
                         mono
                     />
                 </Field>
-                <Toggle
-                    label="Read-only root"
-                    hint="the kernel mounts / as ro rather than rw"
-                    checked={config.rootfsReadOnly}
-                    onChange={(rootfsReadOnly) => update({ rootfsReadOnly })}
-                />
             </div>
+
+            <Toggle
+                label="Read-only root filesystem"
+                hint="the kernel mounts / as ro rather than rw"
+                checked={config.rootfsReadOnly}
+                onChange={(rootfsReadOnly) => update({ rootfsReadOnly })}
+            />
 
             {config.drives.length === 0 ? (
                 <p className="hint">
@@ -89,145 +126,149 @@ export const MachineSection = ({
                 </p>
             ) : null}
 
-            {config.drives.map((drive, index) => (
-                <div className="drive" key={drive.id}>
-                    <div className="row">
-                        <Field label={`Drive ${index + 1} label`}>
-                            <TextInput
-                                value={drive.label}
-                                onChange={(label) =>
-                                    setDrive(drive.id, { label })
-                                }
-                                mono
-                            />
-                        </Field>
-                        <Field label="Image">
-                            <Select
-                                value={drive.imageId ?? ""}
-                                onChange={(imageId) =>
-                                    setDrive(drive.id, {
-                                        imageId:
-                                            imageId === "" ? null : imageId,
-                                    })
-                                }
-                                options={imageOptions(images)}
-                            />
-                        </Field>
-                        <Field label="Size" hint="blank: the image's own size">
-                            <TextInput
-                                value={drive.length}
-                                onChange={(length) =>
-                                    setDrive(drive.id, { length })
-                                }
-                                placeholder="64Mi"
-                                mono
-                            />
-                        </Field>
-                        <Field label="Start" hint="blank: chosen for you">
-                            <TextInput
-                                value={drive.start}
-                                onChange={(start) =>
-                                    setDrive(drive.id, { start })
-                                }
-                                placeholder="0x90000000"
-                                mono
-                            />
-                        </Field>
-                        <div className="drive-actions">
-                            <Toggle
-                                label="read only"
-                                checked={drive.readOnly}
-                                onChange={(readOnly) =>
-                                    setDrive(drive.id, { readOnly })
-                                }
-                            />
-                            <Button
-                                kind="ghost"
-                                onClick={() =>
-                                    update({
-                                        drives: config.drives.filter(
-                                            (other) => other.id !== drive.id,
-                                        ),
-                                    })
-                                }
-                            >
-                                remove
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="row">
-                        <Field
-                            label="Mount"
-                            hint={
-                                drive.mount === "auto"
-                                    ? "/mnt/<label>, when there is a filesystem"
-                                    : undefined
-                            }
-                        >
-                            <Select<MountMode>
-                                value={drive.mount}
-                                onChange={(mount) =>
-                                    setDrive(drive.id, { mount })
-                                }
-                                options={[
-                                    { value: "auto", label: "under /mnt" },
-                                    { value: "custom", label: "at…" },
-                                    { value: "none", label: "not mounted" },
-                                ]}
-                            />
-                        </Field>
-                        {drive.mount === "custom" ? (
-                            <Field label="Mount point">
+            {config.drives.map((drive, index) => {
+                const mountPoint = mountPointOf(drive);
+                return (
+                    <RangeCard
+                        key={drive.id}
+                        name={`Drive ${index + 1}`}
+                        readOnly={drive.readOnly}
+                        onReadOnly={(readOnly) =>
+                            setDrive(drive.id, { readOnly })
+                        }
+                        onRemove={() =>
+                            update({
+                                drives: config.drives.filter(
+                                    (other) => other.id !== drive.id,
+                                ),
+                            })
+                        }
+                    >
+                        <div className="grid">
+                            <Field label="Label">
                                 <TextInput
-                                    value={drive.mountPoint}
-                                    onChange={(mountPoint) =>
-                                        setDrive(drive.id, { mountPoint })
+                                    value={drive.label}
+                                    onChange={(label) =>
+                                        setDrive(drive.id, { label })
                                     }
-                                    placeholder="/data"
                                     mono
                                 />
                             </Field>
-                        ) : null}
-                        <Field
-                            label="Format"
-                            hint="ext2, written by init before mounting"
-                        >
-                            <Select<FormatMode>
-                                value={drive.format}
-                                onChange={(format) =>
-                                    setDrive(drive.id, { format })
+                            <Field label="Image">
+                                <Select
+                                    value={drive.imageId ?? ""}
+                                    onChange={(imageId) =>
+                                        setDrive(drive.id, {
+                                            imageId:
+                                                imageId === "" ? null : imageId,
+                                        })
+                                    }
+                                    options={imageOptions(images)}
+                                />
+                            </Field>
+                            <Field
+                                label="Size"
+                                hint="blank: the image's own size"
+                            >
+                                <TextInput
+                                    value={drive.length}
+                                    onChange={(length) =>
+                                        setDrive(drive.id, { length })
+                                    }
+                                    placeholder="64Mi"
+                                    mono
+                                />
+                            </Field>
+                            <Field label="Start" hint="blank: chosen for you">
+                                <TextInput
+                                    value={drive.start}
+                                    onChange={(start) =>
+                                        setDrive(drive.id, { start })
+                                    }
+                                    placeholder="0x90000000"
+                                    mono
+                                />
+                            </Field>
+                        </div>
+
+                        <div className="grid">
+                            <p className="grid-caption">
+                                What init does with it.
+                            </p>
+                            <Field label="Mount">
+                                <Select<MountMode>
+                                    value={drive.mount}
+                                    onChange={(mount) =>
+                                        setDrive(drive.id, { mount })
+                                    }
+                                    options={[
+                                        { value: "auto", label: "default" },
+                                        {
+                                            value: "custom",
+                                            label: "custom path",
+                                        },
+                                        { value: "none", label: "not mounted" },
+                                    ]}
+                                />
+                            </Field>
+                            <Field label="Mount point">
+                                <TextInput
+                                    value={
+                                        drive.mount === "custom"
+                                            ? drive.mountPoint
+                                            : ""
+                                    }
+                                    onChange={(mountPoint) =>
+                                        setDrive(drive.id, { mountPoint })
+                                    }
+                                    disabled={drive.mount !== "custom"}
+                                    placeholder={
+                                        drive.mount === "custom"
+                                            ? "/data"
+                                            : mountPoint === ""
+                                              ? "not mounted"
+                                              : mountPoint
+                                    }
+                                    mono
+                                />
+                            </Field>
+                            <Field
+                                label="Format"
+                                hint="makes it an ext2 filesystem"
+                            >
+                                <Select<FormatMode>
+                                    value={drive.format}
+                                    onChange={(format) =>
+                                        setDrive(drive.id, { format })
+                                    }
+                                    options={[
+                                        { value: "auto", label: "when empty" },
+                                        { value: "always", label: "always" },
+                                        { value: "never", label: "never" },
+                                    ]}
+                                />
+                            </Field>
+                            <Field
+                                label="Owner"
+                                hint={
+                                    mountPoint === ""
+                                        ? "of /dev/pmemN"
+                                        : "of the mount point"
                                 }
-                                options={[
-                                    {
-                                        value: "auto",
-                                        label: "when it starts empty",
-                                    },
-                                    { value: "always", label: "always" },
-                                    { value: "never", label: "never" },
-                                ]}
-                            />
-                        </Field>
-                        <Field
-                            label="Owner"
-                            hint={
-                                drive.mount === "none"
-                                    ? "who owns /dev/pmemN"
-                                    : "who owns the mount point"
-                            }
-                        >
-                            <TextInput
-                                value={drive.user}
-                                onChange={(user) =>
-                                    setDrive(drive.id, { user })
-                                }
-                                placeholder="dapp"
-                                mono
-                            />
-                        </Field>
-                    </div>
-                </div>
-            ))}
+                            >
+                                <TextInput
+                                    value={drive.user}
+                                    onChange={(user) =>
+                                        setDrive(drive.id, { user })
+                                    }
+                                    placeholder="dapp"
+                                    mono
+                                />
+                            </Field>
+                        </div>
+                    </RangeCard>
+                );
+            })}
         </Section>
     );
 };
@@ -252,7 +293,7 @@ export const NvramSection = ({
     return (
         <Section
             title="NVRAM"
-            hint="Memory ranges with no filesystem on them, which the guest reaches as /dev/uio0 and on — `nvram <label>` in the guest says which."
+            hint="Memory ranges with no filesystem on them, which the guest reaches as /dev/uio0 and on — running nvram with a label there says which."
             actions={
                 <Button
                     kind="ghost"
@@ -270,9 +311,21 @@ export const NvramSection = ({
             }
         >
             {config.nvrams.map((nvram, index) => (
-                <div className="drive" key={nvram.id}>
-                    <div className="row">
-                        <Field label={`NVRAM ${index + 1} label`}>
+                <RangeCard
+                    key={nvram.id}
+                    name={`NVRAM ${index + 1}`}
+                    readOnly={nvram.readOnly}
+                    onReadOnly={(readOnly) => setNvram(nvram.id, { readOnly })}
+                    onRemove={() =>
+                        update({
+                            nvrams: config.nvrams.filter(
+                                (other) => other.id !== nvram.id,
+                            ),
+                        })
+                    }
+                >
+                    <div className="grid">
+                        <Field label="Label">
                             <TextInput
                                 value={nvram.label}
                                 onChange={(label) =>
@@ -313,7 +366,7 @@ export const NvramSection = ({
                                 mono
                             />
                         </Field>
-                        <Field label="Owner" hint="who owns /dev/uioN">
+                        <Field label="Owner" hint="of /dev/uioN, set by init">
                             <TextInput
                                 value={nvram.user}
                                 onChange={(user) =>
@@ -323,29 +376,8 @@ export const NvramSection = ({
                                 mono
                             />
                         </Field>
-                        <div className="drive-actions">
-                            <Toggle
-                                label="read only"
-                                checked={nvram.readOnly}
-                                onChange={(readOnly) =>
-                                    setNvram(nvram.id, { readOnly })
-                                }
-                            />
-                            <Button
-                                kind="ghost"
-                                onClick={() =>
-                                    update({
-                                        nvrams: config.nvrams.filter(
-                                            (other) => other.id !== nvram.id,
-                                        ),
-                                    })
-                                }
-                            >
-                                remove
-                            </Button>
-                        </div>
                     </div>
-                </div>
+                </RangeCard>
             ))}
         </Section>
     );

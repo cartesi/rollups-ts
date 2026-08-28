@@ -306,6 +306,10 @@ const driveMount = (
     return { format, mountPoint };
 };
 
+/** Where init will mount this drive, or "" when it will not mount it at all. */
+export const mountPointOf = (drive: DriveForm): string =>
+    driveMount(drive).mountPoint;
+
 // cartesi-init runs `dtb.init` as root before the entrypoint, which is where
 // the command line tool puts all of this too (see cartesi-machine.lua).
 const driveInit = (drive: DriveForm, label: string): string[] => {

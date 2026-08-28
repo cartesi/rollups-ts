@@ -55,9 +55,11 @@ A flash drive is a memory range, and nothing about it is a filesystem until the
 guest makes one. Mounting one, formatting one, and handing it to a user are
 shell, which is why they end up in `dtb.init` — the script `cartesi-init` runs
 as root before the entrypoint — rather than in the machine configuration.
-This page assembles that script the way `cartesi-machine.lua` does, so the
-form's **Format**, **Mount** and **Owner** are the CLI's `mke2fs:`, `mount:`
-and `user:` keys, with the same defaults:
+This page assembles that script the way `cartesi-machine.lua` does, which is
+why each drive card is in two halves: above, the memory range itself; below,
+what init does with it. **Format**, **Mount** and **Owner** are the CLI's
+`mke2fs:`, `mount:` and `user:` keys, with the same defaults — and a drive left
+on **default** shows the path it resolves to where its mount point would go:
 
 - a drive that starts empty is formatted as ext2; one that comes from an image
   is left as it is;
