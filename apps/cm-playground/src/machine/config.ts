@@ -430,6 +430,9 @@ export const imagePath = (id: string): string => `/images/${id}`;
 /** Where a snapshot's tarball is unpacked, which is the directory load() reads. */
 export const snapshotPath = (id: string): string => `/snapshots/${id}`;
 
+/** Where store() writes a machine on its way into a tarball, and nowhere else. */
+export const STORED_PATH = "/stored/machine";
+
 export interface GeneratedConfig {
     /** What create() is called with, or null when a stored machine is loaded. */
     config: MachineConfig | null;

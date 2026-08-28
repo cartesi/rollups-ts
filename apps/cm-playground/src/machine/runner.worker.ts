@@ -14,10 +14,10 @@ import {
     Reg,
 } from "@cartesi/machine/wasm";
 
-import { imagePath, snapshotPath } from "./config";
-import { gunzip, isGzip, loadArchive } from "./snapshot";
+import { imagePath, snapshotPath, STORED_PATH } from "./config";
+import { gunzip, gzip, isGzip, loadArchive, storeArchive } from "./snapshot";
 import type { BootRequest, FromWorker, RunStats, ToWorker } from "./protocol";
-import { readImage } from "../images/store";
+import { addBytes, readImage } from "../images/store";
 
 /** How far to run before coming up for air. */
 const SLICE = 2_000_000n;
@@ -101,6 +101,41 @@ const loadSnapshot = async (
 
     post({ type: "status", text: "unpacking the snapshot" });
     return loadArchive(loaded, snapshotPath(id), archive, runtime);
+};
+
+/** A name that sorts, and says when the machine was caught. */
+const stamp = (): string =>
+    new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+
+/**
+ * Packs the machine as it stands and puts it in the library, where it is a
+ * snapshot like any other: loadable here, and downloadable as a `.tar.gz`.
+ *
+ * Compressing it is not a nicety. A machine is mostly memory nothing has
+ * written to, so the tar of one is mostly zeroes — gzip takes a fresh 128 MiB
+ * machine down to a few hundred kilobytes, which is the difference between a
+ * snapshot worth keeping in a browser and one that is not.
+ */
+const storeMachine = async (): Promise<void> => {
+    const loaded = await module();
+    const running = machine;
+    if (running === null) {
+        throw new Error("there is no machine to store");
+    }
+
+    post({ type: "storing", text: "storing the machine" });
+    const archive = storeArchive(loaded, running, STORED_PATH);
+
+    post({ type: "storing", text: "compressing" });
+    const compressed = await gzip(archive);
+
+    post({ type: "storing", text: "saving to the library" });
+    const record = await addBytes(
+        `machine-${stamp()}.tar.gz`,
+        compressed,
+        "snapshot",
+    );
+    post({ type: "stored", name: record.name, size: record.size });
 };
 
 /**
@@ -251,6 +286,18 @@ self.onmessage = ({ data }: MessageEvent<ToWorker>) => {
             } catch {
                 // a machine that is gone, or one whose console cannot resize
             }
+            break;
+        case "store":
+            // beside the run rather than instead of it: the drive loop is
+            // between slices whenever this arrives, and picks up where it
+            // left off once the machine has been written out
+            storeMachine().catch((error: unknown) => {
+                post({
+                    type: "storeFailed",
+                    message:
+                        error instanceof Error ? error.message : String(error),
+                });
+            });
             break;
         case "stop":
             stopped = true;

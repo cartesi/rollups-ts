@@ -69,7 +69,8 @@ export const listImages = async (): Promise<ImageRecord[]> => {
         .sort((left, right) => right.addedAt - left.addedAt);
 };
 
-export const readImage = async (id: string): Promise<Uint8Array> => {
+/** The stored bytes as they are, which is what a download wants. */
+export const readImageBlob = async (id: string): Promise<Blob> => {
     const stored = await transact<StoredImage | undefined>(
         "readonly",
         (store) => store.get(id),
@@ -77,8 +78,11 @@ export const readImage = async (id: string): Promise<Uint8Array> => {
     if (stored === undefined) {
         throw new Error(`image ${id} is not in the library`);
     }
-    return new Uint8Array(await stored.blob.arrayBuffer());
+    return stored.blob;
 };
+
+export const readImage = async (id: string): Promise<Uint8Array> =>
+    new Uint8Array(await (await readImageBlob(id)).arrayBuffer());
 
 export const deleteImage = (id: string): Promise<unknown> =>
     transact("readwrite", (store) => store.delete(id));
@@ -108,6 +112,26 @@ const identify = (name: string, kind?: ImageKind): ImageKind => {
 
 const newId = (): string =>
     `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+/**
+ * Something this page made rather than fetched — a snapshot of a machine it
+ * ran. The bytes are already in hand, so unlike the two below there is nothing
+ * to wait for and nowhere for it to have come from.
+ */
+export const addBytes = (
+    name: string,
+    bytes: Uint8Array,
+    kind?: ImageKind,
+): Promise<ImageRecord> =>
+    put({
+        id: newId(),
+        name,
+        kind: identify(name, kind),
+        size: bytes.length,
+        source: "stored here",
+        addedAt: Date.now(),
+        blob: new Blob([bytes as BlobPart]),
+    });
 
 export const addFile = (file: File, kind?: ImageKind): Promise<ImageRecord> =>
     put({

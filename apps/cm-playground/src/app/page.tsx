@@ -21,7 +21,7 @@ import { RunBar } from "../components/RunBar";
 import { SnapshotLibrary } from "../components/SnapshotLibrary";
 import type { TerminalHandle } from "../components/Terminal";
 import { Choice } from "../components/ui";
-import type { ImageRecord } from "../images/store";
+import { type ImageRecord, listImages } from "../images/store";
 import {
     defaultConfig,
     generate,
@@ -69,6 +69,16 @@ const Playground = () => {
 
     const machine = useMachine(
         useCallback((bytes: Uint8Array) => terminal.current?.write(bytes), []),
+        // the worker writes a stored machine straight into the library, so
+        // the page hears about it rather than putting it there
+        useCallback(() => {
+            listImages()
+                .then(setImages)
+                .catch(() => {
+                    // the run bar already says the snapshot was stored; the
+                    // list catches up on the next thing that reloads it
+                });
+        }, []),
     );
 
     useEffect(() => {
@@ -240,6 +250,7 @@ const Playground = () => {
                         problems={generated.problems}
                         onBoot={boot}
                         onStop={machine.stop}
+                        onStore={machine.store}
                         onClear={() => terminal.current?.clear()}
                     />
                     <Terminal

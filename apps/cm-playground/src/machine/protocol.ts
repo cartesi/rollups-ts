@@ -19,6 +19,8 @@ export type ToWorker =
     | BootRequest
     | { type: "input"; bytes: Uint8Array }
     | { type: "resize"; runtime: MachineRuntimeConfig }
+    /** Pack the machine as it stands into the snapshot library. */
+    | { type: "store" }
     | { type: "stop" };
 
 export interface RunStats {
@@ -40,4 +42,9 @@ export type FromWorker =
           rootHash: string;
           exitCode: number | null;
       }
-    | { type: "error"; message: string };
+    | { type: "error"; message: string }
+    // Storing is its own little state machine: it happens beside a machine
+    // that is still running, and failing at it is not the run failing.
+    | { type: "storing"; text: string }
+    | { type: "stored"; name: string; size: number }
+    | { type: "storeFailed"; message: string };

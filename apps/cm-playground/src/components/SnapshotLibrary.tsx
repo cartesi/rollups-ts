@@ -4,8 +4,10 @@
 // config and one file per memory range — packed into a tar. Loading one skips
 // everything the form below does: the machine arrives with its drives, its
 // command line and its cycle count already settled, resuming wherever it was
-// stored rather than booting from scratch.
-import { deleteImage, type ImageRecord } from "../images/store";
+// stored rather than booting from scratch. The other direction is the run
+// bar's "store", which puts the machine running on this page into this same
+// list — from where it can be downloaded and kept.
+import { deleteImage, type ImageRecord, readImageBlob } from "../images/store";
 import { formatSize } from "../machine/config";
 import { LibraryAdd, LibraryStatus } from "./LibraryAdd";
 import { Button, Section } from "./ui";
@@ -23,6 +25,21 @@ export const SnapshotLibrary = ({
     onPick: (id: string | null) => void;
 }) => {
     const { busy, progress, error, run, onProgress } = useLibrary(onChange);
+
+    // Straight from the stored Blob: the browser writes it to disk itself, so
+    // a snapshot never has to exist in this page's memory to be saved.
+    const download = async (snapshot: ImageRecord) => {
+        const url = URL.createObjectURL(await readImageBlob(snapshot.id));
+        try {
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = snapshot.name;
+            link.click();
+        } finally {
+            // after the click, which only needs the URL long enough to start
+            setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        }
+    };
 
     return (
         <Section
@@ -92,7 +109,17 @@ export const SnapshotLibrary = ({
                                             : "use this"}
                                     </Button>
                                 </td>
-                                <td>
+                                <td className="slots">
+                                    <Button
+                                        kind="ghost"
+                                        onClick={() =>
+                                            void run(snapshot.name, () =>
+                                                download(snapshot),
+                                            )
+                                        }
+                                    >
+                                        download
+                                    </Button>
                                     <Button
                                         kind="ghost"
                                         onClick={() =>

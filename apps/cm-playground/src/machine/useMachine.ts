@@ -15,6 +15,16 @@ export interface Outcome {
     stats: RunStats;
 }
 
+/**
+ * Storing has its own little life beside the run: it happens while a machine
+ * is still going, and failing at it leaves the machine alone.
+ */
+export type StoreState =
+    | { phase: "idle" }
+    | { phase: "busy"; text: string }
+    | { phase: "done"; name: string; size: number }
+    | { phase: "failed"; message: string };
+
 export interface MachineState {
     phase: Phase;
     status: string;
@@ -22,6 +32,7 @@ export interface MachineState {
     stats: RunStats | null;
     outcome: Outcome | null;
     error: string | null;
+    store: StoreState;
 }
 
 const initial: MachineState = {
@@ -31,13 +42,20 @@ const initial: MachineState = {
     stats: null,
     outcome: null,
     error: null,
+    store: { phase: "idle" },
 };
 
-export const useMachine = (onOutput: (bytes: Uint8Array) => void) => {
+export const useMachine = (
+    onOutput: (bytes: Uint8Array) => void,
+    /** A snapshot has landed in the library, which the page lists. */
+    onStored: () => void,
+) => {
     const [state, setState] = useState<MachineState>(initial);
     const worker = useRef<Worker | null>(null);
     const output = useRef(onOutput);
     output.current = onOutput;
+    const stored = useRef(onStored);
+    stored.current = onStored;
 
     useEffect(() => {
         const spawned = new Worker(
@@ -87,6 +105,29 @@ export const useMachine = (onOutput: (bytes: Uint8Array) => void) => {
                         phase: "error",
                         status: "failed",
                         error: data.message,
+                    }));
+                    break;
+                case "storing":
+                    setState((was) => ({
+                        ...was,
+                        store: { phase: "busy", text: data.text },
+                    }));
+                    break;
+                case "stored":
+                    setState((was) => ({
+                        ...was,
+                        store: {
+                            phase: "done",
+                            name: data.name,
+                            size: data.size,
+                        },
+                    }));
+                    stored.current();
+                    break;
+                case "storeFailed":
+                    setState((was) => ({
+                        ...was,
+                        store: { phase: "failed", message: data.message },
                     }));
                     break;
             }
@@ -143,6 +184,14 @@ export const useMachine = (onOutput: (bytes: Uint8Array) => void) => {
 
     const stop = useCallback(() => send({ type: "stop" }), [send]);
 
+    const store = useCallback(() => {
+        setState((was) => ({
+            ...was,
+            store: { phase: "busy", text: "storing the machine" },
+        }));
+        send({ type: "store" });
+    }, [send]);
+
     const sendInput = useCallback(
         (bytes: Uint8Array) => send({ type: "input", bytes }),
         [send],
@@ -153,5 +202,5 @@ export const useMachine = (onOutput: (bytes: Uint8Array) => void) => {
         [send],
     );
 
-    return { state, boot, stop, sendInput, resize };
+    return { state, boot, stop, store, sendInput, resize };
 };

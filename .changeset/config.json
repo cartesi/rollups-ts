@@ -6,7 +6,11 @@
     "fixed": [],
     "linked": [],
     "access": "public",
-    "baseBranch": "main",
+    "privatePackages": {
+        "version": true,
+        "tag": false
+    },
+    "baseBranch": "prerelease/v2-alpha",
     "updateInternalDependencies": "patch",
     "ignore": []
 }

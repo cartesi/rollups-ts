@@ -7,7 +7,12 @@
 // be compressed, it may wrap the machine in a directory, and it is as large as
 // the machine inside it, so it does not stay unpacked a moment longer than it
 // has to.
-import type { CartesiMachineWasm, EmscriptenFS } from "@cartesi/machine/wasm";
+import {
+    type CartesiMachine,
+    type CartesiMachineWasm,
+    type EmscriptenFS,
+    SharingMode,
+} from "@cartesi/machine/wasm";
 
 /**
  * Whether these bytes are gzipped — which a tarball that travelled over HTTP
@@ -17,12 +22,27 @@ import type { CartesiMachineWasm, EmscriptenFS } from "@cartesi/machine/wasm";
 export const isGzip = (bytes: Uint8Array): boolean =>
     bytes.length > 2 && bytes[0] === 0x1f && bytes[1] === 0x8b;
 
-export const gunzip = async (bytes: Uint8Array): Promise<Uint8Array> => {
+const through = async (
+    bytes: Uint8Array,
+    transform: CompressionStream | DecompressionStream,
+): Promise<Uint8Array> => {
     const stream = new Blob([bytes as BlobPart])
         .stream()
-        .pipeThrough(new DecompressionStream("gzip"));
+        .pipeThrough(transform);
     return new Uint8Array(await new Response(stream).arrayBuffer());
 };
+
+export const gunzip = (bytes: Uint8Array): Promise<Uint8Array> =>
+    through(bytes, new DecompressionStream("gzip"));
+
+/**
+ * The other direction, for a snapshot this page made. A machine is mostly
+ * memory it has never touched, so this is not a marginal saving: a freshly
+ * booted machine compresses by a factor of hundreds, and the result is an
+ * ordinary `.tar.gz` that `tar -xzf` opens.
+ */
+export const gzip = (bytes: Uint8Array): Promise<Uint8Array> =>
+    through(bytes, new CompressionStream("gzip"));
 
 /**
  * Where the stored machine is inside an unpacked archive.
@@ -94,6 +114,36 @@ export const loadArchive = (
     cartesi.writeSnapshot(dir, archive);
     try {
         return cartesi.load(machineRoot(cartesi.fs, dir), runtime);
+    } finally {
+        removeTree(cartesi.fs, dir);
+    }
+};
+
+/**
+ * Packs a running machine into a tarball, leaving the machine untouched.
+ *
+ * The sharing mode is not a choice: a machine created in memory, which is the
+ * only kind this page has, can only be written out with `All` — the other two
+ * ask the emulator to roll ranges back to a backing store that was never there.
+ * What it does not mean is that the machine is left tied to the files. It goes
+ * on running exactly as it was, so the directory is this function's alone: it
+ * is tarred and then removed, which gives a machine's worth of memory back.
+ */
+export const storeArchive = (
+    cartesi: CartesiMachineWasm,
+    machine: CartesiMachine,
+    dir: string,
+): Uint8Array => {
+    const parent = dir.slice(0, dir.lastIndexOf("/"));
+    cartesi.fs.mkdirTree(parent === "" ? "/" : parent);
+    if (cartesi.fs.analyzePath(dir).exists) {
+        // whatever an interrupted store left behind
+        removeTree(cartesi.fs, dir);
+    }
+
+    machine.store(dir, SharingMode.All);
+    try {
+        return cartesi.readSnapshot(dir);
     } finally {
         removeTree(cartesi.fs, dir);
     }
