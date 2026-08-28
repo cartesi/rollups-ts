@@ -169,7 +169,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.10
-        version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
+        version: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.2.0(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
 
   packages/codec:
     dependencies:
@@ -211,8 +211,8 @@ importers:
   packages/machine:
     dependencies:
       node-addon-api:
-        specifier: ^8.3.0
-        version: 8.9.1
+        specifier: ^8.9.2
+        version: 8.9.2
       node-gyp-build:
         specifier: ^4.8.4
         version: 4.8.4
@@ -249,10 +249,10 @@ importers:
         version: link:../client
       react:
         specifier: ^19.0.0
-        version: 19.2.7
+        version: 19.2.8
       wagmi:
         specifier: ^3.0.0
-        version: 3.5.0(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.7)(typescript@6.0.3)(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))
+        version: 3.5.0(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.8))(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.8)(typescript@6.0.3)(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
@@ -262,7 +262,7 @@ importers:
         version: link:../wagmi-plugin
       '@tanstack/react-query':
         specifier: ^5.0.0
-        version: 5.101.2(react@19.2.7)
+        version: 5.101.2(react@19.2.8)
       '@types/node':
         specifier: 'catalog:'
         version: 26.1.1
@@ -294,8 +294,8 @@ importers:
   packages/rollup:
     dependencies:
       node-addon-api:
-        specifier: ^8.3.0
-        version: 8.9.1
+        specifier: ^8.9.2
+        version: 8.9.2
       node-gyp-build:
         specifier: ^4.8.4
         version: 4.8.4
@@ -4686,8 +4686,8 @@ packages:
     resolution: {integrity: sha512-W5ZNO5KRPB5TkYmGVD9F6YqhsglXJzE6etpbmT+f6EQElhiX/UTG551cnsRGvLG3fyZEg9HwaDmNmj5nwJ4z9g==}
     engines: {node: '>=10'}
 
-  node-addon-api@8.9.1:
-    resolution: {integrity: sha512-4eUQWVPCUUUiBjLnHS3cXWeC6ryoPUc0U3rP7IuzapoGbzMqd/r6KKO0clr0b+snQhsrueFEhCZDdK+LK7hxKg==}
+  node-addon-api@8.9.2:
+    resolution: {integrity: sha512-VijLXbi3UACN69I0JVXJsX4tjACjNoQDgv2gTF6sx2wWEi8tkSg2eX8p5gSIFi8z2+DL3oHmY6OyKce38SDolg==}
     engines: {node: ^18 || ^20 || >= 21}
 
   node-gyp-build@4.8.4:
@@ -4999,10 +4999,6 @@ packages:
       react: ^19.2.7
       react-dom: ^19.2.7
       webpack: ^5.59.0
-
-  react@19.2.7:
-    resolution: {integrity: sha512-HNe9WslTbXmFK8o8cmwgAeJFSBvt1bPdHCVKtaaV+WlAN36mpT4hcRpwbf3fY56ar2oIXzsBpOAiIRHAdY0OlQ==}
-    engines: {node: '>=0.10.0'}
 
   react@19.2.8:
     resolution: {integrity: sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw==}
@@ -6305,7 +6301,7 @@ snapshots:
 
   '@cartesi/machine@1.0.0-alpha.1':
     dependencies:
-      node-addon-api: 8.9.1
+      node-addon-api: 8.9.2
       node-gyp-build: 4.8.4
     optionalDependencies:
       '@cartesi/machine-darwin-arm64': 1.0.0-alpha.1
@@ -7894,10 +7890,10 @@ snapshots:
 
   '@tanstack/query-core@5.101.4': {}
 
-  '@tanstack/react-query@5.101.2(react@19.2.7)':
+  '@tanstack/react-query@5.101.2(react@19.2.8)':
     dependencies:
       '@tanstack/query-core': 5.101.2
-      react: 19.2.7
+      react: 19.2.8
 
   '@tanstack/react-query@5.101.4(react@19.2.8)':
     dependencies:
@@ -8209,7 +8205,7 @@ snapshots:
       obug: 2.1.3
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
+      vitest: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.2.0(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
 
   '@vitest/expect@4.1.10':
     dependencies:
@@ -8219,6 +8215,14 @@ snapshots:
       '@vitest/utils': 4.1.10
       chai: 6.2.2
       tinyrainbow: 3.1.0
+
+  '@vitest/mocker@4.1.10(vite@8.2.0(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))':
+    dependencies:
+      '@vitest/spy': 4.1.10
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 8.2.0(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)
 
   '@vitest/mocker@4.1.10(vite@8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))':
     dependencies:
@@ -8374,19 +8378,19 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@wagmi/connectors@7.2.1(@wagmi/core@3.4.0(@tanstack/query-core@5.101.2)(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(viem@2.55.7(typescript@6.0.3)(zod@4.3.6)))(typescript@6.0.3)(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))':
+  '@wagmi/connectors@7.2.1(@wagmi/core@3.4.0(@tanstack/query-core@5.101.2)(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.8)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.8))(viem@2.55.7(typescript@6.0.3)(zod@4.3.6)))(typescript@6.0.3)(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))':
     dependencies:
-      '@wagmi/core': 3.4.0(@tanstack/query-core@5.101.2)(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))
+      '@wagmi/core': 3.4.0(@tanstack/query-core@5.101.2)(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.8)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.8))(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))
       viem: 2.55.7(typescript@6.0.3)(zod@4.3.6)
     optionalDependencies:
       typescript: 6.0.3
 
-  '@wagmi/core@3.4.0(@tanstack/query-core@5.101.2)(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))':
+  '@wagmi/core@3.4.0(@tanstack/query-core@5.101.2)(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.8)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.8))(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))':
     dependencies:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@6.0.3)
       viem: 2.55.7(typescript@6.0.3)(zod@4.3.6)
-      zustand: 5.0.0(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.4.0(react@19.2.7))
+      zustand: 5.0.0(@types/react@19.2.17)(react@19.2.8)(use-sync-external-store@1.4.0(react@19.2.8))
     optionalDependencies:
       '@tanstack/query-core': 5.101.2
       ox: 0.14.32(typescript@6.0.3)(zod@4.3.6)
@@ -10946,7 +10950,7 @@ snapshots:
     dependencies:
       semver: 7.8.5
 
-  node-addon-api@8.9.1: {}
+  node-addon-api@8.9.2: {}
 
   node-gyp-build@4.8.4: {}
 
@@ -11270,8 +11274,6 @@ snapshots:
       react-dom: 19.2.8(react@19.2.8)
       webpack: 5.108.4(esbuild@0.28.1)(lightningcss@1.33.0)(postcss@8.5.25)
       webpack-sources: 3.5.1
-
-  react@19.2.7: {}
 
   react@19.2.8: {}
 
@@ -12249,9 +12251,9 @@ snapshots:
 
   urlpattern-polyfill@10.1.0: {}
 
-  use-sync-external-store@1.4.0(react@19.2.7):
+  use-sync-external-store@1.4.0(react@19.2.8):
     dependencies:
-      react: 19.2.7
+      react: 19.2.8
 
   use-sync-external-store@1.6.0(react@19.2.8):
     dependencies:
@@ -12309,6 +12311,22 @@ snapshots:
     dependencies:
       vite: 8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)
 
+  vite@8.2.0(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0):
+    dependencies:
+      lightningcss: 1.33.0
+      picomatch: 4.0.5
+      postcss: 8.5.25
+      rolldown: 1.2.0
+      tinyglobby: 0.2.17
+    optionalDependencies:
+      '@types/node': 26.1.1
+      esbuild: 0.25.12
+      fsevents: 2.3.3
+      jiti: 2.7.0
+      terser: 5.49.0
+      tsx: 4.23.0
+      yaml: 2.9.0
+
   vite@8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.33.0
@@ -12328,6 +12346,34 @@ snapshots:
   vitefu@1.1.3(vite@8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)):
     optionalDependencies:
       vite: 8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)
+
+  vitest@4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.2.0(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)):
+    dependencies:
+      '@vitest/expect': 4.1.10
+      '@vitest/mocker': 4.1.10(vite@8.2.0(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0))
+      '@vitest/pretty-format': 4.1.10
+      '@vitest/runner': 4.1.10
+      '@vitest/snapshot': 4.1.10
+      '@vitest/spy': 4.1.10
+      '@vitest/utils': 4.1.10
+      es-module-lexer: 2.3.0
+      expect-type: 1.3.0
+      magic-string: 0.30.21
+      obug: 2.1.3
+      pathe: 2.0.3
+      picomatch: 4.0.5
+      std-env: 4.0.0
+      tinybench: 2.9.0
+      tinyexec: 1.2.4
+      tinyglobby: 0.2.17
+      tinyrainbow: 3.1.0
+      vite: 8.2.0(@types/node@26.1.1)(esbuild@0.25.12)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 26.1.1
+      '@vitest/coverage-v8': 4.1.10(vitest@4.1.10)
+    transitivePeerDependencies:
+      - msw
 
   vitest@4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(vite@8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.0)(yaml@2.9.0)):
     dependencies:
@@ -12527,13 +12573,13 @@ snapshots:
 
   w3c-keyname@2.2.8: {}
 
-  wagmi@3.5.0(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.7)(typescript@6.0.3)(viem@2.55.7(typescript@6.0.3)(zod@4.3.6)):
+  wagmi@3.5.0(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.8))(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.8)(typescript@6.0.3)(viem@2.55.7(typescript@6.0.3)(zod@4.3.6)):
     dependencies:
-      '@tanstack/react-query': 5.101.2(react@19.2.7)
-      '@wagmi/connectors': 7.2.1(@wagmi/core@3.4.0(@tanstack/query-core@5.101.2)(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(viem@2.55.7(typescript@6.0.3)(zod@4.3.6)))(typescript@6.0.3)(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))
-      '@wagmi/core': 3.4.0(@tanstack/query-core@5.101.2)(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))
-      react: 19.2.7
-      use-sync-external-store: 1.4.0(react@19.2.7)
+      '@tanstack/react-query': 5.101.2(react@19.2.8)
+      '@wagmi/connectors': 7.2.1(@wagmi/core@3.4.0(@tanstack/query-core@5.101.2)(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.8)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.8))(viem@2.55.7(typescript@6.0.3)(zod@4.3.6)))(typescript@6.0.3)(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))
+      '@wagmi/core': 3.4.0(@tanstack/query-core@5.101.2)(@types/react@19.2.17)(ox@0.14.32(typescript@6.0.3)(zod@4.3.6))(react@19.2.8)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.8))(viem@2.55.7(typescript@6.0.3)(zod@4.3.6))
+      react: 19.2.8
+      use-sync-external-store: 1.4.0(react@19.2.8)
       viem: 2.55.7(typescript@6.0.3)(zod@4.3.6)
     optionalDependencies:
       typescript: 6.0.3
@@ -12741,10 +12787,10 @@ snapshots:
 
   zod@4.3.6: {}
 
-  zustand@5.0.0(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.4.0(react@19.2.7)):
+  zustand@5.0.0(@types/react@19.2.17)(react@19.2.8)(use-sync-external-store@1.4.0(react@19.2.8)):
     optionalDependencies:
       '@types/react': 19.2.17
-      react: 19.2.7
-      use-sync-external-store: 1.4.0(react@19.2.7)
+      react: 19.2.8
+      use-sync-external-store: 1.4.0(react@19.2.8)
 
   zwitch@2.0.4: {}
