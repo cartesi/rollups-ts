@@ -15,7 +15,7 @@
         "react-dom": "^19.2.8",
         "vite": "^8.2.0",
         "vocs": "^2.8.5",
-        "waku": "1.0.0-beta.8"
+        "waku": "1.0.0-rc.0"
     },
     "devDependencies": {
         "@cartesi/client": "workspace:*",
