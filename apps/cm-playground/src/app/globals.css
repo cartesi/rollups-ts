@@ -116,6 +116,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    /* what the grids below measure themselves against: this column can be
+       half of a wide screen or the whole of a narrow one, and the window
+       does not say which */
+    container-type: inline-size;
 }
 
 .hint {
@@ -175,6 +179,18 @@ body {
 .input:focus {
     outline: 2px solid var(--accent);
     outline-offset: -1px;
+}
+
+/* placeholders carry the value a blank field will take, so they have to read
+   as text rather than as noise */
+.input::placeholder {
+    color: var(--dim);
+    opacity: 0.8;
+}
+
+.input:disabled {
+    color: var(--dim);
+    cursor: default;
 }
 
 .mono {
@@ -292,20 +308,70 @@ textarea.input {
     gap: 6px;
 }
 
-.drive {
+/* memory ranges — a flash drive or an NVRAM */
+
+.range {
     background: var(--panel-2);
     border: 1px solid var(--line);
     border-radius: 6px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 10px;
+    gap: 12px;
+    padding: 12px;
 }
 
-.drive-actions {
+.range-head {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.range-name {
+    color: var(--dim);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.range-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/*
+ * A grid rather than a wrapping row.
+ *
+ * Eight controls only read as a form if each one starts where the one above
+ * it does, and a row that wraps on its own gives every card a different shape.
+ * Here the columns are the same for every card, and each cell is a stack that
+ * begins at the top of its row — so a hint under one control lengthens its
+ * cell without pushing its neighbours out of line.
+ */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 12px;
+}
+
+/* the track is the width here, not the field's own idea of a minimum */
+.grid .field {
+    min-width: 0;
+}
+
+.grid-caption {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--dim);
+}
+
+@container (min-width: 540px) {
+    .grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
 }
 
 .json {
