@@ -38,20 +38,29 @@ const Terminal = dynamic(
 
 const STORED = "cm-playground.config";
 
-const restore = (): PlaygroundConfig => {
+const restore = (): PlaygroundConfig | null => {
     try {
         const saved = localStorage.getItem(STORED);
-        if (saved !== null) {
-            return restoreConfig(JSON.parse(saved));
-        }
+        return saved === null ? null : restoreConfig(JSON.parse(saved));
     } catch {
-        // a stored configuration from an older shape, or none at all
+        // a stored configuration from an older shape, or no storage at all
+        return null;
     }
-    return defaultConfig();
 };
 
 const Playground = () => {
-    const [config, setConfig] = useState<PlaygroundConfig>(restore);
+    // The form starts at the defaults, and the configuration this browser
+    // last had arrives a render later.
+    //
+    // Reading storage while rendering would be the obvious thing, and it is
+    // the one thing that cannot be done here: this page is prerendered, where
+    // there is no localStorage to read, and a first client render that
+    // disagrees with what the server sent has React throw the whole tree away
+    // and build it again. So the read waits for an effect — and the write
+    // waits for the read, or it would save the defaults over what it is about
+    // to load.
+    const [config, setConfig] = useState<PlaygroundConfig>(defaultConfig);
+    const [restored, setRestored] = useState(false);
     const [images, setImages] = useState<ImageRecord[]>([]);
     const terminal = useRef<TerminalHandle | null>(null);
 
@@ -60,8 +69,18 @@ const Playground = () => {
     );
 
     useEffect(() => {
-        localStorage.setItem(STORED, JSON.stringify(config));
-    }, [config]);
+        const saved = restore();
+        if (saved !== null) {
+            setConfig(saved);
+        }
+        setRestored(true);
+    }, []);
+
+    useEffect(() => {
+        if (restored) {
+            localStorage.setItem(STORED, JSON.stringify(config));
+        }
+    }, [config, restored]);
 
     const update = useCallback((change: Partial<PlaygroundConfig>) => {
         setConfig((was) => ({ ...was, ...change }));
