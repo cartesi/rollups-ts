@@ -133,6 +133,7 @@ export const useMachine = (onOutput: (bytes: Uint8Array) => void) => {
                 config: generated.config,
                 runtime: generated.runtime,
                 images: generated.images,
+                snapshot: generated.snapshot,
                 interactive,
                 maxMcycle,
             });

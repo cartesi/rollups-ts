@@ -3,12 +3,15 @@ import type { MachineConfig, MachineRuntimeConfig } from "@cartesi/machine";
 
 export interface BootRequest {
     type: "boot";
-    config: MachineConfig;
+    /** The machine to create, or null when `snapshot` names a stored one. */
+    config: MachineConfig | null;
     runtime: MachineRuntimeConfig;
     /** Library ids the worker stages before creating the machine. */
     images: string[];
+    /** The snapshot tarball to unpack and load, by library id. */
+    snapshot: string | null;
     interactive: boolean;
-    /** Stop after this many cycles; null runs until the machine stops itself. */
+    /** Run this many cycles before giving up; null runs until it stops itself. */
     maxMcycle: string | null;
 }
 

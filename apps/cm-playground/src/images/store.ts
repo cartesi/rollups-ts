@@ -1,12 +1,17 @@
-// The image library: kernels and filesystems, kept in IndexedDB so a reload
-// does not mean downloading a few hundred megabytes again.
+// The library: kernels, filesystems and stored machines, kept in IndexedDB so
+// a reload does not mean downloading a few hundred megabytes again.
 //
 // Both the page and the worker open this — the worker reads the bytes straight
 // out of the database rather than having them posted across, which for a
 // 300 MB rootfs is the difference between one copy and three.
 import { proxied } from "./hosts";
 
-export type ImageKind = "kernel" | "flash" | "other";
+/**
+ * What a stored blob is for. A "snapshot" is a whole machine — the tar of a
+ * directory `machine.store()` wrote — rather than an image a machine is built
+ * from, which is why it is loaded instead of being pointed at from a config.
+ */
+export type ImageKind = "kernel" | "flash" | "snapshot" | "other";
 
 export interface ImageRecord {
     id: string;
@@ -86,6 +91,11 @@ const put = async (image: StoredImage): Promise<ImageRecord> => {
 const identify = (name: string, kind?: ImageKind): ImageKind => {
     if (kind !== undefined) {
         return kind;
+    }
+    // before the others: a snapshot of a machine is very often named after
+    // the machine it holds, which can be anything at all
+    if (/\.tar$|\.tar\.gz$|\.tgz$/i.test(name)) {
+        return "snapshot";
     }
     if (/linux|kernel|\.bin$/i.test(name)) {
         return "kernel";

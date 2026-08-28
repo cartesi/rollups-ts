@@ -18,11 +18,14 @@ import {
 import { ConfigJson } from "../components/ConfigJson";
 import { ImageLibrary } from "../components/ImageLibrary";
 import { RunBar } from "../components/RunBar";
+import { SnapshotLibrary } from "../components/SnapshotLibrary";
 import type { TerminalHandle } from "../components/Terminal";
+import { Choice } from "../components/ui";
 import type { ImageRecord } from "../images/store";
 import {
     defaultConfig,
     generate,
+    type MachineSource,
     type PlaygroundConfig,
     restoreConfig,
 } from "../machine/config";
@@ -94,6 +97,7 @@ const Playground = () => {
                 id !== null && known.has(id) ? id : null;
             return {
                 ...config,
+                snapshotId: kept(config.snapshotId),
                 kernelId: kept(config.kernelId),
                 rootfsId: kept(config.rootfsId),
                 drives: config.drives.map((drive) => ({
@@ -110,7 +114,20 @@ const Playground = () => {
         [config, images],
     );
 
+    // One store, two panels: a snapshot is a machine and the rest are the
+    // parts one is built from, and neither list has any business in the
+    // other's table.
+    const snapshots = useMemo(
+        () => images.filter((image) => image.kind === "snapshot"),
+        [images],
+    );
+    const parts = useMemo(
+        () => images.filter((image) => image.kind !== "snapshot"),
+        [images],
+    );
+
     const generated = useMemo(() => generate(settled()), [settled]);
+    const loading = config.source === "snapshot";
 
     const boot = () => {
         terminal.current?.clear();
@@ -148,32 +165,72 @@ const Playground = () => {
 
             <div className="columns">
                 <div className="column column-config">
-                    <ImageLibrary
-                        images={images}
-                        onChange={setImages}
-                        kernelId={config.kernelId}
-                        rootfsId={config.rootfsId}
-                        onPick={(slot, id) =>
-                            update(
-                                slot === "kernel"
-                                    ? { kernelId: id }
-                                    : { rootfsId: id },
-                            )
-                        }
+                    <Choice<MachineSource>
+                        value={config.source}
+                        onChange={(source) => update({ source })}
+                        options={[
+                            {
+                                value: "config",
+                                label: "Build a machine",
+                                hint: "a kernel, a root filesystem and what runs on it",
+                            },
+                            {
+                                value: "snapshot",
+                                label: "Load a snapshot",
+                                hint: "a stored machine, from a tarball",
+                            },
+                        ]}
                     />
-                    <MachineSection
+
+                    {loading ? (
+                        <SnapshotLibrary
+                            snapshots={snapshots}
+                            onChange={setImages}
+                            snapshotId={config.snapshotId}
+                            onPick={(snapshotId) => update({ snapshotId })}
+                        />
+                    ) : (
+                        <>
+                            <ImageLibrary
+                                images={parts}
+                                onChange={setImages}
+                                kernelId={config.kernelId}
+                                rootfsId={config.rootfsId}
+                                onPick={(slot, id) =>
+                                    update(
+                                        slot === "kernel"
+                                            ? { kernelId: id }
+                                            : { rootfsId: id },
+                                    )
+                                }
+                            />
+                            <MachineSection
+                                config={config}
+                                images={parts}
+                                update={update}
+                            />
+                            <NvramSection
+                                config={config}
+                                images={parts}
+                                update={update}
+                            />
+                            <BootSection config={config} update={update} />
+                        </>
+                    )}
+
+                    {/* A stored machine settled its own configuration when it
+                        was stored; what is left to say about it is how this
+                        page drives it, which is these two. */}
+                    <ConsoleSection
                         config={config}
-                        images={images}
                         update={update}
+                        loading={loading}
                     />
-                    <NvramSection
+                    <AdvancedSection
                         config={config}
-                        images={images}
                         update={update}
+                        loading={loading}
                     />
-                    <BootSection config={config} update={update} />
-                    <ConsoleSection config={config} update={update} />
-                    <AdvancedSection config={config} update={update} />
                     <ConfigJson generated={generated} />
                 </div>
 

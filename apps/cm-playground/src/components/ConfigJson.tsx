@@ -6,8 +6,13 @@ import { Button, Section } from "./ui";
 
 export const ConfigJson = ({ generated }: { generated: GeneratedConfig }) => {
     const [copied, setCopied] = useState(false);
+    // A stored machine brings its own configuration inside the tarball, so
+    // there is nothing to show for it but the half that describes the host.
+    const loading = generated.config === null;
     const text = JSON.stringify(
-        { config: generated.config, runtime: generated.runtime },
+        loading
+            ? { runtime: generated.runtime }
+            : { config: generated.config, runtime: generated.runtime },
         null,
         2,
     );
@@ -15,7 +20,11 @@ export const ConfigJson = ({ generated }: { generated: GeneratedConfig }) => {
     return (
         <Section
             title="Configuration"
-            hint="Exactly what create() is called with."
+            hint={
+                loading
+                    ? "Exactly what load() is called with — the machine's own configuration is inside the snapshot."
+                    : "Exactly what create() is called with."
+            }
             actions={
                 <Button
                     kind="ghost"

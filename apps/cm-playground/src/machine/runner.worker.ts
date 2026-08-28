@@ -14,8 +14,9 @@ import {
     Reg,
 } from "@cartesi/machine/wasm";
 
-import { imagePath } from "./config";
-import type { FromWorker, RunStats, ToWorker } from "./protocol";
+import { imagePath, snapshotPath } from "./config";
+import { gunzip, isGzip, loadArchive } from "./snapshot";
+import type { BootRequest, FromWorker, RunStats, ToWorker } from "./protocol";
 import { readImage } from "../images/store";
 
 /** How far to run before coming up for air. */
@@ -79,6 +80,30 @@ const stage = async (ids: string[]): Promise<void> => {
 };
 
 /**
+ * Reads a snapshot out of the library and loads the machine in it.
+ *
+ * The tarball is the biggest thing this page handles — as big as the machine
+ * inside it — so it is read, unpacked and dropped in one go, rather than kept
+ * staged the way an image is.
+ */
+const loadSnapshot = async (
+    id: string,
+    runtime: BootRequest["runtime"],
+): Promise<CartesiMachine> => {
+    const loaded = await module();
+
+    post({ type: "status", text: "reading the snapshot" });
+    let archive = await readImage(id);
+    if (isGzip(archive)) {
+        post({ type: "status", text: "decompressing the snapshot" });
+        archive = await gunzip(archive);
+    }
+
+    post({ type: "status", text: "unpacking the snapshot" });
+    return loadArchive(loaded, snapshotPath(id), archive, runtime);
+};
+
+/**
  * The exit code the guest halted with. HTIF carries it in the low 32 bits of
  * tohost, with bit 0 marking the halt itself.
  */
@@ -88,9 +113,14 @@ const exitCodeOf = (halted: CartesiMachine): number | null => {
     return (data & 1n) === 0n ? null : Number(data >> 1n);
 };
 
-const drive = async (interactive: boolean, cap: bigint | null) => {
+const drive = async (interactive: boolean, limit: bigint | null) => {
     const running = machine as CartesiMachine;
     const started = performance.now();
+    // A machine created here starts at cycle zero; a loaded one starts wherever
+    // it was stored. Everything this reports is about the run, not the machine's
+    // whole life, so both the speed and the cycle limit count from here.
+    const origin = running.readReg(Reg.Mcycle);
+    const cap = limit === null ? null : origin + limit;
     let idle = 0;
     let reported = 0;
 
@@ -100,7 +130,7 @@ const drive = async (interactive: boolean, cap: bigint | null) => {
         return {
             mcycle: mcycle.toString(),
             seconds,
-            mips: seconds === 0 ? 0 : Number(mcycle) / seconds / 1e6,
+            mips: seconds === 0 ? 0 : Number(mcycle - origin) / seconds / 1e6,
         };
     };
 
@@ -162,25 +192,34 @@ const drive = async (interactive: boolean, cap: bigint | null) => {
 const min = (left: bigint, right: bigint): bigint =>
     left < right ? left : right;
 
-const boot = async (request: Extract<ToWorker, { type: "boot" }>) => {
+const boot = async (request: BootRequest) => {
     stopped = false;
     pending = new Uint8Array(0);
 
-    await stage(request.images);
     const loaded = await module();
-
+    // before anything large is read or unpacked: the machine that ran last is
+    // of no use now, and it is holding its whole state
     machine?.destroy();
-    post({ type: "status", text: "creating the machine" });
-    machine = loaded.create(request.config, request.runtime);
+    machine = null;
+
+    if (request.snapshot !== null) {
+        machine = await loadSnapshot(request.snapshot, request.runtime);
+    } else if (request.config !== null) {
+        await stage(request.images);
+        post({ type: "status", text: "creating the machine" });
+        machine = loaded.create(request.config, request.runtime);
+    } else {
+        throw new Error("nothing to boot: no configuration and no snapshot");
+    }
 
     post({
         type: "booted",
         emulator: formatVersion(loaded.getVersion()),
     });
 
-    const cap =
+    const limit =
         request.maxMcycle === null ? null : BigInt(request.maxMcycle) || null;
-    await drive(request.interactive, cap);
+    await drive(request.interactive, limit);
 };
 
 const formatVersion = (version: bigint): string => {
