@@ -36,3 +36,8 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# License audit outputs
+rollups-ts-license-data.json
+rollups-ts-license-report.html
+.license-audit-cache.json

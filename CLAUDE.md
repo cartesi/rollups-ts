@@ -14,6 +14,7 @@ pnpm + Turborepo monorepo of Cartesi Rollups TypeScript libraries. Requires Node
 - `pnpm dev` — watch mode (tsdown --watch) across packages
 - `pnpm lint` — `biome check` in each package
 - `pnpm check-types` — TypeScript type checking
+- `pnpm lint:licenses` — dependency licence gate (`scripts/audit-licenses.mjs`). Resolves every coordinate pinned in `pnpm-lock.yaml` at its **locked** version, not the registry's `latest`, and enforces `.license-policy.json`. Licences are read from `node_modules/.pnpm` where they are on disk; the ~180 optional dependencies pnpm skips as platform-incompatible (`@esbuild/*`, `@rollup/*`, …) are fetched from the registry, since no single-platform install can provide them. Anything missing that pnpm did *not* skip is treated as a broken install and fails hard rather than being resolved from the network. Exit codes: 0 clean, 1 policy violation, 2 unresolved, 3 bad policy file. `node scripts/render-license-report.mjs` renders the emitted JSON as a browsable HTML report. CI runs it in `.github/workflows/license-check.yaml`
 - Tests (`@cartesi/client`, `@cartesi/codec`, `@cartesi/machine`, `@cartesi/react` and `@cartesi/rollup` have tests, via vitest):
   - `pnpm test` — run every suite once (turbo `test:run`, restricted to `packages/*`; builds each package's prerequisites first)
   - `pnpm test:coverage` — the same, with coverage

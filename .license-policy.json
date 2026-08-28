@@ -1,0 +1,77 @@
+{
+  "_comment": "License policy for cartesi/rollups-ts. Enforced by `pnpm lint:licenses` (= `node scripts/audit-licenses.mjs --check`) and in CI by .github/workflows/license-check.yaml. Every entry under `exceptions` carries its own `evidence` URL and the gate rejects an exception missing one, so the justification for each is in this file — there is no separate document to go and find.",
+
+  "allow": [
+    "MIT",
+    "ISC",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "0BSD",
+    "Unlicense",
+    "BlueOak-1.0.0",
+    "Python-2.0",
+    "W3C-20150513",
+    "CC0-1.0"
+  ],
+
+  "_allowBuildOnly": "Permitted in dev/build and in the private docs app, but NOT inside the runtime closure of a published @cartesi/* package. MPL-2.0 is weak copyleft: unmodified use as a build tool is fine, shipping it in a library is a different conversation. LicenseRef-Sustainable-Use-1.0 is here for a different reason — it is not open source at all, it restricts use to non-commercial or internal purposes and forbids distributing the software for a fee. It reaches us only through apps/docs (vocs -> @codesandbox/sandpack-react -> sandpack-client -> nodebox), which is private:true and never published to npm. Listing it here rather than on the allowlist is deliberate: the moment it turns up in a published package's runtime closure the gate fails with a scope violation instead of waving it through.",
+  "allowBuildOnly": [
+    "MPL-2.0",
+    "LicenseRef-Sustainable-Use-1.0"
+  ],
+
+  "_allowWithNotice": "Allowed anywhere, but the attribution has to appear on the docs third-party notices page. The gate lists these on every run so the page cannot silently fall behind.",
+  "allowWithNotice": [
+    "CC-BY-4.0",
+    "CC-BY-3.0"
+  ],
+
+  "_deny": "Always fails, in any scope, even inside a larger OR expression that would otherwise pass.",
+  "deny": [
+    "AGPL-1.0-only",
+    "AGPL-1.0-or-later",
+    "AGPL-3.0-only",
+    "AGPL-3.0-or-later",
+    "SSPL-1.0",
+    "BUSL-1.1",
+    "Commons-Clause",
+    "Elastic-2.0",
+    "UNLICENSED"
+  ],
+
+  "_exceptions": "Coordinates whose published metadata cannot be resolved to an SPDX id. Every entry must carry BOTH a hand-resolved `license` and an `evidence` URL — the gate rejects an exception missing either, so nobody can wave a package through without recording what they read.",
+  "exceptions": {
+    "khroma@2.1.0": {
+      "license": "MIT",
+      "evidence": "https://github.com/fabiospampinato/khroma/blob/master/license",
+      "note": "No license field in the published manifest. Upstream repo carries the MIT text."
+    },
+    "spawndamnit@3.0.1": {
+      "license": "MIT",
+      "evidence": "https://github.com/thejameskyle/spawndamnit/blob/master/LICENSE",
+      "note": "Publishes 'SEE LICENSE IN LICENSE'. The referenced file is plain MIT."
+    },
+    "@codesandbox/nodebox@0.1.8": {
+      "license": "LicenseRef-Sustainable-Use-1.0",
+      "evidence": "https://github.com/codesandbox/nodebox-runtime/blob/main/LICENSE",
+      "note": "Publishes 'SEE LICENSE IN ./LICENSE'. The referenced file is the Sustainable Use License v1.0 — source-available, NOT open source: use is limited to internal business, non-commercial or personal purposes, and redistribution is only permitted free of charge for non-commercial purposes. The upstream text is byte-identical to the LICENSE shipped in the 0.1.8 tarball. Resolved to a LicenseRef because there is no SPDX id for it, and listed under allowBuildOnly so it stays confined to apps/docs; see _allowBuildOnly."
+    }
+  },
+
+  "_publishable": "Packaging rules for every non-private package under packages/. These encode audit findings F2 and F3 so they cannot regress once fixed.",
+  "_publishableTemporary": "requireLicenseField and requireLicenseInFiles are OFF on purpose, and only until issue #2 lands. They encode audit findings F2/F3 — five packages declare no \"license\" field and seven do not ship their LICENSE — which is packaging work tracked in that issue. Turning them on here would hold the dependency-side rules hostage to a packaging fix, so they start off and the PR that fixes the manifests flips BOTH back to true. If you are reading this after issue #2 closed, that PR forgot to flip them.",
+  "publishable": {
+    "requireLicenseField": false,
+    "requireLicenseInFiles": false,
+    "requireRootNotice": false
+  },
+
+  "_elections": "Recorded choice for dual-licensed dependencies, for the notices page. Not enforced by the gate — both arms are on the allowlist — but written down so the choice is not re-litigated.",
+  "elections": {
+    "dompurify": "Apache-2.0",
+    "@biomejs/*": "Apache-2.0",
+    "@takumi-rs/*": "Apache-2.0",
+    "type-fest": "MIT"
+  }
+}
