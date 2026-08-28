@@ -13,6 +13,7 @@ import {
     BootSection,
     ConsoleSection,
     MachineSection,
+    NvramSection,
 } from "../components/ConfigForm";
 import { ConfigJson } from "../components/ConfigJson";
 import { ImageLibrary } from "../components/ImageLibrary";
@@ -23,6 +24,7 @@ import {
     defaultConfig,
     generate,
     type PlaygroundConfig,
+    restoreConfig,
 } from "../machine/config";
 import { useMachine } from "../machine/useMachine";
 
@@ -40,7 +42,7 @@ const restore = (): PlaygroundConfig => {
     try {
         const saved = localStorage.getItem(STORED);
         if (saved !== null) {
-            return { ...defaultConfig(), ...JSON.parse(saved) };
+            return restoreConfig(JSON.parse(saved));
         }
     } catch {
         // a stored configuration from an older shape, or none at all
@@ -75,6 +77,14 @@ const Playground = () => {
                 ...config,
                 kernelId: kept(config.kernelId),
                 rootfsId: kept(config.rootfsId),
+                drives: config.drives.map((drive) => ({
+                    ...drive,
+                    imageId: kept(drive.imageId),
+                })),
+                nvrams: config.nvrams.map((nvram) => ({
+                    ...nvram,
+                    imageId: kept(nvram.imageId),
+                })),
                 ...extra,
             };
         },
@@ -133,6 +143,11 @@ const Playground = () => {
                         }
                     />
                     <MachineSection
+                        config={config}
+                        images={images}
+                        update={update}
+                    />
+                    <NvramSection
                         config={config}
                         images={images}
                         update={update}

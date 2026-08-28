@@ -5,7 +5,10 @@
 // a person sets here — "interactive", an environment variable, a window size —
 // land in several places at once, and a couple of the emulator's defaults have
 // to be recomputed when they do (the kernel command line naming the console,
-// most of all).
+// most of all). Others land nowhere near the configuration: mounting a drive,
+// owning it, naming the host — those are shell, and they are assembled into
+// `dtb.init`, exactly as cartesi-machine.lua assembles them for the command
+// line tool.
 import type {
     ConsoleFlushMode,
     MachineConfig,
@@ -13,6 +16,12 @@ import type {
     MemoryRangeConfig,
 } from "@cartesi/machine";
 import { HtifConsoleMask } from "@cartesi/machine/wasm";
+
+/** How init mounts a drive: the command line tool's `mount:` key. */
+export type MountMode = "auto" | "none" | "custom";
+
+/** Whether init formats a drive: the command line tool's `mke2fs:` key. */
+export type FormatMode = "auto" | "always" | "never";
 
 /** A drive the machine gets beyond its root filesystem. */
 export interface DriveForm {
@@ -24,6 +33,25 @@ export interface DriveForm {
     length: string;
     start: string;
     readOnly: boolean;
+    /** "auto" mounts at /mnt/<label> when there is something to mount. */
+    mount: MountMode;
+    /** Where to mount it, when `mount` is "custom". */
+    mountPoint: string;
+    /** "auto" formats a drive that starts empty. */
+    format: FormatMode;
+    /** Who owns the mount point — or the device, when it is not mounted. */
+    user: string;
+}
+
+/** A non-volatile memory range, which the guest sees as /dev/uioN. */
+export interface NvramForm {
+    id: string;
+    label: string;
+    imageId: string | null;
+    length: string;
+    start: string;
+    readOnly: boolean;
+    user: string;
 }
 
 export interface EnvVar {
@@ -37,15 +65,19 @@ export type ConsoleKind = "virtio" | "htif";
 export interface PlaygroundConfig {
     kernelId: string | null;
     rootfsId: string | null;
+    rootfsReadOnly: boolean;
     ramLength: string;
 
     drives: DriveForm[];
+    nvrams: NvramForm[];
 
     entrypoint: string;
     env: EnvVar[];
     workdir: string;
     user: string;
     hostname: string;
+    splash: boolean;
+    syncDate: boolean;
     initScript: string;
     bootargs: string;
 
@@ -62,18 +94,49 @@ export interface PlaygroundConfig {
     maxMcycle: string;
 }
 
+const newId = (): string => Math.random().toString(36).slice(2, 10);
+
+export const newDrive = (index: number): DriveForm => ({
+    id: newId(),
+    label: `drive${index + 1}`,
+    imageId: null,
+    length: "",
+    start: "",
+    readOnly: false,
+    mount: "auto",
+    mountPoint: "",
+    format: "auto",
+    user: "",
+});
+
+export const newNvram = (index: number): NvramForm => ({
+    id: newId(),
+    label: `nvram-${index + 1}`,
+    imageId: null,
+    length: "",
+    start: "",
+    readOnly: false,
+    user: "",
+});
+
+export const newEnvVar = (): EnvVar => ({ id: newId(), name: "", value: "" });
+
 export const defaultConfig = (): PlaygroundConfig => ({
     kernelId: null,
     rootfsId: null,
+    rootfsReadOnly: false,
     ramLength: "128Mi",
 
     drives: [],
+    nvrams: [],
 
     entrypoint: "",
     env: [],
     workdir: "",
     user: "",
     hostname: "",
+    splash: true,
+    syncDate: false,
     initScript: "",
     bootargs: "",
 
@@ -89,6 +152,26 @@ export const defaultConfig = (): PlaygroundConfig => ({
     updateHashTree: false,
     maxMcycle: "",
 });
+
+/** Fills in fields a configuration saved by an older version of this page lacks. */
+export const restoreConfig = (saved: unknown): PlaygroundConfig => {
+    const config = { ...defaultConfig(), ...(saved as PlaygroundConfig) };
+    return {
+        ...config,
+        drives: (config.drives ?? []).map((drive, index) => ({
+            ...newDrive(index),
+            ...drive,
+        })),
+        nvrams: (config.nvrams ?? []).map((nvram, index) => ({
+            ...newNvram(index),
+            ...nvram,
+        })),
+        env: (config.env ?? []).map((variable) => ({
+            ...newEnvVar(),
+            ...variable,
+        })),
+    };
+};
 
 // -- sizes -------------------------------------------------------------------
 
@@ -130,6 +213,39 @@ export const formatSize = (bytes: number): string => {
     return `${value.toFixed(value >= 10 || unit === 0 ? 0 : 1)} ${units[unit]}`;
 };
 
+// -- labels ------------------------------------------------------------------
+
+// A memory range always carries the automatic label the machine gives it —
+// `flashdrive0`, `nvram0`, and so on by position — and may carry one of the
+// user's own besides. The emulator is strict about the second: it is what the
+// guest looks a range up by, so it has to be a name and it has to be unique.
+const USER_LABEL = /^[a-z][a-z0-9-]*$/;
+const AUTOMATIC_LABEL = /^(flashdrive|nvram)\d+$/;
+
+const labelProblem = (label: string): string | null => {
+    if (!USER_LABEL.test(label)) {
+        return "must start with a lowercase letter and hold only lowercase letters, digits and hyphens";
+    }
+    if (label.length > 31) {
+        return "is longer than 31 characters";
+    }
+    if (AUTOMATIC_LABEL.test(label)) {
+        return "is a name the machine gives ranges itself";
+    }
+    return null;
+};
+
+/**
+ * The name the guest looks the range up by — `flashdrive <label>` and
+ * `nvram <label>` print the device a label resolves to. The user's own label
+ * when there is one, and the machine's automatic one otherwise.
+ */
+const deviceLabel = (
+    label: string,
+    kind: "flashdrive" | "nvram",
+    index: number,
+): string => (label.trim() === "" ? `${kind}${index}` : label.trim());
+
 // -- the boot command line ---------------------------------------------------
 
 // What the emulator uses when a configuration says nothing (cm.h,
@@ -141,25 +257,131 @@ const bootargsFor = (config: PlaygroundConfig, hasRoot: boolean): string => {
     return [
         `quiet earlycon=sbi console=${console}`,
         "uio_pdrv_genirq.of_id=generic-uio",
-        hasRoot ? "root=/dev/pmem0 rw" : "",
+        hasRoot ? `root=/dev/pmem0 ${config.rootfsReadOnly ? "ro" : "rw"}` : "",
         "init=/usr/sbin/cartesi-init",
     ]
         .filter((part) => part !== "")
         .join(" ");
 };
 
-// cartesi-init runs `dtb.init` before the entrypoint, which is where the
-// command line tool puts the same things (see cartesi-machine.lua).
-const initFor = (config: PlaygroundConfig): string => {
+// -- the init script ---------------------------------------------------------
+
+// The splash cartesi-machine prints on boot. The backslashes are doubled
+// because this is a shell script: `echo` is given the drawing, not the escapes.
+const SPLASH = String.raw`echo "
+         .
+        / \\
+      /    \\
+\\---/---\\  /----\\
+ \\       X       \\
+  \\----/  \\---/---\\
+       \\    / CARTESI
+        \\ /   MACHINE
+         '
+"`;
+
+/** Whether init formats this drive, and where — if anywhere — it mounts it. */
+const driveMount = (
+    drive: DriveForm,
+): { format: boolean; mountPoint: string } => {
+    // A drive that starts empty has no filesystem, so it gets one; one that
+    // comes from an image already has whatever the image holds.
+    const format =
+        drive.format === "always"
+            ? true
+            : drive.format === "never"
+              ? false
+              : drive.imageId === null;
+    const label = drive.label.trim();
+    const mountPoint =
+        drive.mount === "custom"
+            ? drive.mountPoint.trim()
+            : drive.mount === "none"
+              ? ""
+              : // there has to be something to mount, and somewhere to mount
+                // it: an unnamed drive gets no automatic mount point
+                (drive.imageId !== null || format) && label !== ""
+                ? `/mnt/${label}`
+                : "";
+    return { format, mountPoint };
+};
+
+// cartesi-init runs `dtb.init` as root before the entrypoint, which is where
+// the command line tool puts all of this too (see cartesi-machine.lua).
+const driveInit = (drive: DriveForm, label: string): string[] => {
+    // The kernel mounts the root filesystem itself, from the command line,
+    // long before init runs — so init leaves a drive called "root" alone,
+    // whether it came from the image library or from a drive named that here.
+    if (label === "root") {
+        return [];
+    }
+    const { format, mountPoint } = driveMount(drive);
+    const user = drive.user.trim();
+    if (!format && mountPoint === "" && user === "") {
+        return [];
+    }
+    const lines = [`dev=$(flashdrive ${label})`];
+    if (format) {
+        lines.push(
+            `busybox mke2fs -F -b 4096 -I 256 -L "${label}" "$dev" > /dev/null`,
+        );
+    }
+    if (mountPoint !== "") {
+        lines.push(
+            `busybox mkdir -p "${mountPoint}" && busybox mount${
+                drive.readOnly ? " -o ro" : ""
+            } "$dev" "${mountPoint}"`,
+        );
+    }
+    if (user !== "") {
+        // an unmounted drive is still a device the entrypoint may want to read
+        lines.push(
+            `busybox chown ${user}: "${mountPoint === "" ? "$dev" : mountPoint}"`,
+        );
+    }
+    return lines;
+};
+
+// An NVRAM has no filesystem layer, so there is nothing to format or mount:
+// what init settles is who may read and write /dev/uioN.
+const nvramInit = (nvram: NvramForm, label: string): string[] => {
+    const lines = [
+        `dev=$(nvram ${label})`,
+        `busybox chmod ${nvram.readOnly ? "0444" : "0664"} "$dev"`,
+    ];
+    const user = nvram.user.trim();
+    if (user !== "") {
+        lines.push(`busybox chown ${user}: "$dev"`);
+    }
+    return lines;
+};
+
+const initFor = (
+    config: PlaygroundConfig,
+    ranges: string[],
+    now: number,
+): string => {
     const lines: string[] = [];
+    if (config.splash) {
+        lines.push(SPLASH);
+    }
+    if (config.syncDate) {
+        // rounded up by one, as the command line tool does, so the guest is
+        // less likely to start in the host's past
+        lines.push(
+            `busybox date -s @${Math.floor(now / 1000) + 1} >> /dev/null`,
+        );
+    }
+    lines.push(...ranges);
     // The guest cannot see what it is talking to, and a terminal that says
     // nothing gets a dumb one. `cartesi-machine -it` exports the host's TERM
-    // for the same reason; here the terminal is always xterm.
+    // and LANG for the same reason; here the terminal is always an xterm
+    // reading UTF-8.
     const named = config.env.some(
         ({ name }) => name.trim().toUpperCase() === "TERM",
     );
     if (config.interactive && !named) {
-        lines.push("export TERM=xterm-256color");
+        lines.push("export TERM=xterm-256color", "export LANG=C.utf8");
     }
     for (const { name, value } of config.env) {
         if (name.trim() !== "") {
@@ -195,7 +417,11 @@ export interface GeneratedConfig {
     problems: string[];
 }
 
-export const generate = (form: PlaygroundConfig): GeneratedConfig => {
+export const generate = (
+    form: PlaygroundConfig,
+    /** Only read when the date is synced, which is why it is not a constant. */
+    now: number = Date.now(),
+): GeneratedConfig => {
     const problems: string[] = [];
     const images: string[] = [];
 
@@ -209,19 +435,45 @@ export const generate = (form: PlaygroundConfig): GeneratedConfig => {
         images.push(form.kernelId);
     }
 
+    // Labels have to be unique across every range the machine gets, and the
+    // root filesystem holds the first one.
+    const taken = new Set<string>();
+    const claim = (label: string, what: string): void => {
+        if (label === "") {
+            return;
+        }
+        const problem = labelProblem(label);
+        if (problem !== null) {
+            problems.push(`${what} label "${label}" ${problem}`);
+        } else if (taken.has(label)) {
+            problems.push(`${what} label "${label}" is used twice`);
+        }
+        taken.add(label);
+    };
+
+    // Ranges that need something done to them on boot, in the order the
+    // machine will see them.
+    const rangeInit: string[] = [];
+
     const flashDrives: MemoryRangeConfig[] = [];
     if (form.rootfsId !== null) {
         images.push(form.rootfsId);
+        taken.add("root");
         flashDrives.push({
             label: "root",
             backing_store: { data_filename: imagePath(form.rootfsId) },
+            // the kernel mounts it from the command line, so init leaves it be
+            ...(form.rootfsReadOnly ? { read_only: true } : {}),
         });
     }
 
-    for (const drive of form.drives) {
+    for (const [index, drive] of form.drives.entries()) {
         const range: MemoryRangeConfig = {};
-        if (drive.label.trim() !== "") {
-            range.label = drive.label.trim();
+        const label = drive.label.trim();
+        const named = `drive ${index + 1}`;
+        claim(label, named);
+        if (label !== "") {
+            range.label = label;
         }
         if (drive.imageId !== null) {
             images.push(drive.imageId);
@@ -231,9 +483,7 @@ export const generate = (form: PlaygroundConfig): GeneratedConfig => {
         if (length !== null) {
             range.length = Number(length);
         } else if (drive.imageId === null) {
-            problems.push(
-                `drive ${drive.label || flashDrives.length} has neither an image nor a size`,
-            );
+            problems.push(`${named} has neither an image nor a size`);
         }
         const start = parseSize(drive.start);
         if (start !== null) {
@@ -242,10 +492,52 @@ export const generate = (form: PlaygroundConfig): GeneratedConfig => {
         if (drive.readOnly) {
             range.read_only = true;
         }
+        if (drive.mount === "custom" && drive.mountPoint.trim() === "") {
+            problems.push(`${named} asks for a mount point but names none`);
+        }
+        rangeInit.push(
+            ...driveInit(
+                drive,
+                deviceLabel(label, "flashdrive", flashDrives.length),
+            ),
+        );
         flashDrives.push(range);
     }
 
-    const unreproducible = form.interactive || form.unreproducible;
+    const nvrams: MemoryRangeConfig[] = [];
+    for (const [index, nvram] of form.nvrams.entries()) {
+        const range: MemoryRangeConfig = {};
+        const label = nvram.label.trim();
+        const named = `NVRAM ${index + 1}`;
+        claim(label, named);
+        if (label !== "") {
+            range.label = label;
+        }
+        if (nvram.imageId !== null) {
+            images.push(nvram.imageId);
+            range.backing_store = { data_filename: imagePath(nvram.imageId) };
+        }
+        const length = parseSize(nvram.length);
+        if (length !== null) {
+            range.length = Number(length);
+        } else if (nvram.imageId === null) {
+            problems.push(`${named} has neither an image nor a size`);
+        }
+        const start = parseSize(nvram.start);
+        if (start !== null) {
+            range.start = Number(start);
+        }
+        if (nvram.readOnly) {
+            range.read_only = true;
+        }
+        rangeInit.push(
+            ...nvramInit(nvram, deviceLabel(label, "nvram", nvrams.length)),
+        );
+        nvrams.push(range);
+    }
+
+    const unreproducible =
+        form.interactive || form.syncDate || form.unreproducible;
     const registers: Record<string, unknown> = {};
     if (unreproducible) {
         registers.iunrep = 1;
@@ -277,6 +569,9 @@ export const generate = (form: PlaygroundConfig): GeneratedConfig => {
     if (flashDrives.length > 0) {
         config.flash_drive = flashDrives;
     }
+    if (nvrams.length > 0) {
+        config.nvram = nvrams;
+    }
     if (Object.keys(registers).length > 0) {
         config.processor = { registers };
     }
@@ -290,7 +585,7 @@ export const generate = (form: PlaygroundConfig): GeneratedConfig => {
             ? form.bootargs.trim()
             : bootargsFor(form, flashDrives.length > 0);
     dtb.bootargs = bootargs;
-    const init = initFor(form);
+    const init = initFor(form, rangeInit, now);
     if (init !== "") {
         dtb.init = init;
     }

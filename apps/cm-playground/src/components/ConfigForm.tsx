@@ -1,9 +1,15 @@
 // Everything a machine can be told before it boots.
 import type { ImageRecord } from "../images/store";
-import type {
-    ConsoleKind,
-    DriveForm,
-    PlaygroundConfig,
+import {
+    type DriveForm,
+    type FormatMode,
+    type MountMode,
+    newDrive,
+    newEnvVar,
+    newNvram,
+    type NvramForm,
+    type PlaygroundConfig,
+    type ConsoleKind,
 } from "../machine/config";
 import type { ConsoleFlushMode } from "@cartesi/machine";
 import {
@@ -18,7 +24,10 @@ import {
 
 type Update = (change: Partial<PlaygroundConfig>) => void;
 
-const newId = (): string => Math.random().toString(36).slice(2, 10);
+const imageOptions = (images: ImageRecord[]) => [
+    { value: "", label: "empty" },
+    ...images.map((image) => ({ value: image.id, label: image.name })),
+];
 
 export const MachineSection = ({
     config,
@@ -47,14 +56,7 @@ export const MachineSection = ({
                         update({
                             drives: [
                                 ...config.drives,
-                                {
-                                    id: newId(),
-                                    label: `drive${config.drives.length + 1}`,
-                                    imageId: null,
-                                    length: "",
-                                    start: "",
-                                    readOnly: false,
-                                },
+                                newDrive(config.drives.length),
                             ],
                         })
                     }
@@ -71,12 +73,19 @@ export const MachineSection = ({
                         mono
                     />
                 </Field>
+                <Toggle
+                    label="Read-only root"
+                    hint="the kernel mounts / as ro rather than rw"
+                    checked={config.rootfsReadOnly}
+                    onChange={(rootfsReadOnly) => update({ rootfsReadOnly })}
+                />
             </div>
 
             {config.drives.length === 0 ? (
                 <p className="hint">
                     The root filesystem comes from the image library above.
-                    Extra drives appear to the guest as /dev/pmem1 and on.
+                    Extra drives appear to the guest as /dev/pmem1 and on, and
+                    init mounts each of them under /mnt.
                 </p>
             ) : null}
 
@@ -101,13 +110,7 @@ export const MachineSection = ({
                                             imageId === "" ? null : imageId,
                                     })
                                 }
-                                options={[
-                                    { value: "", label: "empty" },
-                                    ...images.map((image) => ({
-                                        value: image.id,
-                                        label: image.name,
-                                    })),
-                                ]}
+                                options={imageOptions(images)}
                             />
                         </Field>
                         <Field label="Size" hint="blank: the image's own size">
@@ -152,6 +155,196 @@ export const MachineSection = ({
                             </Button>
                         </div>
                     </div>
+
+                    <div className="row">
+                        <Field
+                            label="Mount"
+                            hint={
+                                drive.mount === "auto"
+                                    ? "/mnt/<label>, when there is a filesystem"
+                                    : undefined
+                            }
+                        >
+                            <Select<MountMode>
+                                value={drive.mount}
+                                onChange={(mount) =>
+                                    setDrive(drive.id, { mount })
+                                }
+                                options={[
+                                    { value: "auto", label: "under /mnt" },
+                                    { value: "custom", label: "at…" },
+                                    { value: "none", label: "not mounted" },
+                                ]}
+                            />
+                        </Field>
+                        {drive.mount === "custom" ? (
+                            <Field label="Mount point">
+                                <TextInput
+                                    value={drive.mountPoint}
+                                    onChange={(mountPoint) =>
+                                        setDrive(drive.id, { mountPoint })
+                                    }
+                                    placeholder="/data"
+                                    mono
+                                />
+                            </Field>
+                        ) : null}
+                        <Field
+                            label="Format"
+                            hint="ext2, written by init before mounting"
+                        >
+                            <Select<FormatMode>
+                                value={drive.format}
+                                onChange={(format) =>
+                                    setDrive(drive.id, { format })
+                                }
+                                options={[
+                                    {
+                                        value: "auto",
+                                        label: "when it starts empty",
+                                    },
+                                    { value: "always", label: "always" },
+                                    { value: "never", label: "never" },
+                                ]}
+                            />
+                        </Field>
+                        <Field
+                            label="Owner"
+                            hint={
+                                drive.mount === "none"
+                                    ? "who owns /dev/pmemN"
+                                    : "who owns the mount point"
+                            }
+                        >
+                            <TextInput
+                                value={drive.user}
+                                onChange={(user) =>
+                                    setDrive(drive.id, { user })
+                                }
+                                placeholder="dapp"
+                                mono
+                            />
+                        </Field>
+                    </div>
+                </div>
+            ))}
+        </Section>
+    );
+};
+
+export const NvramSection = ({
+    config,
+    images,
+    update,
+}: {
+    config: PlaygroundConfig;
+    images: ImageRecord[];
+    update: Update;
+}) => {
+    const setNvram = (id: string, change: Partial<NvramForm>) => {
+        update({
+            nvrams: config.nvrams.map((nvram) =>
+                nvram.id === id ? { ...nvram, ...change } : nvram,
+            ),
+        });
+    };
+
+    return (
+        <Section
+            title="NVRAM"
+            hint="Memory ranges with no filesystem on them, which the guest reaches as /dev/uio0 and on — `nvram <label>` in the guest says which."
+            actions={
+                <Button
+                    kind="ghost"
+                    onClick={() =>
+                        update({
+                            nvrams: [
+                                ...config.nvrams,
+                                newNvram(config.nvrams.length),
+                            ],
+                        })
+                    }
+                >
+                    add an NVRAM
+                </Button>
+            }
+        >
+            {config.nvrams.map((nvram, index) => (
+                <div className="drive" key={nvram.id}>
+                    <div className="row">
+                        <Field label={`NVRAM ${index + 1} label`}>
+                            <TextInput
+                                value={nvram.label}
+                                onChange={(label) =>
+                                    setNvram(nvram.id, { label })
+                                }
+                                mono
+                            />
+                        </Field>
+                        <Field label="Image">
+                            <Select
+                                value={nvram.imageId ?? ""}
+                                onChange={(imageId) =>
+                                    setNvram(nvram.id, {
+                                        imageId:
+                                            imageId === "" ? null : imageId,
+                                    })
+                                }
+                                options={imageOptions(images)}
+                            />
+                        </Field>
+                        <Field label="Size" hint="a multiple of 4Ki">
+                            <TextInput
+                                value={nvram.length}
+                                onChange={(length) =>
+                                    setNvram(nvram.id, { length })
+                                }
+                                placeholder="4Ki"
+                                mono
+                            />
+                        </Field>
+                        <Field label="Start" hint="blank: chosen for you">
+                            <TextInput
+                                value={nvram.start}
+                                onChange={(start) =>
+                                    setNvram(nvram.id, { start })
+                                }
+                                placeholder="0x90000000"
+                                mono
+                            />
+                        </Field>
+                        <Field label="Owner" hint="who owns /dev/uioN">
+                            <TextInput
+                                value={nvram.user}
+                                onChange={(user) =>
+                                    setNvram(nvram.id, { user })
+                                }
+                                placeholder="dapp"
+                                mono
+                            />
+                        </Field>
+                        <div className="drive-actions">
+                            <Toggle
+                                label="read only"
+                                checked={nvram.readOnly}
+                                onChange={(readOnly) =>
+                                    setNvram(nvram.id, { readOnly })
+                                }
+                            />
+                            <Button
+                                kind="ghost"
+                                onClick={() =>
+                                    update({
+                                        nvrams: config.nvrams.filter(
+                                            (other) => other.id !== nvram.id,
+                                        ),
+                                    })
+                                }
+                            >
+                                remove
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             ))}
         </Section>
@@ -171,14 +364,7 @@ export const BootSection = ({
         actions={
             <Button
                 kind="ghost"
-                onClick={() =>
-                    update({
-                        env: [
-                            ...config.env,
-                            { id: newId(), name: "", value: "" },
-                        ],
-                    })
-                }
+                onClick={() => update({ env: [...config.env, newEnvVar()] })}
             >
                 add a variable
             </Button>
@@ -269,6 +455,19 @@ export const BootSection = ({
             </div>
         ))}
 
+        <Toggle
+            label="Splash"
+            hint="the drawing cartesi-machine prints on boot"
+            checked={config.splash}
+            onChange={(splash) => update({ splash })}
+        />
+        <Toggle
+            label="Set the guest clock"
+            hint="to this machine's, on boot; otherwise the guest starts in 1970, which upsets TLS and timestamps"
+            checked={config.syncDate}
+            onChange={(syncDate) => update({ syncDate })}
+        />
+
         <Field
             label="Init script"
             hint="Shell, run before the entrypoint, as root."
@@ -356,8 +555,10 @@ export const AdvancedSection = ({
     >
         <Toggle
             label="Unreproducible (iunrep)"
-            hint="implied by an interactive machine"
-            checked={config.interactive || config.unreproducible}
+            hint="implied by an interactive machine, and by setting the clock"
+            checked={
+                config.interactive || config.syncDate || config.unreproducible
+            }
             onChange={(unreproducible) => update({ unreproducible })}
         />
         <Toggle
