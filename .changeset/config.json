@@ -10,7 +10,7 @@
         "version": true,
         "tag": false
     },
-    "baseBranch": "prerelease/v2-alpha",
+    "baseBranch": "main",
     "updateInternalDependencies": "patch",
     "ignore": []
 }
