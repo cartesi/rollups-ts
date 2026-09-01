@@ -1,12 +1,14 @@
 # Introduction
 
-`@cartesi/wagmi-plugin` is a [Wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates code for the [Cartesi Rollups smart contracts](https://github.com/cartesi/rollups-contracts) directly from an official release: ABIs come from the foundry build artifacts tarball, and deployment addresses from the deployment addresses tarball.
+`@cartesi/wagmi-plugin` provides `rollupsContracts`, a [Wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates code for the [Cartesi Rollups contracts](https://github.com/cartesi/rollups-contracts) directly from an official release: ABIs come from the build artifacts tarball, and deployment addresses from the deployment addresses and anvil devnet tarballs.
+
+Set its [`prt` option](/wagmi-plugin/prt) to generate the contracts of a PRT (Permissionless Refereed Tournaments) deployment instead — the same rollups contracts, at the same addresses, plus the consensus and tournament contracts a [dave](https://github.com/cartesi/dave) release adds.
 
 Combined with other Wagmi CLI plugins, it can generate fully typed [viem contract actions](https://wagmi.sh/cli/api/plugins/actions) or [React hooks](https://wagmi.sh/cli/api/plugins/react) for the Cartesi contracts. It is the tool used by `@cartesi/client` and `@cartesi/react` themselves for their code generation.
 
 ## Installation
 
-Add the plugin and the Wagmi CLI as development dependencies of your project.
+Add the package and the Wagmi CLI as development dependencies of your project.
 
 :::code-group
 
@@ -30,7 +32,7 @@ While in pre-release, the plugin is published under the `alpha` npm tag. The `@a
 
 ## Usage
 
-Add the plugin to your [wagmi.config.ts](https://wagmi.sh/cli/configuration). With no options, it uses the tarballs of the rollups-contracts `v3.0.0-alpha.10` GitHub release, verified against known SHA-256 hashes.
+Add `rollupsContracts` to your [wagmi.config.ts](https://wagmi.sh/cli/configuration). With no options, it uses the tarballs of the rollups-contracts `v3.0.0-alpha.10` GitHub release, verified against known SHA-256 hashes.
 
 ```ts [wagmi.config.ts]
 import { rollupsContracts } from "@cartesi/wagmi-plugin";
@@ -166,5 +168,6 @@ export default defineConfig({
 | `artifacts`   | `string \| { url: string; sha256?: string }`        | Source of the foundry build artifacts tarball. Defaults to the rollups-contracts `v3.0.0-alpha.10` release tarball, hash-verified.               |
 | `deployments` | `string \| { url: string; sha256?: string }`        | Source of the deployment addresses tarball. Defaults to the rollups-contracts `v3.0.0-alpha.10` release tarball, hash-verified.                  |
 | `anvil`       | `string \| { url: string; sha256?: string } \| false` | Source of the anvil devnet tarball, which carries the addresses on chain 31337. Defaults to the rollups-contracts `v3.0.0-alpha.10` release tarball, hash-verified. `false` skips it. |
+| `prt`         | `boolean \| PrtOptions`                             | Generate a [PRT deployment's contracts](/wagmi-plugin/prt) instead: the same rollups contracts plus the consensus and tournament ones. Defaults to `false`. |
 | `include`     | `(string \| RegExp)[]`                              | Contracts (by name or regular expression) to include, deployed or not. When omitted, all contracts in the artifacts are included.               |
 | `exclude`     | `(string \| RegExp)[]`                              | Contracts (by name or regular expression) to exclude, deployed or not. Applied after `include`.                                                 |

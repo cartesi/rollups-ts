@@ -388,6 +388,13 @@ const config: Config = defineConfig({
                 },
             ],
         },
+        "/wagmi-plugin/": {
+            backLink: true,
+            items: [
+                { text: "Introduction", link: "/wagmi-plugin" },
+                { text: "PRT Contracts", link: "/wagmi-plugin/prt" },
+            ],
+        },
         "/codec/": {
             backLink: true,
             items: [

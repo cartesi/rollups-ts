@@ -1,6 +1,6 @@
 # Cartesi wagmi CLI plugin
 
-A [wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates code for the [Cartesi Rollups smart contracts](https://github.com/cartesi/rollups-contracts) straight from an official release: ABIs come from the foundry build artifacts tarball, and deployment addresses from the deployment addresses and anvil devnet tarballs.
+A [wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates code for the [Cartesi Rollups contracts](https://github.com/cartesi/rollups-contracts) straight from an official release: ABIs come from the build artifacts tarball, and deployment addresses from the deployment addresses and anvil devnet tarballs.
 
 ## Installation
 
@@ -12,7 +12,7 @@ While in pre-release, the plugin is published under the `alpha` npm tag. The `@a
 
 ## Usage
 
-Add the plugin to your `wagmi.config.ts`. By default it uses the tarballs of the rollups-contracts `v3.0.0-alpha.10` GitHub release, verified against known SHA-256 hashes.
+Add `rollupsContracts` to your `wagmi.config.ts`. By default it uses the tarballs of the rollups-contracts `v3.0.0-alpha.10` GitHub release, verified against known SHA-256 hashes.
 
 ```ts
 import { rollupsContracts } from "@cartesi/wagmi-plugin";
@@ -78,10 +78,25 @@ rollupsContracts({
 });
 ```
 
+## PRT contracts
+
+A PRT (Permissionless Refereed Tournaments) deployment is a rollups deployment: it runs against the same `InputBox`, portals and factories, at the same addresses, and adds the consensus and tournament contracts. Set `prt` to generate the union.
+
+```ts
+rollupsContracts({ prt: true });
+```
+
+Everything `rollupsContracts()` generates is still there, with the same ABIs and addresses, plus `DaveConsensus`, `DaveAppFactory`, `MultiLevelTournamentFactory`, `Tournament`, `CartesiStateTransition` and what they are built against. It is one or the other, never both in one config.
+
+[dave](https://github.com/cartesi/dave) publishes the PRT contracts and the deployment addresses, but does not rebuild the rollups contracts, so `prt` reads the ABIs of those from the `artifacts` tarball and everything else from the dave release. By default it uses dave `v3.0.0-alpha.4`, which is deployed against the rollups-contracts `v3.0.0-alpha.10` release `artifacts` defaults to; pass an object (`prt: { artifacts, deployments, anvil }`) to point at another dave release, keeping the pairing intact.
+
+Addresses are read from the plaintext deployment files, which dave publishes since `v3.0.0-alpha.4`, so `prt.deployments` and `prt.anvil` must point at that release or a later one.
+
 ## Behavior
 
 - Tarballs are downloaded on every run, verified against their expected hash, and extracted to a temporary directory that is removed once the contracts have been read. Codegen therefore needs network access.
 - Deployed contracts get their address on every chain: a single address when it is identical across chains, or a per-chain record otherwise.
 - Addresses cover the supported livenets and the devnet (chain 31337), the latter read from the anvil tarball, which is also where the devnet-only test tokens come from. Set `anvil: false` to generate livenet addresses only.
+- When more than one of the tarballs builds the same contract, it is generated once and its ABIs must agree, whatever order the compiler emitted their entries in.
 
 See the [documentation](https://cartesi.github.io/rollups-ts/) for more details.

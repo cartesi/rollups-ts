@@ -1,0 +1,100 @@
+# PRT Contracts
+
+A PRT (Permissionless Refereed Tournaments) deployment *is* a rollups deployment. It runs against the same `InputBox`, the same portals and the same factories, at the same addresses, and adds the consensus and tournament contracts that settle epochs by tournament rather than by authority.
+
+So PRT is not a separate plugin: it is the `prt` option of [`rollupsContracts`](/wagmi-plugin), which generates the union of the two.
+
+```ts [wagmi.config.ts]
+import { rollupsContracts } from "@cartesi/wagmi-plugin";
+import { defineConfig } from "@wagmi/cli";
+
+export default defineConfig({
+    out: "src/generated.ts",
+    plugins: [rollupsContracts({ prt: true })],
+});
+```
+
+Everything `rollupsContracts()` generates is still there, with the same ABIs and the same addresses, plus `DaveConsensus`, `DaveAppFactory`, `MultiLevelTournamentFactory`, `Tournament`, `CartesiStateTransition` and the interfaces and libraries they are built against.
+
+:::tip
+It is one or the other, never both in the same config. `rollupsContracts({ prt: true })` is a superset of `rollupsContracts()`, and the Wagmi CLI rejects two contracts with the same name.
+:::
+
+## Where each piece comes from
+
+[dave](https://github.com/cartesi/dave) publishes the PRT contracts and the deployment addresses, but it does not rebuild the rollups contracts — there is no `InputBox` or portal artifact in its release. Its deployment addresses cover them anyway, because a PRT deployment includes them.
+
+So `prt` reads three tarballs:
+
+| Source | What it provides |
+| --- | --- |
+| the rollups-contracts `artifacts` tarball | ABIs of the rollups contracts, which dave does not rebuild |
+| the dave contract artifacts tarball | ABIs of the PRT contracts |
+| the dave deployment addresses and anvil tarballs | addresses for both, livenets and devnet |
+
+A handful of interfaces are built by both projects. They are generated once, and their ABIs must agree — which they do for the pinned pairing, since the dave release is built against it.
+
+By default `prt: true` uses the dave `v3.0.0-alpha.4` release, which is deployed against the rollups-contracts `v3.0.0-alpha.10` release that `artifacts` defaults to. The two go together: the addresses come from dave, so an `artifacts` release from a different deployment would pair ABIs with addresses that do not belong to them.
+
+## Using a different dave release
+
+Pass an object instead of `true`. Each source accepts a plain URL string, or an object with an expected SHA-256 hash of the tarball for integrity verification (recommended).
+
+```ts [wagmi.config.ts]
+import { rollupsContracts } from "@cartesi/wagmi-plugin";
+import { defineConfig } from "@wagmi/cli";
+
+const version = "3.0.0-alpha.4";
+const anvilVersion = "1.5.1";
+const releaseUrl = `https://github.com/cartesi/dave/releases/download/v${version}`;
+
+export default defineConfig({
+    out: "src/generated.ts",
+    plugins: [
+        rollupsContracts({
+            prt: {
+                artifacts: {
+                    url: `${releaseUrl}/cartesi-rollups-prt-${version}-contract-artifacts.tar.gz`,
+                    sha256: "622964166b4049b556dc20b26ef2b9a5e8621a2ad3e1f43eee0b802a085244b3",
+                },
+                deployments: {
+                    url: `${releaseUrl}/cartesi-rollups-prt-${version}-deployment-addresses.tar.gz`,
+                    sha256: "24bbd3df188952ad0abb1b1d3bc1d5da8e832da3e15286bf552abba9db60f1e8",
+                },
+                anvil: {
+                    url: `${releaseUrl}/cartesi-rollups-prt-${version}-anvil-${anvilVersion}.tar.gz`,
+                    sha256: "ed10a8077113c426a298bb3592ca3725c31aad0828c7e7853b655593db2cd006",
+                },
+            },
+        }),
+    ],
+});
+```
+
+Set `prt.anvil` to `false` to leave the devnet (chain 31337) out, as `anvil: false` does for a plain rollups deployment.
+
+:::warning
+Addresses are read from the plaintext deployment files, which dave publishes since `v3.0.0-alpha.4`. Pointing `prt.deployments` or `prt.anvil` at an earlier release fails, since it ships deployment addresses as JSON only.
+:::
+
+## Selecting contracts
+
+`include` and `exclude` work exactly as they do without `prt`, and apply to the union. A dave release also builds the libraries and dependencies its contracts are compiled against, so narrowing generation is often worthwhile.
+
+```ts [wagmi.config.ts]
+rollupsContracts({
+    prt: true,
+    include: ["InputBox", "DaveConsensus", /Tournament/],
+});
+```
+
+## Options
+
+The `prt` option is either a boolean or an object of tarball sources. Every other option of [`rollupsContracts`](/wagmi-plugin#options) applies unchanged.
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `prt` | `boolean \| PrtOptions` | Generate a PRT deployment's contracts. `true` uses the dave `v3.0.0-alpha.4` release. Defaults to `false`. |
+| `prt.artifacts` | `string \| { url: string; sha256?: string }` | Source of the dave contract artifacts tarball, hash-verified by default. |
+| `prt.deployments` | `string \| { url: string; sha256?: string }` | Source of the dave deployment addresses tarball, which covers the rollups contracts too. |
+| `prt.anvil` | `string \| { url, sha256? } \| false` | Source of the dave anvil devnet tarball, whose addresses cover chain 31337. `false` leaves it out. |
