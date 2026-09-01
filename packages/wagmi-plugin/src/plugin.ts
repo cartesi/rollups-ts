@@ -205,10 +205,10 @@ export interface PrtOptions {
  * Deployed contracts get their address across all chains: a single address
  * if it is the same on every chain, or a per-chain record otherwise.
  *
- * Set `prt` to generate the contracts of a PRT (Permissionless Refereed
- * Tournaments) deployment instead: the same rollups contracts, at the same
- * addresses, plus the consensus and tournament contracts a dave release
- * adds. It is one or the other, not two plugins in the same config.
+ * Set `prt` to also generate the PRT (Permissionless Refereed Tournaments)
+ * contracts from a dave release: PRT Rollups is a superset of the core
+ * rollups contracts, running against the same `InputBox`, portals and
+ * factories, at the same addresses.
  *
  * `include` and `exclude` filter all contracts alike, deployed or not: when
  * neither is given every contract in the artifacts is generated, `include`

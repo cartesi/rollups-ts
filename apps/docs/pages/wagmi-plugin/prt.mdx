@@ -1,8 +1,8 @@
 # PRT Contracts
 
-A PRT (Permissionless Refereed Tournaments) deployment *is* a rollups deployment. It runs against the same `InputBox`, the same portals and the same factories, at the same addresses, and adds the consensus and tournament contracts that settle epochs by tournament rather than by authority.
+PRT stands for Permissionless Refereed Tournaments. It is a dispute-resolution algorithm that allows anyone to defend the correct outcome of a computation with sensible hardware and Ether requirements. PRT Rollups leverages the PRT algorithm to secure Rollups applications.
 
-So PRT is not a separate plugin: it is the `prt` option of [`rollupsContracts`](/wagmi-plugin), which generates the union of the two.
+So PRT Rollups is not a separate project, but rather a superset of the "Core" Rollups contracts. Code generation for PRT Rollups contracts can be configured through the `prt` option of [`rollupsContracts`](/wagmi-plugin).
 
 ```ts [wagmi.config.ts]
 import { rollupsContracts } from "@cartesi/wagmi-plugin";
@@ -16,21 +16,18 @@ export default defineConfig({
 
 Everything `rollupsContracts()` generates is still there, with the same ABIs and the same addresses, plus `DaveConsensus`, `DaveAppFactory`, `MultiLevelTournamentFactory`, `Tournament`, `CartesiStateTransition` and the interfaces and libraries they are built against.
 
-:::tip
-It is one or the other, never both in the same config. `rollupsContracts({ prt: true })` is a superset of `rollupsContracts()`, and the Wagmi CLI rejects two contracts with the same name.
-:::
-
 ## Where each piece comes from
 
 [dave](https://github.com/cartesi/dave) publishes the PRT contracts and the deployment addresses, but it does not rebuild the rollups contracts — there is no `InputBox` or portal artifact in its release. Its deployment addresses cover them anyway, because a PRT deployment includes them.
 
-So `prt` reads three tarballs:
+So `prt` reads four tarballs:
 
 | Source | What it provides |
 | --- | --- |
-| the rollups-contracts `artifacts` tarball | ABIs of the rollups contracts, which dave does not rebuild |
-| the dave contract artifacts tarball | ABIs of the PRT contracts |
-| the dave deployment addresses and anvil tarballs | addresses for both, livenets and devnet |
+| the rollups-contracts artifacts tarball | ABIs of the rollups contracts |
+| the dave artifacts tarball | ABIs of the PRT rollups contracts |
+| the dave deployment addresses tarball | livenet addresses |
+| the dave anvil tarball | devnet addresses |
 
 A handful of interfaces are built by both projects. They are generated once, and their ABIs must agree — which they do for the pinned pairing, since the dave release is built against it.
 

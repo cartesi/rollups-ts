@@ -80,13 +80,13 @@ rollupsContracts({
 
 ## PRT contracts
 
-A PRT (Permissionless Refereed Tournaments) deployment is a rollups deployment: it runs against the same `InputBox`, portals and factories, at the same addresses, and adds the consensus and tournament contracts. Set `prt` to generate the union.
+The Rollups contracts provide two permissioned consensus models out of the box: Authority (1-of-1) and Quorum (majority-of-N). These consensus models are simple to implement and interact with, but they are not very safe. Both are permissioned and therefore prone to private-key leakage. Meanwhile, PRT (Permissionless Refereed Tournaments) is a 1-of-N dispute-resolution algorithm that allows anyone to defend the correct outcome of a computation with sensible hardware and Ether requirements. If you wish to generate bindings for the PRT contracts as well, you can set the `prt` option to true.
 
 ```ts
 rollupsContracts({ prt: true });
 ```
 
-Everything `rollupsContracts()` generates is still there, with the same ABIs and addresses, plus `DaveConsensus`, `DaveAppFactory`, `MultiLevelTournamentFactory`, `Tournament`, `CartesiStateTransition` and what they are built against. It is one or the other, never both in one config.
+Everything `rollupsContracts()` generates is still there, with the same ABIs and addresses, plus `DaveConsensus`, `DaveAppFactory`, `MultiLevelTournamentFactory`, `Tournament`, `CartesiStateTransition` and what they are built against.
 
 [dave](https://github.com/cartesi/dave) publishes the PRT contracts and the deployment addresses, but does not rebuild the rollups contracts, so `prt` reads the ABIs of those from the `artifacts` tarball and everything else from the dave release. By default it uses dave `v3.0.0-alpha.4`, which is deployed against the rollups-contracts `v3.0.0-alpha.10` release `artifacts` defaults to; pass an object (`prt: { artifacts, deployments, anvil }`) to point at another dave release, keeping the pairing intact.
 
@@ -97,6 +97,6 @@ Addresses are read from the plaintext deployment files, which dave publishes sin
 - Tarballs are downloaded on every run, verified against their expected hash, and extracted to a temporary directory that is removed once the contracts have been read. Codegen therefore needs network access.
 - Deployed contracts get their address on every chain: a single address when it is identical across chains, or a per-chain record otherwise.
 - Addresses cover the supported livenets and the devnet (chain 31337), the latter read from the anvil tarball, which is also where the devnet-only test tokens come from. Set `anvil: false` to generate livenet addresses only.
-- When more than one of the tarballs builds the same contract, it is generated once and its ABIs must agree, whatever order the compiler emitted their entries in.
+- When multiple projects build the same contract, the plugin ensures their ABIs match and generates only one binding.
 
 See the [documentation](https://cartesi.github.io/rollups-ts/) for more details.
