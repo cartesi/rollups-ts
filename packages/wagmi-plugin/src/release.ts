@@ -2,7 +2,7 @@ import type { ContractConfig } from "@wagmi/cli";
 import type { Abi, Address } from "abitype";
 import fs from "node:fs";
 import path from "node:path";
-import { isAddress } from "viem";
+import { isAddress, isAddressEqual } from "viem";
 import { downloadAndExtract, type TarballSource } from "./download.js";
 
 export type ContractFilter = string | RegExp;
@@ -20,10 +20,18 @@ export interface Release {
      * must agree.
      */
     artifacts: TarballSource[];
-    /** deployment addresses tarball */
-    deployments: TarballSource;
-    /** anvil devnet tarball, or `false` to skip the devnet addresses */
-    anvil: TarballSource | false;
+    /**
+     * Deployment addresses tarballs, merged into one set of addresses. More
+     * than one is a cross-check: a PRT deployment includes the rollups one,
+     * so both releases publish the shared addresses, and reading both fails
+     * the generation if the two ever disagree.
+     */
+    deployments: TarballSource[];
+    /**
+     * Anvil devnet tarballs, merged like `deployments`, or `false` to skip
+     * the devnet addresses altogether.
+     */
+    anvil: TarballSource[] | false;
     /**
      * The release that first published the plaintext deployment files, named
      * in the error raised for a tarball that has none.
@@ -130,9 +138,8 @@ export const readDeployments = (
 };
 
 /**
- * Merge the artifacts of several tarballs into one set of contracts, keeping
- * every artifact declaring a name so that `readAbi` can hold the copies to
- * agreement.
+ * Merge the artifacts of several tarballs into a single mapping.
+ * Arrays of artifact paths for the same contract are concatenated.
  */
 export const mergeArtifacts = (
     maps: Map<string, string[]>[],
@@ -147,8 +154,13 @@ export const mergeArtifacts = (
 };
 
 /**
- * Merge deployment maps of disjoint chains, as read from the deployment
- * addresses and the anvil devnet tarballs.
+ * Merge the deployment maps read from a release's tarballs, mapping each
+ * contract to its address on every chain they cover.
+ *
+ * The maps are only expected to overlap when they come from releases that
+ * share a deployment, and then they must agree: an address two of them
+ * disagree on is a sign that the releases were not deployed together, which
+ * would pair some contracts with addresses that are not theirs.
  */
 export const mergeDeployments = (
     maps: Map<string, Record<number, Address>>[],
@@ -156,7 +168,18 @@ export const mergeDeployments = (
     const merged = new Map<string, Record<number, Address>>();
     for (const map of maps) {
         for (const [name, addresses] of map) {
-            merged.set(name, { ...merged.get(name), ...addresses });
+            const known = merged.get(name) ?? {};
+            for (const [chain, address] of Object.entries(addresses)) {
+                const chainId = Number(chain);
+                const seen = known[chainId];
+                if (seen && !isAddressEqual(seen, address)) {
+                    throw new Error(
+                        `${name} is deployed at conflicting addresses on chain ${chainId}: ${seen} and ${address}. The releases these tarballs come from were not deployed together.`,
+                    );
+                }
+                known[chainId] = address;
+            }
+            merged.set(name, known);
         }
     }
     return merged;
@@ -248,10 +271,10 @@ export const readAbi = (artifactPaths: string[], name: string): Abi => {
 export const collapseAddress = (
     addresses: Record<number, Address>,
 ): ContractConfig["address"] => {
-    const unique = new Set(
-        Object.values(addresses).map((address) => address.toLowerCase()),
-    );
-    return unique.size === 1 ? Object.values(addresses)[0] : addresses;
+    const [first, ...rest] = Object.values(addresses);
+    return first && rest.every((address) => isAddressEqual(address, first))
+        ? first
+        : addresses;
 };
 
 /**
@@ -277,24 +300,23 @@ export const releaseContracts = async (
     };
 
     try {
-        const [artifactsDirs, deploymentsDir, anvilDir] = await Promise.all([
+        const [artifactsDirs, addressesDirs] = await Promise.all([
             Promise.all(release.artifacts.map(extract)),
-            extract(release.deployments),
-            release.anvil ? extract(release.anvil) : undefined,
+            Promise.all(
+                [
+                    ...release.deployments,
+                    ...(release.anvil ? release.anvil : []),
+                ].map(extract),
+            ),
         ]);
-
-        // tarballs contain the `deployments` directory contents either at
-        // the root or nested under that directory
-        const resolveRoot = (dir: string, nested: string) =>
-            fs.existsSync(path.join(dir, nested))
-                ? path.join(dir, nested)
-                : dir;
 
         const artifacts = mergeArtifacts(artifactsDirs.map(findArtifacts));
         const deployments = mergeDeployments(
-            [deploymentsDir, ...(anvilDir ? [anvilDir] : [])].map((dir) =>
+            addressesDirs.map((dir) =>
                 readDeployments(
-                    resolveRoot(dir, "deployments"),
+                    // every release publishes the addresses under this
+                    // directory, livenets and devnet alike
+                    path.join(dir, "deployments"),
                     release.plaintextDeploymentsSince,
                 ),
             ),

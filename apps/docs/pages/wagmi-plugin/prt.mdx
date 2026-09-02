@@ -18,20 +18,27 @@ Everything `rollupsContracts()` generates is still there, with the same ABIs and
 
 ## Where each piece comes from
 
-[dave](https://github.com/cartesi/dave) publishes the PRT contracts and the deployment addresses, but it does not rebuild the rollups contracts — there is no `InputBox` or portal artifact in its release. Its deployment addresses cover them anyway, because a PRT deployment includes them.
+[dave](https://github.com/cartesi/dave) publishes the PRT contracts and the deployment addresses, but it does not rebuild the rollups contracts — there is no `InputBox` or portal artifact in its release. Both releases publish the addresses they share, because a PRT deployment includes the rollups one.
 
-So `prt` reads four tarballs:
+So `prt` reads six tarballs:
 
 | Source | What it provides |
 | --- | --- |
 | the rollups-contracts artifacts tarball | ABIs of the rollups contracts |
 | the dave artifacts tarball | ABIs of the PRT rollups contracts |
-| the dave deployment addresses tarball | livenet addresses |
-| the dave anvil tarball | devnet addresses |
+| the rollups-contracts deployment addresses tarball | livenet addresses of the rollups contracts |
+| the dave deployment addresses tarball | livenet addresses of both |
+| the rollups-contracts anvil tarball | devnet addresses of the rollups contracts |
+| the dave anvil tarball | devnet addresses of both |
 
-A handful of interfaces are built by both projects. They are generated once, and their ABIs must agree — which they do for the pinned pairing, since the dave release is built against it.
+A handful of interfaces are built by both projects, and most addresses are published by both. Each is generated once, and the copies must agree: ABIs that differ, or an address the two releases disagree on, fail the generation rather than silently picking one.
 
-By default `prt: true` uses the dave `v3.0.0-alpha.4` release, which is deployed against the rollups-contracts `v3.0.0-alpha.10` release that `artifacts` defaults to. The two go together: the addresses come from dave, so an `artifacts` release from a different deployment would pair ABIs with addresses that do not belong to them.
+By default `prt: true` uses the dave `v3.0.0-alpha.4` release, which is deployed against the rollups-contracts `v3.0.0-alpha.10` release that `artifacts` defaults to. Overriding one without the other pairs releases that were not deployed together, and the address cross-check is what catches it:
+
+```
+InputBox is deployed at conflicting addresses on chain 1: 0xD4CA… and 0x35Cd….
+The releases these tarballs come from were not deployed together.
+```
 
 ## Using a different dave release
 
@@ -68,7 +75,7 @@ export default defineConfig({
 });
 ```
 
-Set `prt.anvil` to `false` to leave the devnet (chain 31337) out, as `anvil: false` does for a plain rollups deployment.
+Each source can be turned off on its own: `prt.anvil` set to `false` drops dave's devnet addresses, while the top-level `anvil: false` drops the devnet altogether, both releases' tarballs included.
 
 :::warning
 Addresses are read from the plaintext deployment files, which dave publishes since `v3.0.0-alpha.4`. Pointing `prt.deployments` or `prt.anvil` at an earlier release fails, since it ships deployment addresses as JSON only.
@@ -93,5 +100,5 @@ The `prt` option is either a boolean or an object of tarball sources. Every othe
 | --- | --- | --- |
 | `prt` | `boolean \| PrtOptions` | Generate a PRT deployment's contracts. `true` uses the dave `v3.0.0-alpha.4` release. Defaults to `false`. |
 | `prt.artifacts` | `string \| { url: string; sha256?: string }` | Source of the dave contract artifacts tarball, hash-verified by default. |
-| `prt.deployments` | `string \| { url: string; sha256?: string }` | Source of the dave deployment addresses tarball, which covers the rollups contracts too. |
-| `prt.anvil` | `string \| { url, sha256? } \| false` | Source of the dave anvil devnet tarball, whose addresses cover chain 31337. `false` leaves it out. |
+| `prt.deployments` | `string \| { url: string; sha256?: string }` | Source of the dave deployment addresses tarball, read alongside the rollups-contracts one and cross-checked against it. |
+| `prt.anvil` | `string \| { url, sha256? } \| false` | Source of the dave anvil devnet tarball, whose addresses cover chain 31337. `false` leaves dave's devnet out; `anvil: false` leaves the devnet out entirely. |
