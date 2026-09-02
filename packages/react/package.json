@@ -1,7 +1,7 @@
 {
     "name": "@cartesi/react",
     "description": "Cartesi rollups react hooks",
-    "version": "2.0.0-alpha.40",
+    "version": "2.0.0-alpha.41",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
