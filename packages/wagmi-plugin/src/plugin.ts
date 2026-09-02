@@ -142,13 +142,15 @@ export interface RollupsContractsOptions {
      * `InputBox`, portals and factories, at the same addresses, and adds the
      * consensus and tournament contracts. So this generates the union — the
      * rollups-contracts artifacts, which dave does not rebuild, plus dave's
-     * own — with the addresses read from the dave release, which cover both.
+     * own — and reads both releases' addresses, which overlap and must
+     * agree.
      *
      * `true` uses the `PRT_DEFAULT_*` tarballs of the dave
      * `PRT_DEFAULT_VERSION` GitHub release, which is deployed against the
      * rollups-contracts `DEFAULT_VERSION` one. Pass an object to point at a
-     * different dave release, keeping in mind that its addresses and the
-     * `artifacts` release must belong to the same deployment.
+     * different dave release; overriding one release without the other
+     * pairs deployments that do not belong together, which the address
+     * cross-check turns into an error rather than a silent mix.
      */
     prt?: boolean | PrtOptions;
     /**
@@ -231,40 +233,46 @@ export const rollupsContracts = (
             ? {}
             : prt
         : undefined;
+    const prtAnvil =
+        prtOptions &&
+        (prtOptions.anvil === undefined ? PRT_DEFAULT_ANVIL : prtOptions.anvil);
     return {
         name: "rollupsContracts",
         contracts: () =>
-            releaseContracts(
-                prtOptions
-                    ? {
-                          // dave does not rebuild the rollups contracts, so
-                          // both sets of artifacts are needed to cover the
-                          // addresses the dave release publishes
-                          artifacts: [
-                              artifacts,
-                              prtOptions.artifacts ?? PRT_DEFAULT_ARTIFACTS,
+            releaseContracts({
+                // dave does not rebuild the rollups contracts, so a PRT
+                // deployment needs both sets of artifacts to cover the
+                // addresses the dave release publishes
+                artifacts: [
+                    artifacts,
+                    ...(prtOptions
+                        ? [prtOptions.artifacts ?? PRT_DEFAULT_ARTIFACTS]
+                        : []),
+                ],
+                // both releases publish the addresses a PRT deployment
+                // shares with the rollups one, so reading both is a
+                // cross-check that they were deployed together
+                deployments: [
+                    deployments,
+                    ...(prtOptions
+                        ? [prtOptions.deployments ?? PRT_DEFAULT_DEPLOYMENTS]
+                        : []),
+                ],
+                anvil:
+                    anvil === false
+                        ? false
+                        : [
+                              anvil,
+                              ...(prtAnvil === undefined || prtAnvil === false
+                                  ? []
+                                  : [prtAnvil]),
                           ],
-                          deployments:
-                              prtOptions.deployments ?? PRT_DEFAULT_DEPLOYMENTS,
-                          anvil:
-                              prtOptions.anvil === undefined
-                                  ? PRT_DEFAULT_ANVIL
-                                  : prtOptions.anvil,
-                          plaintextDeploymentsSince: "dave 3.0.0-alpha.4",
-                          artifactAliases,
-                          include,
-                          exclude,
-                      }
-                    : {
-                          artifacts: [artifacts],
-                          deployments,
-                          anvil,
-                          plaintextDeploymentsSince:
-                              "rollups-contracts 3.0.0-alpha.8",
-                          artifactAliases,
-                          include,
-                          exclude,
-                      },
-            ),
+                plaintextDeploymentsSince: prtOptions
+                    ? "dave 3.0.0-alpha.4"
+                    : "rollups-contracts 3.0.0-alpha.8",
+                artifactAliases,
+                include,
+                exclude,
+            }),
     };
 };

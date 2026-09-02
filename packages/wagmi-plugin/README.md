@@ -88,7 +88,7 @@ rollupsContracts({ prt: true });
 
 Everything `rollupsContracts()` generates is still there, with the same ABIs and addresses, plus `DaveConsensus`, `DaveAppFactory`, `MultiLevelTournamentFactory`, `Tournament`, `CartesiStateTransition` and what they are built against.
 
-[dave](https://github.com/cartesi/dave) publishes the PRT contracts and the deployment addresses, but does not rebuild the rollups contracts, so `prt` reads the ABIs of those from the `artifacts` tarball and everything else from the dave release. By default it uses dave `v3.0.0-alpha.4`, which is deployed against the rollups-contracts `v3.0.0-alpha.10` release `artifacts` defaults to; pass an object (`prt: { artifacts, deployments, anvil }`) to point at another dave release, keeping the pairing intact.
+[dave](https://github.com/cartesi/dave) publishes the PRT contracts and the deployment addresses, but does not rebuild the rollups contracts, so `prt` reads the ABIs of those from the `artifacts` tarball and adds dave's own. Both releases publish the addresses they share, and both are read: an address they disagree on fails the generation, which is what catches a dave release paired with a rollups-contracts one it was not deployed against. By default it uses dave `v3.0.0-alpha.4`, deployed against the rollups-contracts `v3.0.0-alpha.10` release `artifacts` defaults to; pass an object (`prt: { artifacts, deployments, anvil }`) to point at another dave release, keeping the pairing intact.
 
 Addresses are read from the plaintext deployment files, which dave publishes since `v3.0.0-alpha.4`, so `prt.deployments` and `prt.anvil` must point at that release or a later one.
 
@@ -97,6 +97,6 @@ Addresses are read from the plaintext deployment files, which dave publishes sin
 - Tarballs are downloaded on every run, verified against their expected hash, and extracted to a temporary directory that is removed once the contracts have been read. Codegen therefore needs network access.
 - Deployed contracts get their address on every chain: a single address when it is identical across chains, or a per-chain record otherwise.
 - Addresses cover the supported livenets and the devnet (chain 31337), the latter read from the anvil tarball, which is also where the devnet-only test tokens come from. Set `anvil: false` to generate livenet addresses only.
-- When multiple projects build the same contract, the plugin ensures their ABIs match and generates only one binding.
+- When multiple projects build the same contract, the plugin ensures their ABIs match and generates only one binding, and likewise that the releases agree on the addresses they both publish.
 
 See the [documentation](https://cartesi.github.io/rollups-ts/) for more details.
