@@ -1,5 +1,18 @@
 # @cartesi/wagmi-plugin
 
+## 1.0.0-alpha.6
+
+### Minor Changes
+
+- 2891af1: move the default rollups-contracts to 3.0.0-alpha.10, with new SHA-256 hashes for the artifacts, deployment addresses and anvil devnet tarballs. The release is additive: it publishes the ERC-165, ERC-20, ERC-721 and ERC-1155 interfaces its contracts are compiled against, and no existing ABI changed.
+- 8fde483: add the `prt` option to `rollupsContracts`, which additionally generates the PRT (Permissionless Refereed Tournaments) contracts from a [dave](https://github.com/cartesi/dave) release, defaulting to v3.0.0-alpha.4. PRT Rollups is a superset of the core rollups contracts — same `InputBox`, portals and factories, at the same addresses — so this adds to what `rollupsContracts()` generates rather than replacing it: dave does not rebuild the rollups contracts, so their ABIs still come from the `artifacts` tarball, and both releases' deployment addresses are read.
+  
+  Contracts and addresses published by more than one release are generated once, and the copies must agree. ABIs are compared as unordered sets of canonicalized entries, so that equivalent ABIs are not reported as conflicting because the compiler emitted their entries in a different order; an address the releases disagree on fails the generation, which catches a dave release paired with a rollups-contracts one it was not deployed against. Extraction directories are also now removed when a sibling download fails, not only when every download succeeds.
+
+### Patch Changes
+
+- 28cb878: upgrade modern-tar to 0.8.4. Its 0.8.0 breaking changes are all in the web entrypoint, which this package does not use: the `unpackTar` signature, its options and its path-traversal guards are unchanged.
+
 ## 1.0.0-alpha.5
 
 ### Patch Changes

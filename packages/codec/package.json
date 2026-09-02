@@ -1,7 +1,7 @@
 {
     "name": "@cartesi/codec",
     "description": "Codec for Cartesi Rollups inputs and outputs",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.4",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
