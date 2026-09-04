@@ -22,7 +22,7 @@
         "tsdown": "catalog:",
         "typescript": "catalog:",
         "viem": "catalog:",
-        "vitest": "^4.1.10"
+        "vitest": "^4.1.11"
     },
     "type": "module",
     "main": "./dist/index.cjs",
