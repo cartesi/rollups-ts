@@ -24,7 +24,7 @@
         "@cartesi/react": "workspace:*",
         "@cartesi/rollup": "workspace:*",
         "@cartesi/rpc": "workspace:*",
-        "@tanstack/react-query": "^5.101.4",
+        "@tanstack/react-query": "^5.102.8",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "typescript": "catalog:",

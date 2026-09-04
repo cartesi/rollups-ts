@@ -13,7 +13,7 @@
     "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@cartesi/wagmi-plugin": "workspace:*",
-        "@tanstack/react-query": "^5.0.0",
+        "@tanstack/react-query": "^5.102.8",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "@vitest/coverage-v8": "^4.1.10",
@@ -46,7 +46,7 @@
         "dist/**"
     ],
     "peerDependencies": {
-        "@tanstack/react-query": "^5.0.0",
+        "@tanstack/react-query": "^5.102.8",
         "react": "^19.0.0",
         "viem": "^2.0.0",
         "wagmi": "^3.0.0"
