@@ -71,7 +71,7 @@
         "tsdown": "catalog:",
         "typescript": "catalog:",
         "viem": "catalog:",
-        "vitest": "^4.1.10"
+        "vitest": "^4.1.11"
     },
     "engines": {
         "node": ">=18"
