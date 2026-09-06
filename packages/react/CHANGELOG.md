@@ -1,5 +1,13 @@
 # @cartesi/react
 
+## 2.0.0-alpha.42
+
+### Patch Changes
+
+- 0ca5694: bump dependencies
+- Updated dependencies [0ca5694]
+  - @cartesi/client@2.0.0-alpha.38
+
 ## 2.0.0-alpha.41
 
 ### Major Changes
