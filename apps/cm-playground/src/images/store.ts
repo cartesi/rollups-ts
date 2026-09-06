@@ -1,12 +1,17 @@
-// The image library: kernels and filesystems, kept in IndexedDB so a reload
-// does not mean downloading a few hundred megabytes again.
+// The library: kernels, filesystems and stored machines, kept in IndexedDB so
+// a reload does not mean downloading a few hundred megabytes again.
 //
 // Both the page and the worker open this — the worker reads the bytes straight
 // out of the database rather than having them posted across, which for a
 // 300 MB rootfs is the difference between one copy and three.
 import { proxied } from "./hosts";
 
-export type ImageKind = "kernel" | "flash" | "other";
+/**
+ * What a stored blob is for. A "snapshot" is a whole machine — the tar of a
+ * directory `machine.store()` wrote — rather than an image a machine is built
+ * from, which is why it is loaded instead of being pointed at from a config.
+ */
+export type ImageKind = "kernel" | "flash" | "snapshot" | "other";
 
 export interface ImageRecord {
     id: string;
@@ -64,7 +69,8 @@ export const listImages = async (): Promise<ImageRecord[]> => {
         .sort((left, right) => right.addedAt - left.addedAt);
 };
 
-export const readImage = async (id: string): Promise<Uint8Array> => {
+/** The stored bytes as they are, which is what a download wants. */
+export const readImageBlob = async (id: string): Promise<Blob> => {
     const stored = await transact<StoredImage | undefined>(
         "readonly",
         (store) => store.get(id),
@@ -72,8 +78,11 @@ export const readImage = async (id: string): Promise<Uint8Array> => {
     if (stored === undefined) {
         throw new Error(`image ${id} is not in the library`);
     }
-    return new Uint8Array(await stored.blob.arrayBuffer());
+    return stored.blob;
 };
+
+export const readImage = async (id: string): Promise<Uint8Array> =>
+    new Uint8Array(await (await readImageBlob(id)).arrayBuffer());
 
 export const deleteImage = (id: string): Promise<unknown> =>
     transact("readwrite", (store) => store.delete(id));
@@ -87,6 +96,11 @@ const identify = (name: string, kind?: ImageKind): ImageKind => {
     if (kind !== undefined) {
         return kind;
     }
+    // before the others: a snapshot of a machine is very often named after
+    // the machine it holds, which can be anything at all
+    if (/\.tar$|\.tar\.gz$|\.tgz$/i.test(name)) {
+        return "snapshot";
+    }
     if (/linux|kernel|\.bin$/i.test(name)) {
         return "kernel";
     }
@@ -98,6 +112,26 @@ const identify = (name: string, kind?: ImageKind): ImageKind => {
 
 const newId = (): string =>
     `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+/**
+ * Something this page made rather than fetched — a snapshot of a machine it
+ * ran. The bytes are already in hand, so unlike the two below there is nothing
+ * to wait for and nowhere for it to have come from.
+ */
+export const addBytes = (
+    name: string,
+    bytes: Uint8Array,
+    kind?: ImageKind,
+): Promise<ImageRecord> =>
+    put({
+        id: newId(),
+        name,
+        kind: identify(name, kind),
+        size: bytes.length,
+        source: "stored here",
+        addedAt: Date.now(),
+        blob: new Blob([bytes as BlobPart]),
+    });
 
 export const addFile = (file: File, kind?: ImageKind): Promise<ImageRecord> =>
     put({
