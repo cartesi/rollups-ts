@@ -58,20 +58,20 @@
         "test:run": "vitest run"
     },
     "dependencies": {
-        "node-addon-api": "^8.3.0",
-        "node-gyp-build": "^4.8.4"
+        "node-addon-api": "catalog:",
+        "node-gyp-build": "catalog:"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@cartesi/codec": "workspace:*",
         "@types/node": "catalog:",
-        "@vitest/coverage-v8": "^4.1.10",
-        "node-gyp": "^13.0.0",
+        "@vitest/coverage-v8": "catalog:",
+        "node-gyp": "catalog:",
         "prebuildify": "^6.0.1",
         "tsdown": "catalog:",
         "typescript": "catalog:",
         "viem": "catalog:",
-        "vitest": "^4.1.10"
+        "vitest": "catalog:"
     },
     "engines": {
         "node": ">=18"

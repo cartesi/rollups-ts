@@ -36,7 +36,7 @@
         "access": "public"
     },
     "dependencies": {
-        "json-rpc-2.0": "^1.7.1"
+        "json-rpc-2.0": "^1.8.0"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
