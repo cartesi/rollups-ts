@@ -1,5 +1,11 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.27
+
+### Patch Changes
+
+- 0ca5694: bump dependencies
+
 ## 2.0.0-alpha.26
 
 ### Major Changes

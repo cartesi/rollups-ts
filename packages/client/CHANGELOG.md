@@ -1,5 +1,13 @@
 # @cartesi/client
 
+## 2.0.0-alpha.38
+
+### Patch Changes
+
+- 0ca5694: bump dependencies
+- Updated dependencies [0ca5694]
+  - @cartesi/rpc@2.0.0-alpha.27
+
 ## 2.0.0-alpha.37
 
 ### Major Changes
