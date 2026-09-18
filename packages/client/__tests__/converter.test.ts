@@ -296,9 +296,17 @@ describe("converter", () => {
             input_index_upper_bound: "0x5",
             machine_hash:
                 "0x3b57a86b635d433eb923dc86fa6f9832f15a88f89cfa7d8d45f568dbb6cf992e",
-            outputs_merkle_root:
+            tx_buffer_data_block:
                 "0x3b57a86b635d433eb923dc86fa6f9832f15a88f89cfa7d8d45f568dbb6cf992e",
-            outputs_merkle_proof: null,
+            tx_buffer_proof: [
+                "0x1c4e1f0f2a6d8b35e07c9a41d2f68b530ae9c7148d35f0a26be914c73d5820af",
+                "0x7d9a03e5c1b84f26a0d3e79418b5c62f0a4d18e73b96c250fa817d3e4b09c6d1",
+            ],
+            iflags_y_data_block: null,
+            iflags_y_proof: null,
+            htif_tohost_data_block:
+                "0x5a0c73e9184bd26f3a91ce0d87f4b2a6913ce5407db28f6a15cd930e7b4c8e21",
+            htif_tohost_proof: null,
             tournament_address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
             commitment:
                 "0x3b57a86b635d433eb923dc86fa6f9832f15a88f89cfa7d8d45f568dbb6cf992e",
@@ -314,7 +322,7 @@ describe("converter", () => {
         const epoch = epochConverter(rpcEpoch);
 
         const props = Object.keys(epoch);
-        expect(props).toHaveLength(17);
+        expect(props).toHaveLength(21);
         expect(props).toEqual(
             expect.arrayContaining([
                 "index",
@@ -323,8 +331,12 @@ describe("converter", () => {
                 "inputIndexLowerBound",
                 "inputIndexUpperBound",
                 "machineHash",
-                "outputsMerkleRoot",
-                "outputsMerkleProof",
+                "txBufferDataBlock",
+                "txBufferProof",
+                "iflagsYDataBlock",
+                "iflagsYProof",
+                "htifTohostDataBlock",
+                "htifTohostProof",
                 "tournamentAddress",
                 "commitment",
                 "commitmentProof",
@@ -347,8 +359,14 @@ describe("converter", () => {
             hexToBigInt(rpcEpoch.input_index_upper_bound),
         );
         expect(epoch.machineHash).toEqual(rpcEpoch.machine_hash);
-        expect(epoch.outputsMerkleRoot).toEqual(rpcEpoch.outputs_merkle_root);
-        expect(epoch.outputsMerkleProof).toEqual(rpcEpoch.outputs_merkle_proof);
+        expect(epoch.txBufferDataBlock).toEqual(rpcEpoch.tx_buffer_data_block);
+        expect(epoch.txBufferProof).toEqual(rpcEpoch.tx_buffer_proof);
+        expect(epoch.iflagsYDataBlock).toEqual(rpcEpoch.iflags_y_data_block);
+        expect(epoch.iflagsYProof).toEqual(rpcEpoch.iflags_y_proof);
+        expect(epoch.htifTohostDataBlock).toEqual(
+            rpcEpoch.htif_tohost_data_block,
+        );
+        expect(epoch.htifTohostProof).toEqual(rpcEpoch.htif_tohost_proof);
         expect(epoch.tournamentAddress).toEqual(
             rpcEpoch.tournament_address
                 ? getAddress(rpcEpoch.tournament_address)
@@ -493,7 +511,8 @@ describe("converter", () => {
             status: "ACCEPTED",
             exception_data: null,
             machine_hash: null,
-            outputs_hash: null,
+            tx_buffer_data_block:
+                "0xf4c6e1a97b305d82e4be0c7139af5d268b0e34c7159da2836f0bc47e5a91d3b2",
             transaction_hash:
                 "0x8f2c9ab4d7e15c30b6f18a4ee2d9037c4a1f5d2e9b7c63a0d4e8f1b25c7a9d3e",
             log_index: "0x2",
@@ -509,7 +528,7 @@ describe("converter", () => {
         expect(input.status).toBe(rpcInput.status);
         expect(input.exceptionData).toBeNull();
         expect(input.machineHash).toBeNull();
-        expect(input.outputsHash).toBeNull();
+        expect(input.txBufferDataBlock).toBe(rpcInput.tx_buffer_data_block);
         expect(input.transactionHash).toBe(rpcInput.transaction_hash);
         expect(input.logIndex).toBe(hexToBigInt(rpcInput.log_index));
         expect(input.decodedData).toBeDefined();
@@ -540,7 +559,7 @@ describe("converter", () => {
             status: "EXCEPTION",
             exception_data: "0x6f6f7073",
             machine_hash: null,
-            outputs_hash: null,
+            tx_buffer_data_block: null,
             transaction_hash:
                 "0x8f2c9ab4d7e15c30b6f18a4ee2d9037c4a1f5d2e9b7c63a0d4e8f1b25c7a9d3e",
             log_index: "0x3",
@@ -553,6 +572,31 @@ describe("converter", () => {
         // passed through as raw bytes, not decoded
         expect(input.exceptionData).toBe("0x6f6f7073");
     });
+
+    it.each(["OVERFLOW", "UNEXPECTED_YIELD"] as const)(
+        "should carry the %s terminal status",
+        (status) => {
+            const rpcInput: Input = {
+                epoch_index: "0x1",
+                index: "0x9",
+                block_number: "0x1f6",
+                raw_data: "0x415bf363",
+                decoded_data: null,
+                status,
+                exception_data: null,
+                machine_hash: null,
+                tx_buffer_data_block: null,
+                transaction_hash:
+                    "0x8f2c9ab4d7e15c30b6f18a4ee2d9037c4a1f5d2e9b7c63a0d4e8f1b25c7a9d3e",
+                log_index: "0x4",
+                created_at: "2025-04-11T10:00:00.000Z",
+                updated_at: "2025-04-11T10:05:00.000Z",
+            };
+
+            const input = inputConverter(rpcInput);
+            expect(input.status).toBe(status);
+        },
+    );
 
     it("should convert the report", () => {
         const rpcReport: Report = {

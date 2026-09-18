@@ -37,13 +37,13 @@ export const waitForInput = async (
                 throw new Error("Input is not processed");
             }
 
-            // every terminal status other than ACCEPTED; the node collapsed its
-            // resource-limit statuses into these
+            // every terminal status other than ACCEPTED; checked by exclusion
+            // so a status the node adds later is rejected rather than silently
+            // resolved. NONE is not terminal and is handled above
             if (
                 rejectErrors &&
-                (input.status === "EXCEPTION" ||
-                    input.status === "MACHINE_HALTED" ||
-                    input.status === "REJECTED")
+                input.status !== "NONE" &&
+                input.status !== "ACCEPTED"
             ) {
                 throw new AbortError(`Input status: ${input.status}`);
             }
