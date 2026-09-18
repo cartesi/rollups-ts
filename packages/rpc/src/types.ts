@@ -64,17 +64,20 @@ export type EpochStatus =
  * Outcome of running an input through the machine. `NONE` means the input has
  * not completed yet; the rest are terminal.
  *
- * The node collapsed its former resource-limit statuses
+ * The node once reported a set of resource-limit statuses
  * (`OUTPUTS_LIMIT_EXCEEDED`, `REPORTS_LIMIT_EXCEEDED`, `CYCLE_LIMIT_EXCEEDED`,
- * `TIME_LIMIT_EXCEEDED`, `PAYLOAD_LENGTH_LIMIT_EXCEEDED`) into the outcomes
- * below, so they are no longer part of the union.
+ * `TIME_LIMIT_EXCEEDED`, `PAYLOAD_LENGTH_LIMIT_EXCEEDED`); they are no longer
+ * part of the union, and `OVERFLOW` is not a drop-in replacement for any of
+ * them.
  */
 export type InputStatus =
     | "NONE"
     | "ACCEPTED"
     | "REJECTED"
     | "EXCEPTION"
-    | "MACHINE_HALTED";
+    | "MACHINE_HALTED"
+    | "OVERFLOW"
+    | "UNEXPECTED_YIELD";
 
 export type ConsensusType = "AUTHORITY" | "QUORUM" | "PRT";
 
@@ -85,7 +88,15 @@ export type ConsensusType = "AUTHORITY" | "QUORUM" | "PRT";
  */
 export type DefaultBlock = "FINALIZED" | "SAFE" | "LATEST" | "PENDING";
 
-export type ApplicationStatus = "OK" | "FAILED" | "DIVERGED" | "CORRUPTED";
+export type ApplicationStatus =
+    | "OK"
+    | "FAILED"
+    | "DIVERGED"
+    | "CORRUPTED"
+    | "GUEST_EXCEPTION"
+    | "MACHINE_HALTED"
+    | "MCYCLE_OVERFLOW"
+    | "UNEXPECTED_YIELD";
 
 export type SnapshotPolicy = "NONE" | "EVERY_INPUT" | "EVERY_EPOCH";
 
@@ -112,6 +123,11 @@ export type Application = {
     consensus_type: ConsensusType;
     enabled: boolean;
     status: ApplicationStatus;
+    /**
+     * Human-readable terminal or failure description. Null only while `status`
+     * is `OK`. Foreclosure is reported separately via `foreclose_block`, not
+     * via `status`.
+     */
     reason?: string | null;
     iinputbox_block: HexNumber;
     last_epoch_check_block: HexNumber;
@@ -172,8 +188,25 @@ export type Epoch = {
     input_index_lower_bound: HexNumber;
     input_index_upper_bound: HexNumber;
     machine_hash: Hash | null;
-    outputs_merkle_root: Hash | null;
-    outputs_merkle_proof: Hash[] | null;
+    /** The 32-byte CMIO TX-buffer memory block in the proved machine state. */
+    tx_buffer_data_block: Hash | null;
+    /**
+     * Merkle siblings proving the TX-buffer data block against `machine_hash`.
+     */
+    tx_buffer_proof: Hash[] | null;
+    /** The 32-byte memory block containing the machine `iflags.Y` register. */
+    iflags_y_data_block: Hash | null;
+    /**
+     * Merkle siblings proving the `iflags.Y` data block against `machine_hash`.
+     */
+    iflags_y_proof: Hash[] | null;
+    /** The 32-byte memory block containing the machine HTIF `tohost` register. */
+    htif_tohost_data_block: Hash | null;
+    /**
+     * Merkle siblings proving the HTIF `tohost` data block against
+     * `machine_hash`.
+     */
+    htif_tohost_proof: Hash[] | null;
     commitment: Hash | null;
     commitment_proof: Hash[] | null;
     claim_transaction_hash: Hash | null;
@@ -231,7 +264,12 @@ export type Input = {
      */
     exception_data: Hex | null;
     machine_hash: Hash | null;
-    outputs_hash: Hash | null;
+    /**
+     * The 32-byte CMIO TX-buffer memory block in the machine state this input
+     * produced. Replaces the former `outputs_hash`, which was a digest of the
+     * input's outputs rather than a memory block.
+     */
+    tx_buffer_data_block: Hash | null;
     transaction_hash: Hash;
     log_index: HexNumber;
     created_at: DateTime;
