@@ -38,3 +38,19 @@ import type { WaitForInputParams } from "@cartesi/client";
 import type { WaitForInputReturnType, Input } from "@cartesi/client";
 // WaitForInputReturnType = Input;
 ```
+
+The two boolean options govern the two ways waiting can end early, and they do
+not overlap.
+
+`waitProcessing` (default `true`) keeps polling while the input is still
+`NONE`, the only non-terminal status. Set it to `false` to resolve with the
+input as it is, processed or not.
+
+`rejectErrors` (default `false`) aborts — rejecting rather than resolving —
+once the input reaches any terminal status other than `ACCEPTED`. That is every
+outcome the node can report for an input it finished running: `REJECTED`,
+`EXCEPTION`, `MACHINE_HALTED`, `OVERFLOW` and `UNEXPECTED_YIELD`. It is checked
+by exclusion, so an outcome the node adds in a later release aborts too instead
+of being mistaken for success. Aborting skips the remaining retries; with
+`rejectErrors: false` the same input resolves normally and the status is yours
+to inspect.
