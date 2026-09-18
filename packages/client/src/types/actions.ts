@@ -94,6 +94,11 @@ export type Application = {
     consensusType: ConsensusType;
     status: ApplicationStatus;
     enabled: boolean;
+    /**
+     * Human-readable terminal or failure description. Null only while `status`
+     * is `OK`. Foreclosure is reported separately via `forecloseBlock`, not
+     * via `status`.
+     */
     reason?: string | null;
     inputBoxBlock: bigint;
     lastEpochCheckBlock: bigint;
@@ -162,8 +167,25 @@ export type Epoch = {
     inputIndexLowerBound: bigint;
     inputIndexUpperBound: bigint;
     machineHash: Hash | null;
-    outputsMerkleRoot: Hash | null;
-    outputsMerkleProof: Hash[] | null;
+    /** The 32-byte CMIO TX-buffer memory block in the proved machine state. */
+    txBufferDataBlock: Hash | null;
+    /**
+     * Merkle siblings proving the TX-buffer data block against `machineHash`.
+     */
+    txBufferProof: Hash[] | null;
+    /** The 32-byte memory block containing the machine `iflags.Y` register. */
+    iflagsYDataBlock: Hash | null;
+    /**
+     * Merkle siblings proving the `iflags.Y` data block against `machineHash`.
+     */
+    iflagsYProof: Hash[] | null;
+    /** The 32-byte memory block containing the machine HTIF `tohost` register. */
+    htifTohostDataBlock: Hash | null;
+    /**
+     * Merkle siblings proving the HTIF `tohost` data block against
+     * `machineHash`.
+     */
+    htifTohostProof: Hash[] | null;
     tournamentAddress: Address | null;
     commitment: Hash | null;
     commitmentProof: Hash[] | null;
@@ -304,7 +326,12 @@ export type Input = {
      */
     exceptionData: Hex | null;
     machineHash: Hash | null;
-    outputsHash: Hash | null;
+    /**
+     * The 32-byte CMIO TX-buffer memory block in the machine state this input
+     * produced. Replaces the former `outputsHash`, which was a digest of the
+     * input's outputs rather than a memory block.
+     */
+    txBufferDataBlock: Hash | null;
     transactionHash: Hash;
     logIndex: bigint;
     createdAt: Date;
@@ -518,6 +545,11 @@ export type ListReportsReturnType = {
 
 export type WaitForInputParams = GetInputParams & {
     waitProcessing?: boolean;
+    /**
+     * Abort instead of resolving when the input reaches any terminal status
+     * other than `ACCEPTED`. `NONE` is governed by `waitProcessing`, not by
+     * this option.
+     */
     rejectErrors?: boolean;
     pollingInterval?: number;
     retryCount?: number;
