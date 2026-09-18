@@ -22,3 +22,10 @@ The `data` is an `Input` (resolved when the input is processed):
 ```ts twoslash
 import type { GetInputReturnType } from "@cartesi/client";
 ```
+
+The wait options are the ones [`waitForInput`](/client/waitForInput) takes.
+`waitProcessing` (default `true`) polls while the input is still `NONE`, and
+`rejectErrors` (default `false`) fails the query once the input reaches any
+terminal status other than `ACCEPTED` — `REJECTED`, `EXCEPTION`,
+`MACHINE_HALTED`, `OVERFLOW` or `UNEXPECTED_YIELD` — so the hook surfaces it
+through `error` rather than `data`.
