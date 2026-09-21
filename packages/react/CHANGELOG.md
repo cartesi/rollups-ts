@@ -1,5 +1,29 @@
 # @cartesi/react
 
+## 2.0.0-alpha.42
+
+### Patch Changes
+
+- 0ca5694: bump dependencies
+- 22cb049: Carry the node JSON-RPC changes of `@cartesi/client` through the hooks.
+  
+  No hook changed: each one infers its result from the client action it wraps, so
+  the new shapes arrive on their own. What that means for consumers:
+  
+  - `useEpoch`, `useEpochByVirtualIndex` and `useEpochs` no longer expose
+    `outputsMerkleRoot`/`outputsMerkleProof`, and expose the new TX-buffer,
+    `iflags.Y` and HTIF `tohost` data blocks and proofs instead.
+  - `useInput`, `useInputs` and `useWaitForInput` expose `txBufferDataBlock`
+    where the data previously had `outputsHash` — a change of meaning, not just
+    a rename.
+  - The `InputStatus` and `ApplicationStatus` unions the data carries gained
+    members, so an exhaustive `switch` over either no longer compiles.
+  - `useWaitForInput` inherits the `rejectErrors` change: it now fails on any
+    status that is neither `NONE` nor `ACCEPTED`.
+- Updated dependencies [0ca5694]
+- Updated dependencies [5eebdd0]
+  - @cartesi/client@2.0.0-alpha.38
+
 ## 2.0.0-alpha.41
 
 ### Major Changes
