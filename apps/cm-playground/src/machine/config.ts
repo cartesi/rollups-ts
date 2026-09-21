@@ -1,6 +1,11 @@
 // The form model, and the pure function that turns it into what the emulator
 // takes: a MachineConfig and a MachineRuntimeConfig.
 //
+// A machine comes from one of two places — built here from the settings below,
+// or loaded from a stored one someone else built. The second kind brings its
+// own MachineConfig inside the tarball, so all this has to produce for it is
+// the runtime configuration, which is the half that describes the host.
+//
 // The model is deliberately not the machine configuration itself. A few things
 // a person sets here — "interactive", an environment variable, a window size —
 // land in several places at once, and a couple of the emulator's defaults have
@@ -62,7 +67,14 @@ export interface EnvVar {
 
 export type ConsoleKind = "virtio" | "htif";
 
+/** Where the machine comes from: built from these settings, or loaded whole. */
+export type MachineSource = "config" | "snapshot";
+
 export interface PlaygroundConfig {
+    source: MachineSource;
+    /** The library id of the snapshot to load, when that is the source. */
+    snapshotId: string | null;
+
     kernelId: string | null;
     rootfsId: string | null;
     rootfsReadOnly: boolean;
@@ -122,6 +134,9 @@ export const newNvram = (index: number): NvramForm => ({
 export const newEnvVar = (): EnvVar => ({ id: newId(), name: "", value: "" });
 
 export const defaultConfig = (): PlaygroundConfig => ({
+    source: "config",
+    snapshotId: null,
+
     kernelId: null,
     rootfsId: null,
     rootfsReadOnly: false,
@@ -412,20 +427,68 @@ const initFor = (
 /** Where an image ends up in the module's filesystem. */
 export const imagePath = (id: string): string => `/images/${id}`;
 
+/** Where a snapshot's tarball is unpacked, which is the directory load() reads. */
+export const snapshotPath = (id: string): string => `/snapshots/${id}`;
+
+/** Where store() writes a machine on its way into a tarball, and nowhere else. */
+export const STORED_PATH = "/stored/machine";
+
 export interface GeneratedConfig {
-    config: MachineConfig;
+    /** What create() is called with, or null when a stored machine is loaded. */
+    config: MachineConfig | null;
     runtime: MachineRuntimeConfig;
     /** Images this configuration needs staged, by library id. */
     images: string[];
+    /** The snapshot to unpack and load, by library id, or null to create one. */
+    snapshot: string | null;
     /** Reasons the configuration cannot be booted as it stands. */
     problems: string[];
 }
+
+/**
+ * The half of the settings that describes the host rather than the machine:
+ * where the console reads and writes, and how the run is driven. A stored
+ * machine takes this too — it is the one thing about it this page still says.
+ */
+const runtimeFor = (form: PlaygroundConfig): MachineRuntimeConfig => {
+    const runtime: MachineRuntimeConfig = {
+        console: {
+            output_destination: "to_buffer",
+            output_flush_mode: form.flushMode,
+            input_source: form.interactive ? "from_buffer" : "from_null",
+            tty_cols: form.ttyCols,
+            tty_rows: form.ttyRows,
+        },
+    };
+    if (form.softYield) {
+        runtime.soft_yield = true;
+    }
+    if (form.updateHashTree) {
+        runtime.concurrency = { update_hash_tree: 1 };
+    }
+    return runtime;
+};
 
 export const generate = (
     form: PlaygroundConfig,
     /** Only read when the date is synced, which is why it is not a constant. */
     now: number = Date.now(),
 ): GeneratedConfig => {
+    const runtime = runtimeFor(form);
+
+    // A stored machine is already a machine: everything below this — images,
+    // ranges, the command line, the init script — was settled by whoever built
+    // it, and is inside the tarball.
+    if (form.source === "snapshot") {
+        return {
+            config: null,
+            runtime,
+            images: [],
+            snapshot: form.snapshotId,
+            problems: form.snapshotId === null ? ["no snapshot chosen"] : [],
+        };
+    }
+
     const problems: string[] = [];
     const images: string[] = [];
 
@@ -607,21 +670,11 @@ export const generate = (
     }
     config.dtb = dtb;
 
-    const runtime: MachineRuntimeConfig = {
-        console: {
-            output_destination: "to_buffer",
-            output_flush_mode: form.flushMode,
-            input_source: form.interactive ? "from_buffer" : "from_null",
-            tty_cols: form.ttyCols,
-            tty_rows: form.ttyRows,
-        },
+    return {
+        config,
+        runtime,
+        images: [...new Set(images)],
+        snapshot: null,
+        problems,
     };
-    if (form.softYield) {
-        runtime.soft_yield = true;
-    }
-    if (form.updateHashTree) {
-        runtime.concurrency = { update_hash_tree: 1 };
-    }
-
-    return { config, runtime, images: [...new Set(images)], problems };
 };
