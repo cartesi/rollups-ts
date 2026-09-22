@@ -15,7 +15,7 @@ allowBuilds:
 catalog:
     "@biomejs/biome": 2.5.12
     "@types/node": ^26.4.1
-    "@types/react": ^19.2.18
+    "@types/react": ^19.3.0
     "@vitest/coverage-v8": ^5.0.0
     node-addon-api: ^8.9.2
     node-gyp: ^13.0.2
