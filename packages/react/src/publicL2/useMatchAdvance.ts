@@ -13,7 +13,11 @@ export const matchAdvanceQueryKey = (
 ) => [
     serverUrl(client),
     "matchAdvance",
-    { ...params, epochIndex: params.epochIndex?.toString() },
+    {
+        ...params,
+        epochIndex: params.epochIndex?.toString(),
+        logIndex: params.logIndex?.toString(),
+    },
 ];
 
 export const matchAdvanceOptions = (
@@ -27,7 +31,8 @@ export const matchAdvanceOptions = (
             params.epochIndex !== undefined &&
             params.tournamentAddress !== undefined &&
             params.idHash !== undefined &&
-            params.parent !== undefined
+            params.txHash !== undefined &&
+            params.logIndex !== undefined
                 ? () =>
                       client.getMatchAdvance({
                           application: params.application as string,
@@ -35,7 +40,8 @@ export const matchAdvanceOptions = (
                           tournamentAddress:
                               params.tournamentAddress as Address,
                           idHash: params.idHash as Hash,
-                          parent: params.parent as Hash,
+                          txHash: params.txHash as Hash,
+                          logIndex: params.logIndex as bigint,
                       })
                 : skipToken,
     });

@@ -9,6 +9,10 @@ import {
     applicationQueryKey,
     applicationsOptions,
     applicationsQueryKey,
+    bondEventOptions,
+    bondEventQueryKey,
+    bondEventsOptions,
+    bondEventsQueryKey,
     chainIdOptions,
     chainIdQueryKey,
     commitmentOptions,
@@ -76,6 +80,10 @@ const clientA2 = createCartesiPublicClient({ transport: http(urlA) });
 
 const application = "0x0000000000000000000000000000000000000001";
 const tournamentAddress = "0x0000000000000000000000000000000000000002";
+const txHash =
+    "0x0000000000000000000000000000000000000000000000000000000000000003";
+const idHash =
+    "0x0000000000000000000000000000000000000000000000000000000000000004";
 
 interface Case {
     name: string;
@@ -104,6 +112,12 @@ const mk = <P>(
 const cases: Case[] = [
     mk("application", applicationOptions, applicationQueryKey, { application }),
     mk("applications", applicationsOptions, applicationsQueryKey, {}),
+    mk("bondEvent", bondEventOptions, bondEventQueryKey, {
+        application,
+        txHash,
+        logIndex: 0n,
+    }),
+    mk("bondEvents", bondEventsOptions, bondEventsQueryKey, { application }),
     mk(
         "chainId",
         (c) => chainIdOptions(c),
@@ -159,6 +173,9 @@ const cases: Case[] = [
         application,
         epochIndex: 1n,
         tournamentAddress,
+        idHash,
+        txHash,
+        logIndex: 0n,
     }),
     mk("matchAdvances", matchAdvancesOptions, matchAdvancesQueryKey, {
         application,
@@ -281,6 +298,22 @@ describe("*QueryKey bigint normalization", () => {
             inputIndex: 2n,
         });
         expect(key[2]).toMatchObject({ epochIndex: "1", inputIndex: "2" });
+    });
+
+    it("stringifies a zero log index rather than dropping it", () => {
+        for (const key of [
+            bondEventQueryKey(clientA, { application, txHash, logIndex: 0n }),
+            matchAdvanceQueryKey(clientA, {
+                application,
+                epochIndex: 1n,
+                tournamentAddress,
+                idHash,
+                txHash,
+                logIndex: 0n,
+            }),
+        ]) {
+            expect(key[2]).toMatchObject({ logIndex: "0" });
+        }
     });
 
     it("stringifies the inclusive range bounds of every listing key", () => {

@@ -10,6 +10,16 @@ export {
     applicationsQueryKey,
     useApplications,
 } from "./useApplications.js";
+export {
+    bondEventOptions,
+    bondEventQueryKey,
+    useBondEvent,
+} from "./useBondEvent.js";
+export {
+    bondEventsOptions,
+    bondEventsQueryKey,
+    useBondEvents,
+} from "./useBondEvents.js";
 export { chainIdOptions, chainIdQueryKey, useChainId } from "./useChainId.js";
 export {
     commitmentOptions,
