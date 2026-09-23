@@ -1,0 +1,47 @@
+# cartesi_listBondEvents
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data, pagination } = await client.request("cartesi_listBondEvents", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    limit: 50,
+    offset: 0,
+});
+```
+
+Events are ordered by block number and block-global log index; `descending`
+reverses both.
+
+## Filters
+
+The request can filter results by:
+
+- `epoch_index: HexNumber`
+- `tournament_address: Address`
+
+```ts twoslash
+import { type HexNumber } from "@cartesi/rpc"
+```
+
+## Return Type
+
+The `data` is an array of `BondEvent`, discriminated on `type`: a
+`PARTIAL_BOND_REFUND` carries `refund`, a `BOND_RECOVERED` carries `recovery`,
+and neither carries both.
+
+```ts twoslash
+import {
+    type BondEvent,
+    type ListBondEventsReturnType,
+} from "@cartesi/rpc";
+```
+
+A failed partial refund records the value that was *requested*, not a payment —
+read `refund.success` before treating `refund.value` as money that moved. A
+failed terminal bond transfer emits no `BOND_RECOVERED` event at all; the bond
+stays recoverable in the tournament snapshot.
+
+For more information about pagination refer to the [pagination section](/rpc#pagination).

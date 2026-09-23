@@ -1,0 +1,26 @@
+# useBondEvents
+
+## Usage
+
+```tsx twoslash
+import { useBondEvents } from "@cartesi/react";
+
+function Example() {
+  const { data, isLoading } = useBondEvents({
+    application: "0x...",
+    limit: 10,
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is a `ListBondEventsReturnType`:
+
+```ts twoslash
+import {
+  type BondEvent,
+  type ListBondEventsReturnType,
+} from "@cartesi/client";
+```

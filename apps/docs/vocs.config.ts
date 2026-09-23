@@ -137,6 +137,14 @@ const config: Config = defineConfig({
                             text: "getMatchAdvance",
                             link: "/client/getMatchAdvance",
                         },
+                        {
+                            text: "listBondEvents",
+                            link: "/client/listBondEvents",
+                        },
+                        {
+                            text: "getBondEvent",
+                            link: "/client/getBondEvent",
+                        },
                         { text: "listInputs", link: "/client/listInputs" },
                         { text: "getInput", link: "/client/getInput" },
                         { text: "listOutputs", link: "/client/listOutputs" },
@@ -217,6 +225,14 @@ const config: Config = defineConfig({
                         {
                             text: "useMatchAdvances",
                             link: "/react/useMatchAdvances",
+                        },
+                        {
+                            text: "useBondEvents",
+                            link: "/react/useBondEvents",
+                        },
+                        {
+                            text: "useBondEvent",
+                            link: "/react/useBondEvent",
                         },
                         { text: "useInput", link: "/react/useInput" },
                         { text: "useInputs", link: "/react/useInputs" },
@@ -305,6 +321,10 @@ const config: Config = defineConfig({
                             link: "/rpc/cartesi_listMatchAdvances",
                         },
                         {
+                            text: "cartesi_listBondEvents",
+                            link: "/rpc/cartesi_listBondEvents",
+                        },
+                        {
                             text: "cartesi_listInputs",
                             link: "/rpc/cartesi_listInputs",
                         },
@@ -343,6 +363,10 @@ const config: Config = defineConfig({
                         {
                             text: "cartesi_getMatchAdvance",
                             link: "/rpc/cartesi_getMatchAdvance",
+                        },
+                        {
+                            text: "cartesi_getBondEvent",
+                            link: "/rpc/cartesi_getBondEvent",
                         },
                         {
                             text: "cartesi_getLastAcceptedEpochIndex",
