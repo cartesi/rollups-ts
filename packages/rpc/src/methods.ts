@@ -1,6 +1,8 @@
 import type {
     GetApplicationParams,
     GetApplicationReturnType,
+    GetBondEventParams,
+    GetBondEventReturnType,
     GetChainIdReturnType,
     GetCommitmentParams,
     GetCommitmentReturnType,
@@ -34,6 +36,8 @@ import type {
     GetWithdrawalReturnType,
     ListApplicationsParams,
     ListApplicationsReturnType,
+    ListBondEventsParams,
+    ListBondEventsReturnType,
     ListCommitmentsParams,
     ListCommitmentsReturnType,
     ListEpochsParams,
@@ -85,6 +89,10 @@ export type Methods = {
     cartesi_getMatchAdvance(
         params: GetMatchAdvanceParams,
     ): GetMatchAdvanceReturnType;
+    cartesi_listBondEvents(
+        params: ListBondEventsParams,
+    ): ListBondEventsReturnType;
+    cartesi_getBondEvent(params: GetBondEventParams): GetBondEventReturnType;
     cartesi_listInputs(params: ListInputsParams): ListInputsReturnType;
     cartesi_getInput(params: GetInputParams): GetInputReturnType;
     cartesi_getProcessedInputCount(
