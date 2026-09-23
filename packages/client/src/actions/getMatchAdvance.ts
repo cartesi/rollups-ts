@@ -17,7 +17,8 @@ export const getMatchAdvance = async (
             epoch_index: numberToHex(params.epochIndex),
             tournament_address: getAddress(params.tournamentAddress),
             id_hash: params.idHash,
-            parent: params.parent,
+            tx_hash: params.txHash,
+            log_index: numberToHex(params.logIndex),
         },
     });
     return matchAdvancedConverter(matchAdvanced);

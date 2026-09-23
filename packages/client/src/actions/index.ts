@@ -1,4 +1,5 @@
 export { getApplication } from "./getApplication.js";
+export { getBondEvent } from "./getBondEvent.js";
 export { getChainId } from "./getChainId.js";
 export { getCommitment } from "./getCommitment.js";
 export { getEpoch } from "./getEpoch.js";
@@ -17,6 +18,7 @@ export { getReport } from "./getReport.js";
 export { getTournament } from "./getTournament.js";
 export { getWithdrawal } from "./getWithdrawal.js";
 export { listApplications } from "./listApplications.js";
+export { listBondEvents } from "./listBondEvents.js";
 export { listCommitments } from "./listCommitments.js";
 export { listEpochs } from "./listEpochs.js";
 export { listInputs } from "./listInputs.js";

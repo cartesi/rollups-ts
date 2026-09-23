@@ -36,6 +36,11 @@ export type Address = `0x${string}`;
 export type Hash = `0x${string}`;
 export type Hex = `0x${string}`;
 export type HexNumber = `0x${string}`;
+/**
+ * An exact uint256 quantity in canonical hexadecimal form, up to 2^256-1. It is a
+ * string because the node never encodes one as a JSON number.
+ */
+export type Uint256 = `0x${string}`;
 export type DateTime = string;
 
 export type Pagination = {
@@ -108,6 +113,41 @@ export type DeletionReason =
 
 export type WinnerCommitment = "NONE" | "ONE" | "TWO";
 
+export type TournamentKind = "LEAF" | "NON_LEAF";
+
+export type TournamentStandingState =
+    | "MATCHES_ACTIVE"
+    | "AWAITING_CLOSURE"
+    | "ROOT_WINNER"
+    | "ROOT_FAILED"
+    | "INNER_WINNER"
+    | "INNER_ELIMINABLE_NO_WINNER"
+    | "INNER_ELIMINABLE_WINNER_EXPIRED";
+
+export type MatchPhase =
+    | "UNINITIALIZED"
+    | "BISECTING"
+    | "READY_TO_SEAL"
+    | "SEALED";
+
+export type CommitmentSide = "ONE" | "TWO";
+
+export type MatchTimeoutOutcome =
+    | "NONE"
+    | "ONE_WINS"
+    | "TWO_WINS"
+    | "ELIMINATE_BOTH";
+
+export type InnerTournamentDisposition = "UNSETTLED" | "WINNER" | "ELIMINABLE";
+
+export type BondDisposition =
+    | "TOURNAMENT_RUNNING"
+    | "NO_WINNER"
+    | "RECOVERABLE"
+    | "RECOVERED";
+
+export type BondEventType = "PARTIAL_BOND_REFUND" | "BOND_RECOVERED";
+
 export type GetApplicationParams = { application: string | Address };
 
 export type Application = {
@@ -119,7 +159,6 @@ export type Application = {
     epoch_length: HexNumber;
     claim_staging_period: HexNumber;
     withdrawal_config: WithdrawalConfig;
-    data_availability: Hex;
     consensus_type: ConsensusType;
     enabled: boolean;
     status: ApplicationStatus;
@@ -382,6 +421,51 @@ export type ListTournamentsParams = PaginationParams & {
     parent_match_id_hash?: Hash;
 };
 
+export type TournamentCreationEvent = {
+    block_number: HexNumber;
+    tx_hash: Hash;
+    log_index: HexNumber;
+};
+
+export type TournamentInnerResult = {
+    disposition: InnerTournamentDisposition;
+    parent_commitment: Hash | null;
+    /** Remaining carryover allowance, in blocks, at `as_of_block`. */
+    paused_allowance: HexNumber;
+};
+
+/**
+ * Claimer and payment are present only for a `RECOVERABLE` disposition, where a
+ * zero payment is still a valid value.
+ */
+export type TournamentBondRecovery = {
+    disposition: BondDisposition;
+    claimer: Address | null;
+    payment: Uint256 | null;
+};
+
+/**
+ * Current contract state, not historical winner data: an expired inner candidate
+ * stays a candidate without being a current winner. Separate API calls do not add
+ * up to a single snapshot.
+ */
+export type TournamentSnapshot = {
+    /** The block at which every view in this snapshot was read. */
+    as_of_block: HexNumber;
+    standing: TournamentStandingState;
+    accepts_joins: boolean;
+    candidate: Hash | null;
+    winner_commitment: Hash | null;
+    final_state_hash: Hash | null;
+    parent_commitment: Hash | null;
+    /** Completion block, or zero while the tournament is unfinished. */
+    finished_at_block: HexNumber;
+    /** Expiry block of a live inner winner; zero for every other standing. */
+    winner_expires_at: HexNumber;
+    inner_result: TournamentInnerResult | null;
+    bond_recovery: TournamentBondRecovery;
+};
+
 export type Tournament = {
     epoch_index: HexNumber;
     address: Address;
@@ -391,11 +475,17 @@ export type Tournament = {
     level: HexNumber;
     log2step: HexNumber;
     height: HexNumber;
-    winner_commitment: Hash | null;
-    final_state_hash: Hash | null;
-    finished_at_block: HexNumber;
     created_at: DateTime;
     updated_at: DateTime;
+    initial_hash: Hash;
+    base_cycle: Uint256;
+    kind: TournamentKind;
+    /** The block the tournament was created in. */
+    start_instant: HexNumber;
+    /** Initial clock allowance, in blocks. */
+    allowance: HexNumber;
+    creation_event: TournamentCreationEvent | null;
+    snapshot: TournamentSnapshot;
 };
 
 export type ListTournamentsReturnType = PaginatedReturnType<Tournament>;
@@ -415,6 +505,23 @@ export type ListCommitmentsParams = PaginationParams & {
     tournament_address?: Address;
 };
 
+export type CommitmentSnapshot = {
+    as_of_block: HexNumber;
+    /**
+     * Current claimer, which can be zero after elimination or recovery. The
+     * original submitter stays on `Commitment.submitter_address`.
+     */
+    claimer: Address;
+    clock_running: boolean;
+    /** Responder expiry block while the clock runs; zero while it is paused. */
+    clock_deadline: HexNumber;
+    /**
+     * Paused allowance, in blocks. A retained clock does not on its own prove
+     * that the commitment is live.
+     */
+    clock_allowance: HexNumber;
+};
+
 export type Commitment = {
     epoch_index: HexNumber;
     tournament_address: Address;
@@ -425,6 +532,8 @@ export type Commitment = {
     tx_hash: Hash;
     created_at: DateTime;
     updated_at: DateTime;
+    log_index: HexNumber;
+    snapshot: CommitmentSnapshot;
 };
 
 export type ListCommitmentsReturnType = PaginatedReturnType<Commitment>;
@@ -446,6 +555,64 @@ export type ListMatchesParams = PaginationParams & {
     tournament_address?: Address;
 };
 
+export type LeafMatchSeal = {
+    /** The immutable deadline from `LeafMatchSealed`. */
+    eliminable_at: HexNumber;
+    block_number: HexNumber;
+    tx_hash: Hash;
+    log_index: HexNumber;
+};
+
+type MatchBisectionSnapshotBase = {
+    revealing_parent: Hash;
+    waiting_left: Hash;
+    waiting_right: Hash;
+    segment_start_position: Uint256;
+    segment_start_cycle: Uint256;
+    responder: CommitmentSide;
+};
+
+export type MatchBisectionSnapshot = MatchBisectionSnapshotBase & {
+    current_height: HexNumber | null;
+};
+
+/** Sealed values are in commitment-side order, not in reveal order. */
+export type MatchSealedSnapshot = {
+    agree_state: Hash;
+    divergence_position: Uint256;
+    divergence_cycle: Uint256;
+    final_state_one: Hash;
+    final_state_two: Hash;
+};
+
+/**
+ * Current match state. A deleted match is `UNINITIALIZED` and carries no phase
+ * payload, while its deletion facts stay on the match itself; a sealed non-leaf
+ * match has no local timeout outcome, because its child tournament controls
+ * progress.
+ */
+export type MatchSnapshot = {
+    as_of_block: HexNumber;
+    timeout_outcome: MatchTimeoutOutcome;
+    /**
+     * Deferred charge, in blocks, from the timeout classifier at `as_of_block`.
+     */
+    deferred_charge: HexNumber;
+} & (
+    | { phase: "UNINITIALIZED"; bisection: null; sealed: null }
+    | {
+          phase: "BISECTING";
+          bisection: MatchBisectionSnapshotBase & { current_height: HexNumber };
+          sealed: null;
+      }
+    | {
+          phase: "READY_TO_SEAL";
+          bisection: MatchBisectionSnapshotBase & { current_height: null };
+          sealed: null;
+      }
+    | { phase: "SEALED"; bisection: null; sealed: MatchSealedSnapshot }
+);
+
 export type Match = {
     epoch_index: HexNumber;
     tournament_address: Address;
@@ -461,6 +628,14 @@ export type Match = {
     deletion_tx_hash: Hash | null;
     created_at: DateTime;
     updated_at: DateTime;
+    log_index: HexNumber;
+    /**
+     * The immutable `MatchCreated` deadline, not the current responder deadline.
+     */
+    eliminable_at: HexNumber;
+    leaf_seal: LeafMatchSeal | null;
+    deletion_log_index: HexNumber | null;
+    snapshot: MatchSnapshot;
 };
 
 export type ListMatchesReturnType = PaginatedReturnType<Match>;
@@ -476,6 +651,10 @@ export type GetMatchReturnType = {
     data: Match;
 };
 
+/**
+ * `descending` reverses both the block-number and the log-index ordering of the
+ * results.
+ */
 export type ListMatchAdvancesParams = PaginationParams & {
     application: string | Address;
     epoch_index: HexNumber;
@@ -493,20 +672,80 @@ export type MatchAdvanced = {
     tx_hash: Hash;
     created_at: DateTime;
     updated_at: DateTime;
+    log_index: HexNumber;
+    segment_start_position: Uint256;
+    /** The immutable both-sides elimination deadline this advance reports. */
+    eliminable_at: HexNumber;
 };
 
 export type ListMatchAdvancesReturnType = PaginatedReturnType<MatchAdvanced>;
 
+/**
+ * A match advance is keyed by the transaction hash and block-global log index of
+ * its event, both of which `cartesi_listMatchAdvances` returns: repeated
+ * other-parent hashes stay distinct events, so the parent hash alone does not
+ * identify one.
+ */
 export type GetMatchAdvanceParams = {
     application: string | Address;
     epoch_index: HexNumber;
     tournament_address: Address;
     id_hash: Hash;
-    parent: Hash;
+    tx_hash: Hash;
+    log_index: HexNumber;
 };
 
 export type GetMatchAdvanceReturnType = {
     data: MatchAdvanced;
+};
+
+/** Value is the refund that was requested; it was paid only if `success`. */
+export type PartialBondRefund = {
+    recipient: Address;
+    value: Uint256;
+    success: boolean;
+};
+
+export type BondRecovered = {
+    commitment: Hash;
+    claimer: Address;
+    payment: Uint256;
+    burned: Uint256;
+};
+
+export type BondEvent = {
+    epoch_index: HexNumber;
+    tournament_address: Address;
+    block_number: HexNumber;
+    tx_hash: Hash;
+    log_index: HexNumber;
+    created_at: DateTime;
+    updated_at: DateTime;
+} & (
+    | { type: "PARTIAL_BOND_REFUND"; refund: PartialBondRefund; recovery: null }
+    | { type: "BOND_RECOVERED"; refund: null; recovery: BondRecovered }
+);
+
+/**
+ * `descending` reverses both the block-number and the log-index ordering of the
+ * results.
+ */
+export type ListBondEventsParams = PaginationParams & {
+    application: string | Address;
+    epoch_index?: HexNumber;
+    tournament_address?: Address;
+};
+
+export type ListBondEventsReturnType = PaginatedReturnType<BondEvent>;
+
+export type GetBondEventParams = {
+    application: string | Address;
+    tx_hash: Hash;
+    log_index: HexNumber;
+};
+
+export type GetBondEventReturnType = {
+    data: BondEvent;
 };
 
 export type ListInputsParams = PaginationParams &
