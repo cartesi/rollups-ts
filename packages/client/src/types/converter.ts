@@ -1,42 +1,48 @@
 import type {
     Application as ApplicationRpc,
+    BondEvent as BondEventRpc,
+    CommitmentSnapshot as CommitmentSnapshotRpc,
     Commitment as CommitmentRpc,
     DelegateCallVoucher as DelegateCallVoucherRpc,
     Epoch as EpochRpc,
     Input as InputRpc,
+    LeafMatchSeal as LeafMatchSealRpc,
     MatchAdvanced as MatchAdvancedRpc,
+    MatchBisectionSnapshot as MatchBisectionSnapshotRpc,
+    MatchSnapshot as MatchSnapshotRpc,
     Match as MatchRpc,
     NodeInfo as NodeInfoRpc,
     Notice as NoticeRpc,
     Output as OutputRpc,
     Pagination as PaginationRpc,
     Report as ReportRpc,
+    TournamentCreationEvent as TournamentCreationEventRpc,
+    TournamentSnapshot as TournamentSnapshotRpc,
     Tournament as TournamentRpc,
     Voucher as VoucherRpc,
     Withdrawal as WithdrawalRpc,
 } from "@cartesi/rpc";
-import {
-    type Hex,
-    decodeFunctionData,
-    getAddress,
-    hexToBigInt,
-    hexToNumber,
-} from "viem";
+import { getAddress, hexToBigInt, hexToNumber } from "viem";
 import type {
     Application,
+    BondEvent,
     Commitment,
-    DataAvailability,
+    CommitmentSnapshot,
     DelegateCallVoucher,
     Epoch,
     Input,
+    LeafMatchSeal,
     Match,
     MatchAdvanced,
+    MatchSnapshot,
     NodeInfo,
     Notice,
     Output,
     Pagination,
     Report,
     Tournament,
+    TournamentCreationEvent,
+    TournamentSnapshot,
     Voucher,
     Withdrawal,
 } from "./actions.js";
@@ -47,56 +53,6 @@ export const paginationConverter = (pagination: PaginationRpc): Pagination => {
         offset: pagination.offset,
         totalCount: pagination.total_count,
     };
-};
-
-// the node reports the data availability of an application as a call to one
-// of these functions; rollups-contracts dropped the `DataAvailability` library
-// in 3.0.0-alpha.7 (applications now advertise their input box directly), so
-// the ABI is kept here instead of being generated from the contracts
-const dataAvailabilityAbi = [
-    {
-        type: "function",
-        name: "InputBox",
-        inputs: [{ name: "inputBox", type: "address" }],
-        outputs: [],
-        stateMutability: "nonpayable",
-    },
-    {
-        type: "function",
-        name: "InputBoxAndEspresso",
-        inputs: [
-            { name: "inputBox", type: "address" },
-            { name: "fromBlock", type: "uint256" },
-            { name: "namespaceId", type: "uint32" },
-        ],
-        outputs: [],
-        stateMutability: "nonpayable",
-    },
-] as const;
-
-const parseDataAvailability = (data: Hex): DataAvailability => {
-    const { functionName, args } = decodeFunctionData({
-        abi: dataAvailabilityAbi,
-        data,
-    });
-    switch (functionName) {
-        case "InputBox": {
-            const [inputBoxAddress] = args;
-            return {
-                type: functionName,
-                inputBoxAddress,
-            };
-        }
-        case "InputBoxAndEspresso": {
-            const [inputBoxAddress, fromBlock, namespaceId] = args;
-            return {
-                type: functionName,
-                inputBoxAddress: getAddress(inputBoxAddress),
-                fromBlock,
-                namespaceId,
-            };
-        }
-    }
 };
 
 export const applicationConverter = (
@@ -125,7 +81,6 @@ export const applicationConverter = (
                 application.withdrawal_config.withdrawal_output_builder,
             ),
         },
-        dataAvailability: parseDataAvailability(application.data_availability),
         consensusType: application.consensus_type,
         status: application.status,
         enabled: application.enabled,
@@ -230,6 +185,50 @@ export const epochConverter = (epoch: EpochRpc): Epoch => {
     };
 };
 
+const tournamentCreationEventConverter = (
+    event: TournamentCreationEventRpc,
+): TournamentCreationEvent => {
+    return {
+        blockNumber: hexToBigInt(event.block_number),
+        txHash: event.tx_hash,
+        logIndex: hexToBigInt(event.log_index),
+    };
+};
+
+const tournamentSnapshotConverter = (
+    snapshot: TournamentSnapshotRpc,
+): TournamentSnapshot => {
+    return {
+        asOfBlock: hexToBigInt(snapshot.as_of_block),
+        standing: snapshot.standing,
+        acceptsJoins: snapshot.accepts_joins,
+        candidate: snapshot.candidate,
+        winnerCommitment: snapshot.winner_commitment,
+        finalStateHash: snapshot.final_state_hash,
+        parentCommitment: snapshot.parent_commitment,
+        finishedAtBlock: hexToBigInt(snapshot.finished_at_block),
+        winnerExpiresAt: hexToBigInt(snapshot.winner_expires_at),
+        innerResult: snapshot.inner_result
+            ? {
+                  disposition: snapshot.inner_result.disposition,
+                  parentCommitment: snapshot.inner_result.parent_commitment,
+                  pausedAllowance: hexToBigInt(
+                      snapshot.inner_result.paused_allowance,
+                  ),
+              }
+            : null,
+        bondRecovery: {
+            disposition: snapshot.bond_recovery.disposition,
+            claimer: snapshot.bond_recovery.claimer
+                ? getAddress(snapshot.bond_recovery.claimer)
+                : null,
+            payment: snapshot.bond_recovery.payment
+                ? hexToBigInt(snapshot.bond_recovery.payment)
+                : null,
+        },
+    };
+};
+
 export const tournamentConverter = (tournament: TournamentRpc): Tournament => {
     return {
         epochIndex: hexToBigInt(tournament.epoch_index),
@@ -242,11 +241,29 @@ export const tournamentConverter = (tournament: TournamentRpc): Tournament => {
         level: hexToBigInt(tournament.level),
         log2step: hexToBigInt(tournament.log2step),
         height: hexToBigInt(tournament.height),
-        winnerCommitment: tournament.winner_commitment,
-        finalStateHash: tournament.final_state_hash,
-        finishedAtBlock: hexToBigInt(tournament.finished_at_block),
         createdAt: new Date(tournament.created_at),
         updatedAt: new Date(tournament.updated_at),
+        initialHash: tournament.initial_hash,
+        baseCycle: hexToBigInt(tournament.base_cycle),
+        kind: tournament.kind,
+        startInstant: hexToBigInt(tournament.start_instant),
+        allowance: hexToBigInt(tournament.allowance),
+        creationEvent: tournament.creation_event
+            ? tournamentCreationEventConverter(tournament.creation_event)
+            : null,
+        snapshot: tournamentSnapshotConverter(tournament.snapshot),
+    };
+};
+
+const commitmentSnapshotConverter = (
+    snapshot: CommitmentSnapshotRpc,
+): CommitmentSnapshot => {
+    return {
+        asOfBlock: hexToBigInt(snapshot.as_of_block),
+        claimer: getAddress(snapshot.claimer),
+        clockRunning: snapshot.clock_running,
+        clockDeadline: hexToBigInt(snapshot.clock_deadline),
+        clockAllowance: hexToBigInt(snapshot.clock_allowance),
     };
 };
 
@@ -261,7 +278,91 @@ export const commitmentConverter = (commitment: CommitmentRpc): Commitment => {
         txHash: commitment.tx_hash,
         createdAt: new Date(commitment.created_at),
         updatedAt: new Date(commitment.updated_at),
+        logIndex: hexToBigInt(commitment.log_index),
+        snapshot: commitmentSnapshotConverter(commitment.snapshot),
     };
+};
+
+const leafMatchSealConverter = (seal: LeafMatchSealRpc): LeafMatchSeal => {
+    return {
+        eliminableAt: hexToBigInt(seal.eliminable_at),
+        blockNumber: hexToBigInt(seal.block_number),
+        txHash: seal.tx_hash,
+        logIndex: hexToBigInt(seal.log_index),
+    };
+};
+
+// the phase-specific halves of a match snapshot are narrowed by `phase`, so the
+// fields every phase shares are converted once and the arms add their own
+const matchBisectionBaseConverter = (bisection: MatchBisectionSnapshotRpc) => {
+    return {
+        revealingParent: bisection.revealing_parent,
+        waitingLeft: bisection.waiting_left,
+        waitingRight: bisection.waiting_right,
+        segmentStartPosition: hexToBigInt(bisection.segment_start_position),
+        segmentStartCycle: hexToBigInt(bisection.segment_start_cycle),
+        responder: bisection.responder,
+    };
+};
+
+const matchSnapshotConverter = (snapshot: MatchSnapshotRpc): MatchSnapshot => {
+    const common = {
+        asOfBlock: hexToBigInt(snapshot.as_of_block),
+        timeoutOutcome: snapshot.timeout_outcome,
+        deferredCharge: hexToBigInt(snapshot.deferred_charge),
+    };
+    switch (snapshot.phase) {
+        case "UNINITIALIZED": {
+            return {
+                ...common,
+                phase: snapshot.phase,
+                bisection: null,
+                sealed: null,
+            };
+        }
+        case "BISECTING": {
+            return {
+                ...common,
+                phase: snapshot.phase,
+                bisection: {
+                    ...matchBisectionBaseConverter(snapshot.bisection),
+                    currentHeight: hexToBigInt(
+                        snapshot.bisection.current_height,
+                    ),
+                },
+                sealed: null,
+            };
+        }
+        case "READY_TO_SEAL": {
+            return {
+                ...common,
+                phase: snapshot.phase,
+                bisection: {
+                    ...matchBisectionBaseConverter(snapshot.bisection),
+                    currentHeight: null,
+                },
+                sealed: null,
+            };
+        }
+        case "SEALED": {
+            return {
+                ...common,
+                phase: snapshot.phase,
+                bisection: null,
+                sealed: {
+                    agreeState: snapshot.sealed.agree_state,
+                    divergencePosition: hexToBigInt(
+                        snapshot.sealed.divergence_position,
+                    ),
+                    divergenceCycle: hexToBigInt(
+                        snapshot.sealed.divergence_cycle,
+                    ),
+                    finalStateOne: snapshot.sealed.final_state_one,
+                    finalStateTwo: snapshot.sealed.final_state_two,
+                },
+            };
+        }
+    }
 };
 
 export const matchConverter = (match: MatchRpc): Match => {
@@ -282,6 +383,15 @@ export const matchConverter = (match: MatchRpc): Match => {
         deletionTxHash: match.deletion_tx_hash,
         createdAt: new Date(match.created_at),
         updatedAt: new Date(match.updated_at),
+        logIndex: hexToBigInt(match.log_index),
+        eliminableAt: hexToBigInt(match.eliminable_at),
+        leafSeal: match.leaf_seal
+            ? leafMatchSealConverter(match.leaf_seal)
+            : null,
+        deletionLogIndex: match.deletion_log_index
+            ? hexToBigInt(match.deletion_log_index)
+            : null,
+        snapshot: matchSnapshotConverter(match.snapshot),
     };
 };
 
@@ -298,7 +408,49 @@ export const matchAdvancedConverter = (
         txHash: matchAdvanced.tx_hash,
         createdAt: new Date(matchAdvanced.created_at),
         updatedAt: new Date(matchAdvanced.updated_at),
+        logIndex: hexToBigInt(matchAdvanced.log_index),
+        segmentStartPosition: hexToBigInt(matchAdvanced.segment_start_position),
+        eliminableAt: hexToBigInt(matchAdvanced.eliminable_at),
     };
+};
+
+export const bondEventConverter = (bondEvent: BondEventRpc): BondEvent => {
+    const common = {
+        epochIndex: hexToBigInt(bondEvent.epoch_index),
+        tournamentAddress: getAddress(bondEvent.tournament_address),
+        blockNumber: hexToBigInt(bondEvent.block_number),
+        txHash: bondEvent.tx_hash,
+        logIndex: hexToBigInt(bondEvent.log_index),
+        createdAt: new Date(bondEvent.created_at),
+        updatedAt: new Date(bondEvent.updated_at),
+    };
+    switch (bondEvent.type) {
+        case "PARTIAL_BOND_REFUND": {
+            return {
+                ...common,
+                type: bondEvent.type,
+                refund: {
+                    recipient: getAddress(bondEvent.refund.recipient),
+                    value: hexToBigInt(bondEvent.refund.value),
+                    success: bondEvent.refund.success,
+                },
+                recovery: null,
+            };
+        }
+        case "BOND_RECOVERED": {
+            return {
+                ...common,
+                type: bondEvent.type,
+                refund: null,
+                recovery: {
+                    commitment: bondEvent.recovery.commitment,
+                    claimer: getAddress(bondEvent.recovery.claimer),
+                    payment: hexToBigInt(bondEvent.recovery.payment),
+                    burned: hexToBigInt(bondEvent.recovery.burned),
+                },
+            };
+        }
+    }
 };
 
 export const inputConverter = (input: InputRpc): Input => {

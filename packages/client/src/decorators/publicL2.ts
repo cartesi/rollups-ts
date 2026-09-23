@@ -1,6 +1,8 @@
 import type {
     GetApplicationParams as GetApplicationParamsRpc,
     GetApplicationReturnType as GetApplicationReturnTypeRpc,
+    GetBondEventParams as GetBondEventParamsRpc,
+    GetBondEventReturnType as GetBondEventReturnTypeRpc,
     GetChainIdReturnType as GetChainIdReturnTypeRpc,
     GetCommitmentParams as GetCommitmentParamsRpc,
     GetCommitmentReturnType as GetCommitmentReturnTypeRpc,
@@ -34,6 +36,8 @@ import type {
     GetWithdrawalReturnType as GetWithdrawalReturnTypeRpc,
     ListApplicationsParams as ListApplicationsParamsRpc,
     ListApplicationsReturnType as ListApplicationsReturnTypeRpc,
+    ListBondEventsParams as ListBondEventsParamsRpc,
+    ListBondEventsReturnType as ListBondEventsReturnTypeRpc,
     ListCommitmentsParams as ListCommitmentsParamsRpc,
     ListCommitmentsReturnType as ListCommitmentsReturnTypeRpc,
     ListEpochsParams as ListEpochsParamsRpc,
@@ -57,6 +61,7 @@ import type { Client, Transport } from "viem";
 
 import {
     getApplication,
+    getBondEvent,
     getChainId,
     getCommitment,
     getEpoch,
@@ -75,6 +80,7 @@ import {
     getTournament,
     getWithdrawal,
     listApplications,
+    listBondEvents,
     listCommitments,
     listEpochs,
     listInputs,
@@ -89,6 +95,8 @@ import {
 import type {
     GetApplicationParams,
     GetApplicationReturnType,
+    GetBondEventParams,
+    GetBondEventReturnType,
     GetChainIdReturnType,
     GetCommitmentParams,
     GetCommitmentReturnType,
@@ -122,6 +130,8 @@ import type {
     GetWithdrawalReturnType,
     ListApplicationsParams,
     ListApplicationsReturnType,
+    ListBondEventsParams,
+    ListBondEventsReturnType,
     ListCommitmentsParams,
     ListCommitmentsReturnType,
     ListEpochsParams,
@@ -209,6 +219,16 @@ export type PublicCartesiRpcSchema = [
         Method: "cartesi_getMatchAdvance";
         Parameters: GetMatchAdvanceParamsRpc;
         ReturnType: GetMatchAdvanceReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_listBondEvents";
+        Parameters: ListBondEventsParamsRpc;
+        ReturnType: ListBondEventsReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_getBondEvent";
+        Parameters: GetBondEventParamsRpc;
+        ReturnType: GetBondEventReturnTypeRpc;
     },
     {
         Method: "cartesi_getLastAcceptedEpochIndex";
@@ -299,6 +319,9 @@ export type PublicActionsL2 = {
     listMatchAdvances: (
         params: ListMatchAdvancesParams,
     ) => Promise<ListMatchAdvancesReturnType>;
+    listBondEvents: (
+        params: ListBondEventsParams,
+    ) => Promise<ListBondEventsReturnType>;
     listInputs: (params: ListInputsParams) => Promise<ListInputsReturnType>;
     listOutputs: (params: ListOutputsParams) => Promise<ListOutputsReturnType>;
     listReports: (params: ListReportsParams) => Promise<ListReportsReturnType>;
@@ -325,6 +348,9 @@ export type PublicActionsL2 = {
     getMatchAdvance: (
         params: GetMatchAdvanceParams,
     ) => Promise<GetMatchAdvanceReturnType>;
+    getBondEvent: (
+        params: GetBondEventParams,
+    ) => Promise<GetBondEventReturnType>;
     /** @deprecated use `getNodeInfo` instead. */
     getNodeVersion: () => Promise<GetNodeVersionReturnType>;
     getInput: (params: GetInputParams) => Promise<GetInputReturnType>;
@@ -375,6 +401,8 @@ export const publicActionsL2 =
         getMatch: (params) => getMatch(client, params),
         listMatchAdvances: (params) => listMatchAdvances(client, params),
         getMatchAdvance: (params) => getMatchAdvance(client, params),
+        listBondEvents: (params) => listBondEvents(client, params),
+        getBondEvent: (params) => getBondEvent(client, params),
         getNodeInfo: () => getNodeInfo(client),
         getChainId: () => getChainId(client),
         getNodeVersion: () => getNodeVersion(client),

@@ -1,23 +1,143 @@
 import type {
     Application,
+    BondEvent,
+    Commitment,
     Epoch,
     Input,
+    MatchAdvanced,
+    Match as MatchRpc,
+    MatchSnapshot,
     NodeInfo,
     Output,
     Report,
+    Tournament,
     Withdrawal,
 } from "@cartesi/rpc";
 import { getAddress, hexToBigInt } from "viem";
 import { describe, expect, it } from "vitest";
 import {
     applicationConverter,
+    bondEventConverter,
+    commitmentConverter,
     epochConverter,
     inputConverter,
+    matchAdvancedConverter,
+    matchConverter,
     nodeInfoConverter,
     outputConverter,
     reportConverter,
+    tournamentConverter,
     withdrawalConverter,
 } from "../src/types/converter.js";
+
+// a readable stand-in for the 32-byte hashes the PRT types are full of
+const hash = (byte: string): `0x${string}` => `0x${byte.repeat(32)}`;
+
+const baseTournament: Tournament = {
+    epoch_index: "0x2",
+    address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+    parent_tournament_address: null,
+    parent_match_id_hash: null,
+    max_level: "0x3",
+    level: "0x0",
+    log2step: "0x1f",
+    height: "0x40",
+    created_at: "2025-04-10T03:23:27.450183Z",
+    updated_at: "2025-04-10T04:03:28.755635Z",
+    initial_hash: hash("bb"),
+    base_cycle: "0x0",
+    kind: "NON_LEAF",
+    start_instant: "0x64",
+    allowance: "0x1c20",
+    creation_event: null,
+    snapshot: {
+        as_of_block: "0xc8",
+        standing: "MATCHES_ACTIVE",
+        accepts_joins: true,
+        candidate: null,
+        winner_commitment: null,
+        final_state_hash: null,
+        parent_commitment: null,
+        finished_at_block: "0x0",
+        winner_expires_at: "0x0",
+        inner_result: null,
+        bond_recovery: {
+            disposition: "TOURNAMENT_RUNNING",
+            claimer: null,
+            payment: null,
+        },
+    },
+};
+
+const bisection = {
+    revealing_parent: hash("ff"),
+    waiting_left: hash("a1"),
+    waiting_right: hash("a2"),
+    segment_start_position: "0x0",
+    segment_start_cycle: "0x0",
+    responder: "ONE",
+} as const;
+
+const snapshotOfPhase = (phase: MatchSnapshot["phase"]): MatchSnapshot => {
+    const common = {
+        as_of_block: "0xc8",
+        timeout_outcome: "NONE",
+        deferred_charge: "0x0",
+    } as const;
+    switch (phase) {
+        case "UNINITIALIZED":
+            return { ...common, phase, bisection: null, sealed: null };
+        case "BISECTING":
+            return {
+                ...common,
+                phase,
+                bisection: { ...bisection, current_height: "0x3f" },
+                sealed: null,
+            };
+        case "READY_TO_SEAL":
+            return {
+                ...common,
+                phase,
+                bisection: { ...bisection, current_height: null },
+                sealed: null,
+            };
+        case "SEALED":
+            return {
+                ...common,
+                phase,
+                bisection: null,
+                sealed: {
+                    agree_state: hash("b1"),
+                    divergence_position: "0x10",
+                    divergence_cycle: "0x20",
+                    final_state_one: hash("b2"),
+                    final_state_two: hash("b3"),
+                },
+            };
+    }
+};
+
+const baseMatch: MatchRpc = {
+    epoch_index: "0x2",
+    tournament_address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+    id_hash: hash("aa"),
+    commitment_one: hash("bb"),
+    commitment_two: hash("cc"),
+    left_of_two: hash("dd"),
+    block_number: "0x64",
+    tx_hash: hash("ee"),
+    winner_commitment: "NONE",
+    deletion_reason: "NOT_DELETED",
+    deletion_block_number: null,
+    deletion_tx_hash: null,
+    created_at: "2025-04-10T03:23:27.450183Z",
+    updated_at: "2025-04-10T04:03:28.755635Z",
+    log_index: "0x0",
+    eliminable_at: "0x1f4",
+    leaf_seal: null,
+    deletion_log_index: null,
+    snapshot: snapshotOfPhase("BISECTING"),
+};
 
 describe("converter", () => {
     it("should convert the application", () => {
@@ -28,8 +148,6 @@ describe("converter", () => {
             iinputbox_address: "0xb6b39fb3dd926a9e3fbc7a129540eebea3016a6c",
             template_hash:
                 "0x3b57a86b635d433eb923dc86fa6f9832f15a88f89cfa7d8d45f568dbb6cf992e",
-            data_availability:
-                "0xb12c9ede0000000000000000000000001b51e2992a2755ba4d6f7094032df91991a0cfac",
             consensus_type: "AUTHORITY",
             status: "OK",
             enabled: true,
@@ -84,7 +202,7 @@ describe("converter", () => {
         const application = applicationConverter(rpcApplication);
 
         const properties = Object.keys(application);
-        expect(properties).toHaveLength(30);
+        expect(properties).toHaveLength(29);
         expect(properties.sort()).toEqual(
             [
                 "name",
@@ -103,7 +221,6 @@ describe("converter", () => {
                 "epochLength",
                 "claimStagingPeriod",
                 "withdrawalConfig",
-                "dataAvailability",
                 "consensusType",
                 "status",
                 "enabled",
@@ -163,10 +280,6 @@ describe("converter", () => {
         );
         expect(application.consensusAddress).toBe(
             getAddress(rpcApplication.iconsensus_address),
-        );
-        expect(application.dataAvailability.type).toBe("InputBox");
-        expect(application.dataAvailability.inputBoxAddress).toBe(
-            "0x1b51e2992A2755Ba4D6F7094032DF91991a0Cfac",
         );
         expect(application.epochLength).toBe(
             hexToBigInt(rpcApplication.epoch_length),
@@ -683,5 +796,347 @@ describe("converter", () => {
         expect(withdrawal.updatedAt).toStrictEqual(
             new Date(rpcWithdrawal.updated_at),
         );
+    });
+
+    it("should convert the tournament", () => {
+        const rpcTournament: Tournament = {
+            epoch_index: "0x2",
+            address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+            parent_tournament_address:
+                "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+            parent_match_id_hash: hash("aa"),
+            max_level: "0x3",
+            level: "0x1",
+            log2step: "0x1f",
+            height: "0x40",
+            created_at: "2025-04-10T03:23:27.450183Z",
+            updated_at: "2025-04-10T04:03:28.755635Z",
+            initial_hash: hash("bb"),
+            base_cycle: "0x2540be400",
+            kind: "NON_LEAF",
+            start_instant: "0x64",
+            allowance: "0x1c20",
+            creation_event: {
+                block_number: "0x64",
+                tx_hash: hash("cc"),
+                log_index: "0x0",
+            },
+            snapshot: {
+                as_of_block: "0xc8",
+                standing: "MATCHES_ACTIVE",
+                accepts_joins: true,
+                candidate: hash("dd"),
+                winner_commitment: null,
+                final_state_hash: null,
+                parent_commitment: null,
+                finished_at_block: "0x0",
+                winner_expires_at: "0x0",
+                inner_result: {
+                    disposition: "UNSETTLED",
+                    parent_commitment: null,
+                    paused_allowance: "0x1c20",
+                },
+                bond_recovery: {
+                    disposition: "TOURNAMENT_RUNNING",
+                    claimer: null,
+                    payment: null,
+                },
+            },
+        };
+
+        const tournament = tournamentConverter(rpcTournament);
+
+        expect(tournament).toStrictEqual({
+            epochIndex: 2n,
+            address: getAddress(rpcTournament.address),
+            parentTournamentAddress: getAddress(
+                "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+            ),
+            parentMatchIdHash: hash("aa"),
+            maxLevel: 3n,
+            level: 1n,
+            log2step: 31n,
+            height: 64n,
+            createdAt: new Date(rpcTournament.created_at),
+            updatedAt: new Date(rpcTournament.updated_at),
+            initialHash: hash("bb"),
+            baseCycle: 10000000000n,
+            kind: "NON_LEAF",
+            startInstant: 100n,
+            allowance: 7200n,
+            creationEvent: {
+                blockNumber: 100n,
+                txHash: hash("cc"),
+                logIndex: 0n,
+            },
+            snapshot: {
+                asOfBlock: 200n,
+                standing: "MATCHES_ACTIVE",
+                acceptsJoins: true,
+                candidate: hash("dd"),
+                winnerCommitment: null,
+                finalStateHash: null,
+                parentCommitment: null,
+                finishedAtBlock: 0n,
+                winnerExpiresAt: 0n,
+                innerResult: {
+                    disposition: "UNSETTLED",
+                    parentCommitment: null,
+                    pausedAllowance: 7200n,
+                },
+                bondRecovery: {
+                    disposition: "TOURNAMENT_RUNNING",
+                    claimer: null,
+                    payment: null,
+                },
+            },
+        });
+    });
+
+    // a recoverable bond carries a claimer and a payment, and a zero payment is
+    // a value rather than an absence
+    it("should keep a zero recoverable bond payment", () => {
+        const tournament = tournamentConverter({
+            ...baseTournament,
+            snapshot: {
+                ...baseTournament.snapshot,
+                standing: "ROOT_WINNER",
+                bond_recovery: {
+                    disposition: "RECOVERABLE",
+                    claimer: "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+                    payment: "0x0",
+                },
+            },
+        });
+
+        expect(tournament.snapshot.bondRecovery).toStrictEqual({
+            disposition: "RECOVERABLE",
+            claimer: getAddress("0x92cc14432c1f82622493abd64d99ea8a3000a7c7"),
+            payment: 0n,
+        });
+    });
+
+    it("should convert the commitment", () => {
+        const rpcCommitment: Commitment = {
+            epoch_index: "0x2",
+            tournament_address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+            commitment: hash("aa"),
+            final_state_hash: hash("bb"),
+            submitter_address: "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+            block_number: "0x64",
+            tx_hash: hash("cc"),
+            created_at: "2025-04-10T03:23:27.450183Z",
+            updated_at: "2025-04-10T04:03:28.755635Z",
+            log_index: "0x0",
+            snapshot: {
+                as_of_block: "0xc8",
+                claimer: "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+                clock_running: true,
+                clock_deadline: "0xfa",
+                clock_allowance: "0x0",
+            },
+        };
+
+        const commitment = commitmentConverter(rpcCommitment);
+
+        expect(commitment).toStrictEqual({
+            epochIndex: 2n,
+            tournamentAddress: getAddress(rpcCommitment.tournament_address),
+            commitment: hash("aa"),
+            finalStateHash: hash("bb"),
+            submitterAddress: getAddress(
+                "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+            ),
+            blockNumber: 100n,
+            txHash: hash("cc"),
+            createdAt: new Date(rpcCommitment.created_at),
+            updatedAt: new Date(rpcCommitment.updated_at),
+            logIndex: 0n,
+            snapshot: {
+                asOfBlock: 200n,
+                claimer: getAddress(
+                    "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+                ),
+                clockRunning: true,
+                clockDeadline: 250n,
+                clockAllowance: 0n,
+            },
+        });
+    });
+
+    it("should convert the match", () => {
+        const match = matchConverter(baseMatch);
+
+        expect(match).toStrictEqual({
+            epochIndex: 2n,
+            tournamentAddress: getAddress(baseMatch.tournament_address),
+            idHash: hash("aa"),
+            commitmentOne: hash("bb"),
+            commitmentTwo: hash("cc"),
+            leftOfTwo: hash("dd"),
+            blockNumber: 100n,
+            txHash: hash("ee"),
+            winnerCommitment: "NONE",
+            deletionReason: "NOT_DELETED",
+            deletionBlockNumber: null,
+            deletionTxHash: null,
+            createdAt: new Date(baseMatch.created_at),
+            updatedAt: new Date(baseMatch.updated_at),
+            logIndex: 0n,
+            eliminableAt: 500n,
+            leafSeal: null,
+            deletionLogIndex: null,
+            snapshot: {
+                asOfBlock: 200n,
+                phase: "BISECTING",
+                bisection: {
+                    revealingParent: hash("ff"),
+                    waitingLeft: hash("a1"),
+                    waitingRight: hash("a2"),
+                    segmentStartPosition: 0n,
+                    segmentStartCycle: 0n,
+                    currentHeight: 63n,
+                    responder: "ONE",
+                },
+                sealed: null,
+                timeoutOutcome: "NONE",
+                deferredCharge: 0n,
+            },
+        });
+    });
+
+    // every phase of a match snapshot carries exactly one payload, and a deleted
+    // match carries neither while keeping its deletion facts on the match
+    it.each([
+        ["UNINITIALIZED", false, false],
+        ["BISECTING", true, false],
+        ["READY_TO_SEAL", true, false],
+        ["SEALED", false, true],
+    ] as const)(
+        "should convert a %s match snapshot",
+        (phase, hasBisection, hasSealed) => {
+            const match = matchConverter({
+                ...baseMatch,
+                snapshot: snapshotOfPhase(phase),
+            });
+
+            expect(match.snapshot.phase).toBe(phase);
+            expect(match.snapshot.bisection !== null).toBe(hasBisection);
+            expect(match.snapshot.sealed !== null).toBe(hasSealed);
+        },
+    );
+
+    it("should leave the current height of a sealable match null", () => {
+        const match = matchConverter({
+            ...baseMatch,
+            snapshot: snapshotOfPhase("READY_TO_SEAL"),
+        });
+
+        expect(match.snapshot.bisection?.currentHeight).toBeNull();
+    });
+
+    it("should convert the match advance", () => {
+        const rpcMatchAdvanced: MatchAdvanced = {
+            epoch_index: "0x2",
+            tournament_address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+            id_hash: hash("aa"),
+            other_parent: hash("bb"),
+            left_node: hash("cc"),
+            block_number: "0x64",
+            tx_hash: hash("dd"),
+            created_at: "2025-04-10T03:23:27.450183Z",
+            updated_at: "2025-04-10T04:03:28.755635Z",
+            log_index: "0x0",
+            segment_start_position: "0x0",
+            eliminable_at: "0x1f4",
+        };
+
+        const matchAdvanced = matchAdvancedConverter(rpcMatchAdvanced);
+
+        expect(matchAdvanced).toStrictEqual({
+            epochIndex: 2n,
+            tournamentAddress: getAddress(rpcMatchAdvanced.tournament_address),
+            idHash: hash("aa"),
+            otherParent: hash("bb"),
+            leftNode: hash("cc"),
+            blockNumber: 100n,
+            txHash: hash("dd"),
+            createdAt: new Date(rpcMatchAdvanced.created_at),
+            updatedAt: new Date(rpcMatchAdvanced.updated_at),
+            logIndex: 0n,
+            segmentStartPosition: 0n,
+            eliminableAt: 500n,
+        });
+    });
+
+    it("should convert a partial bond refund event", () => {
+        const rpcBondEvent: BondEvent = {
+            epoch_index: "0x2",
+            tournament_address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+            block_number: "0x64",
+            tx_hash: hash("aa"),
+            log_index: "0x0",
+            created_at: "2025-04-10T03:23:27.450183Z",
+            updated_at: "2025-04-10T04:03:28.755635Z",
+            type: "PARTIAL_BOND_REFUND",
+            refund: {
+                recipient: "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+                value: "0xde0b6b3a7640000",
+                success: false,
+            },
+            recovery: null,
+        };
+
+        const bondEvent = bondEventConverter(rpcBondEvent);
+
+        expect(bondEvent).toStrictEqual({
+            epochIndex: 2n,
+            tournamentAddress: getAddress(rpcBondEvent.tournament_address),
+            blockNumber: 100n,
+            txHash: hash("aa"),
+            logIndex: 0n,
+            createdAt: new Date(rpcBondEvent.created_at),
+            updatedAt: new Date(rpcBondEvent.updated_at),
+            type: "PARTIAL_BOND_REFUND",
+            refund: {
+                recipient: getAddress(
+                    "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+                ),
+                // the requested value, which a failed refund did not pay
+                value: 1000000000000000000n,
+                success: false,
+            },
+            recovery: null,
+        });
+    });
+
+    it("should convert a bond recovery event", () => {
+        const rpcBondEvent: BondEvent = {
+            epoch_index: "0x2",
+            tournament_address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+            block_number: "0x64",
+            tx_hash: hash("aa"),
+            log_index: "0x1",
+            created_at: "2025-04-10T03:23:27.450183Z",
+            updated_at: "2025-04-10T04:03:28.755635Z",
+            type: "BOND_RECOVERED",
+            refund: null,
+            recovery: {
+                commitment: hash("bb"),
+                claimer: "0x92cc14432c1f82622493abd64d99ea8a3000a7c7",
+                payment: "0xde0b6b3a7640000",
+                burned: "0x0",
+            },
+        };
+
+        const bondEvent = bondEventConverter(rpcBondEvent);
+
+        expect(bondEvent.refund).toBeNull();
+        expect(bondEvent.recovery).toStrictEqual({
+            commitment: hash("bb"),
+            claimer: getAddress("0x92cc14432c1f82622493abd64d99ea8a3000a7c7"),
+            payment: 1000000000000000000n,
+            burned: 0n,
+        });
     });
 });
