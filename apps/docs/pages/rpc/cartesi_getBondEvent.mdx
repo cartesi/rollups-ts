@@ -1,0 +1,21 @@
+# cartesi_getBondEvent
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data: bondEvent } = await client.request("cartesi_getBondEvent", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    tx_hash: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    log_index: "0x0",
+});
+```
+
+Both keys come from `cartesi_listBondEvents`. A log index of zero is valid.
+
+## Return Type
+
+```ts twoslash
+import { type BondEvent } from "@cartesi/rpc";
+```

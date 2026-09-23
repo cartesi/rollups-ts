@@ -1,0 +1,38 @@
+# getBondEvent
+
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const bondEvent = await publicClientL2.getBondEvent({
+  application: "0x...",
+  txHash: "0x...",
+  logIndex: 0n,
+});
+```
+
+Both keys come from `listBondEvents`. A log index of zero is valid.
+
+## Parameters
+
+```ts twoslash
+import type { GetBondEventParams } from "@cartesi/client";
+// {
+//   application: Address | string;
+//   txHash: Hash;
+//   logIndex: bigint;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetBondEventReturnType, BondEvent } from "@cartesi/client";
+// GetBondEventReturnType = BondEvent;
+```

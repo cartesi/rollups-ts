@@ -10,9 +10,15 @@ const { data: matchAdvanced } = await client.request("cartesi_getMatchAdvance", 
     epoch_index: "0x2A",
     tournament_address: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
     id_hash: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
-    parent: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    tx_hash: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    log_index: "0x0",
 });
 ```
+
+An advance is keyed by the transaction hash and block-global log index of its
+event, both of which `cartesi_listMatchAdvances` returns: repeated other-parent
+hashes stay distinct events, so the parent hash alone does not identify one. A
+log index of zero is valid.
 
 ## Return Type
 

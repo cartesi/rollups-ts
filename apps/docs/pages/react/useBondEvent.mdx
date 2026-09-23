@@ -1,0 +1,29 @@
+# useBondEvent
+
+## Usage
+
+```tsx twoslash
+import { useBondEvent } from "@cartesi/react";
+
+function Example() {
+  const { data, isLoading } = useBondEvent({
+    application: "0x...",
+    txHash: "0x...",
+    logIndex: 0n,
+  });
+  // render logic
+}
+```
+
+Both keys come from `useBondEvents`. A log index of zero is valid.
+
+## Return Type
+
+The `data` is a `BondEvent`:
+
+```ts twoslash
+import {
+  type BondEvent,
+  type GetBondEventReturnType,
+} from "@cartesi/client";
+```

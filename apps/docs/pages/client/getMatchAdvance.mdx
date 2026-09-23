@@ -15,9 +15,15 @@ const matchAdvance = await publicClientL2.getMatchAdvance({
   epochIndex: 1n,
   tournamentAddress: "0x...",
   idHash: "0x...",
-  parent: "0x...",
+  txHash: "0x...",
+  logIndex: 0n,
 });
 ```
+
+An advance is keyed by the transaction hash and block-global log index of its
+event, both of which `listMatchAdvances` returns: repeated other-parent hashes
+stay distinct events, so the parent hash alone does not identify one. A log
+index of zero is valid.
 
 ## Parameters
 
@@ -28,7 +34,8 @@ import type { GetMatchAdvanceParams } from "@cartesi/client";
 //   epochIndex: bigint;
 //   tournamentAddress: Address;
 //   idHash: Hash;
-//   parent: Hash;
+//   txHash: Hash;
+//   logIndex: bigint;
 // }
 ```
 
