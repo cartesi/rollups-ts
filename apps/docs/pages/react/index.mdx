@@ -66,3 +66,49 @@ function Home() {
   )
 }
 ```
+
+## Contract hooks
+
+Besides the node hooks, `@cartesi/react` re-exports generated [wagmi](https://wagmi.sh) hooks for every Cartesi contract, including the PRT ones.
+
+A commitment's bond becomes claimable once its tournament is finished. `tryRecoveringBond` takes no arguments and is not restricted, so any connected account can send it — read the tournament's `snapshot.bondRecovery` to find out whether there is anything to claim.
+
+```tsx
+import {
+  useSimulateTournamentTryRecoveringBond,
+  useTournament,
+  useWriteTournamentTryRecoveringBond,
+} from "@cartesi/react";
+import type { Address } from "viem";
+
+function RecoverBond({
+  application,
+  address,
+}: {
+  application: Address;
+  address: Address;
+}) {
+  const { data: tournament } = useTournament({ application, address });
+  const recoverable =
+    tournament?.snapshot.bondRecovery.disposition === "RECOVERABLE";
+
+  const { data: simulation } = useSimulateTournamentTryRecoveringBond({
+    address,
+    query: { enabled: recoverable },
+  });
+  const { writeContract, isPending } = useWriteTournamentTryRecoveringBond();
+
+  return (
+    <button
+      disabled={!simulation || isPending}
+      onClick={() => simulation && writeContract(simulation.request)}
+    >
+      Recover bond
+    </button>
+  );
+}
+```
+
+The snapshot was read at `tournament.snapshot.asOfBlock` rather than at the block the transaction lands in, so treat it as a reason to try rather than a guarantee.
+
+`daveAppFactory` and `multiLevelTournamentFactory` are deployed once per chain, because the tournament parameters depend on the chain's block time, so their hooks resolve the address from the connected chain or from a `chainId` you pass. The eight public chains and the devnet (31337) are covered; dave publishes nothing for cannon (13370).
