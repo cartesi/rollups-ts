@@ -18,13 +18,12 @@ COPY . .
 
 RUN make -C deps/machine-guest-tools/sys-utils/libcmt libcmt TOOLCHAIN_PREFIX=riscv64-linux-gnu-
 
-# The devDependencies use pnpm's `catalog:` protocol, which npm cannot resolve,
-# and none of them is needed to cross-compile the addon: drop them and install
-# the runtime dependencies (node-addon-api supplies binding.gyp's include_dir)
-# plus the prebuild toolchain.
-RUN node -e "const fs=require('node:fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));delete p.devDependencies;delete p.scripts;fs.writeFileSync('package.json',JSON.stringify(p))" \
-    && npm install --ignore-scripts \
-    && npm install --ignore-scripts --no-save prebuildify@^6.0.1 node-gyp@^13.0.0
+# The dependencies use pnpm's `catalog:` protocol, which npm cannot resolve
+# (and the catalog lives in the workspace root, outside this build context):
+# drop them and install just what cross-compiling the addon needs,
+# node-addon-api (binding.gyp's include_dir) plus the prebuild toolchain.
+RUN node -e "const fs=require('node:fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));delete p.dependencies;delete p.devDependencies;delete p.scripts;fs.writeFileSync('package.json',JSON.stringify(p))" \
+    && npm install --ignore-scripts --no-save node-addon-api@^8.9.2 prebuildify@^6.0.1 node-gyp@^13.0.2
 
 ENV CC=riscv64-linux-gnu-gcc \
     CXX=riscv64-linux-gnu-g++ \
