@@ -52,7 +52,7 @@ export const DEFAULT_ANVIL: TarballSource = {
  * dave version used by default when `artifacts`, `deployments` and `anvil`
  * are omitted from the `prt` option of `rollupsContracts`.
  */
-export const PRT_DEFAULT_VERSION = "3.0.0-alpha.4";
+export const PRT_DEFAULT_VERSION = "3.0.0-alpha.5";
 
 const prtDefaultReleaseUrl = `https://github.com/cartesi/dave/releases/download/v${PRT_DEFAULT_VERSION}`;
 
@@ -62,7 +62,7 @@ const prtDefaultReleaseUrl = `https://github.com/cartesi/dave/releases/download/
  */
 export const PRT_DEFAULT_ARTIFACTS: TarballSource = {
     url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-contract-artifacts.tar.gz`,
-    sha256: "622964166b4049b556dc20b26ef2b9a5e8621a2ad3e1f43eee0b802a085244b3",
+    sha256: "10673f0d8cf83988e172b1b4baebb9c74a0dda0d6b3f77c89950638b63dae4ee",
 };
 
 /**
@@ -71,7 +71,7 @@ export const PRT_DEFAULT_ARTIFACTS: TarballSource = {
  */
 export const PRT_DEFAULT_DEPLOYMENTS: TarballSource = {
     url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-deployment-addresses.tar.gz`,
-    sha256: "24bbd3df188952ad0abb1b1d3bc1d5da8e832da3e15286bf552abba9db60f1e8",
+    sha256: "435c11b8d6c6cfe864e4a3eb5c311ea02492cb976db757394f7da7084af90efa",
 };
 
 /**
@@ -90,7 +90,7 @@ export const PRT_DEFAULT_ANVIL_VERSION = "1.5.1";
  */
 export const PRT_DEFAULT_ANVIL: TarballSource = {
     url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-anvil-${PRT_DEFAULT_ANVIL_VERSION}.tar.gz`,
-    sha256: "ed10a8077113c426a298bb3592ca3725c31aad0828c7e7853b655593db2cd006",
+    sha256: "7e6b6a402b5e384fd6aa56387726cf4cc08783b6350b1c16a71a2e6ff454e583",
 };
 
 /**

@@ -33,7 +33,7 @@ So `prt` reads six tarballs:
 
 A handful of interfaces are built by both projects, and most addresses are published by both. Each is generated once, and the copies must agree: ABIs that differ, or an address the two releases disagree on, fail the generation rather than silently picking one.
 
-By default `prt: true` uses the dave `v3.0.0-alpha.4` release, which is deployed against the rollups-contracts `v3.0.0-alpha.10` release that `artifacts` defaults to. Overriding one without the other pairs releases that were not deployed together, and the address cross-check is what catches it:
+By default `prt: true` uses the dave `v3.0.0-alpha.5` release, which is deployed against the rollups-contracts `v3.0.0-alpha.10` release that `artifacts` defaults to. Overriding one without the other pairs releases that were not deployed together, and the address cross-check is what catches it:
 
 ```
 InputBox is deployed at conflicting addresses on chain 1: 0xD4CA… and 0x35Cd….
@@ -98,7 +98,7 @@ The `prt` option is either a boolean or an object of tarball sources. Every othe
 
 | Option | Type | Description |
 | --- | --- | --- |
-| `prt` | `boolean \| PrtOptions` | Generate a PRT deployment's contracts. `true` uses the dave `v3.0.0-alpha.4` release. Defaults to `false`. |
+| `prt` | `boolean \| PrtOptions` | Generate a PRT deployment's contracts. `true` uses the dave `v3.0.0-alpha.5` release. Defaults to `false`. |
 | `prt.artifacts` | `string \| { url: string; sha256?: string }` | Source of the dave contract artifacts tarball, hash-verified by default. |
 | `prt.deployments` | `string \| { url: string; sha256?: string }` | Source of the dave deployment addresses tarball, read alongside the rollups-contracts one and cross-checked against it. |
 | `prt.anvil` | `string \| { url, sha256? } \| false` | Source of the dave anvil devnet tarball, whose addresses cover chain 31337. `false` leaves dave's devnet out; `anvil: false` leaves the devnet out entirely. |
