@@ -176,6 +176,67 @@ await publicClient.readContract({
 });
 ```
 
+## Recovering a tournament bond
+
+Applications running under PRT settle disputes in tournaments. A commitment's bond becomes claimable once its tournament is finished, and `Tournament.tryRecoveringBond` takes no arguments and is not restricted, so any account can send it.
+
+Whether there is anything to claim is current contract state, which the node reports on the tournament's `snapshot`. `bondRecovery.disposition` is `RECOVERABLE` when a bond is waiting, and `claimer` and `payment` are filled in only then — a `payment` of zero is a real value, not an absence.
+
+```ts twoslash
+import { http } from "viem";
+import { createPublicClient, createWalletClient } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+import { tournamentAbi } from "@cartesi/client/abi";
+import { privateKeyToAccount } from "viem/accounts";
+import { mainnet } from "viem/chains";
+
+const account = privateKeyToAccount("0x...");
+const application = "0x...";
+
+const publicClient = createPublicClient({ chain: mainnet, transport: http() });
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+const walletClient = createWalletClient({
+  account,
+  chain: mainnet,
+  transport: http(),
+});
+
+const tournament = await publicClientL2.getTournament({
+  application,
+  address: "0x...",
+});
+
+if (tournament.snapshot.bondRecovery.disposition === "RECOVERABLE") {
+  const { request } = await publicClient.simulateContract({
+    abi: tournamentAbi,
+    address: tournament.address,
+    functionName: "tryRecoveringBond",
+    account,
+  });
+
+  const hash = await walletClient.writeContract(request);
+}
+```
+
+:::warning
+The snapshot was read at `tournament.snapshot.asOfBlock`, not at the block your transaction lands in, so treat it as a reason to try rather than a guarantee. `tryRecoveringBond` returns a `bool` and a failed terminal transfer emits no event, which is why the bond stays recoverable in the snapshot until it is actually paid out.
+:::
+
+## PRT contract addresses
+
+Most Cartesi contracts are deployed at the same address on every chain, so their exports are a single address. `DaveAppFactory` and `MultiLevelTournamentFactory` are not: dave deploys them per chain, because the tournament parameters depend on the chain's block time. Their address exports are records keyed by chain ID.
+
+```ts twoslash
+import { daveAppFactoryAddress } from "@cartesi/client/abi";
+import { mainnet } from "viem/chains";
+
+const factory = daveAppFactoryAddress[mainnet.id];
+```
+
+The records cover the eight public chains plus the devnet (31337). dave publishes no deployment for cannon (13370), so there is no entry for it.
+
 ## Estimating gas
 
 Gas estimation is done with viem's [estimateContractGas](https://viem.sh/docs/contract/estimateContractGas) action.
