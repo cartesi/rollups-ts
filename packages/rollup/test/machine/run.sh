@@ -53,8 +53,13 @@ if [ -z "${SKIP_ROOTFS:-}" ]; then
     CONTEXT="$WORK/context"
     rm -rf "$CONTEXT"
     mkdir -p "$CONTEXT/dapp"
-    TARBALL=$(npm pack --pack-destination "$WORK" | tail -1)
-    npm install --prefix "$CONTEXT/dapp" --ignore-scripts --omit=dev "$WORK/$TARBALL"
+    # pnpm, not npm, packs it: only pnpm rewrites the `catalog:` and
+    # `workspace:` specifiers in package.json, which npm cannot install
+    PACK="$WORK/pack"
+    rm -rf "$PACK"
+    mkdir -p "$PACK"
+    pnpm pack --pack-destination "$PACK" > /dev/null
+    npm install --prefix "$CONTEXT/dapp" --ignore-scripts --omit=dev "$PACK"/*.tgz
     cp test/machine/app.mjs "$CONTEXT/dapp/"
 
     # 4. build the riscv64 rootfs and convert it to ext2
