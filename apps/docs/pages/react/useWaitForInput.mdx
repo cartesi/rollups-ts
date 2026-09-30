@@ -27,5 +27,6 @@ The wait options are the ones [`waitForInput`](/client/waitForInput) takes.
 `waitProcessing` (default `true`) polls while the input is still `NONE`, and
 `rejectErrors` (default `false`) fails the query once the input reaches any
 terminal status other than `ACCEPTED` — `REJECTED`, `EXCEPTION`,
-`MACHINE_HALTED`, `OVERFLOW` or `UNEXPECTED_YIELD` — so the hook surfaces it
+`MACHINE_HALTED`, `OVERFLOW`, `UNEXPECTED_YIELD` or `INVALID_OUTPUTS_ROOT` — so
+the hook surfaces it
 through `error` rather than `data`.
