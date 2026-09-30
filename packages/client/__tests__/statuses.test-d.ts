@@ -26,6 +26,7 @@ describe("status unions", () => {
             | "MACHINE_HALTED"
             | "OVERFLOW"
             | "UNEXPECTED_YIELD"
+            | "INVALID_OUTPUTS_ROOT"
         >();
     });
 
@@ -39,6 +40,7 @@ describe("status unions", () => {
             | "MACHINE_HALTED"
             | "MCYCLE_OVERFLOW"
             | "UNEXPECTED_YIELD"
+            | "INVALID_OUTPUTS_ROOT"
         >();
     });
 });

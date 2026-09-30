@@ -686,7 +686,7 @@ describe("converter", () => {
         expect(input.exceptionData).toBe("0x6f6f7073");
     });
 
-    it.each(["OVERFLOW", "UNEXPECTED_YIELD"] as const)(
+    it.each(["OVERFLOW", "UNEXPECTED_YIELD", "INVALID_OUTPUTS_ROOT"] as const)(
         "should carry the %s terminal status",
         (status) => {
             const rpcInput: Input = {
