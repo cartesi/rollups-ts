@@ -82,7 +82,8 @@ export type InputStatus =
     | "EXCEPTION"
     | "MACHINE_HALTED"
     | "OVERFLOW"
-    | "UNEXPECTED_YIELD";
+    | "UNEXPECTED_YIELD"
+    | "INVALID_OUTPUTS_ROOT";
 
 export type ConsensusType = "AUTHORITY" | "QUORUM" | "PRT";
 
@@ -101,7 +102,8 @@ export type ApplicationStatus =
     | "GUEST_EXCEPTION"
     | "MACHINE_HALTED"
     | "MCYCLE_OVERFLOW"
-    | "UNEXPECTED_YIELD";
+    | "UNEXPECTED_YIELD"
+    | "INVALID_OUTPUTS_ROOT";
 
 export type SnapshotPolicy = "NONE" | "EVERY_INPUT" | "EVERY_EPOCH";
 
