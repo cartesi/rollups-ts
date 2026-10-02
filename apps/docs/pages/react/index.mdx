@@ -73,11 +73,13 @@ Besides the node hooks, `@cartesi/react` re-exports generated [wagmi](https://wa
 
 A commitment's bond becomes claimable once its tournament is finished. `tryRecoveringBond` takes no arguments and is not restricted, so any connected account can send it — read the tournament's `snapshot.bondRecovery` to find out whether there is anything to claim.
 
+A tournament is created per dispute by `MultiLevelTournamentFactory`, so it has no published address and the hooks take the one the node reports. They are the `ITournament` hooks, the interface a tournament is reached through.
+
 ```tsx
 import {
-  useSimulateTournamentTryRecoveringBond,
+  useSimulateITournamentTryRecoveringBond,
   useTournament,
-  useWriteTournamentTryRecoveringBond,
+  useWriteITournamentTryRecoveringBond,
 } from "@cartesi/react";
 import type { Address } from "viem";
 
@@ -92,11 +94,11 @@ function RecoverBond({
   const recoverable =
     tournament?.snapshot.bondRecovery.disposition === "RECOVERABLE";
 
-  const { data: simulation } = useSimulateTournamentTryRecoveringBond({
+  const { data: simulation } = useSimulateITournamentTryRecoveringBond({
     address,
     query: { enabled: recoverable },
   });
-  const { writeContract, isPending } = useWriteTournamentTryRecoveringBond();
+  const { writeContract, isPending } = useWriteITournamentTryRecoveringBond();
 
   return (
     <button

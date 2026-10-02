@@ -92,6 +92,14 @@ rollupsContracts({
 });
 ```
 
+`prtInternals` is the exclusion list `@cartesi/client` and `@cartesi/react` use, and a reasonable default if you do not want to curate your own: it drops the libraries and error-only ABIs, the generic plumbing, and the concrete `Tournament` and `DaveConsensus` in favour of `ITournament` and `IDaveConsensus`, which is how an application reaches a tournament the factory created.
+
+```ts [wagmi.config.ts]
+import { prtInternals, rollupsContracts } from "@cartesi/wagmi-plugin";
+
+rollupsContracts({ prt: true, exclude: prtInternals });
+```
+
 ## Options
 
 The `prt` option is either a boolean or an object of tarball sources. Every other option of [`rollupsContracts`](/wagmi-plugin#options) applies unchanged.
