@@ -1,5 +1,112 @@
 # @cartesi/react
 
+## 2.0.0-alpha.42
+
+### Patch Changes
+
+- e064d20: Carry the PRT and bond-event changes of `@cartesi/client` through the hooks.
+  
+  `useMatchAdvance` is the only existing hook whose own signature moved: it takes
+  `txHash` and `logIndex` where it took `parent`, and both are gated by `skipToken`
+  and stringified into the query key. Its params come from the records
+  `useMatchAdvances` returns, since repeated other-parent hashes stay distinct
+  events and the parent hash never identified one advance.
+  
+  Every other hook infers its result from the client action it wraps, so the new
+  shapes arrive on their own. What that means for consumers:
+  
+  - `useTournament` and `useTournaments` no longer expose `winnerCommitment`,
+    `finalStateHash` or `finishedAtBlock` at the top level. They are on
+    `snapshot`, together with the tournament's standing, candidate and bond
+    recovery, and what you read there is current contract state at
+    `snapshot.asOfBlock` rather than a settled result.
+  - `useCommitment`, `useCommitments`, `useMatch` and `useMatches` gain `logIndex`
+    and a `snapshot` of their own — the commitment's live claimer and clocks, the
+    match's phase payload.
+  - `useMatchAdvance` and `useMatchAdvances` gain `logIndex`,
+    `segmentStartPosition` and `eliminableAt`.
+  - `useApplication` and `useApplications` no longer expose `dataAvailability`;
+    the node stopped serving it.
+  - A match snapshot and a bond event are discriminated unions, so narrow on
+    `snapshot.phase` or `event.type` before reading `bisection`, `sealed`,
+    `refund` or `recovery`.
+  
+  `useBondEvents` and `useBondEvent` are new, wrapping the actions of the same
+  name.
+- 7988eca: Generate the PRT contract hooks.
+  
+  `wagmi.config.ts` now passes `prt: true`, so the generated hooks cover dave's
+  contracts alongside the core rollups ones. Nothing generated before changes;
+  this only adds.
+  
+  The pair worth naming is `useSimulateTournamentTryRecoveringBond` and
+  `useWriteTournamentTryRecoveringBond`. `tryRecoveringBond()` takes no arguments
+  and is `nonpayable`, so any account can claim a finished tournament's bond once
+  `tournament.snapshot.bondRecovery` reports `RECOVERABLE` — simulate at the
+  tournament's address, then write.
+  
+  `daveAppFactory` and `multiLevelTournamentFactory` are deployed per chain,
+  because the tournament parameters depend on the chain's block time, so their
+  generated hooks resolve the address from the connected chain or from a `chainId`
+  you pass. They cover the eight public chains plus the devnet (31337); dave
+  publishes nothing for cannon (13370), so a hook for those two has no address
+  there.
+- 0ca5694: bump dependencies
+- 22cb049: Carry the node JSON-RPC changes of `@cartesi/client` through the hooks.
+  
+  No hook changed: each one infers its result from the client action it wraps, so
+  the new shapes arrive on their own. What that means for consumers:
+  
+  - `useEpoch`, `useEpochByVirtualIndex` and `useEpochs` no longer expose
+    `outputsMerkleRoot`/`outputsMerkleProof`, and expose the new TX-buffer,
+    `iflags.Y` and HTIF `tohost` data blocks and proofs instead.
+  - `useInput`, `useInputs` and `useWaitForInput` expose `txBufferDataBlock`
+    where the data previously had `outputsHash` — a change of meaning, not just
+    a rename.
+  - The `InputStatus` and `ApplicationStatus` unions the data carries gained
+    members, so an exhaustive `switch` over either no longer compiles.
+  - `useWaitForInput` inherits the `rejectErrors` change: it now fails on any
+    status that is neither `NONE` nor `ACCEPTED`.
+- 944f08a: Stop generating the PRT contracts an application has no use for.
+  
+  Codegen now excludes `prtInternals`, the same list `@cartesi/client` excludes,
+  so the two packages agree on which contracts exist. This cuts the generated
+  output from 1745 exports to 1535 and the package's declaration file from
+  19.7 MB to 15.0 MB, which also brings the build back within the memory a 2 GB
+  Node heap allows.
+  
+  What this removes:
+  
+  - The `Tournament` hooks, ABI, address and config. Claim a bond through
+    `useWriteITournamentTryRecoveringBond` and
+    `useSimulateITournamentTryRecoveringBond`, passing the address of the
+    tournament: a tournament is created per dispute by
+    `MultiLevelTournamentFactory`, so the generated address was one devnet
+    instance, never the contract a consumer calls. `ITournament` declares the
+    same eight events and all but one of the functions: the ERC-165
+    `supportsInterface` probe is on the concrete contract only.
+  - The `DaveConsensus` hooks and ABI — likewise `IDaveConsensus`, with the
+    consensus address of the application.
+  - The `IOwnable` and `ERC165` hooks and ABIs, which are generic plumbing.
+  - Fourteen libraries and error-only ABIs with no functions and no events at
+    all, which generated an ABI and no hooks: `AddressErrors`,
+    `ApplicationChecker`, `IApplicationChecker`, `IApplicationFactoryErrors`,
+    `BinaryMerkleTreeErrors`, `Clones`, `Create2`, `Errors`,
+    `IRefundOutputBuilderErrors`, `ISentryErrors`,
+    `IWithdrawalOutputBuilderErrors`, `LibMath`, `MachineValidationErrors` and
+    `SafeCast`.
+  
+  Every other hook, ABI and address is unchanged, `daveAppFactory` and
+  `multiLevelTournamentFactory` included, as are all of the `publicL2` hooks.
+- Updated dependencies [2da4195]
+- Updated dependencies [8f3051f]
+- Updated dependencies [18d4e13]
+- Updated dependencies [0ca5694]
+- Updated dependencies [59aebb8]
+- Updated dependencies [662771d]
+- Updated dependencies [5eebdd0]
+  - @cartesi/client@2.0.0-alpha.38
+
 ## 2.0.0-alpha.41
 
 ### Major Changes

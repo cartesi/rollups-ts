@@ -1,5 +1,84 @@
 # @cartesi/rpc
 
+## 2.0.0-alpha.27
+
+### Patch Changes
+
+- 0ca5694: bump dependencies
+- 475a5cd: Track the terminal machine outcomes and state proofs the node added to its
+  JSON-RPC API.
+  
+  `Epoch` loses `outputs_merkle_root` and `outputs_merkle_proof` — the node no
+  longer serves the outputs Merkle root — and gains three data-block/proof pairs,
+  each proved against `machine_hash`: `tx_buffer_data_block`/`tx_buffer_proof`
+  for the CMIO TX buffer, `iflags_y_data_block`/`iflags_y_proof` for the
+  `iflags.Y` register, and `htif_tohost_data_block`/`htif_tohost_proof` for the
+  HTIF `tohost` register.
+  
+  `Input.outputs_hash` is now `tx_buffer_data_block`. This is a change of
+  meaning, not a rename: the field was a digest of the input's outputs and is now
+  the 32-byte CMIO TX-buffer memory block of the machine state the input
+  produced.
+  
+  `InputStatus` gains the terminal `OVERFLOW` and `UNEXPECTED_YIELD` — new
+  outcomes, not replacements for the resource-limit statuses the node removed
+  earlier. `ApplicationStatus` gains `GUEST_EXCEPTION`, `MACHINE_HALTED`,
+  `MCYCLE_OVERFLOW` and `UNEXPECTED_YIELD`. An exhaustive `switch` over either
+  union no longer compiles.
+  
+  `Application.reason` is non-null for every status but `OK`, where it was
+  previously documented as non-null only for `FAILED`, `DIVERGED` and
+  `CORRUPTED`. Foreclosure is still reported via `foreclose_block`, not via
+  `status`.
+- fa16494: Mirror the `INVALID_OUTPUTS_ROOT` status the node added.
+  
+  `InputStatus` and `ApplicationStatus` each gain `INVALID_OUTPUTS_ROOT`. The node
+  added it to both `InputCompletionStatus` and `ApplicationStatus` in its OpenRPC
+  specification and attached no description to either, so what it reports is the
+  node's to define; this package only mirrors that the member exists.
+  
+  Additive on the wire — an older client reading a node that reports it sees a
+  status it does not know rather than a malformed response. Breaking for a
+  consumer whose `switch` over either union is exhaustive, exactly as the earlier
+  additions to these unions were.
+- e233105: Track the PRT read-model changes the node made to its JSON-RPC API.
+  
+  `Tournament`, `Commitment` and `Match` stop being flat rows of event data and gain
+  a `snapshot`: current contract state, read at a stated `as_of_block`, beside the
+  immutable event fields. `Tournament` therefore loses `winner_commitment`,
+  `final_state_hash` and `finished_at_block` to `snapshot`, and what you read there
+  is the tournament as of that block rather than a settled historical result — an
+  expired inner candidate is still a candidate, and separate calls do not add up to
+  one snapshot. `Tournament` also gains `initial_hash`, `base_cycle`, `kind`,
+  `start_instant`, `allowance` and `creation_event`, which is null for a root.
+  
+  `Match` gains `eliminable_at`, `leaf_seal`, `deletion_log_index` and a
+  `MatchSnapshot` discriminated on `phase`; `Commitment` and `MatchAdvanced` gain
+  `log_index`, and `MatchAdvanced` also `segment_start_position` and its own
+  `eliminable_at`. `commitment_one`, `commitment_two`, `left_of_two`, `other_parent`
+  and `left_node` are now `Hash` rather than a loose byte array, and
+  `deletion_tx_hash` is nullable.
+  
+  `cartesi_getMatchAdvance` is keyed by `tx_hash` and `log_index` instead of
+  `parent`. This is not a rename: repeated other-parent hashes stay distinct events,
+  so the parent hash never identified an advance on its own. Take both values from
+  `cartesi_listMatchAdvances`.
+  
+  `Application` loses `data_availability`. The node no longer serves it, so there is
+  nothing left to decode.
+  
+  Two methods are new. `cartesi_listBondEvents` lists partial-refund and
+  bond-recovery events for an application, ordered by block number and block-global
+  log index, and `cartesi_getBondEvent` fetches one by `tx_hash` and `log_index`. A
+  failed partial refund records the value that was requested, not a payment, and a
+  failed terminal bond transfer emits no recovery event at all — it stays
+  recoverable in the tournament snapshot. `BondEvent` is discriminated on `type`, so
+  `refund` and `recovery` are never both present.
+  
+  `Uint256` is a new scalar for the exact uint256 quantities these types carry. The
+  node's `BondEventNotFound` reuses code `-31001`, which `errorCodes.resourceNotFound`
+  already names.
+
 ## 2.0.0-alpha.26
 
 ### Major Changes
