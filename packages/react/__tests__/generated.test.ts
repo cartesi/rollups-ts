@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
     daveAppFactoryAbi,
     daveAppFactoryAddress,
-    useSimulateTournamentTryRecoveringBond,
-    useWriteTournamentTryRecoveringBond,
+    useSimulateITournamentTryRecoveringBond,
+    useWriteITournamentTryRecoveringBond,
 } from "../src/index.js";
 
 // `src/generated.ts` is wagmi codegen output, so there is nothing here to unit
@@ -11,16 +11,20 @@ import {
 // package's public surface: a consumer importing from `@cartesi/react` gets the
 // bond-claim hooks and the factory a PRT application is deployed through. If
 // codegen stops emitting them, this fails rather than a consumer's build.
+//
+// The bond is claimed through `ITournament`, not through `Tournament`: a
+// tournament is created per dispute by the factory, so a consumer holds its
+// address and calls the interface. `Tournament` itself is excluded as internal.
 
 describe("PRT contract hooks", () => {
     it.each([
         [
-            "useWriteTournamentTryRecoveringBond",
-            useWriteTournamentTryRecoveringBond,
+            "useWriteITournamentTryRecoveringBond",
+            useWriteITournamentTryRecoveringBond,
         ],
         [
-            "useSimulateTournamentTryRecoveringBond",
-            useSimulateTournamentTryRecoveringBond,
+            "useSimulateITournamentTryRecoveringBond",
+            useSimulateITournamentTryRecoveringBond,
         ],
     ])("exports %s", (_name, hook) => {
         expect(hook).toBeTypeOf("function");
