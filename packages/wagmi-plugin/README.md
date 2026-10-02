@@ -92,6 +92,14 @@ Everything `rollupsContracts()` generates is still there, with the same ABIs and
 
 Addresses are read from the plaintext deployment files, which dave publishes since `v3.0.0-alpha.4`, so `prt.deployments` and `prt.anvil` must point at that release or a later one.
 
+Much of what dave publishes is of no use to an application: libraries, error-only ABIs, and concrete contracts whose interface is what you call. Pass `prtInternals` as `exclude` to generate only the surface a consumer reaches for.
+
+```ts
+rollupsContracts({ prt: true, exclude: prtInternals });
+```
+
+That drops `Tournament` and `DaveConsensus` in favour of `ITournament` and `IDaveConsensus` — an application holds the address of a tournament the factory created, not of a published deployment — so a bond is claimed through `iTournamentAbi`. It is worth doing: wagmi writes one declaration per contract member, each carrying a copy of that contract's ABI type, so a large ABI nobody calls is paid for many times over in the declaration file.
+
 ## Behavior
 
 - Tarballs are downloaded on every run, verified against their expected hash, and extracted to a temporary directory that is removed once the contracts have been read. Codegen therefore needs network access.

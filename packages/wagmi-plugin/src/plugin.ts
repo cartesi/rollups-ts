@@ -94,6 +94,42 @@ export const PRT_DEFAULT_ANVIL: TarballSource = {
 };
 
 /**
+ * PRT contracts that are of no use to an application: pass as `exclude` to
+ * generate only the surface a consumer calls. Every entry is either reached
+ * through the interface it implements, generic plumbing, or an ABI with
+ * nothing callable in it at all.
+ *
+ * Generating them is not wrong, only costly: wagmi writes one declaration per
+ * contract member, each carrying a copy of that contract's ABI type, so a
+ * large ABI nobody calls is paid for many times over in the declaration file.
+ */
+export const prtInternals: ContractFilter[] = [
+    // reached through their interface; neither is a contract a consumer holds
+    // a published address for, `Tournament`'s being one devnet instance of a
+    // contract the factory creates per dispute
+    "Tournament",
+    "DaveConsensus",
+    // generic plumbing rather than protocol surface
+    "IOwnable",
+    "ERC165",
+    // no functions and no events at all: an ABI with nothing to call
+    "AddressErrors",
+    "ApplicationChecker",
+    "IApplicationChecker",
+    "IApplicationFactoryErrors",
+    "BinaryMerkleTreeErrors",
+    "Clones",
+    "Create2",
+    "Errors",
+    "IRefundOutputBuilderErrors",
+    "ISentryErrors",
+    "IWithdrawalOutputBuilderErrors",
+    "LibMath",
+    "MachineValidationErrors",
+    "SafeCast",
+];
+
+/**
  * Deployments named after the role they play rather than after the contract
  * they are an instance of, mapped to the artifact holding their ABI. The
  * devnet USD withdrawal output builder is deployed through the
