@@ -1,5 +1,11 @@
 # @cartesi/rollup
 
+## 1.0.0-alpha.3
+
+### Patch Changes
+
+- 0ca5694: bump dependencies
+
 ## 1.0.0-alpha.2
 
 ### Patch Changes

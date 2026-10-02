@@ -1,5 +1,147 @@
 # @cartesi/client
 
+## 2.0.0-alpha.38
+
+### Patch Changes
+
+- 2da4195: Mirror the `@cartesi/rpc` changes for the node's PRT read models and bond events.
+  
+  `Tournament`, `Commitment` and `Match` gain a `snapshot`: current contract state
+  read at a stated `snapshot.asOfBlock`, beside the immutable event fields they
+  already carried. `tournament.winnerCommitment`, `finalStateHash` and
+  `finishedAtBlock` move to `tournament.snapshot`, and reading them there is not the
+  same thing as reading a settled result — an expired inner candidate is still
+  `snapshot.candidate` without being `snapshot.winnerCommitment`, and two calls do
+  not add up to one consistent snapshot. `Tournament` also gains `initialHash`,
+  `baseCycle`, `kind`, `startInstant`, `allowance` and `creationEvent`, which is
+  null for a root tournament.
+  
+  `Match` gains `eliminableAt`, `leafSeal`, `deletionLogIndex` and a `MatchSnapshot`
+  discriminated on `phase`; `Commitment` and `MatchAdvanced` gain `logIndex`, and
+  `MatchAdvanced` also `segmentStartPosition` and its own `eliminableAt`.
+  `MatchSnapshot` and the new `BondEvent` are discriminated unions, so `bisection`
+  and `sealed` — and `refund` and `recovery` — narrow on the discriminant instead of
+  being nullable fields you have to test one by one.
+  
+  `getMatchAdvance` takes `txHash` and `logIndex` instead of `parent`. This is not a
+  rename: repeated other-parent hashes stay distinct events, so the parent hash
+  never identified one advance. Take both values from the `MatchAdvanced` records
+  `listMatchAdvances` returns.
+  
+  `Application.dataAvailability` is gone, along with the `DataAvailability`,
+  `DataAvailabilityInputBox` and `DataAvailabilityInputBoxAndEspresso` types and the
+  locally kept ABI that decoded them. The node no longer serves the field, so there
+  is nothing left to decode; an application's input box is on
+  `Application.inputBoxAddress`.
+  
+  Two actions are new. `listBondEvents` lists an application's partial-refund and
+  bond-recovery events, ordered by block number and block-global log index, and
+  `getBondEvent` fetches one by `txHash` and `logIndex`. A failed partial refund
+  records the value that was requested rather than a payment — check `refund.success`
+  before treating `refund.value` as money that moved — and a failed terminal bond
+  transfer emits no recovery event at all, staying recoverable in the tournament
+  snapshot.
+- 8f3051f: Stop generating the PRT contracts an application has no use for.
+  
+  Codegen now excludes `prtInternals`, so `@cartesi/client/abi` carries only the
+  contracts a consumer calls. The same list is excluded in `@cartesi/react`, so
+  the two packages agree on which contracts exist.
+  
+  What this removes:
+  
+  - `tournamentAbi`, `tournamentAddress` and `tournamentConfig` — use
+    `iTournamentAbi` with the address of the tournament you are acting on. A
+    tournament is created per dispute by `MultiLevelTournamentFactory`, so the
+    address that was generated here was one devnet instance, never the contract a
+    consumer calls.
+  - `daveConsensusAbi` — likewise `iDaveConsensusAbi`, with the consensus address
+    of the application. It had no generated address either way, being deployed
+    per application rather than published.
+  - `iOwnableAbi` and `erc165Abi`, which are generic plumbing.
+  - Fourteen libraries and error-only ABIs with no functions and no events at
+    all: `addressErrorsAbi`, `applicationCheckerAbi`, `iApplicationCheckerAbi`,
+    `iApplicationFactoryErrorsAbi`, `binaryMerkleTreeErrorsAbi`, `clonesAbi`,
+    `create2Abi`, `errorsAbi`, `iRefundOutputBuilderErrorsAbi`,
+    `iSentryErrorsAbi`, `iWithdrawalOutputBuilderErrorsAbi`, `libMathAbi`,
+    `machineValidationErrorsAbi` and `safeCastAbi`.
+  
+  Every other contract, ABI and address is unchanged, `daveAppFactory` and
+  `multiLevelTournamentFactory` included.
+- 18d4e13: Add the PRT factories to the `cartesi` devnet chain.
+  
+  `cartesi.contracts` from `@cartesi/client/chains` gains `daveAppFactory` and
+  `multiLevelTournamentFactory`, so a devnet application can be deployed through
+  PRT without hand-writing an address.
+  
+  Both entries are the devnet (31337) address and nothing else. dave deploys these
+  two per chain, because the tournament parameters depend on the chain's block
+  time, so there is no single address to put on a chain record. On any other chain
+  read `daveAppFactoryAddress[chainId]` and
+  `multiLevelTournamentFactoryAddress[chainId]` from `@cartesi/client/abi`, which
+  is the public way to reach them; `cartesi.contracts` is for the devnet only.
+- 0ca5694: bump dependencies
+- 59aebb8: Generate the PRT contracts.
+  
+  `wagmi.config.ts` now passes `prt: true`, so `@cartesi/client/abi` carries dave's
+  contracts alongside the core rollups ones. PRT Rollups is a superset — same
+  `InputBox`, portals and factories, at the same addresses — so nothing that was
+  exported before changes; this only adds.
+  
+  The one worth knowing about is `tournamentAbi`. `tryRecoveringBond()` takes no
+  arguments and is `nonpayable`, so anyone can claim a finished tournament's bond
+  once `tournament.snapshot.bondRecovery` says it is `RECOVERABLE`.
+  
+  Note the shape of the new address exports. `daveAppFactoryAddress` and
+  `multiLevelTournamentFactoryAddress` are records keyed by chain ID rather than a
+  single address, because dave deploys those per chain — the tournament parameters
+  depend on the chain's block time. They cover the eight public chains plus the
+  devnet (31337); dave publishes nothing for cannon (13370), so there is no entry
+  for it. Everything dave shares with rollups-contracts keeps its single address.
+- 662771d: Mirror the `INVALID_OUTPUTS_ROOT` status the node added.
+  
+  `InputStatus` and `ApplicationStatus` each gain `INVALID_OUTPUTS_ROOT`, widening
+  the unions `Input.status` and `Application.status` carry. Both are re-exported
+  from `@cartesi/rpc` and the converter passes `status` through untouched, so
+  nothing in this package's source changed.
+  
+  Additive on the wire, breaking for a consumer whose `switch` over either union
+  is exhaustive — the same caveat the earlier additions to these unions carry.
+  
+  `waitForInput` needs no change and neither does your call to it. `rejectErrors`
+  aborts on any status that is neither `NONE` nor `ACCEPTED`, so it treats a
+  status the node adds later as a failure rather than mistaking it for success.
+  That is why it was written by exclusion.
+- 5eebdd0: Mirror the `@cartesi/rpc` changes for the node's terminal machine outcomes and
+  state proofs.
+  
+  `Epoch` loses `outputsMerkleRoot` and `outputsMerkleProof` and gains
+  `txBufferDataBlock`/`txBufferProof`, `iflagsYDataBlock`/`iflagsYProof` and
+  `htifTohostDataBlock`/`htifTohostProof`, each proved against `machineHash`. The
+  node no longer serves the outputs Merkle root at all — read it from the L1
+  `Outputs` contract instead. The `outputsMerkleRoot` exported through
+  `@cartesi/client/abi` is a different thing and is unchanged.
+  
+  `Input.outputsHash` is now `txBufferDataBlock`. This is a change of meaning,
+  not a rename: the field was a digest of the input's outputs and is now the
+  32-byte CMIO TX-buffer memory block of the machine state the input produced.
+  Renaming the property without revisiting what you do with the value is wrong.
+  
+  `InputStatus` gains `OVERFLOW` and `UNEXPECTED_YIELD`; `ApplicationStatus`
+  gains `GUEST_EXCEPTION`, `MACHINE_HALTED`, `MCYCLE_OVERFLOW` and
+  `UNEXPECTED_YIELD`. An exhaustive `switch` over either union no longer
+  compiles. `reason` is non-null for every status but `OK`.
+  
+  `waitForInput` with `rejectErrors` now aborts on any status that is neither
+  `NONE` nor `ACCEPTED`, so it covers the two new outcomes. It is checked by
+  exclusion rather than by listing the terminal statuses, so a status the node
+  adds later aborts instead of resolving as a success. `waitProcessing` still
+  governs `NONE` on its own.
+- Updated dependencies [0ca5694]
+- Updated dependencies [475a5cd]
+- Updated dependencies [fa16494]
+- Updated dependencies [e233105]
+  - @cartesi/rpc@2.0.0-alpha.27
+
 ## 2.0.0-alpha.37
 
 ### Major Changes
