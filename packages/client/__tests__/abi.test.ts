@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
     daveAppFactoryAddress,
     inputBoxAddress,
+    iTournamentAbi,
     multiLevelTournamentFactoryAddress,
-    tournamentAbi,
 } from "../src/rollups.js";
 
 // The PRT contracts come from a dave release through codegen rather than being
@@ -24,8 +24,10 @@ const chainIds = (addresses: Record<number, string>) =>
         .sort((a, b) => a - b);
 
 describe("PRT ABIs", () => {
+    // a tournament is created per dispute by the factory, so what a consumer
+    // holds is an address plus the interface, not a published deployment
     it("exposes the tournament bond claim", () => {
-        const tryRecoveringBond = tournamentAbi.find(
+        const tryRecoveringBond = iTournamentAbi.find(
             (item) =>
                 item.type === "function" && item.name === "tryRecoveringBond",
         );
