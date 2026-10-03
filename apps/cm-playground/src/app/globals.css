@@ -212,6 +212,42 @@ textarea.input {
     accent-color: var(--accent);
 }
 
+/* where the machine comes from: built from the form below, or loaded whole */
+
+.choice {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.choice-option {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--fg);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font: inherit;
+    padding: 10px 12px;
+    text-align: left;
+}
+
+.choice-option:hover {
+    border-color: var(--accent);
+}
+
+.choice-selected {
+    border-color: var(--accent);
+    /* a second ring rather than a thicker border, which would move the text */
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.choice-label {
+    font-weight: 600;
+}
+
 /* buttons */
 
 .button {
@@ -548,6 +584,11 @@ textarea.input {
 
     .field {
         min-width: 0;
+    }
+
+    /* two columns of one word each, otherwise */
+    .choice {
+        grid-template-columns: 1fr;
     }
 
     .row > .field {

@@ -1,4 +1,5 @@
 // Boot, stop, and what the machine has done so far.
+import { formatSize } from "../machine/config";
 import type { MachineState } from "../machine/useMachine";
 import { Button } from "./ui";
 
@@ -9,16 +10,25 @@ export const RunBar = ({
     problems,
     onBoot,
     onStop,
+    onStore,
     onClear,
 }: {
     state: MachineState;
     problems: string[];
     onBoot: () => void;
     onStop: () => void;
+    onStore: () => void;
     onClear: () => void;
 }) => {
     const busy = state.phase === "starting" || state.phase === "running";
     const stats = state.stats;
+    const store = state.store;
+    // There is a machine to store for as long as one exists — one that has
+    // halted is still worth keeping, and one that is running is the whole
+    // point of being able to catch it.
+    const storable =
+        (state.phase === "running" || state.phase === "done") &&
+        store.phase !== "busy";
 
     return (
         <div className="runbar">
@@ -34,6 +44,9 @@ export const RunBar = ({
                 </Button>
                 <Button kind="danger" onClick={onStop} disabled={!busy}>
                     stop
+                </Button>
+                <Button kind="ghost" onClick={onStore} disabled={!storable}>
+                    store
                 </Button>
                 <Button kind="ghost" onClick={onClear} disabled={busy}>
                     clear
@@ -81,6 +94,16 @@ export const RunBar = ({
                     </span>
                 )}
             </div>
+
+            {store.phase === "idle" ? null : (
+                <p className={store.phase === "failed" ? "error" : "hint"}>
+                    {store.phase === "busy"
+                        ? `${store.text}…`
+                        : store.phase === "done"
+                          ? `stored ${store.name} — ${formatSize(store.size)}, in the snapshot library`
+                          : `could not store the machine: ${store.message}`}
+                </p>
+            )}
 
             {problems.length === 0 ? null : (
                 <p className="error">{problems.join(" · ")}</p>

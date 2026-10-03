@@ -135,6 +135,39 @@ export const Select = <T extends string>({
     </select>
 );
 
+/**
+ * One of a handful of things this can be, laid out as cards rather than as a
+ * select: these are the choices worth seeing all of before picking one.
+ */
+export const Choice = <T extends string>({
+    value,
+    onChange,
+    options,
+}: {
+    value: T;
+    onChange: (value: T) => void;
+    options: { value: T; label: string; hint: string }[];
+}) => (
+    <div className="choice">
+        {options.map((option) => (
+            <button
+                type="button"
+                key={option.value}
+                className={
+                    option.value === value
+                        ? "choice-option choice-selected"
+                        : "choice-option"
+                }
+                aria-pressed={option.value === value}
+                onClick={() => onChange(option.value)}
+            >
+                <span className="choice-label">{option.label}</span>
+                <span className="field-hint">{option.hint}</span>
+            </button>
+        ))}
+    </div>
+);
+
 export const Button = ({
     children,
     onClick,

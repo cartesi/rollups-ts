@@ -527,14 +527,28 @@ export const BootSection = ({
     </Section>
 );
 
+// The console is the one part of a stored machine this page still has a say
+// in — the buffers it reads and writes are runtime configuration, which
+// `load()` takes like `create()` does. Which device carries them is not: that
+// was decided when the machine was built, and a machine stored without a
+// console keeps its silence however this is set.
 export const ConsoleSection = ({
     config,
     update,
+    loading = false,
 }: {
     config: PlaygroundConfig;
     update: Update;
+    loading?: boolean;
 }) => (
-    <Section title="Console">
+    <Section
+        title="Console"
+        hint={
+            loading
+                ? "A stored machine brings its own console device; only what this page does with it is settled here."
+                : undefined
+        }
+    >
         <Toggle
             label="Interactive"
             hint="the machine reads what you type, which makes it unreproducible"
@@ -542,23 +556,25 @@ export const ConsoleSection = ({
             onChange={(interactive) => update({ interactive })}
         />
         <div className="row">
-            <Field
-                label="Device"
-                hint={
-                    config.console === "virtio"
-                        ? "carries the window size, and SIGWINCH with it"
-                        : "always present, but no window size and no signals"
-                }
-            >
-                <Select<ConsoleKind>
-                    value={config.console}
-                    onChange={(console) => update({ console })}
-                    options={[
-                        { value: "virtio", label: "VirtIO (hvc1)" },
-                        { value: "htif", label: "HTIF (hvc0)" },
-                    ]}
-                />
-            </Field>
+            {loading ? null : (
+                <Field
+                    label="Device"
+                    hint={
+                        config.console === "virtio"
+                            ? "carries the window size, and SIGWINCH with it"
+                            : "always present, but no window size and no signals"
+                    }
+                >
+                    <Select<ConsoleKind>
+                        value={config.console}
+                        onChange={(console) => update({ console })}
+                        options={[
+                            { value: "virtio", label: "VirtIO (hvc1)" },
+                            { value: "htif", label: "HTIF (hvc0)" },
+                        ]}
+                    />
+                </Field>
+            )}
             <Field label="Flush output">
                 <Select<ConsoleFlushMode>
                     value={config.flushMode}
@@ -577,22 +593,29 @@ export const ConsoleSection = ({
 export const AdvancedSection = ({
     config,
     update,
+    loading = false,
 }: {
     config: PlaygroundConfig;
     update: Update;
+    /** A stored machine's own registers are inside it; only the run is ours. */
+    loading?: boolean;
 }) => (
     <Section
         title="Advanced"
         hint="Rarely needed, and exactly what the emulator calls them."
     >
-        <Toggle
-            label="Unreproducible (iunrep)"
-            hint="implied by an interactive machine, and by setting the clock"
-            checked={
-                config.interactive || config.syncDate || config.unreproducible
-            }
-            onChange={(unreproducible) => update({ unreproducible })}
-        />
+        {loading ? null : (
+            <Toggle
+                label="Unreproducible (iunrep)"
+                hint="implied by an interactive machine, and by setting the clock"
+                checked={
+                    config.interactive ||
+                    config.syncDate ||
+                    config.unreproducible
+                }
+                onChange={(unreproducible) => update({ unreproducible })}
+            />
+        )}
         <Toggle
             label="Soft yield"
             checked={config.softYield}
@@ -605,14 +628,16 @@ export const AdvancedSection = ({
             onChange={(updateHashTree) => update({ updateHashTree })}
         />
         <div className="row">
-            <Field label="Cycle limit" hint="imcyclemax; blank for none">
-                <TextInput
-                    value={config.imcyclemax}
-                    onChange={(imcyclemax) => update({ imcyclemax })}
-                    placeholder="0"
-                    mono
-                />
-            </Field>
+            {loading ? null : (
+                <Field label="Cycle limit" hint="imcyclemax; blank for none">
+                    <TextInput
+                        value={config.imcyclemax}
+                        onChange={(imcyclemax) => update({ imcyclemax })}
+                        placeholder="0"
+                        mono
+                    />
+                </Field>
+            )}
             <Field
                 label="Stop after"
                 hint="cycles this page runs before giving up"
