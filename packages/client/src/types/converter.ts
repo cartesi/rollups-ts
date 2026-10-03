@@ -377,9 +377,7 @@ export const matchConverter = (match: MatchRpc): Match => {
         txHash: match.tx_hash,
         winnerCommitment: match.winner_commitment,
         deletionReason: match.deletion_reason,
-        deletionBlockNumber: match.deletion_block_number
-            ? hexToBigInt(match.deletion_block_number)
-            : null,
+        deletionBlockNumber: hexToBigInt(match.deletion_block_number),
         deletionTxHash: match.deletion_tx_hash,
         createdAt: new Date(match.created_at),
         updatedAt: new Date(match.updated_at),

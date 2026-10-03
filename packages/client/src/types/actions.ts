@@ -389,7 +389,8 @@ export type Match = {
     txHash: Hash;
     winnerCommitment: WinnerCommitment;
     deletionReason: DeletionReason;
-    deletionBlockNumber: bigint | null;
+    /** Block the match was deleted in, or zero while it is not deleted. */
+    deletionBlockNumber: bigint;
     deletionTxHash: Hash | null;
     createdAt: Date;
     updatedAt: Date;
