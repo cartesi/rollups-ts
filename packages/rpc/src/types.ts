@@ -626,7 +626,8 @@ export type Match = {
     tx_hash: Hash;
     winner_commitment: WinnerCommitment;
     deletion_reason: DeletionReason;
-    deletion_block_number: HexNumber | null;
+    /** Block the match was deleted in, or zero while it is not deleted. */
+    deletion_block_number: HexNumber;
     deletion_tx_hash: Hash | null;
     created_at: DateTime;
     updated_at: DateTime;
