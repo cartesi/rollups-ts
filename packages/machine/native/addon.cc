@@ -128,6 +128,23 @@ bool get_bytes(Napi::Env env, const Napi::Value &value, const char *name, const 
     return true;
 }
 
+// CMIO response data. Its length crosses the C API as a uint32_t, which is
+// checked here rather than truncated: the emulator would otherwise accept a
+// prefix of an oversized response as if it were the whole of it.
+bool get_cmio_data(Napi::Env env, const Napi::Value &value, const char *name, const uint8_t **data,
+    uint32_t *length) {
+    size_t size = 0;
+    if (!get_bytes(env, value, name, data, &size)) {
+        return false;
+    }
+    if (size > UINT32_MAX) {
+        Napi::RangeError::New(env, std::string(name) + " is too large").ThrowAsJavaScriptException();
+        return false;
+    }
+    *length = static_cast<uint32_t>(size);
+    return true;
+}
+
 // A 32-byte hash argument, viewed as the cm_hash array pointer the C API wants.
 bool get_hash(Napi::Env env, const Napi::Value &value, const char *name, const cm_hash **hash) {
     const uint8_t *data = nullptr;
@@ -226,7 +243,11 @@ private:
     Napi::Value ReadConsoleOutput(const Napi::CallbackInfo &info);
     Napi::Value WriteConsoleInput(const Napi::CallbackInfo &info);
     Napi::Value Run(const Napi::CallbackInfo &info);
+    Napi::Value CollectMcycleRootHashes(const Napi::CallbackInfo &info);
+    Napi::Value CollectMcycleBundle(const Napi::CallbackInfo &info);
     Napi::Value RunUarch(const Napi::CallbackInfo &info);
+    Napi::Value CollectUarchCycleRootHashes(const Napi::CallbackInfo &info);
+    Napi::Value CollectUarchCycleBundle(const Napi::CallbackInfo &info);
     Napi::Value ResetUarch(const Napi::CallbackInfo &info);
     Napi::Value ReceiveCmioRequest(const Napi::CallbackInfo &info);
     Napi::Value SendCmioResponse(const Napi::CallbackInfo &info);
@@ -640,6 +661,82 @@ Napi::Value Machine::RunUarch(const Napi::CallbackInfo &info) {
     return Napi::Number::New(env, break_reason);
 }
 
+// The collect calls run the machine like run() and runUarch() do, sampling
+// root hashes along the way. Partial bundles, revert tails and results cross
+// as the JSON the C API speaks; the TypeScript layer decodes them.
+Napi::Value Machine::CollectMcycleRootHashes(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    uint64_t mcycle_end = 0;
+    uint64_t log2_mcycle_period = 0;
+    uint64_t mcycle_phase = 0;
+    int32_t log2_bundle_mcycle_count = 0;
+    std::string previous_partial_bundle;
+    bool has_previous_partial_bundle = false;
+    if (!get_u64(env, info[0], "mcycleEnd", &mcycle_end) ||
+        !get_u64(env, info[1], "log2McyclePeriod", &log2_mcycle_period) ||
+        !get_u64(env, info[2], "mcyclePhase", &mcycle_phase) ||
+        !get_i32(env, info[3], "log2BundleMcycleCount", &log2_bundle_mcycle_count) ||
+        !get_optional_string(env, info[4], "previousPartialBundle", &previous_partial_bundle,
+            &has_previous_partial_bundle)) {
+        return env.Undefined();
+    }
+    const char *result = nullptr;
+    CHECK_CM(env, cm_collect_mcycle_root_hashes(machine_, mcycle_end, log2_mcycle_period, mcycle_phase,
+                      log2_bundle_mcycle_count,
+                      has_previous_partial_bundle ? previous_partial_bundle.c_str() : nullptr, &result));
+    return Napi::String::New(env, result);
+}
+
+Napi::Value Machine::CollectMcycleBundle(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    uint64_t bundle_offset = 0;
+    uint64_t log2_mcycle_period = 0;
+    int32_t log2_bundle_mcycle_count = 0;
+    if (!get_u64(env, info[0], "bundleOffset", &bundle_offset) ||
+        !get_u64(env, info[1], "log2McyclePeriod", &log2_mcycle_period) ||
+        !get_i32(env, info[2], "log2BundleMcycleCount", &log2_bundle_mcycle_count)) {
+        return env.Undefined();
+    }
+    const char *result = nullptr;
+    CHECK_CM(env,
+        cm_collect_mcycle_bundle(machine_, bundle_offset, log2_mcycle_period, log2_bundle_mcycle_count, &result));
+    return Napi::String::New(env, result);
+}
+
+Napi::Value Machine::CollectUarchCycleRootHashes(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    uint64_t mcycle_end = 0;
+    int32_t log2_bundle_uarch_cycle_count = 0;
+    std::string revert_uarch_tail;
+    bool has_revert_uarch_tail = false;
+    if (!get_u64(env, info[0], "mcycleEnd", &mcycle_end) ||
+        !get_i32(env, info[1], "log2BundleUarchCycleCount", &log2_bundle_uarch_cycle_count) ||
+        !get_optional_string(env, info[2], "revertUarchTail", &revert_uarch_tail, &has_revert_uarch_tail)) {
+        return env.Undefined();
+    }
+    const char *result = nullptr;
+    CHECK_CM(env, cm_collect_uarch_cycle_root_hashes(machine_, mcycle_end, log2_bundle_uarch_cycle_count,
+                      has_revert_uarch_tail ? revert_uarch_tail.c_str() : nullptr, &result));
+    return Napi::String::New(env, result);
+}
+
+Napi::Value Machine::CollectUarchCycleBundle(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    uint64_t bundle_offset = 0;
+    int32_t log2_bundle_uarch_cycle_count = 0;
+    std::string revert_uarch_tail;
+    bool has_revert_uarch_tail = false;
+    if (!get_u64(env, info[0], "bundleOffset", &bundle_offset) ||
+        !get_i32(env, info[1], "log2BundleUarchCycleCount", &log2_bundle_uarch_cycle_count) ||
+        !get_optional_string(env, info[2], "revertUarchTail", &revert_uarch_tail, &has_revert_uarch_tail)) {
+        return env.Undefined();
+    }
+    const char *result = nullptr;
+    CHECK_CM(env, cm_collect_uarch_cycle_bundle(machine_, bundle_offset, log2_bundle_uarch_cycle_count,
+                      has_revert_uarch_tail ? revert_uarch_tail.c_str() : nullptr, &result));
+    return Napi::String::New(env, result);
+}
+
 Napi::Value Machine::ResetUarch(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     CHECK_CM(env, cm_reset_uarch(machine_));
@@ -664,9 +761,9 @@ Napi::Value Machine::SendCmioResponse(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     int32_t reason = 0;
     const uint8_t *data = nullptr;
-    size_t length = 0;
+    uint32_t length = 0;
     const cm_hash *revert_root_hash = nullptr;
-    if (!get_i32(env, info[0], "reason", &reason) || !get_bytes(env, info[1], "data", &data, &length) ||
+    if (!get_i32(env, info[0], "reason", &reason) || !get_cmio_data(env, info[1], "data", &data, &length) ||
         !get_optional_hash(env, info[2], "revertRootHash", &revert_root_hash)) {
         return env.Undefined();
     }
@@ -712,10 +809,10 @@ Napi::Value Machine::LogSendCmioResponse(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     int32_t reason = 0;
     const uint8_t *data = nullptr;
-    size_t length = 0;
+    uint32_t length = 0;
     const cm_hash *revert_root_hash = nullptr;
     int32_t log_type = 0;
-    if (!get_i32(env, info[0], "reason", &reason) || !get_bytes(env, info[1], "data", &data, &length) ||
+    if (!get_i32(env, info[0], "reason", &reason) || !get_cmio_data(env, info[1], "data", &data, &length) ||
         !get_hash(env, info[2], "revertRootHash", &revert_root_hash) || !get_i32(env, info[3], "logType", &log_type)) {
         return env.Undefined();
     }
@@ -770,11 +867,12 @@ Napi::Value verify_reset_uarch(Napi::Env env, cm_machine *m, const Napi::Callbac
 Napi::Value verify_send_cmio_response(Napi::Env env, cm_machine *m, const Napi::CallbackInfo &info, size_t base) {
     int32_t reason = 0;
     const uint8_t *data = nullptr;
-    size_t length = 0;
+    uint32_t length = 0;
     const cm_hash *root_hash_before = nullptr;
     std::string log;
     const cm_hash *revert_root_hash = nullptr;
-    if (!get_i32(env, info[base + 0], "reason", &reason) || !get_bytes(env, info[base + 1], "data", &data, &length) ||
+    if (!get_i32(env, info[base + 0], "reason", &reason) ||
+        !get_cmio_data(env, info[base + 1], "data", &data, &length) ||
         !get_hash(env, info[base + 2], "rootHashBefore", &root_hash_before) ||
         !get_string(env, info[base + 3], "log", &log) ||
         !get_hash(env, info[base + 4], "revertRootHash", &revert_root_hash)) {
@@ -1005,7 +1103,11 @@ Napi::Object Machine::Init(Napi::Env env, Napi::Object exports) {
             InstanceMethod<&Machine::ReadConsoleOutput>("readConsoleOutput"),
             InstanceMethod<&Machine::WriteConsoleInput>("writeConsoleInput"),
             InstanceMethod<&Machine::Run>("run"),
+            InstanceMethod<&Machine::CollectMcycleRootHashes>("collectMcycleRootHashes"),
+            InstanceMethod<&Machine::CollectMcycleBundle>("collectMcycleBundle"),
             InstanceMethod<&Machine::RunUarch>("runUarch"),
+            InstanceMethod<&Machine::CollectUarchCycleRootHashes>("collectUarchCycleRootHashes"),
+            InstanceMethod<&Machine::CollectUarchCycleBundle>("collectUarchCycleBundle"),
             InstanceMethod<&Machine::ResetUarch>("resetUarch"),
             InstanceMethod<&Machine::ReceiveCmioRequest>("receiveCmioRequest"),
             InstanceMethod<&Machine::SendCmioResponse>("sendCmioResponse"),

@@ -82,6 +82,69 @@ describe("JSON-RPC client", () => {
         );
     });
 
+    it("collects root hashes the way the local binding does", async () => {
+        // a fresh machine of its own, so the hashes do not depend on what
+        // the other tests did to the shared one
+        const other = spawn();
+        try {
+            const client = connectHttp(`http://${other.getBoundAddress()}`);
+            await client.create({ ram: { length: RAM_LENGTH } });
+            const local = create({ ram: { length: RAM_LENGTH } });
+
+            const first = await client.collectMcycleRootHashes(512n, 8, 0n, 2);
+            expect(first.partialBundle).toBeDefined();
+            const rest = await client.collectMcycleRootHashes(
+                1024n,
+                8,
+                first.mcyclePhase,
+                2,
+                first.partialBundle,
+            );
+            expect(rest.breakReason).toBe(BreakReason.ReachedTargetMcycle);
+            expect(rest.hashes.map(hex)).toEqual(
+                local.collectMcycleRootHashes(1024n, 8, 0n, 2).hashes.map(hex),
+            );
+
+            expect(
+                (await client.collectMcycleBundle(1n, 8, 1)).map(hex),
+            ).toEqual(local.collectMcycleBundle(1n, 8, 1).map(hex));
+
+            // the revert tail of a machine waiting on an accepted input
+            const yielded = create({ ram: { length: RAM_LENGTH } });
+            yielded.writeReg(Reg.IflagsY, 1n);
+            const tail = yielded.collectUarchCycleRootHashes(
+                yielded.readReg(Reg.Mcycle),
+                0,
+            ).hashes;
+            await client.writeRevertRootHash(tail.at(-1) as Uint8Array);
+            local.writeRevertRootHash(tail.at(-1) as Uint8Array);
+
+            expect(
+                (await client.collectUarchCycleBundle(0n, 3, tail)).map(hex),
+            ).toEqual(local.collectUarchCycleBundle(0n, 3, tail).map(hex));
+
+            const mcycleEnd = (await client.readReg(Reg.Mcycle)) + 1n;
+            const remote = await client.collectUarchCycleRootHashes(
+                mcycleEnd,
+                0,
+                tail,
+            );
+            const expected = local.collectUarchCycleRootHashes(
+                mcycleEnd,
+                0,
+                tail,
+            );
+            expect(remote.mcycleHashOffsets).toEqual(
+                expected.mcycleHashOffsets,
+            );
+            expect(remote.hashes.map(hex)).toEqual(expected.hashes.map(hex));
+            local.destroy();
+            yielded.destroy();
+        } finally {
+            other.shutdown();
+        }
+    });
+
     it("forks the server into a client for the child", async () => {
         const before = await machine.getRootHash();
 

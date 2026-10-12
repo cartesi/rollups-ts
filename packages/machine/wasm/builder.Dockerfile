@@ -11,7 +11,7 @@
 # ends up in a release has to be reproducible.
 
 ARG EMSDK_VERSION=6.0.8
-ARG CARTESI_MACHINE_VERSION=0.21.0
+ARG CARTESI_MACHINE_VERSION=0.22.0-test2
 
 # -----------------------------------------------------------------------------
 # libcartesi.a, compiled to WebAssembly

@@ -14,7 +14,7 @@
 // Calls are asynchronous, so this cannot implement CartesiMachine itself; it
 // mirrors it, method for method.
 import {
-    BreakReason,
+    type BreakReason,
     MachineError,
     HtifYieldReason,
     MAX_MCYCLE,
@@ -22,8 +22,21 @@ import {
     type ErrorCode,
     Reg,
     type HtifYieldCommand,
+    type McycleRootHashes,
     type SharingMode,
+    type UarchCycleRootHashes,
 } from "../cartesi-machine.js";
+import {
+    fromBase64,
+    fromBase64Hashes,
+    parseJson,
+    toBase64,
+    toBase64Hashes,
+    toBigInt,
+    toBreakReason,
+    toMcycleRootHashes,
+    toUarchCycleRootHashes,
+} from "../encoding.js";
 import type {
     AccessLog,
     AccessLogType,
@@ -32,41 +45,13 @@ import type {
     MachineConfig,
     MachineRuntimeConfig,
     MemoryRangeConfig,
+    PartialBundle,
     Proof,
 } from "../types.js";
 
 // -----------------------------------------------------------------------------
 // Wire encoding
 // -----------------------------------------------------------------------------
-
-const toBase64 = (bytes: Uint8Array): string => {
-    let binary = "";
-    for (const byte of bytes) {
-        binary += String.fromCharCode(byte);
-    }
-    return btoa(binary);
-};
-
-const fromBase64 = (text: string): Uint8Array => {
-    const binary = atob(text);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) {
-        bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes;
-};
-
-/**
- * The emulator writes u64 values as JSON numbers, so a register with its top
- * bits set does not survive JSON.parse. Quoting integers too long to be exact
- * doubles keeps them intact for BigInt to read; anything shorter is exact
- * already. Digits inside strings are never preceded by one of these
- * delimiters, so they are left alone.
- */
-const parse = (text: string): unknown =>
-    JSON.parse(
-        text.replace(/([:[,]\s*)(-?\d{16,})(?=\s*[,\]}])/g, '$1"$2"'),
-    ) as unknown;
 
 /**
  * A marker no JSON payload of this API can contain, used to smuggle a bigint
@@ -79,8 +64,6 @@ const stringify = (value: unknown): string =>
     JSON.stringify(value, (_key, item: unknown) =>
         typeof item === "bigint" ? `${BIGINT_TAG}${item}` : item,
     ).replace(new RegExp(`"${BIGINT_TAG}(-?\\d+)"`, "g"), "$1");
-
-const toBigInt = (value: unknown): bigint => BigInt(value as string | number);
 
 const SHARING_MODES = ["none", "config", "all"] as const;
 
@@ -103,18 +86,6 @@ const regName = (reg: Reg): string => {
             /^iflags_([xyh])$/,
             (_match, flag: string) => `iflags_${flag.toUpperCase()}`,
         );
-};
-
-const BREAK_REASONS: Record<string, BreakReason> = {
-    failed: BreakReason.Failed,
-    halted: BreakReason.Halted,
-    yielded_manually: BreakReason.YieldedManually,
-    yielded_automatically: BreakReason.YieldedAutomatically,
-    yielded_softly: BreakReason.YieldedSoftly,
-    reached_target_mcycle: BreakReason.ReachedTargetMcycle,
-    console_output: BreakReason.ConsoleOutput,
-    console_input: BreakReason.ConsoleInput,
-    mcycle_overflow: BreakReason.McycleOverflow,
 };
 
 const UARCH_BREAK_REASONS: Record<string, UarchBreakReason> = {
@@ -208,7 +179,29 @@ export interface RemoteMachineClient {
     writeConsoleInput(data: Uint8Array): Promise<number>;
 
     run(mcycleEnd?: bigint): Promise<BreakReason>;
+    collectMcycleRootHashes(
+        mcycleEnd: bigint,
+        log2McyclePeriod: number,
+        mcyclePhase: bigint,
+        log2BundleMcycleCount: number,
+        previousPartialBundle?: PartialBundle,
+    ): Promise<McycleRootHashes>;
+    collectMcycleBundle(
+        bundleOffset: bigint,
+        log2McyclePeriod: number,
+        log2BundleMcycleCount: number,
+    ): Promise<Uint8Array[]>;
     runUarch(uarchCycleEnd: bigint): Promise<UarchBreakReason>;
+    collectUarchCycleRootHashes(
+        mcycleEnd: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail?: Uint8Array[],
+    ): Promise<UarchCycleRootHashes>;
+    collectUarchCycleBundle(
+        bundleOffset: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail?: Uint8Array[],
+    ): Promise<Uint8Array[]>;
     resetUarch(): Promise<void>;
 
     receiveCmioRequest(): Promise<{
@@ -278,7 +271,7 @@ export const connect = (
             );
         }
 
-        const body = parse(await response.text()) as {
+        const body = parseJson(await response.text()) as {
             result?: unknown;
             error?: RpcError;
         };
@@ -532,14 +525,40 @@ export const connect = (
         },
 
         async run(mcycleEnd = MAX_MCYCLE) {
-            const reason = (await rpc("machine.run", [mcycleEnd])) as string;
-            const known = BREAK_REASONS[reason];
-            if (known === undefined) {
-                throw new Error(
-                    `@cartesi/machine: unknown break reason ${reason}`,
-                );
-            }
-            return known;
+            return toBreakReason(await rpc("machine.run", [mcycleEnd]));
+        },
+
+        async collectMcycleRootHashes(
+            mcycleEnd,
+            log2McyclePeriod,
+            mcyclePhase,
+            log2BundleMcycleCount,
+            previousPartialBundle,
+        ) {
+            // the partial bundle is a required parameter that may be null
+            return toMcycleRootHashes(
+                await rpc("machine.collect_mcycle_root_hashes", [
+                    mcycleEnd,
+                    log2McyclePeriod,
+                    mcyclePhase,
+                    log2BundleMcycleCount,
+                    previousPartialBundle ?? null,
+                ]),
+            );
+        },
+
+        async collectMcycleBundle(
+            bundleOffset,
+            log2McyclePeriod,
+            log2BundleMcycleCount,
+        ) {
+            return fromBase64Hashes(
+                await rpc("machine.collect_mcycle_bundle", [
+                    bundleOffset,
+                    log2McyclePeriod,
+                    log2BundleMcycleCount,
+                ]),
+            );
         },
 
         async runUarch(uarchCycleEnd) {
@@ -553,6 +572,40 @@ export const connect = (
                 );
             }
             return known;
+        },
+
+        async collectUarchCycleRootHashes(
+            mcycleEnd,
+            log2BundleUarchCycleCount,
+            revertUarchTail,
+        ) {
+            return toUarchCycleRootHashes(
+                await rpc(
+                    "machine.collect_uarch_cycle_root_hashes",
+                    params(
+                        mcycleEnd,
+                        log2BundleUarchCycleCount,
+                        revertUarchTail && toBase64Hashes(revertUarchTail),
+                    ),
+                ),
+            );
+        },
+
+        async collectUarchCycleBundle(
+            bundleOffset,
+            log2BundleUarchCycleCount,
+            revertUarchTail,
+        ) {
+            return fromBase64Hashes(
+                await rpc(
+                    "machine.collect_uarch_cycle_bundle",
+                    params(
+                        bundleOffset,
+                        log2BundleUarchCycleCount,
+                        revertUarchTail && toBase64Hashes(revertUarchTail),
+                    ),
+                ),
+            );
         },
 
         async resetUarch() {

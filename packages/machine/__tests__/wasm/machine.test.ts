@@ -18,7 +18,7 @@ import {
 // what the native build produces for the same steps, which is the property
 // worth pinning — a WebAssembly machine has to be the same machine.
 const PRISTINE_ROOT_HASH =
-    "b5db5de4951fb9f43b54a31c55a59e6da0445447124974033134d98317bca15e";
+    "289c8c1ac57b5caa4709987495c81aef27208235d091f91463b5660e8de26fe7";
 
 const RAM_LENGTH = 0x4000000;
 
@@ -39,7 +39,7 @@ describe("WebAssembly binding", () => {
             // major * 1000000 + minor * 1000 + patch
             const version = cartesi.getVersion();
             expect(version / 1000000n).toBe(0n);
-            expect((version / 1000n) % 1000n).toBe(21n);
+            expect((version / 1000n) % 1000n).toBe(22n);
         });
 
         it("exposes a filesystem for stored machines", () => {
@@ -104,6 +104,75 @@ describe("WebAssembly binding", () => {
 
         it("names addresses", () => {
             expect(cartesi.getAddressName(0x80000000n)).toBe("memory");
+        });
+    });
+
+    // The calls whose signatures 0.22 added or changed: the collect calls
+    // answer in JSON, and CMIO response lengths are a uint32_t, which crosses
+    // into the module as a Number where 0.21's uint64_t took a BigInt.
+    describe("root hashes and cmio", () => {
+        const fresh = () => cartesi.create({ ram: { length: RAM_LENGTH } });
+
+        it("collects the root hashes the machine passes through", () => {
+            const references = [256n, 512n, 768n, 1024n].map((mcycle) => {
+                const reference = fresh();
+                reference.run(mcycle);
+                return hex(reference.getRootHash());
+            });
+            expect(
+                fresh()
+                    .collectMcycleRootHashes(1024n, 8, 0n, 0)
+                    .hashes.map(hex),
+            ).toEqual(references);
+            expect(fresh().collectMcycleBundle(0n, 8, 2).map(hex)).toEqual(
+                references,
+            );
+        });
+
+        it("collects uarch cycle root hashes against a revert tail", () => {
+            const yielded = fresh();
+            yielded.writeReg(Reg.IflagsY, 1n);
+            const tail = yielded.collectUarchCycleRootHashes(
+                yielded.readReg(Reg.Mcycle),
+                0,
+            ).hashes;
+
+            const machine = fresh();
+            machine.writeRevertRootHash(tail.at(-1) as Uint8Array);
+            const { hashes, mcycleHashOffsets } =
+                machine.collectUarchCycleRootHashes(1n, 0, tail);
+            expect(mcycleHashOffsets).toEqual([0, hashes.length]);
+
+            const bundled = fresh();
+            bundled.writeRevertRootHash(tail.at(-1) as Uint8Array);
+            expect(
+                bundled.collectUarchCycleBundle(0n, 3, tail).map(hex),
+            ).toEqual(hashes.slice(0, 8).map(hex));
+        });
+
+        it("sends, logs and verifies a response nothing waits for", () => {
+            const machine = fresh();
+            const before = machine.getRootHash();
+            const data = new Uint8Array(16).fill(0xab);
+            machine.sendCmioResponse(1, data);
+            const log = machine.logSendCmioResponse(
+                0,
+                data,
+                { has_annotations: false, has_large_data: false },
+                before,
+            );
+            expect(
+                hex(
+                    cartesi.verifySendCmioResponse(
+                        0,
+                        data,
+                        before,
+                        JSON.parse(log),
+                        before,
+                    ),
+                ),
+            ).toBe(hex(before));
+            expect(hex(machine.getRootHash())).toBe(hex(before));
         });
     });
 

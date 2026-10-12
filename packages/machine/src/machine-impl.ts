@@ -6,15 +6,24 @@ import type {
     BreakReason,
     CartesiMachine,
     HtifYieldCommand,
+    McycleRootHashes,
     Reg,
     SharingMode,
     UarchBreakReason,
+    UarchCycleRootHashes,
 } from "./cartesi-machine.js";
 import {
     HtifYieldReason,
     MachineError,
     MAX_MCYCLE,
 } from "./cartesi-machine.js";
+import {
+    fromBase64Hashes,
+    parseJson,
+    toBase64Hashes,
+    toMcycleRootHashes,
+    toUarchCycleRootHashes,
+} from "./encoding.js";
 import type { NativeAddon, NativeMachine } from "./native.js";
 import type {
     AccessLog,
@@ -24,6 +33,7 @@ import type {
     MachineConfig,
     MachineRuntimeConfig,
     MemoryRangeConfig,
+    PartialBundle,
     Proof,
 } from "./types.js";
 
@@ -367,10 +377,121 @@ export class CartesiMachineImpl implements CartesiMachine {
     }
 
     /**
+     * Runs the machine until mcycleEnd or a fixed point (a manual yield, a
+     * halt or an mcycle overflow), collecting the state root hash after every
+     * 2^log2McyclePeriod cycles — or, when log2BundleMcycleCount is not zero,
+     * the root hash of each bundle of 2^log2BundleMcycleCount of those. A
+     * collection is resumed by passing back the mcyclePhase and partialBundle
+     * the previous call returned.
+     */
+    collectMcycleRootHashes(
+        mcycleEnd: bigint,
+        log2McyclePeriod: number,
+        mcyclePhase: bigint,
+        log2BundleMcycleCount: number,
+        previousPartialBundle?: PartialBundle,
+    ): McycleRootHashes {
+        return toMcycleRootHashes(
+            parseJson(
+                call(() =>
+                    this.machine.collectMcycleRootHashes(
+                        mcycleEnd,
+                        BigInt(log2McyclePeriod),
+                        mcyclePhase,
+                        log2BundleMcycleCount,
+                        previousPartialBundle === undefined
+                            ? null
+                            : JSON.stringify(previousPartialBundle),
+                    ),
+                ),
+            ),
+        );
+    }
+
+    /**
+     * Collects the 2^log2BundleMcycleCount state root hashes of one bundle,
+     * counting bundles of samples 2^log2McyclePeriod cycles apart from the
+     * current mcycle. Past a fixed point the bundle is padded with its state
+     * root hash; a machine already at one is left unchanged.
+     */
+    collectMcycleBundle(
+        bundleOffset: bigint,
+        log2McyclePeriod: number,
+        log2BundleMcycleCount: number,
+    ): Uint8Array[] {
+        return fromBase64Hashes(
+            JSON.parse(
+                call(() =>
+                    this.machine.collectMcycleBundle(
+                        bundleOffset,
+                        BigInt(log2McyclePeriod),
+                        log2BundleMcycleCount,
+                    ),
+                ),
+            ),
+        );
+    }
+
+    /**
      * Runs the microarchitecture
      */
     runUarch(uarchCycleEnd: bigint): UarchBreakReason {
         return call(() => this.machine.runUarch(uarchCycleEnd));
+    }
+
+    /**
+     * Runs the machine uarch cycle by uarch cycle until mcycleEnd or a fixed
+     * point, collecting the state root hash after every uarch cycle (or the
+     * root hash of each bundle of 2^log2BundleUarchCycleCount of those).
+     *
+     * revertUarchTail is the unbundled collection of the machine the revert
+     * root hash names, taken while it waited for its input; the emulator
+     * needs it whenever the call may end at a rejected input.
+     */
+    collectUarchCycleRootHashes(
+        mcycleEnd: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail?: Uint8Array[],
+    ): UarchCycleRootHashes {
+        return toUarchCycleRootHashes(
+            JSON.parse(
+                call(() =>
+                    this.machine.collectUarchCycleRootHashes(
+                        mcycleEnd,
+                        log2BundleUarchCycleCount,
+                        revertUarchTail === undefined
+                            ? null
+                            : JSON.stringify(toBase64Hashes(revertUarchTail)),
+                    ),
+                ),
+            ),
+        );
+    }
+
+    /**
+     * Collects the 2^log2BundleUarchCycleCount state root hashes of one bundle
+     * of the current mcycle, expanded to one hash per uarch cycle. The
+     * machine is left as collectUarchCycleRootHashes() would leave it with
+     * mcycleEnd one past the current mcycle.
+     */
+    collectUarchCycleBundle(
+        bundleOffset: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail?: Uint8Array[],
+    ): Uint8Array[] {
+        return fromBase64Hashes(
+            JSON.parse(
+                call(() =>
+                    this.machine.collectUarchCycleBundle(
+                        bundleOffset,
+                        log2BundleUarchCycleCount,
+                        revertUarchTail === undefined
+                            ? null
+                            : JSON.stringify(toBase64Hashes(revertUarchTail)),
+                    ),
+                ),
+            ),
+        );
     }
 
     /**
@@ -394,9 +515,11 @@ export class CartesiMachineImpl implements CartesiMachine {
     /**
      * Sends a CMIO response.
      * The revert root hash is the machine root hash to revert to in case the
-     * response is eventually rejected. It is required for advance-state
-     * responses — where it defaults to the current root hash, the value the
-     * emulator checks for — and refused (must be absent) for other responses.
+     * response is eventually rejected. For advance-state responses it must
+     * match the current root hash when an accepted manual yield is pending —
+     * so that is what it defaults to — and is ignored otherwise; other
+     * responses refuse it (it must be absent). A response the machine is not
+     * waiting for, or that does not fit in the rx buffer, is a no-op.
      */
     sendCmioResponse(
         reason: HtifYieldReason,

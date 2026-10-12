@@ -53,7 +53,29 @@ export interface NativeMachine {
     /** Appends to the console input buffer, returning the bytes accepted. */
     writeConsoleInput(data: Uint8Array): bigint;
     run(mcycleEnd: bigint): number;
+    collectMcycleRootHashes(
+        mcycleEnd: bigint,
+        log2McyclePeriod: bigint,
+        mcyclePhase: bigint,
+        log2BundleMcycleCount: number,
+        previousPartialBundle: string | null,
+    ): string;
+    collectMcycleBundle(
+        bundleOffset: bigint,
+        log2McyclePeriod: bigint,
+        log2BundleMcycleCount: number,
+    ): string;
     runUarch(uarchCycleEnd: bigint): number;
+    collectUarchCycleRootHashes(
+        mcycleEnd: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail: string | null,
+    ): string;
+    collectUarchCycleBundle(
+        bundleOffset: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail: string | null,
+    ): string;
     resetUarch(): void;
     receiveCmioRequest(): { cmd: number; reason: number; data: Uint8Array };
     sendCmioResponse(

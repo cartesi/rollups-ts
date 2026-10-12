@@ -20,7 +20,7 @@ const { existsSync, readFileSync } = require("node:fs");
 const path = require("node:path");
 
 // emulator version series the binding targets
-const CARTESI_MACHINE_SERIES = "0.21";
+const CARTESI_MACHINE_SERIES = "0.22";
 
 const platformPackage = `@cartesi/machine-${process.platform}-${process.arch}`;
 try {

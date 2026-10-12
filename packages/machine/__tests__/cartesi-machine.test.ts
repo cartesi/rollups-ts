@@ -12,11 +12,13 @@ import {
     getLastError,
     getSlirpVersion,
     hostfwd,
+    HtifYieldReason,
     ipv4,
     load,
     MachineError,
     NET_USER,
     Reg,
+    verifySendCmioResponse,
     verifyStep,
 } from "../src";
 import { CartesiMachineImpl } from "../src/machine-impl";
@@ -242,6 +244,150 @@ describe("CartesiMachine", () => {
         });
     });
 
+    describe("Root Hash Collection", () => {
+        const config = { ram: { length: 0x4000000 } };
+
+        // the addon hands back Buffers and the collect calls Uint8Arrays,
+        // which toEqual tells apart
+        const hex = (hashes: (Uint8Array | undefined)[]): string[] =>
+            hashes.map((hash) => Buffer.from(hash ?? []).toString("hex"));
+
+        /** The root hash of a fresh machine after `setup` and `mcycle` cycles. */
+        const rootHashAt = (
+            mcycle: bigint,
+            setup: (machine: CartesiMachine) => void = () => {},
+        ): Uint8Array => {
+            const reference = create(config);
+            setup(reference);
+            reference.run(mcycle);
+            const hash = reference.getRootHash();
+            reference.destroy();
+            return hash;
+        };
+
+        /**
+         * The uarch cycle root hashes of a machine waiting on an accepted
+         * manual yield: the revert tail a machine whose revert root hash is
+         * that machine's needs.
+         */
+        const revertUarchTail = (): Uint8Array[] => {
+            const yielded = create(config);
+            yielded.writeReg(Reg.IflagsY, 1n);
+            const tail = yielded.collectUarchCycleRootHashes(
+                yielded.readReg(Reg.Mcycle),
+                0,
+            );
+            expect(tail.breakReason).toBe(BreakReason.YieldedManually);
+            yielded.destroy();
+            return tail.hashes;
+        };
+
+        it("should collect a root hash every period", () => {
+            const collected = create(config).collectMcycleRootHashes(
+                1024n,
+                8,
+                0n,
+                0,
+            );
+            expect(collected.breakReason).toBe(BreakReason.ReachedTargetMcycle);
+            expect(collected.mcyclePhase).toBe(0n);
+            expect(collected.partialBundle).toBeUndefined();
+            expect(hex(collected.hashes)).toEqual(
+                hex(
+                    [256n, 512n, 768n, 1024n].map((mcycle) =>
+                        rootHashAt(mcycle),
+                    ),
+                ),
+            );
+        });
+
+        it("should resume a bundled collection from its partial bundle", () => {
+            const machine = create(config);
+            const first = machine.collectMcycleRootHashes(512n, 8, 0n, 2);
+            expect(first.hashes).toEqual([]);
+            expect(first.partialBundle?.leaf_count).toBe(2);
+
+            const rest = machine.collectMcycleRootHashes(
+                1024n,
+                8,
+                first.mcyclePhase,
+                2,
+                first.partialBundle,
+            );
+            expect(rest.partialBundle).toBeUndefined();
+            expect(rest.hashes).toEqual(
+                create(config).collectMcycleRootHashes(1024n, 8, 0n, 2).hashes,
+            );
+        });
+
+        it("should collect one bundle of mcycle samples", () => {
+            const samples = [256n, 512n, 768n, 1024n].map((mcycle) =>
+                rootHashAt(mcycle),
+            );
+            expect(hex(create(config).collectMcycleBundle(0n, 8, 2))).toEqual(
+                hex(samples),
+            );
+
+            const machine = create(config);
+            expect(hex(machine.collectMcycleBundle(1n, 8, 1))).toEqual(
+                hex(samples.slice(2)),
+            );
+            expect(machine.readReg(Reg.Mcycle)).toBe(1024n);
+        });
+
+        it("should collect uarch cycle root hashes against a revert tail", () => {
+            const tail = revertUarchTail();
+            const revertTo = (machine: CartesiMachine) =>
+                machine.writeRevertRootHash(tail.at(-1) as Uint8Array);
+
+            // the tail is required: the mcycle could end on a rejected input
+            expect(() =>
+                create(config).collectUarchCycleRootHashes(1n, 0),
+            ).toThrow(MachineError);
+
+            const machine = create(config);
+            revertTo(machine);
+            const collected = machine.collectUarchCycleRootHashes(1n, 0, tail);
+            expect(collected.breakReason).toBe(BreakReason.ReachedTargetMcycle);
+            expect(collected.mcycleHashOffsets).toEqual([
+                0,
+                collected.hashes.length,
+            ]);
+            // the uarch reset ends the mcycle where the big machine does
+            expect(hex([collected.hashes.at(-1)])).toEqual(
+                hex([rootHashAt(1n, revertTo)]),
+            );
+            expect(machine.readReg(Reg.Mcycle)).toBe(1n);
+        });
+
+        it("should collect one bundle of uarch cycles", () => {
+            const tail = revertUarchTail();
+            const fresh = () => {
+                const machine = create(config);
+                machine.writeRevertRootHash(tail.at(-1) as Uint8Array);
+                return machine;
+            };
+            const { hashes } = fresh().collectUarchCycleRootHashes(1n, 0, tail);
+
+            expect(fresh().collectUarchCycleBundle(0n, 3, tail)).toEqual(
+                hashes.slice(0, 8),
+            );
+
+            // the final bundle repeats the halted uarch's root hash up to the
+            // one after its reset
+            const last = fresh().collectUarchCycleBundle(
+                (1n << BigInt(Constant.RollupLog2MaxUarchCyclesPerMcycle - 3)) -
+                    1n,
+                3,
+                tail,
+            );
+            expect(last).toEqual([
+                ...Array(7).fill(hashes.at(-2)),
+                hashes.at(-1),
+            ]);
+        });
+    });
+
     describe("Networking", () => {
         // A machine with a virtio net-user device sits behind libslirp's NAT.
         // The library is loaded on demand, so whether these run for real
@@ -365,6 +511,39 @@ describe("CartesiMachine", () => {
             // We'll just test that the methods exist and have correct signatures
             expect(typeof machine.receiveCmioRequest).toBe("function");
             expect(typeof machine.sendCmioResponse).toBe("function");
+        });
+
+        it("should ignore a response the machine is not waiting for", () => {
+            const before = machine.getRootHash();
+            for (const reason of [
+                HtifYieldReason.AdvanceState,
+                HtifYieldReason.InspectState,
+            ]) {
+                machine.sendCmioResponse(reason, new Uint8Array(4));
+            }
+            expect(machine.getRootHash()).toEqual(before);
+        });
+
+        it("should log and verify a CMIO response", () => {
+            const before = machine.getRootHash();
+            const data = new Uint8Array(16).fill(0xab);
+            const log = machine.logSendCmioResponse(
+                HtifYieldReason.AdvanceState,
+                data,
+                { has_annotations: true, has_large_data: false },
+                before,
+            );
+            // nothing was waiting for it, so the logged transition is a no-op
+            expect(
+                verifySendCmioResponse(
+                    HtifYieldReason.AdvanceState,
+                    data,
+                    before,
+                    JSON.parse(log),
+                    before,
+                ),
+            ).toEqual(machine.getRootHash());
+            expect(machine.getRootHash()).toEqual(before);
         });
     });
 

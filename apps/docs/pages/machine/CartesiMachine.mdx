@@ -59,6 +59,30 @@ export interface CartesiMachine {
     runUarch(uarchCycleEnd: bigint): UarchBreakReason;
     resetUarch(): void;
 
+    //// Root Hash Collection
+    collectMcycleRootHashes(
+        mcycleEnd: bigint,
+        log2McyclePeriod: number,
+        mcyclePhase: bigint,
+        log2BundleMcycleCount: number,
+        previousPartialBundle?: PartialBundle,
+    ): McycleRootHashes;
+    collectMcycleBundle(
+        bundleOffset: bigint,
+        log2McyclePeriod: number,
+        log2BundleMcycleCount: number,
+    ): Uint8Array[];
+    collectUarchCycleRootHashes(
+        mcycleEnd: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail?: Uint8Array[],
+    ): UarchCycleRootHashes;
+    collectUarchCycleBundle(
+        bundleOffset: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail?: Uint8Array[],
+    ): Uint8Array[];
+
     //// Hash Tree Operations
     getRootHash(): Uint8Array;
     readRevertRootHash(): Uint8Array;
@@ -370,6 +394,72 @@ Resets the entire microarchitecture state to pristine values.
 resetUarch(): void;
 ```
 
+## collectMcycleRootHashes
+
+Runs the machine until `mcycleEnd` or a fixed point (a manual yield, a halt or an mcycle overflow), collecting the state root hash after every 2^`log2McyclePeriod` cycles. With a non-zero `log2BundleMcycleCount`, each entry is instead the root hash of a bundle of 2^`log2BundleMcycleCount` consecutive state root hashes. A collection that stops halfway through a period or a bundle is resumed by passing back the `mcyclePhase` and `partialBundle` it returned. Past a fixed point, its state root hash (or, for a rejected input, the revert root hash) pads the sequence.
+
+```ts
+collectMcycleRootHashes(
+    mcycleEnd: bigint,
+    log2McyclePeriod: number,
+    mcyclePhase: bigint,
+    log2BundleMcycleCount: number,
+    previousPartialBundle?: PartialBundle,
+): McycleRootHashes;
+
+interface McycleRootHashes {
+    hashes: Uint8Array[];
+    mcyclePhase: bigint;
+    breakReason: BreakReason; // as run() would have returned
+    partialBundle?: PartialBundle; // absent when no bundle is in progress
+    consoleIoError?: string; // reported, but does not stop collection
+}
+```
+
+## collectMcycleBundle
+
+Collects the 2^`log2BundleMcycleCount` state root hashes of a single bundle: bundles are counted from the current mcycle, each spanning 2^(`log2McyclePeriod` + `log2BundleMcycleCount`) cycles. Execution first advances to the start of bundle `bundleOffset`, then samples every 2^`log2McyclePeriod` cycles; a fixed point reached before the bundle ends fills the rest of it. A machine already at a fixed point is left unchanged.
+
+```ts
+collectMcycleBundle(
+    bundleOffset: bigint,
+    log2McyclePeriod: number,
+    log2BundleMcycleCount: number,
+): Uint8Array[];
+```
+
+## collectUarchCycleRootHashes
+
+Runs the machine uarch cycle by uarch cycle until `mcycleEnd` or a fixed point, resetting the microarchitecture between mcycles, and collects the state root hash after every uarch cycle (or, with a non-zero `log2BundleUarchCycleCount`, the root hash of each bundle of them). `mcycleHashOffsets` delimits the entries of each mcycle: within one, the next-to-last entry is the state root hash after the uarch halted, which pads the mcycle, and the last is the state root hash after the reset.
+
+`revertUarchTail` is the unbundled collection of the machine the revert root hash names, taken while it waited for its input: it has to end with the revert root hash. The emulator needs it whenever the call may run an mcycle that is not a fixed point — any such mcycle could end in a rejected input — or starts at a rejected input.
+
+```ts
+collectUarchCycleRootHashes(
+    mcycleEnd: bigint,
+    log2BundleUarchCycleCount: number,
+    revertUarchTail?: Uint8Array[],
+): UarchCycleRootHashes;
+
+interface UarchCycleRootHashes {
+    hashes: Uint8Array[];
+    mcycleHashOffsets: number[];
+    breakReason: BreakReason; // as run() would have returned
+}
+```
+
+## collectUarchCycleBundle
+
+Collects the 2^`log2BundleUarchCycleCount` state root hashes of one bundle of the current mcycle, expanded to 2^20 positions, one per uarch cycle: once the uarch halts its state root hash repeats up to the last position, which holds the one after the reset. The machine is left as `collectUarchCycleRootHashes` leaves it with `mcycleEnd` one past the current mcycle.
+
+```ts
+collectUarchCycleBundle(
+    bundleOffset: bigint,
+    log2BundleUarchCycleCount: number,
+    revertUarchTail?: Uint8Array[],
+): Uint8Array[];
+```
+
 ## getRootHash
 
 Obtains the root hash of the current machine state.
@@ -477,7 +567,7 @@ verifyResetUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array;
 
 ## sendCmioResponse
 
-Sends a cmio response. Should only be called as a response to cmio requests with manual yield command. The revert root hash is the machine root hash to revert to in case the response is eventually rejected. It is required for advance-state responses — where it defaults to the machine's current root hash, the value the emulator checks for — and must be absent for other responses (inspect-state queries and GIO responses).
+Sends a cmio response to a manual yield. The revert root hash is the machine root hash to revert to in case the response is eventually rejected. For advance-state responses it has to match the machine's current root hash when an accepted manual yield is pending — which is what it defaults to — and is ignored otherwise; other responses (inspect-state queries and GIO responses) refuse it. A response the machine is not waiting for, one that does not fit in the rx buffer, or an advance-state response to a yield other than an accepted one is a no-op, exactly as the logged transition is.
 
 ```ts
 sendCmioResponse(

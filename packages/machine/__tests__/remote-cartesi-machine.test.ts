@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, test } from "vitest";
-import { CleanupCall, type RemoteCartesiMachine, connect, spawn } from "../src";
+import {
+    type CartesiMachine,
+    CleanupCall,
+    type RemoteCartesiMachine,
+    Reg,
+    connect,
+    create,
+    spawn,
+} from "../src";
 
 // These tests need a working cartesi-jsonrpc-machine executable: either on the
 // PATH from an emulator installation, or the one bundled in the platform
@@ -90,5 +98,37 @@ describe("Cartesi JSON-RPC Machine API", () => {
     test("delayNextRequest: success", () => {
         const machine = spawnServer();
         expect(() => machine.delayNextRequest(100)).not.toThrow();
+    });
+
+    test("collect root hashes: same as a local machine", () => {
+        // partial bundles and revert tails cross the C API as JSON, which
+        // the server has to take and give back unchanged
+        const config = { ram: { length: 0x4000000 } };
+        const yielded = create(config);
+        yielded.writeReg(Reg.IflagsY, 1n);
+        const tail = yielded.collectUarchCycleRootHashes(
+            yielded.readReg(Reg.Mcycle),
+            0,
+        ).hashes;
+
+        const collect = (machine: CartesiMachine) => {
+            const first = machine.collectMcycleRootHashes(512n, 8, 0n, 2);
+            const rest = machine.collectMcycleRootHashes(
+                1024n,
+                8,
+                first.mcyclePhase,
+                2,
+                first.partialBundle,
+            );
+            machine.writeRevertRootHash(tail.at(-1) as Uint8Array);
+            const bundle = machine.collectUarchCycleBundle(0n, 3, tail);
+            return [...rest.hashes, ...bundle].map((hash) =>
+                Buffer.from(hash).toString("hex"),
+            );
+        };
+
+        const remote = spawnServer();
+        remote.create(config);
+        expect(collect(remote)).toEqual(collect(create(config)));
     });
 });

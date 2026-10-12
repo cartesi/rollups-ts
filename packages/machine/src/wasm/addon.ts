@@ -568,11 +568,95 @@ const createBinding = (module: CartesiMachineModule) => {
             });
         }
 
+        collectMcycleRootHashes(
+            mcycleEnd: bigint,
+            log2McyclePeriod: bigint,
+            mcyclePhase: bigint,
+            log2BundleMcycleCount: number,
+            previousPartialBundle: string | null,
+        ): string {
+            return withFrame((frame) => {
+                const out = frame.out(4);
+                check(
+                    module._cm_collect_mcycle_root_hashes(
+                        this.pointer,
+                        mcycleEnd,
+                        log2McyclePeriod,
+                        mcyclePhase,
+                        log2BundleMcycleCount,
+                        frame.string(previousPartialBundle),
+                        out,
+                    ),
+                );
+                return frame.readStringAt(out);
+            });
+        }
+
+        collectMcycleBundle(
+            bundleOffset: bigint,
+            log2McyclePeriod: bigint,
+            log2BundleMcycleCount: number,
+        ): string {
+            return withFrame((frame) => {
+                const out = frame.out(4);
+                check(
+                    module._cm_collect_mcycle_bundle(
+                        this.pointer,
+                        bundleOffset,
+                        log2McyclePeriod,
+                        log2BundleMcycleCount,
+                        out,
+                    ),
+                );
+                return frame.readStringAt(out);
+            });
+        }
+
         runUarch(uarchCycleEnd: bigint): number {
             return withFrame((frame) => {
                 const out = frame.out(4);
                 check(module._cm_run_uarch(this.pointer, uarchCycleEnd, out));
                 return frame.readU32(out);
+            });
+        }
+
+        collectUarchCycleRootHashes(
+            mcycleEnd: bigint,
+            log2BundleUarchCycleCount: number,
+            revertUarchTail: string | null,
+        ): string {
+            return withFrame((frame) => {
+                const out = frame.out(4);
+                check(
+                    module._cm_collect_uarch_cycle_root_hashes(
+                        this.pointer,
+                        mcycleEnd,
+                        log2BundleUarchCycleCount,
+                        frame.string(revertUarchTail),
+                        out,
+                    ),
+                );
+                return frame.readStringAt(out);
+            });
+        }
+
+        collectUarchCycleBundle(
+            bundleOffset: bigint,
+            log2BundleUarchCycleCount: number,
+            revertUarchTail: string | null,
+        ): string {
+            return withFrame((frame) => {
+                const out = frame.out(4);
+                check(
+                    module._cm_collect_uarch_cycle_bundle(
+                        this.pointer,
+                        bundleOffset,
+                        log2BundleUarchCycleCount,
+                        frame.string(revertUarchTail),
+                        out,
+                    ),
+                );
+                return frame.readStringAt(out);
             });
         }
 
@@ -634,7 +718,7 @@ const createBinding = (module: CartesiMachineModule) => {
                         this.pointer,
                         reason,
                         frame.bytes(data),
-                        BigInt(data.length),
+                        data.length,
                         frame.bytes(revertRootHash),
                     ),
                 );
@@ -687,7 +771,7 @@ const createBinding = (module: CartesiMachineModule) => {
                         this.pointer,
                         reason,
                         frame.bytes(data),
-                        BigInt(data.length),
+                        data.length,
                         frame.bytes(revertRootHash),
                         logType,
                         out,
@@ -819,7 +903,7 @@ const createBinding = (module: CartesiMachineModule) => {
                     machine,
                     reason,
                     frame.bytes(data),
-                    BigInt(data.length),
+                    data.length,
                     frame.bytes(rootHashBefore),
                     frame.string(log),
                     frame.bytes(revertRootHash),

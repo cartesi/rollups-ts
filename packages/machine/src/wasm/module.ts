@@ -170,10 +170,40 @@ export interface CartesiMachineModule {
 
     // running
     _cm_run(machine: number, mcycleEnd: bigint, breakReason: number): number;
+    _cm_collect_mcycle_root_hashes(
+        machine: number,
+        mcycleEnd: bigint,
+        log2McyclePeriod: bigint,
+        mcyclePhase: bigint,
+        log2BundleMcycleCount: number,
+        previousPartialBundle: number,
+        out: number,
+    ): number;
+    _cm_collect_mcycle_bundle(
+        machine: number,
+        bundleOffset: bigint,
+        log2McyclePeriod: bigint,
+        log2BundleMcycleCount: number,
+        out: number,
+    ): number;
     _cm_run_uarch(
         machine: number,
         uarchCycleEnd: bigint,
         breakReason: number,
+    ): number;
+    _cm_collect_uarch_cycle_root_hashes(
+        machine: number,
+        mcycleEnd: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail: number,
+        out: number,
+    ): number;
+    _cm_collect_uarch_cycle_bundle(
+        machine: number,
+        bundleOffset: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail: number,
+        out: number,
     ): number;
     _cm_reset_uarch(machine: number): number;
 
@@ -189,7 +219,7 @@ export interface CartesiMachineModule {
         machine: number,
         reason: number,
         data: number,
-        length: bigint,
+        length: number,
         revertRootHash: number,
     ): number;
 
@@ -206,7 +236,7 @@ export interface CartesiMachineModule {
         machine: number,
         reason: number,
         data: number,
-        length: bigint,
+        length: number,
         revertRootHash: number,
         logType: number,
         out: number,
@@ -233,7 +263,7 @@ export interface CartesiMachineModule {
         machine: number,
         reason: number,
         data: number,
-        length: bigint,
+        length: number,
         rootHashBefore: number,
         log: number,
         revertRootHash: number,
@@ -247,7 +277,7 @@ export type CartesiMachineModuleFactory = (
 ) => Promise<CartesiMachineModule>;
 
 /** The ABI wasm/entry.c reports; bumped when the module's shape changes. */
-export const EXPECTED_ABI_VERSION = 1;
+export const EXPECTED_ABI_VERSION = 2;
 
 export interface LoadModuleOptions {
     /**
