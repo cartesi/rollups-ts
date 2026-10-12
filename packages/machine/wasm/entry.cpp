@@ -16,8 +16,10 @@ extern "C" {
 
 // Bumped when the shape of the module's exports changes in a way src/wasm
 // depends on (an added helper, a changed convention). Unrelated to the
-// emulator version, which cm_get_version() reports.
-#define CMW_ABI_VERSION 1
+// emulator version, which cm_get_version() reports — except where a release
+// changes a signature: 2 is emulator 0.22, whose CMIO response lengths are
+// uint32_t, which cross as a Number where 0.21's uint64_t took a BigInt.
+#define CMW_ABI_VERSION 2
 
 uint32_t cmw_abi_version(void) {
     return CMW_ABI_VERSION;

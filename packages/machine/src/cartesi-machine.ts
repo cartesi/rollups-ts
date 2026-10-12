@@ -10,6 +10,7 @@ import type {
     MachineConfig,
     MachineRuntimeConfig,
     MemoryRangeConfig,
+    PartialBundle,
     Proof,
 } from "./types.js";
 
@@ -378,6 +379,33 @@ export enum Reg {
     UarchLast_,
 }
 
+/** What collectMcycleRootHashes returns. */
+export interface McycleRootHashes {
+    /** State root hashes, or bundle root hashes when bundling. */
+    hashes: Uint8Array[];
+    /** Machine cycles elapsed in the current sampling period. */
+    mcyclePhase: bigint;
+    /** Why collection stopped, as run() would have reported it. */
+    breakReason: BreakReason;
+    /** The bundle in progress, for the next call; absent when none remains. */
+    partialBundle?: PartialBundle;
+    /** A console I/O error met along the way, which does not stop collection. */
+    consoleIoError?: string;
+}
+
+/** What collectUarchCycleRootHashes returns. */
+export interface UarchCycleRootHashes {
+    /** State root hashes, or bundle root hashes when bundling. */
+    hashes: Uint8Array[];
+    /**
+     * Offsets into `hashes` delimiting each mcycle: the first is zero, each
+     * other one follows an implicit uarch reset.
+     */
+    mcycleHashOffsets: number[];
+    /** Why collection stopped, as run() would have reported it. */
+    breakReason: BreakReason;
+}
+
 export interface CartesiMachine {
     isEmpty(): boolean;
     isJsonrpcMachine(): boolean;
@@ -423,7 +451,29 @@ export interface CartesiMachine {
     readConsoleOutput(maxLength?: bigint): Uint8Array;
     writeConsoleInput(data: Uint8Array): number;
     run(mcycleEnd?: bigint): BreakReason;
+    collectMcycleRootHashes(
+        mcycleEnd: bigint,
+        log2McyclePeriod: number,
+        mcyclePhase: bigint,
+        log2BundleMcycleCount: number,
+        previousPartialBundle?: PartialBundle,
+    ): McycleRootHashes;
+    collectMcycleBundle(
+        bundleOffset: bigint,
+        log2McyclePeriod: number,
+        log2BundleMcycleCount: number,
+    ): Uint8Array[];
     runUarch(uarchCycleEnd: bigint): UarchBreakReason;
+    collectUarchCycleRootHashes(
+        mcycleEnd: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail?: Uint8Array[],
+    ): UarchCycleRootHashes;
+    collectUarchCycleBundle(
+        bundleOffset: bigint,
+        log2BundleUarchCycleCount: number,
+        revertUarchTail?: Uint8Array[],
+    ): Uint8Array[];
     resetUarch(): void;
     receiveCmioRequest(): {
         cmd: HtifYieldCommand;

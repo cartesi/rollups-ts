@@ -36,6 +36,14 @@ const platformPackage = `@cartesi/machine-${process.platform}-${process.arch}`;
 // works in both output formats (require is not defined in the ESM bundle)
 const require_ = createRequire(join(__dirname, "index.js"));
 
+/**
+ * Whether the addon came from the platform package, whose server executable is
+ * then the one built with it. A source build pairs with the installation it
+ * linked against instead, even where a platform package is also resolvable —
+ * as in this repository, where the playground pulls in the published one.
+ */
+let fromPlatformPackage = false;
+
 const loadAddon = (): NativeAddon => {
     // A local build wins: node-gyp-build resolves build/ (and prebuilds/)
     // under the package root, present when the addon was compiled from source
@@ -46,7 +54,9 @@ const loadAddon = (): NativeAddon => {
         // Published installs resolve the platform-specific prebuilt package,
         // whose main is the addon itself.
         try {
-            return require_(platformPackage) as NativeAddon;
+            const loaded = require_(platformPackage) as NativeAddon;
+            fromPlatformPackage = true;
+            return loaded;
         } catch {
             throw new Error(
                 `@cartesi/machine: no native binding available; expected the ${platformPackage} package (unsupported platform?) or a source build (requires an installed cartesi-machine emulator distribution)`,
@@ -68,10 +78,12 @@ export const addon = loadAddon();
  * `cartesi-jsonrpc-machine` on the PATH. The prebuilt platform package
  * bundles the server executable; point the environment variable at it so
  * spawn works out of the box. Source builds rely on the emulator
- * installation the addon was linked against, whose server is on the PATH.
+ * installation the addon was linked against, whose server is on the PATH:
+ * a server from another emulator release speaks another JSON-RPC version,
+ * which the client refuses.
  */
 export function ensureJsonrpcServerBinary(): void {
-    if (process.env.CARTESI_JSONRPC_MACHINE) {
+    if (process.env.CARTESI_JSONRPC_MACHINE || !fromPlatformPackage) {
         return;
     }
     try {

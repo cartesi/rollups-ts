@@ -10,7 +10,7 @@ There are three ways to reach a machine, and they share one API:
 | [`@cartesi/machine/wasm`](/machine/browser) | libcartesi compiled to WebAssembly by Emscripten | browsers, Node.js, Deno, workers |
 | [`connectHttp()`](/machine/connectHttp) | JSON-RPC over `fetch`, to a `cartesi-jsonrpc-machine` server | anywhere with `fetch` |
 
-The Node.js binding links against the static libraries of the official emulator distribution (currently [0.21.0](https://github.com/cartesi/machine-emulator/releases/tag/v0.21.0)). Prebuilt platform packages bundle everything — including the `cartesi-jsonrpc-machine` server executable used by [spawn](/machine/spawn) — so **no emulator installation is required** for the supported platforms.
+The Node.js binding links against the static libraries of the official emulator distribution (currently [0.22.0](https://github.com/cartesi/machine-emulator/releases/tag/v0.22.0)). Prebuilt platform packages bundle everything — including the `cartesi-jsonrpc-machine` server executable used by [spawn](/machine/spawn) — so **no emulator installation is required** for the supported platforms.
 
 The [WebAssembly build](/machine/browser) is the same emulator compiled for a different target, so it is the same machine: identical root hashes, proofs and access logs, at roughly the speed of the native build.
 

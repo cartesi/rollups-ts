@@ -312,6 +312,15 @@ export interface PageHashTreeCacheStats {
     pristine_pages?: UnsignedInteger;
 }
 
+// Bundle in progress, returned by collect_mcycle_root_hashes to be passed back
+// to the next call as is
+export interface PartialBundle {
+    log2_max_leaves: UnsignedInteger;
+    hash_function: HashFunctionType;
+    leaf_count: UnsignedInteger;
+    context: Base64Hash[];
+}
+
 // Hash Tree statistics
 export interface HashTreeStats {
     phtc?: PageHashTreeCacheStats;
