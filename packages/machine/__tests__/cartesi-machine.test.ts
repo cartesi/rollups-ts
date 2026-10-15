@@ -11,12 +11,14 @@ import {
     getDefaultConfig,
     getLastError,
     getSlirpVersion,
+    getUarchPristineHash,
     hostfwd,
     HtifYieldReason,
     ipv4,
     load,
     MachineError,
     NET_USER,
+    PmaConstant,
     Reg,
     verifySendCmioResponse,
     verifyStep,
@@ -241,6 +243,22 @@ describe("CartesiMachine", () => {
 
         it("should reset microarchitecture", () => {
             expect(() => machine.resetUarch()).not.toThrow();
+        });
+
+        it("should hash the pristine uarch state a reset restores", () => {
+            const uarchState = () =>
+                machine.getNodeHash(
+                    PmaConstant.UarchStateStart,
+                    PmaConstant.UarchStateLog2Size,
+                );
+            const pristine = getUarchPristineHash();
+            expect(machine.getUarchPristineHash()).toEqual(pristine);
+            expect(uarchState()).toEqual(pristine);
+
+            machine.runUarch(10n);
+            expect(uarchState()).not.toEqual(pristine);
+            machine.resetUarch();
+            expect(uarchState()).toEqual(pristine);
         });
     });
 

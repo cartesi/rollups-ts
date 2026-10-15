@@ -20,7 +20,7 @@ concurrency:
 # emulator distribution @cartesi/machine's addon links against; must stay in
 # the series the binding targets (CARTESI_MACHINE_SERIES in its install script)
 env:
-    CARTESI_MACHINE_VERSION: 0.22.0-test2
+    CARTESI_MACHINE_VERSION: 0.22.0
     # apps/cm-playground is a Next.js app; nothing here should phone home
     NEXT_TELEMETRY_DISABLED: 1
 

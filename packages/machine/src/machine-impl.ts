@@ -105,6 +105,14 @@ export class CartesiMachineImpl implements CartesiMachine {
     }
 
     /**
+     * Gets the Keccak-256 hash of the pristine uarch state (its shadow and
+     * RAM), the one a uarch reset restores
+     */
+    getUarchPristineHash(): Uint8Array {
+        return call(() => this.machine.getUarchPristineHash());
+    }
+
+    /**
      * Gets a description of what is at a given target physical address
      */
     getAddressName(paddr: bigint): string {
@@ -736,6 +744,14 @@ export const createMachineApi = (addon: NativeAddon) => ({
      */
     getRegAddress(reg: Reg): bigint {
         return call(() => addon.getRegAddress(reg));
+    },
+
+    /**
+     * Gets the Keccak-256 hash of the pristine uarch state (its shadow and
+     * RAM), the one a uarch reset restores
+     */
+    getUarchPristineHash(): Uint8Array {
+        return call(() => addon.getUarchPristineHash());
     },
 
     /**

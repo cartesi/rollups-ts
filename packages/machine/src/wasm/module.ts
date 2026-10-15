@@ -88,6 +88,7 @@ export interface CartesiMachineModule {
     _cm_get_last_error_message(): number;
     _cm_get_default_config(machine: number, out: number): number;
     _cm_get_reg_address(machine: number, reg: number, out: number): number;
+    _cm_get_uarch_pristine_hash(machine: number, hash: number): number;
     _cm_get_address_name(machine: number, paddr: bigint, out: number): number;
     _cm_set_runtime_config(machine: number, runtimeConfig: number): number;
     _cm_get_runtime_config(machine: number, out: number): number;

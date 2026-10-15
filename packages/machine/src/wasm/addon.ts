@@ -342,6 +342,10 @@ const createBinding = (module: CartesiMachineModule) => {
 
         // -- hashes and proofs ----------------------------------------------
 
+        getUarchPristineHash(): Uint8Array {
+            return this.hashOut(module._cm_get_uarch_pristine_hash);
+        }
+
         getRootHash(): Uint8Array {
             return this.hashOut(module._cm_get_root_hash);
         }
@@ -981,6 +985,14 @@ const createBinding = (module: CartesiMachineModule) => {
                 const out = frame.out(8);
                 check(module._cm_get_reg_address(0, reg, out));
                 return frame.readU64(out);
+            });
+        },
+
+        getUarchPristineHash(): Uint8Array {
+            return withFrame((frame) => {
+                const hash = frame.out(HASH_SIZE);
+                check(module._cm_get_uarch_pristine_hash(0, hash));
+                return frame.readBytes(hash, HASH_SIZE);
             });
         },
 

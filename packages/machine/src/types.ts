@@ -63,6 +63,9 @@ export interface BackingStoreConfig {
     shared?: boolean;
     create?: boolean;
     truncate?: boolean;
+    // recompute every page hash on load (implied when a hash-tree file is
+    // omitted or missing)
+    mark_pages_dirty?: boolean;
 }
 
 // Processor registers

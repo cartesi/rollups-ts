@@ -51,6 +51,7 @@ export interface CartesiMachine {
 
     //// Register Operations
     getRegAddress(reg: Reg): bigint;
+    getUarchPristineHash(): Uint8Array;
     readReg(reg: Reg): bigint;
     writeReg(reg: Reg, value: bigint): void;
 
@@ -350,6 +351,14 @@ Returns the address of a register.
 
 ```ts
 getRegAddress(reg: Reg): bigint;
+```
+
+## getUarchPristineHash
+
+Returns the Keccak-256 hash of the pristine microarchitecture state (its shadow and RAM), which a uarch reset restores. On a Keccak-256 machine it is the hash-tree node at `PmaConstant.UarchStateStart` of size 2^`PmaConstant.UarchStateLog2Size`. Also available as a module-level function.
+
+```ts
+getUarchPristineHash(): Uint8Array;
 ```
 
 ## readReg
