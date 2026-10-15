@@ -152,6 +152,7 @@ export interface RemoteMachineClient {
     replaceMemoryRange(rangeConfig: MemoryRangeConfig): Promise<void>;
     getAddressRanges(): Promise<AddressRangeDescription[]>;
     getRegAddress(reg: Reg): Promise<bigint>;
+    getUarchPristineHash(): Promise<Uint8Array>;
     getAddressName(paddr: bigint): Promise<string>;
 
     getRootHash(): Promise<Uint8Array>;
@@ -410,6 +411,12 @@ export const connect = (
 
         async getAddressName(paddr) {
             return (await rpc("machine.get_address_name", [paddr])) as string;
+        },
+
+        async getUarchPristineHash() {
+            return fromBase64(
+                (await rpc("machine.get_uarch_pristine_hash")) as string,
+            );
         },
 
         async getRootHash() {

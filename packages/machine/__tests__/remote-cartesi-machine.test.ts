@@ -6,6 +6,7 @@ import {
     Reg,
     connect,
     create,
+    getUarchPristineHash,
     spawn,
 } from "../src";
 
@@ -98,6 +99,12 @@ describe("Cartesi JSON-RPC Machine API", () => {
     test("delayNextRequest: success", () => {
         const machine = spawnServer();
         expect(() => machine.delayNextRequest(100)).not.toThrow();
+    });
+
+    test("getUarchPristineHash: same as a local machine", () => {
+        expect(spawnServer().getUarchPristineHash()).toEqual(
+            getUarchPristineHash(),
+        );
     });
 
     test("collect root hashes: same as a local machine", () => {

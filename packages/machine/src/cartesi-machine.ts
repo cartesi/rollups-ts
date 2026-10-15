@@ -65,6 +65,9 @@ export const PmaConstant = {
     PlicLength: 0x00400000n,
     DtbStart: 0x7ff00000n,
     DtbLength: 0x100000n,
+    UarchStateStart: 0x400000n,
+    UarchStateLog2Size: 22,
+    UarchStateLength: 0x400000n,
 } as const;
 
 /// Driver IDs for PMA entries
@@ -433,6 +436,7 @@ export interface CartesiMachine {
     getInitialConfig(): MachineConfig;
     getAddressRanges(): AddressRangeDescription[];
     getRegAddress(reg: Reg): bigint;
+    getUarchPristineHash(): Uint8Array;
     getAddressName(paddr: bigint): string;
     getRootHash(): Uint8Array;
     readRevertRootHash(): Uint8Array;

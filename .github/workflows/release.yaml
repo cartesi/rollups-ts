@@ -16,7 +16,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 # emulator distribution @cartesi/machine's addon links against; must stay in
 # the series the binding targets (CARTESI_MACHINE_SERIES in its install script)
 env:
-    CARTESI_MACHINE_VERSION: 0.22.0-test2
+    CARTESI_MACHINE_VERSION: 0.22.0
 
 jobs:
     # @cartesi/rollup is a native addon and must be published with prebuilds for

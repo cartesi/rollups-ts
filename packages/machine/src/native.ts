@@ -28,6 +28,7 @@ export interface NativeMachine {
     destroy(): void;
     getDefaultConfig(): string;
     getRegAddress(reg: number): bigint;
+    getUarchPristineHash(): Uint8Array;
     setRuntimeConfig(runtimeConfig: string): void;
     getRuntimeConfig(): string;
     replaceMemoryRange(rangeConfig: string): void;
@@ -140,6 +141,7 @@ export interface NativeAddon {
     ): NativeMachine;
     getDefaultConfig(): string;
     getRegAddress(reg: number): bigint;
+    getUarchPristineHash(): Uint8Array;
     getAddressName(paddr: bigint): string;
     verifyStep(
         rootHashBefore: Uint8Array,

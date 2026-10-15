@@ -41,6 +41,7 @@ export const {
     getSlirpVersion,
     getDefaultConfig,
     getRegAddress,
+    getUarchPristineHash,
     getAddressName,
     verifyStep,
     verifyStepUarch,

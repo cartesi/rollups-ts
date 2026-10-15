@@ -222,6 +222,7 @@ private:
     Napi::Value Destroy(const Napi::CallbackInfo &info);
     Napi::Value GetDefaultConfig(const Napi::CallbackInfo &info);
     Napi::Value GetRegAddress(const Napi::CallbackInfo &info);
+    Napi::Value GetUarchPristineHash(const Napi::CallbackInfo &info);
     Napi::Value SetRuntimeConfig(const Napi::CallbackInfo &info);
     Napi::Value GetRuntimeConfig(const Napi::CallbackInfo &info);
     Napi::Value ReplaceMemoryRange(const Napi::CallbackInfo &info);
@@ -403,6 +404,13 @@ Napi::Value Machine::GetRegAddress(const Napi::CallbackInfo &info) {
     uint64_t val = 0;
     CHECK_CM(env, cm_get_reg_address(machine_, static_cast<cm_reg>(reg), &val));
     return Napi::BigInt::New(env, val);
+}
+
+Napi::Value Machine::GetUarchPristineHash(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    cm_hash hash{};
+    CHECK_CM(env, cm_get_uarch_pristine_hash(machine_, &hash));
+    return Napi::Buffer<uint8_t>::Copy(env, hash, CM_HASH_SIZE);
 }
 
 Napi::Value Machine::SetRuntimeConfig(const Napi::CallbackInfo &info) {
@@ -1082,6 +1090,7 @@ Napi::Object Machine::Init(Napi::Env env, Napi::Object exports) {
             InstanceMethod<&Machine::Destroy>("destroy"),
             InstanceMethod<&Machine::GetDefaultConfig>("getDefaultConfig"),
             InstanceMethod<&Machine::GetRegAddress>("getRegAddress"),
+            InstanceMethod<&Machine::GetUarchPristineHash>("getUarchPristineHash"),
             InstanceMethod<&Machine::SetRuntimeConfig>("setRuntimeConfig"),
             InstanceMethod<&Machine::GetRuntimeConfig>("getRuntimeConfig"),
             InstanceMethod<&Machine::ReplaceMemoryRange>("replaceMemoryRange"),
@@ -1236,6 +1245,13 @@ Napi::Value GetRegAddress(const Napi::CallbackInfo &info) {
     return Napi::BigInt::New(env, val);
 }
 
+Napi::Value GetUarchPristineHash(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    cm_hash hash{};
+    CHECK_CM(env, cm_get_uarch_pristine_hash(nullptr, &hash));
+    return Napi::Buffer<uint8_t>::Copy(env, hash, CM_HASH_SIZE);
+}
+
 Napi::Value GetAddressName(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     uint64_t paddr = 0;
@@ -1339,6 +1355,7 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
     exports.Set("machineLoadNew", Napi::Function::New(env, MachineLoadNew));
     exports.Set("getDefaultConfig", Napi::Function::New(env, GetDefaultConfig));
     exports.Set("getRegAddress", Napi::Function::New(env, GetRegAddress));
+    exports.Set("getUarchPristineHash", Napi::Function::New(env, GetUarchPristineHash));
     exports.Set("getAddressName", Napi::Function::New(env, GetAddressName));
     exports.Set("verifyStep", Napi::Function::New(env, VerifyStep));
     exports.Set("verifyStepUarch", Napi::Function::New(env, VerifyStepUarch));

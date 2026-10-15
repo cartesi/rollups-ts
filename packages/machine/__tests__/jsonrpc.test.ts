@@ -11,6 +11,7 @@ import {
     BreakReason,
     connectHttp,
     create,
+    getUarchPristineHash,
     MachineError,
     Reg,
     spawn,
@@ -57,6 +58,12 @@ describe("JSON-RPC client", () => {
         local.run(100000n);
         expect(hex(await machine.getRootHash())).toBe(hex(local.getRootHash()));
         local.destroy();
+    });
+
+    it("hashes the pristine uarch state as the binding does", async () => {
+        expect(hex(await machine.getUarchPristineHash())).toBe(
+            hex(getUarchPristineHash()),
+        );
     });
 
     it("carries bytes as base64, both ways", async () => {

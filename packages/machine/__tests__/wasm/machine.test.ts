@@ -10,6 +10,7 @@ import {
     ErrorCode,
     init,
     MachineError,
+    PmaConstant,
     Reg,
 } from "../../src/browser";
 
@@ -18,7 +19,7 @@ import {
 // what the native build produces for the same steps, which is the property
 // worth pinning — a WebAssembly machine has to be the same machine.
 const PRISTINE_ROOT_HASH =
-    "289c8c1ac57b5caa4709987495c81aef27208235d091f91463b5660e8de26fe7";
+    "64c47761e7e0ecbf3c9e0346f43f1da8fbe086d0760615c703d66fa3c30bf569";
 
 const RAM_LENGTH = 0x4000000;
 
@@ -148,6 +149,20 @@ describe("WebAssembly binding", () => {
             expect(
                 bundled.collectUarchCycleBundle(0n, 3, tail).map(hex),
             ).toEqual(hashes.slice(0, 8).map(hex));
+        });
+
+        it("hashes the pristine uarch state a reset restores", () => {
+            const machine = fresh();
+            const pristine = hex(cartesi.getUarchPristineHash());
+            expect(hex(machine.getUarchPristineHash())).toBe(pristine);
+            expect(
+                hex(
+                    machine.getNodeHash(
+                        PmaConstant.UarchStateStart,
+                        PmaConstant.UarchStateLog2Size,
+                    ),
+                ),
+            ).toBe(pristine);
         });
 
         it("sends, logs and verifies a response nothing waits for", () => {

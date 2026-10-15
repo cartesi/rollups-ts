@@ -21,7 +21,7 @@ A `CartesiMachineWasm`: the machine constructors, plus the handles that only exi
 | --- | --- |
 | [`create`](/machine/create), [`load`](/machine/load), [`empty`](/machine/empty) | the machine constructors, returning a [CartesiMachine](/machine/CartesiMachine) |
 | `getVersion`, `getDefaultConfig`, `getLastError` | module-level queries |
-| `getRegAddress`, `getAddressName` | register and address range lookups |
+| `getRegAddress`, `getAddressName`, `getUarchPristineHash` | register and address range lookups, and the pristine uarch state hash |
 | `verifyStep`, `verifyStepUarch`, `verifyResetUarch`, `verifySendCmioResponse` | stateless verification of access logs |
 | `writeSnapshot(dir, archive)` | unpacks a tar of a stored machine into the module's filesystem |
 | `readSnapshot(dir)` | packs a stored machine back into a tar archive |
