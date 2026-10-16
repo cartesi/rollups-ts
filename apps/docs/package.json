@@ -11,7 +11,7 @@
         "preview": "vocs preview"
     },
     "dependencies": {
-        "react": "^19.2.8",
+        "react": "^19.3.0",
         "react-dom": "^19.2.8",
         "vite": "^8.2.0",
         "vocs": "^2.8.5",
