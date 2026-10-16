@@ -1,18 +1,12 @@
 // Kernels and filesystems: where they come from and which ones this machine
-// uses. They are kept in IndexedDB, so this is also the only place in the app
-// that knows a few hundred megabytes are involved.
-import { useCallback, useEffect, useRef, useState } from "react";
-
+// is built out of. They are kept in IndexedDB, so this is also one of the two
+// places in the app that knows a few hundred megabytes are involved.
 import { CATALOG } from "../images/catalog";
-import {
-    addFile,
-    addUrl,
-    deleteImage,
-    type ImageRecord,
-    listImages,
-} from "../images/store";
+import { addUrl, deleteImage, type ImageRecord } from "../images/store";
 import { formatSize } from "../machine/config";
-import { Button, Field, Section, TextInput } from "./ui";
+import { LibraryAdd, LibraryStatus } from "./LibraryAdd";
+import { Button, Section } from "./ui";
+import { useLibrary } from "./useLibrary";
 
 export const ImageLibrary = ({
     images,
@@ -21,52 +15,14 @@ export const ImageLibrary = ({
     rootfsId,
     onPick,
 }: {
+    /** The images a machine can be built from — snapshots are not among them. */
     images: ImageRecord[];
     onChange: (images: ImageRecord[]) => void;
     kernelId: string | null;
     rootfsId: string | null;
     onPick: (slot: "kernel" | "rootfs", id: string | null) => void;
 }) => {
-    const [busy, setBusy] = useState<string | null>(null);
-    const [progress, setProgress] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [url, setUrl] = useState("");
-    const fileInput = useRef<HTMLInputElement>(null);
-
-    const refresh = useCallback(async () => {
-        onChange(await listImages());
-    }, [onChange]);
-
-    useEffect(() => {
-        refresh().catch((cause: unknown) => setError(String(cause)));
-    }, [refresh]);
-
-    const run = async (label: string, work: () => Promise<unknown>) => {
-        setBusy(label);
-        setProgress(null);
-        setError(null);
-        try {
-            await work();
-            await refresh();
-        } catch (cause) {
-            setError(cause instanceof Error ? cause.message : String(cause));
-        } finally {
-            setBusy(null);
-            setProgress(null);
-        }
-    };
-
-    // A rootfs is a third of a gigabyte, so a download that says nothing for a
-    // minute looks like one that has stalled.
-    const onProgress = (received: number, total: number | null) => {
-        setProgress(
-            total === null
-                ? formatSize(received)
-                : `${formatSize(received)} of ${formatSize(total)} · ${Math.round(
-                      (received / total) * 100,
-                  )}%`,
-        );
-    };
+    const { busy, progress, error, run, onProgress } = useLibrary(onChange);
 
     const have = (url: string) => images.some((image) => image.source === url);
 
@@ -118,58 +74,14 @@ export const ImageLibrary = ({
                 <strong>add a file</strong>.
             </p>
 
-            <div className="row">
-                <Field label="From a URL" wide>
-                    <TextInput
-                        value={url}
-                        onChange={setUrl}
-                        placeholder="https://…/rootfs.ext2"
-                        mono
-                    />
-                </Field>
-                <Button
-                    disabled={busy !== null || url.trim() === ""}
-                    onClick={() =>
-                        void run(url, async () => {
-                            await addUrl(url.trim(), { onProgress });
-                            setUrl("");
-                        })
-                    }
-                >
-                    fetch
-                </Button>
-                <Button
-                    kind="ghost"
-                    disabled={busy !== null}
-                    onClick={() => fileInput.current?.click()}
-                >
-                    add a file
-                </Button>
-                <input
-                    ref={fileInput}
-                    type="file"
-                    hidden
-                    onChange={(event) => {
-                        const files = Array.from(event.target.files ?? []);
-                        event.target.value = "";
-                        if (files.length > 0) {
-                            void run(files[0]?.name ?? "file", async () => {
-                                for (const file of files) {
-                                    await addFile(file);
-                                }
-                            });
-                        }
-                    }}
-                />
-            </div>
+            <LibraryAdd
+                placeholder="https://…/rootfs.ext2"
+                busy={busy}
+                run={run}
+                onProgress={onProgress}
+            />
 
-            {busy === null ? null : (
-                <p className="hint">
-                    working on {busy}
-                    {progress === null ? "" : ` — ${progress}`}…
-                </p>
-            )}
-            {error === null ? null : <p className="error">{error}</p>}
+            <LibraryStatus busy={busy} progress={progress} error={error} />
 
             {images.length === 0 ? (
                 <p className="hint">
