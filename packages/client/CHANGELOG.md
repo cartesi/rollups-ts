@@ -1,5 +1,18 @@
 # @cartesi/client
 
+## 2.0.0-alpha.39
+
+### Patch Changes
+
+- 0e9a6a2: Type `Match.deletionBlockNumber` as `bigint`, no longer nullable, mirroring
+  `@cartesi/rpc`.
+  
+  The node reports `0x0` for a match that is not deleted, and the converter
+  already turned that into `0n` rather than `null`, so the runtime value is
+  unchanged; only the type now says so. A `null` check on it was dead code.
+- Updated dependencies [a9ad932]
+  - @cartesi/rpc@2.0.0-alpha.28
+
 ## 2.0.0-alpha.38
 
 ### Patch Changes
