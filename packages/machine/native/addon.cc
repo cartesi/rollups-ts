@@ -185,13 +185,22 @@ bool get_optional_string(Napi::Env env, const Napi::Value &value, const char *na
     return get_string(env, value, name, out);
 }
 
-// Access log type flags, matching the koffi binding's AccessLogTypeEnum.
+// An int32_t argument (registers, reasons, log types, log2 sizes). Rejected
+// unless it is an integer in range: Int32Value() alone wraps modulo 2^32 and
+// maps NaN and infinities to 0, which turns a caller's mistake into a
+// different, valid-looking call.
 bool get_i32(Napi::Env env, const Napi::Value &value, const char *name, int32_t *out) {
     if (!value.IsNumber()) {
         Napi::TypeError::New(env, std::string(name) + " must be a number").ThrowAsJavaScriptException();
         return false;
     }
-    *out = value.As<Napi::Number>().Int32Value();
+    double d = value.As<Napi::Number>().DoubleValue();
+    if (!(d >= INT32_MIN && d <= INT32_MAX) || d != static_cast<double>(static_cast<int32_t>(d))) {
+        Napi::RangeError::New(env, std::string(name) + " must be an integer that fits in an int32")
+            .ThrowAsJavaScriptException();
+        return false;
+    }
+    *out = static_cast<int32_t>(d);
     return true;
 }
 

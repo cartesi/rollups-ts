@@ -9,6 +9,21 @@ import type { CartesiMachineModule } from "./module.js";
 const HASH_SIZE = 32;
 const HASH_TREE_LOG2_ROOT_SIZE = 64;
 
+/**
+ * An int32_t argument, checked before it reaches the module: a Number passed
+ * as a wasm i32 is wrapped modulo 2^32, and NaN and infinities become 0, which
+ * turns a caller's mistake into a different, valid-looking call. The N-API
+ * addon refuses the same values.
+ */
+const int32 = (value: number, name: string): number => {
+    if (!Number.isInteger(value) || value < -0x80000000 || value > 0x7fffffff) {
+        throw new RangeError(
+            `${name} must be an integer that fits in an int32`,
+        );
+    }
+    return value;
+};
+
 /** Errors carry what the wrapper turns into a MachineError. */
 class NativeError extends Error {
     constructor(
@@ -220,7 +235,7 @@ const createBinding = (module: CartesiMachineModule) => {
                         this.pointer,
                         frame.string(dir),
                         frame.string(runtimeConfig),
-                        sharing,
+                        int32(sharing, "sharing"),
                     ),
                 );
             });
@@ -237,7 +252,11 @@ const createBinding = (module: CartesiMachineModule) => {
         store(dir: string, sharing: number = 0): void {
             withFrame((frame) => {
                 check(
-                    module._cm_store(this.pointer, frame.string(dir), sharing),
+                    module._cm_store(
+                        this.pointer,
+                        frame.string(dir),
+                        int32(sharing, "sharing"),
+                    ),
                 );
             });
         }
@@ -293,7 +312,13 @@ const createBinding = (module: CartesiMachineModule) => {
         getRegAddress(reg: number): bigint {
             return withFrame((frame) => {
                 const out = frame.out(8);
-                check(module._cm_get_reg_address(this.pointer, reg, out));
+                check(
+                    module._cm_get_reg_address(
+                        this.pointer,
+                        int32(reg, "reg"),
+                        out,
+                    ),
+                );
                 return frame.readU64(out);
             });
         }
@@ -372,7 +397,7 @@ const createBinding = (module: CartesiMachineModule) => {
                     module._cm_get_node_hash(
                         this.pointer,
                         address,
-                        log2Size,
+                        int32(log2Size, "log2Size"),
                         hash,
                     ),
                 );
@@ -391,8 +416,8 @@ const createBinding = (module: CartesiMachineModule) => {
                     module._cm_get_proof(
                         this.pointer,
                         address,
-                        log2Size,
-                        log2RootSize,
+                        int32(log2Size, "log2Size"),
+                        int32(log2RootSize, "log2RootSize"),
                         out,
                     ),
                 );
@@ -435,13 +460,15 @@ const createBinding = (module: CartesiMachineModule) => {
         readReg(reg: number): bigint {
             return withFrame((frame) => {
                 const out = frame.out(8);
-                check(module._cm_read_reg(this.pointer, reg, out));
+                check(
+                    module._cm_read_reg(this.pointer, int32(reg, "reg"), out),
+                );
                 return frame.readU64(out);
             });
         }
 
         writeReg(reg: number, value: bigint): void {
-            check(module._cm_write_reg(this.pointer, reg, value));
+            check(module._cm_write_reg(this.pointer, int32(reg, "reg"), value));
         }
 
         readMemory(address: bigint, length: bigint): Uint8Array {
@@ -587,7 +614,7 @@ const createBinding = (module: CartesiMachineModule) => {
                         mcycleEnd,
                         log2McyclePeriod,
                         mcyclePhase,
-                        log2BundleMcycleCount,
+                        int32(log2BundleMcycleCount, "log2BundleMcycleCount"),
                         frame.string(previousPartialBundle),
                         out,
                     ),
@@ -608,7 +635,7 @@ const createBinding = (module: CartesiMachineModule) => {
                         this.pointer,
                         bundleOffset,
                         log2McyclePeriod,
-                        log2BundleMcycleCount,
+                        int32(log2BundleMcycleCount, "log2BundleMcycleCount"),
                         out,
                     ),
                 );
@@ -635,7 +662,10 @@ const createBinding = (module: CartesiMachineModule) => {
                     module._cm_collect_uarch_cycle_root_hashes(
                         this.pointer,
                         mcycleEnd,
-                        log2BundleUarchCycleCount,
+                        int32(
+                            log2BundleUarchCycleCount,
+                            "log2BundleUarchCycleCount",
+                        ),
                         frame.string(revertUarchTail),
                         out,
                     ),
@@ -655,7 +685,10 @@ const createBinding = (module: CartesiMachineModule) => {
                     module._cm_collect_uarch_cycle_bundle(
                         this.pointer,
                         bundleOffset,
-                        log2BundleUarchCycleCount,
+                        int32(
+                            log2BundleUarchCycleCount,
+                            "log2BundleUarchCycleCount",
+                        ),
                         frame.string(revertUarchTail),
                         out,
                     ),
@@ -720,7 +753,7 @@ const createBinding = (module: CartesiMachineModule) => {
                 check(
                     module._cm_send_cmio_response(
                         this.pointer,
-                        reason,
+                        int32(reason, "reason"),
                         frame.bytes(data),
                         data.length,
                         frame.bytes(revertRootHash),
@@ -749,7 +782,13 @@ const createBinding = (module: CartesiMachineModule) => {
         logStepUarch(logType: number): string {
             return withFrame((frame) => {
                 const out = frame.out(4);
-                check(module._cm_log_step_uarch(this.pointer, logType, out));
+                check(
+                    module._cm_log_step_uarch(
+                        this.pointer,
+                        int32(logType, "logType"),
+                        out,
+                    ),
+                );
                 return frame.readStringAt(out);
             });
         }
@@ -757,7 +796,13 @@ const createBinding = (module: CartesiMachineModule) => {
         logResetUarch(logType: number): string {
             return withFrame((frame) => {
                 const out = frame.out(4);
-                check(module._cm_log_reset_uarch(this.pointer, logType, out));
+                check(
+                    module._cm_log_reset_uarch(
+                        this.pointer,
+                        int32(logType, "logType"),
+                        out,
+                    ),
+                );
                 return frame.readStringAt(out);
             });
         }
@@ -773,11 +818,11 @@ const createBinding = (module: CartesiMachineModule) => {
                 check(
                     module._cm_log_send_cmio_response(
                         this.pointer,
-                        reason,
+                        int32(reason, "reason"),
                         frame.bytes(data),
                         data.length,
                         frame.bytes(revertRootHash),
-                        logType,
+                        int32(logType, "logType"),
                         out,
                     ),
                 );
@@ -905,7 +950,7 @@ const createBinding = (module: CartesiMachineModule) => {
             check(
                 module._cm_verify_send_cmio_response(
                     machine,
-                    reason,
+                    int32(reason, "reason"),
                     frame.bytes(data),
                     data.length,
                     frame.bytes(rootHashBefore),
@@ -964,7 +1009,7 @@ const createBinding = (module: CartesiMachineModule) => {
                     module._cm_load_new(
                         frame.string(dir),
                         frame.string(runtimeConfig),
-                        sharing,
+                        int32(sharing, "sharing"),
                         out,
                     ),
                 );
@@ -983,7 +1028,7 @@ const createBinding = (module: CartesiMachineModule) => {
         getRegAddress(reg: number): bigint {
             return withFrame((frame) => {
                 const out = frame.out(8);
-                check(module._cm_get_reg_address(0, reg, out));
+                check(module._cm_get_reg_address(0, int32(reg, "reg"), out));
                 return frame.readU64(out);
             });
         },
