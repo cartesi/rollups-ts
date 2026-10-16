@@ -378,6 +378,32 @@ describe("CartesiMachine", () => {
             expect(machine.readReg(Reg.Mcycle)).toBe(1n);
         });
 
+        it("should refuse a bundle size that is not an int32", () => {
+            // the addon used to wrap these modulo 2^32 (NaN and infinities to
+            // 0), which ran a different, smaller collection instead
+            for (const bad of [2 ** 32, 2 ** 32 + 2, 2.7, NaN, Infinity]) {
+                const fresh = create(config);
+                expect(() => fresh.collectMcycleBundle(0n, 8, bad)).toThrow(
+                    RangeError,
+                );
+                expect(() =>
+                    fresh.collectMcycleRootHashes(1024n, 8, 0n, bad),
+                ).toThrow(RangeError);
+                expect(() => fresh.collectUarchCycleBundle(0n, bad)).toThrow(
+                    RangeError,
+                );
+                expect(() =>
+                    fresh.collectUarchCycleRootHashes(1n, bad),
+                ).toThrow(RangeError);
+                expect(fresh.readReg(Reg.Mcycle)).toBe(0n);
+                fresh.destroy();
+            }
+            // the other int32 arguments go through the same check
+            expect(() =>
+                machine.getNodeHash(0x80000000n, 2 ** 32 + 12),
+            ).toThrow(RangeError);
+        });
+
         it("should collect one bundle of uarch cycles", () => {
             const tail = revertUarchTail();
             const fresh = () => {

@@ -165,6 +165,35 @@ describe("WebAssembly binding", () => {
             ).toBe(pristine);
         });
 
+        it("refuses a bundle size that is not an int32", () => {
+            // a Number passed as a wasm i32 wraps modulo 2^32 (NaN and
+            // infinities to 0), which would run a different collection
+            for (const bad of [2 ** 32, 2 ** 32 + 2, 2.7, NaN, Infinity]) {
+                const machine = fresh();
+                expect(() => machine.collectMcycleBundle(0n, 8, bad)).toThrow(
+                    RangeError,
+                );
+                expect(() =>
+                    machine.collectMcycleRootHashes(1024n, 8, 0n, bad),
+                ).toThrow(RangeError);
+                expect(() => machine.collectUarchCycleBundle(0n, bad)).toThrow(
+                    RangeError,
+                );
+                expect(() =>
+                    machine.collectUarchCycleRootHashes(1n, bad),
+                ).toThrow(RangeError);
+                expect(machine.readReg(Reg.Mcycle)).toBe(0n);
+                // each machine holds 64 MiB of the module's heap, which the
+                // suites after this one need
+                machine.destroy();
+            }
+            const machine = fresh();
+            expect(() =>
+                machine.getNodeHash(0x80000000n, 2 ** 32 + 12),
+            ).toThrow(RangeError);
+            machine.destroy();
+        });
+
         it("sends, logs and verifies a response nothing waits for", () => {
             const machine = fresh();
             const before = machine.getRootHash();
