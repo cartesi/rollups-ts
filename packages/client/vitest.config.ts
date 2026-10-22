@@ -15,7 +15,7 @@ export default defineConfig({
             provider: "v8",
             reporter: ["text", "lcov"],
             exclude: ["./src/rollups.ts"],
-            include: ["**/src"],
+            include: ["./src/**"],
         },
     },
 });
