@@ -1,4 +1,10 @@
-import { getAddress, hexToBytes, slice } from "viem";
+import {
+    AbiFunctionSignatureNotFoundError,
+    getAddress,
+    type Hex,
+    hexToBytes,
+    slice,
+} from "viem";
 import { describe, expect, it } from "vitest";
 import {
     decodeOutput,
@@ -23,6 +29,16 @@ const encodedVoucher =
 // canonical calldata of Outputs.DelegateCallVoucher(0x...1, 0xdeadbeef)
 const encodedDelegateCallVoucher =
     "0x10321e8b000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000004deadbeef00000000000000000000000000000000000000000000000000000000" as const;
+
+// Error contract for data whose leading four bytes match no `Outputs`
+// function. The hex path gets this from the decoder and the byte array path
+// throws it by hand, so every assertion goes through one helper to keep the
+// two in step. Pinned: the error class, and the offending selector quoted in
+// the message; the wording around it belongs to the decoder that raises it.
+const expectUnknownSelector = (decode: () => unknown, selector: Hex): void => {
+    expect(decode).toThrow(AbiFunctionSignatureNotFoundError);
+    expect(decode).toThrow(`"${selector}" not found`);
+};
 
 const notice: Notice = { type: "Notice", payload: "0xdeadbeef" };
 
@@ -100,7 +116,51 @@ describe("output", () => {
     });
 
     it("should throw on data with an unknown function selector", () => {
-        expect(() => decodeOutput("0x415bf363")).toThrow();
+        expectUnknownSelector(() => decodeOutput("0x415bf363"), "0x415bf363");
+    });
+
+    // the selector is one of the three but the arguments are missing. The
+    // class is the decoder's own and is deliberately not pinned.
+    it("should throw on data that is too short to decode", () => {
+        expect(() => decodeOutput(slice(encodedVoucher, 0, 4))).toThrow();
+        expect(() => decodeOutput(slice(encodedVoucher, 0, 36))).toThrow();
+    });
+
+    // A destination is checksummed by the ABI decoder on the hex path and by
+    // readAddressWord on the byte array path. The roundtrip tests cover it
+    // only incidentally — they would fail with a mismatched output object,
+    // pointing nowhere near address casing — so these encode from the
+    // lowercase spelling and assert the checksummed one comes back. The
+    // fixtures above cannot do this: 0x...01 has no alphabetic digit, so
+    // checksumming it is the identity.
+    it.each([
+        ["hex", (o: Output): Output => decodeOutput(encodeOutput(o))],
+        [
+            "bytes",
+            (o: Output): Output<Uint8Array> =>
+                decodeOutput(encodeOutput(o, "bytes")),
+        ],
+    ])("should return a checksummed destination (%s)", (_name, roundtrip) => {
+        const lowercase = "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182";
+        const checksummed = getAddress(lowercase);
+        expect(checksummed).not.toEqual(lowercase);
+
+        const decodedVoucher = roundtrip({
+            type: "Voucher",
+            destination: lowercase,
+            value: 2n,
+            payload: "0xdeadbeef",
+        });
+        const decodedDelegateCall = roundtrip({
+            type: "DelegateCallVoucher",
+            destination: lowercase,
+            payload: "0xdeadbeef",
+        });
+
+        expect(decodedVoucher).toMatchObject({ destination: checksummed });
+        expect(decodedDelegateCall).toMatchObject({
+            destination: checksummed,
+        });
     });
 });
 
@@ -188,6 +248,9 @@ describe("output (byte array)", () => {
     });
 
     it("should throw on a byte array with an unknown function selector", () => {
-        expect(() => decodeOutput(hexToBytes("0x415bf363"))).toThrow();
+        expectUnknownSelector(
+            () => decodeOutput(hexToBytes("0x415bf363")),
+            "0x415bf363",
+        );
     });
 });
