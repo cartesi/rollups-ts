@@ -20,6 +20,7 @@ catalog:
     node-addon-api: ^8.9.2
     node-gyp: ^13.0.2
     node-gyp-build: ^4.8.4
+    ox: ^1.8.9
     tsdown: ^0.23.0
     typescript: ^6.0.3
     viem: ^2.56.3
