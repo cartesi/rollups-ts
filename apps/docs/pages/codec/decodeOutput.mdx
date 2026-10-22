@@ -67,4 +67,4 @@ Byte fields follow the representation of the encoded data: hex string in, hex st
 
 ## Errors
 
-Throws a viem `AbiFunctionSignatureNotFoundError` if the data does not start with the selector of one of the `Outputs` functions.
+Throws an ox `AbiItem.NotFoundError` if the data does not start with the selector of one of the `Outputs` functions, and the underlying decoder's own error if it does but is too short to decode.

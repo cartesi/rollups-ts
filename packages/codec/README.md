@@ -2,15 +2,17 @@
 
 Isomorphic utility functions to decode (and encode, for testing) data compliant with the Cartesi Rollups [`Inputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Inputs.sol) and [`Outputs`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/Outputs.sol) interfaces, as well as the portal deposit input payloads packed-encoded by the [`InputEncoding`](https://github.com/cartesi/rollups-contracts/blob/main/src/common/InputEncoding.sol) library.
 
-Inputs delivered to a Cartesi application and outputs produced by it are ABI-encoded as calls to the functions of those interfaces. This package decodes those blobs into friendly typed objects, and encodes typed objects back into blobs. The `Input` and `Output` TypeScript types are inferred directly from the `Inputs` and `Outputs` ABIs, so they always match the rollups-contracts release the package is built against. It works in browsers and Node.js, and depends only on [viem](https://viem.sh) and [abitype](https://abitype.dev).
+Inputs delivered to a Cartesi application and outputs produced by it are ABI-encoded as calls to the functions of those interfaces. This package decodes those blobs into friendly typed objects, and encodes typed objects back into blobs. The `Input` and `Output` TypeScript types are inferred directly from the `Inputs` and `Outputs` ABIs, so they always match the rollups-contracts release the package is built against. It works in browsers and Node.js, and depends only on [ox](https://oxlib.sh) and [abitype](https://abitype.dev).
 
 ## Installation
 
 ```sh
-npm install @cartesi/codec@alpha viem
+npm install @cartesi/codec@alpha
 ```
 
 While in pre-release, the library is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
+
+The CommonJS entry point requires Node.js 22.12 or newer, where `require()` of an ES module is unflagged; ox publishes no CommonJS build of its own. The ESM entry point has no such requirement.
 
 ## Usage
 
