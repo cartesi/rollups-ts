@@ -7,28 +7,32 @@ Inputs delivered to a Cartesi application and outputs produced by it are ABI-enc
 - inputs are encoded as `EvmAdvance(uint256,address,address,uint256,uint256,uint256,uint256,bytes)` calls;
 - outputs are encoded as `Notice(bytes)`, `Voucher(address,uint256,bytes)` or `DelegateCallVoucher(address,bytes)` calls.
 
-The package decodes those blobs into friendly typed objects, and encodes typed objects back into blobs. The `Input` and `Output` TypeScript types are inferred directly from the `Inputs` and `Outputs` ABIs, so they always match the rollups-contracts release the package is built against. It works in browsers and Node.js, and depends only on [viem](https://viem.sh) and [abitype](https://abitype.dev).
+The package decodes those blobs into friendly typed objects, and encodes typed objects back into blobs. The `Input` and `Output` TypeScript types are inferred directly from the `Inputs` and `Outputs` ABIs, so they always match the rollups-contracts release the package is built against. It works in browsers and Node.js, and depends only on [ox](https://oxlib.sh) and [abitype](https://abitype.dev).
 
 ## Installation
 
 :::code-group
 
 ```sh [npm]
-npm install @cartesi/codec@alpha viem
+npm install @cartesi/codec@alpha
 ```
 
 ```sh [pnpm]
-pnpm add @cartesi/codec@alpha viem
+pnpm add @cartesi/codec@alpha
 ```
 
 ```sh [yarn]
-yarn add @cartesi/codec@alpha viem
+yarn add @cartesi/codec@alpha
 ```
 
 :::
 
 :::warning
 While in pre-release, the library is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
+:::
+
+:::info
+The CommonJS entry point requires Node.js 22.12 or newer, where `require()` of an ES module is unflagged; ox publishes no CommonJS build of its own. The ESM entry point has no such requirement.
 :::
 
 ## Hex strings and byte arrays
