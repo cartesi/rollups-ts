@@ -1,10 +1,5 @@
-import {
-    AbiFunctionSignatureNotFoundError,
-    getAddress,
-    type Hex,
-    hexToBytes,
-    slice,
-} from "viem";
+import * as AbiItem from "ox/AbiItem";
+import * as Hex from "ox/Hex";
 import { describe, expect, it } from "vitest";
 import {
     decodeOutput,
@@ -35,8 +30,11 @@ const encodedDelegateCallVoucher =
 // throws it by hand, so every assertion goes through one helper to keep the
 // two in step. Pinned: the error class, and the offending selector quoted in
 // the message; the wording around it belongs to the decoder that raises it.
-const expectUnknownSelector = (decode: () => unknown, selector: Hex): void => {
-    expect(decode).toThrow(AbiFunctionSignatureNotFoundError);
+const expectUnknownSelector = (
+    decode: () => unknown,
+    selector: Hex.Hex,
+): void => {
+    expect(decode).toThrow(AbiItem.NotFoundError);
     expect(decode).toThrow(`"${selector}" not found`);
 };
 
@@ -59,13 +57,13 @@ describe("output", () => {
     it("should encode a notice", () => {
         expect(encodeNotice(notice)).toEqual(encodedNotice);
         expect(encodeOutput(notice)).toEqual(encodedNotice);
-        expect(slice(encodedNotice, 0, 4)).toEqual("0xc258d6e5");
+        expect(Hex.slice(encodedNotice, 0, 4)).toEqual("0xc258d6e5");
     });
 
     it("should encode a voucher", () => {
         expect(encodeVoucher(voucher)).toEqual(encodedVoucher);
         expect(encodeOutput(voucher)).toEqual(encodedVoucher);
-        expect(slice(encodedVoucher, 0, 4)).toEqual("0x237a816f");
+        expect(Hex.slice(encodedVoucher, 0, 4)).toEqual("0x237a816f");
     });
 
     it("should encode a delegate call voucher", () => {
@@ -75,7 +73,9 @@ describe("output", () => {
         expect(encodeOutput(delegateCallVoucher)).toEqual(
             encodedDelegateCallVoucher,
         );
-        expect(slice(encodedDelegateCallVoucher, 0, 4)).toEqual("0x10321e8b");
+        expect(Hex.slice(encodedDelegateCallVoucher, 0, 4)).toEqual(
+            "0x10321e8b",
+        );
     });
 
     it("should decode a notice", () => {
@@ -93,9 +93,7 @@ describe("output", () => {
     });
 
     it("should roundtrip outputs through encode and decode", () => {
-        const destination = getAddress(
-            "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
-        );
+        const destination = "0x67742FF5B2B762503fF0A92738C6FC2ea4a4d182";
         const outputs = [
             { type: "Notice", payload: "0x" },
             {
@@ -122,8 +120,8 @@ describe("output", () => {
     // the selector is one of the three but the arguments are missing. The
     // class is the decoder's own and is deliberately not pinned.
     it("should throw on data that is too short to decode", () => {
-        expect(() => decodeOutput(slice(encodedVoucher, 0, 4))).toThrow();
-        expect(() => decodeOutput(slice(encodedVoucher, 0, 36))).toThrow();
+        expect(() => decodeOutput(Hex.slice(encodedVoucher, 0, 4))).toThrow();
+        expect(() => decodeOutput(Hex.slice(encodedVoucher, 0, 36))).toThrow();
     });
 
     // A destination is checksummed by the ABI decoder on the hex path and by
@@ -142,7 +140,7 @@ describe("output", () => {
         ],
     ])("should return a checksummed destination (%s)", (_name, roundtrip) => {
         const lowercase = "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182";
-        const checksummed = getAddress(lowercase);
+        const checksummed = "0x67742FF5B2B762503fF0A92738C6FC2ea4a4d182";
         expect(checksummed).not.toEqual(lowercase);
 
         const decodedVoucher = roundtrip({
@@ -165,7 +163,7 @@ describe("output", () => {
 });
 
 describe("output (byte array)", () => {
-    const payloadBytes = hexToBytes("0xdeadbeef");
+    const payloadBytes = Hex.toBytes("0xdeadbeef");
     const noticeBytes: Notice<Uint8Array> = {
         type: "Notice",
         payload: payloadBytes,
@@ -180,21 +178,21 @@ describe("output (byte array)", () => {
     };
 
     it("should decode a notice from a byte array", () => {
-        expect(decodeOutput(hexToBytes(encodedNotice))).toEqual(noticeBytes);
+        expect(decodeOutput(Hex.toBytes(encodedNotice))).toEqual(noticeBytes);
     });
 
     it("should decode a voucher from a byte array", () => {
-        expect(decodeOutput(hexToBytes(encodedVoucher))).toEqual(voucherBytes);
+        expect(decodeOutput(Hex.toBytes(encodedVoucher))).toEqual(voucherBytes);
     });
 
     it("should decode a delegate call voucher from a byte array", () => {
-        expect(decodeOutput(hexToBytes(encodedDelegateCallVoucher))).toEqual(
+        expect(decodeOutput(Hex.toBytes(encodedDelegateCallVoucher))).toEqual(
             delegateCallVoucherBytes,
         );
     });
 
     it("should return the payload as a zero-copy view of the data", () => {
-        const data = hexToBytes(encodedNotice);
+        const data = Hex.toBytes(encodedNotice);
         const decoded = decodeOutput(data);
         expect(decoded.payload.buffer).toBe(data.buffer);
         expect(decoded.payload.byteOffset).toBe(4 + 2 * 32);
@@ -203,16 +201,16 @@ describe("output (byte array)", () => {
 
     it("should encode outputs to byte arrays", () => {
         expect(encodeNotice(noticeBytes, "bytes")).toEqual(
-            hexToBytes(encodedNotice),
+            Hex.toBytes(encodedNotice),
         );
         expect(encodeVoucher(voucher, "bytes")).toEqual(
-            hexToBytes(encodedVoucher),
+            Hex.toBytes(encodedVoucher),
         );
         expect(encodeDelegateCallVoucher(delegateCallVoucher, "bytes")).toEqual(
-            hexToBytes(encodedDelegateCallVoucher),
+            Hex.toBytes(encodedDelegateCallVoucher),
         );
         expect(encodeOutput(voucherBytes, "bytes")).toEqual(
-            hexToBytes(encodedVoucher),
+            Hex.toBytes(encodedVoucher),
         );
     });
 
@@ -225,16 +223,14 @@ describe("output (byte array)", () => {
     });
 
     it("should roundtrip outputs through encode and decode", () => {
-        const destination = getAddress(
-            "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
-        );
+        const destination = "0x67742FF5B2B762503fF0A92738C6FC2ea4a4d182";
         const outputs: Output<Uint8Array>[] = [
             { type: "Notice", payload: new Uint8Array() },
             {
                 type: "Voucher",
                 destination,
                 value: 0n,
-                payload: hexToBytes("0x095ea7b3"),
+                payload: Hex.toBytes("0x095ea7b3"),
             },
             {
                 type: "DelegateCallVoucher",
@@ -249,7 +245,7 @@ describe("output (byte array)", () => {
 
     it("should throw on a byte array with an unknown function selector", () => {
         expectUnknownSelector(
-            () => decodeOutput(hexToBytes("0x415bf363")),
+            () => decodeOutput(Hex.toBytes("0x415bf363")),
             "0x415bf363",
         );
     });

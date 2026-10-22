@@ -1,4 +1,5 @@
-import { bytesToHex, type Hex } from "viem";
+import * as Bytes from "ox/Bytes";
+import type * as Hex from "ox/Hex";
 import { describe, expect, it } from "vitest";
 import { asHex } from "../src/bytes.js";
 import { decodeInput, encodeInput, type Input } from "../src/input.js";
@@ -38,13 +39,13 @@ const toHexFields = (decoded: object): Record<string, unknown> =>
     Object.fromEntries(
         Object.entries(decoded).map(([key, value]) => [
             key,
-            value instanceof Uint8Array ? bytesToHex(value) : value,
+            value instanceof Uint8Array ? Bytes.toHex(value) : value,
         ]),
     );
 
 type Case = {
     name: string;
-    hex: () => Hex;
+    hex: () => Hex.Hex;
     bytes: () => Uint8Array;
     fromHex: () => object;
     decodeBytes: (data: Uint8Array) => object;

@@ -1,4 +1,5 @@
-import { bytesToHex, getAddress, hexToBytes, numberToHex } from "viem";
+import * as Bytes from "ox/Bytes";
+import * as Hex from "ox/Hex";
 import { describe, expect, it } from "vitest";
 import {
     abiBytesSize,
@@ -29,7 +30,7 @@ import {
 // are exactly the parts that go wrong silently, by returning a subarray of the
 // wrong length rather than by throwing.
 
-const address = getAddress("0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182");
+const address = "0x67742FF5B2B762503fF0A92738C6FC2ea4a4d182";
 
 describe("ceilWord", () => {
     it.each([
@@ -71,12 +72,12 @@ describe("size helpers", () => {
 
 describe("representation normalizers", () => {
     it("should pass a byte array through asBytes", () => {
-        const bytes = hexToBytes("0xdeadbeef");
+        const bytes = Hex.toBytes("0xdeadbeef");
         expect(asBytes(bytes)).toBe(bytes);
     });
 
     it("should convert hex to bytes with asBytes", () => {
-        expect(asBytes("0xdeadbeef")).toEqual(hexToBytes("0xdeadbeef"));
+        expect(asBytes("0xdeadbeef")).toEqual(Hex.toBytes("0xdeadbeef"));
     });
 
     it("should pass hex through asHex", () => {
@@ -84,7 +85,7 @@ describe("representation normalizers", () => {
     });
 
     it("should convert bytes to hex with asHex", () => {
-        expect(asHex(hexToBytes("0xdeadbeef"))).toEqual("0xdeadbeef");
+        expect(asHex(Hex.toBytes("0xdeadbeef"))).toEqual("0xdeadbeef");
     });
 
     it("should round empty values through both", () => {
@@ -94,38 +95,40 @@ describe("representation normalizers", () => {
 });
 
 describe("hasSelector", () => {
-    const selector = hexToBytes("0xdeadbeef");
+    const selector = Hex.toBytes("0xdeadbeef");
 
     it("should match data starting with the selector", () => {
-        expect(hasSelector(hexToBytes("0xdeadbeef0011"), selector)).toBe(true);
+        expect(hasSelector(Hex.toBytes("0xdeadbeef0011"), selector)).toBe(true);
     });
 
     it("should not match data starting with another selector", () => {
-        expect(hasSelector(hexToBytes("0xdeadbeee0011"), selector)).toBe(false);
+        expect(hasSelector(Hex.toBytes("0xdeadbeee0011"), selector)).toBe(
+            false,
+        );
     });
 
     // every() reads past the end as undefined rather than throwing, so a
     // truncated blob has to come back false instead of matching
     it("should not match data shorter than the selector", () => {
-        expect(hasSelector(hexToBytes("0xdead"), selector)).toBe(false);
+        expect(hasSelector(Hex.toBytes("0xdead"), selector)).toBe(false);
         expect(hasSelector(new Uint8Array(), selector)).toBe(false);
     });
 });
 
 describe("addresses", () => {
     it("should read a checksummed address", () => {
-        const data = hexToBytes(address.toLowerCase() as `0x${string}`);
+        const data = Hex.toBytes(address.toLowerCase() as `0x${string}`);
         expect(readAddress(data, 0)).toEqual(address);
     });
 
     it("should read an address right-aligned in a word", () => {
         const data = new Uint8Array(WORD);
-        data.set(hexToBytes(address), WORD - 20);
+        data.set(Hex.toBytes(address), WORD - 20);
         expect(readAddressWord(data, 0)).toEqual(address);
     });
 
     it("should throw reading an address out of bounds", () => {
-        expect(() => readAddress(hexToBytes("0xdeadbeef"), 0)).toThrow(
+        expect(() => readAddress(Hex.toBytes("0xdeadbeef"), 0)).toThrow(
             "data out of bounds: expected at least 20 bytes, got 4",
         );
     });
@@ -133,14 +136,14 @@ describe("addresses", () => {
     it("should write an address and return the next offset", () => {
         const data = new Uint8Array(20);
         expect(writeAddress(data, 0, address)).toEqual(20);
-        expect(bytesToHex(data)).toEqual(address.toLowerCase());
+        expect(Bytes.toHex(data)).toEqual(address.toLowerCase());
     });
 
     it("should write an address right-aligned in a word", () => {
         const data = new Uint8Array(WORD);
         expect(writeAddressWord(data, 0, address)).toEqual(WORD);
         expect(data.subarray(0, WORD - 20)).toEqual(new Uint8Array(12));
-        expect(bytesToHex(data.subarray(WORD - 20))).toEqual(
+        expect(Bytes.toHex(data.subarray(WORD - 20))).toEqual(
             address.toLowerCase(),
         );
     });
@@ -192,7 +195,7 @@ describe("abi bytes", () => {
     };
 
     it("should write the length word and return the next offset", () => {
-        const value = hexToBytes("0xdeadbeef");
+        const value = Hex.toBytes("0xdeadbeef");
         const data = new Uint8Array(abiBytesSize(value));
         expect(writeAbiBytes(data, 0, value)).toEqual(2 * WORD);
         expect(readUint256(data, 0)).toEqual(4n);
@@ -200,7 +203,7 @@ describe("abi bytes", () => {
     });
 
     it("should right-pad the contents with zeros", () => {
-        const data = encode(hexToBytes("0xdeadbeef"));
+        const data = encode(Hex.toBytes("0xdeadbeef"));
         expect(data.subarray(2 * WORD + 4)).toEqual(new Uint8Array(WORD - 4));
     });
 
@@ -214,7 +217,7 @@ describe("abi bytes", () => {
     );
 
     it("should return a zero-copy view of the data", () => {
-        const value = hexToBytes("0xdeadbeef");
+        const value = Hex.toBytes("0xdeadbeef");
         const data = encode(value);
         const read = readAbiBytes(data, 0, 0);
         expect(read.buffer).toBe(data.buffer);
@@ -225,7 +228,7 @@ describe("abi bytes", () => {
     it("should resolve the offset pointer relative to the base", () => {
         // the same field one word further in, reached from a base of 32, so a
         // pointer of 32 lands at 64 rather than at 32
-        const value = hexToBytes("0xdeadbeef");
+        const value = Hex.toBytes("0xdeadbeef");
         const data = new Uint8Array(2 * WORD + abiBytesSize(value));
         writeUint256(data, WORD, BigInt(WORD));
         writeAbiBytes(data, 2 * WORD, value);
@@ -233,7 +236,10 @@ describe("abi bytes", () => {
     });
 
     it("should throw on a field whose contents are truncated", () => {
-        const data = encode(hexToBytes("0xdeadbeef")).subarray(0, 2 * WORD + 2);
+        const data = encode(Hex.toBytes("0xdeadbeef")).subarray(
+            0,
+            2 * WORD + 2,
+        );
         expect(() => readAbiBytes(data, 0, 0)).toThrow("data out of bounds");
     });
 
@@ -283,21 +289,21 @@ describe("abi uint256 array", () => {
 describe("raw writers", () => {
     it("should write bytes and return the offset past them", () => {
         const data = new Uint8Array(8);
-        expect(writeBytes(data, 2, hexToBytes("0xdeadbeef"))).toEqual(6);
-        expect(bytesToHex(data)).toEqual("0x0000deadbeef0000");
+        expect(writeBytes(data, 2, Hex.toBytes("0xdeadbeef"))).toEqual(6);
+        expect(Bytes.toHex(data)).toEqual("0x0000deadbeef0000");
     });
 
     it("should pad to whole words and return the padded offset", () => {
         const data = new Uint8Array(2 * WORD);
-        expect(writePaddedBytes(data, 0, hexToBytes("0xdeadbeef"))).toEqual(
+        expect(writePaddedBytes(data, 0, Hex.toBytes("0xdeadbeef"))).toEqual(
             WORD,
         );
-        expect(data.subarray(0, 4)).toEqual(hexToBytes("0xdeadbeef"));
+        expect(data.subarray(0, 4)).toEqual(Hex.toBytes("0xdeadbeef"));
         expect(data.subarray(4, WORD)).toEqual(new Uint8Array(WORD - 4));
     });
 
     it("should not pad a value that already fills whole words", () => {
-        const value = hexToBytes(numberToHex(1n, { size: 32 }));
+        const value = Hex.toBytes(Hex.fromNumber(1n, { size: 32 }));
         expect(writePaddedBytes(new Uint8Array(WORD), 0, value)).toEqual(WORD);
     });
 });

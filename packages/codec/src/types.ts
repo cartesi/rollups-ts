@@ -1,9 +1,10 @@
-import type {
-    AbiParameter,
-    AbiParameterToPrimitiveType,
-    ByteArray,
-    Hex,
-} from "viem";
+import type { AbiParameter, AbiParameterToPrimitiveType } from "abitype";
+import type * as Bytes from "ox/Bytes";
+import type * as Hex from "ox/Hex";
+
+// abitype is a direct dependency for `AbiParameterToPrimitiveType` alone:
+// ox builds on abitype and re-exports its ABI extraction types, but has no
+// public equivalent for mapping a single parameter to its primitive type.
 
 /**
  * Map named ABI parameters to an object type: `{ name: primitiveType, ... }`.
@@ -12,7 +13,7 @@ import type {
  */
 export type ParamsToObject<
     params extends readonly AbiParameter[],
-    bytes extends Hex | ByteArray = Hex,
+    bytes extends Hex.Hex | Bytes.Bytes = Hex.Hex,
 > = {
     [param in params[number] as param extends {
         name: infer name extends string;
