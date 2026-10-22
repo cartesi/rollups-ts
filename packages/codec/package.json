@@ -50,9 +50,6 @@
         "NOTICE",
         "dist/**"
     ],
-    "peerDependencies": {
-        "viem": "^2.0.0"
-    },
     "publishConfig": {
         "access": "public"
     },
@@ -69,6 +66,10 @@
         "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
-        "abitype": "^1.3.0"
+        "abitype": "^1.3.0",
+        "ox": "catalog:"
+    },
+    "engines": {
+        "node": "^22.12 || ^24 || >=26"
     }
 }
