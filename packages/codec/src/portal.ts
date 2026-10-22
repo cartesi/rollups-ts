@@ -1,21 +1,13 @@
-import {
-    type Address,
-    type ByteArray,
-    decodeAbiParameters,
-    encodeAbiParameters,
-    encodePacked,
-    getAddress,
-    type Hex,
-    hexToBigInt,
-    isAddressEqual,
-    size,
-    slice,
-} from "viem";
+import * as AbiParameters from "ox/AbiParameters";
+import * as Address from "ox/Address";
+import type * as Bytes from "ox/Bytes";
+import * as Hex from "ox/Hex";
 import {
     abiBytesSize,
     abiUint256ArraySize,
     asBytes,
     asHex,
+    byteSize,
     readAbiBytes,
     readAbiUint256Array,
     readAddress,
@@ -42,15 +34,15 @@ import type { Prettify, To } from "./types.js";
 // library, and sizes are in bytes
 
 // each deposit type takes a `bytes` parameter selecting the representation of
-// its variable-size data fields: `Hex` (the default) or `Uint8Array`
+// its variable-size data fields: `Hex.Hex` (the default) or `Uint8Array`
 
 /**
  * Payload of an input added by the Ether portal.
  * Layout: `sender (20) ‖ value (32) ‖ execLayerData`.
  */
-export type EtherDeposit<bytes extends Hex | ByteArray = Hex> = {
+export type EtherDeposit<bytes extends Hex.Hex | Bytes.Bytes = Hex.Hex> = {
     /** Ether sender */
-    sender: Address;
+    sender: Address.Address;
     /** Amount of Wei being sent */
     value: bigint;
     /** Additional data to be interpreted by the execution layer */
@@ -61,11 +53,11 @@ export type EtherDeposit<bytes extends Hex | ByteArray = Hex> = {
  * Payload of an input added by the ERC-20 portal.
  * Layout: `token (20) ‖ sender (20) ‖ value (32) ‖ execLayerData`.
  */
-export type Erc20Deposit<bytes extends Hex | ByteArray = Hex> = {
+export type Erc20Deposit<bytes extends Hex.Hex | Bytes.Bytes = Hex.Hex> = {
     /** Token contract */
-    token: Address;
+    token: Address.Address;
     /** Token sender */
-    sender: Address;
+    sender: Address.Address;
     /** Amount of tokens being sent */
     value: bigint;
     /** Additional data to be interpreted by the execution layer */
@@ -77,11 +69,11 @@ export type Erc20Deposit<bytes extends Hex | ByteArray = Hex> = {
  * Layout: `token (20) ‖ sender (20) ‖ tokenId (32) ‖
  * abi.encode(baseLayerData, execLayerData)`.
  */
-export type Erc721Deposit<bytes extends Hex | ByteArray = Hex> = {
+export type Erc721Deposit<bytes extends Hex.Hex | Bytes.Bytes = Hex.Hex> = {
     /** Token contract */
-    token: Address;
+    token: Address.Address;
     /** Token sender */
-    sender: Address;
+    sender: Address.Address;
     /** Token identifier */
     tokenId: bigint;
     /** Additional data to be interpreted by the base layer */
@@ -95,11 +87,13 @@ export type Erc721Deposit<bytes extends Hex | ByteArray = Hex> = {
  * Layout: `token (20) ‖ sender (20) ‖ tokenId (32) ‖ value (32) ‖
  * abi.encode(baseLayerData, execLayerData)`.
  */
-export type Erc1155SingleDeposit<bytes extends Hex | ByteArray = Hex> = {
+export type Erc1155SingleDeposit<
+    bytes extends Hex.Hex | Bytes.Bytes = Hex.Hex,
+> = {
     /** Token contract */
-    token: Address;
+    token: Address.Address;
     /** Token sender */
-    sender: Address;
+    sender: Address.Address;
     /** Identifier of the token being transferred */
     tokenId: bigint;
     /** Transfer amount */
@@ -115,20 +109,21 @@ export type Erc1155SingleDeposit<bytes extends Hex | ByteArray = Hex> = {
  * Layout: `token (20) ‖ sender (20) ‖
  * abi.encode(tokenIds, values, baseLayerData, execLayerData)`.
  */
-export type Erc1155BatchDeposit<bytes extends Hex | ByteArray = Hex> = {
-    /** Token contract */
-    token: Address;
-    /** Token sender */
-    sender: Address;
-    /** Identifiers of the tokens being transferred */
-    tokenIds: readonly bigint[];
-    /** Transfer amounts per token type */
-    values: readonly bigint[];
-    /** Additional data to be interpreted by the base layer */
-    baseLayerData: bytes;
-    /** Additional data to be interpreted by the execution layer */
-    execLayerData: bytes;
-};
+export type Erc1155BatchDeposit<bytes extends Hex.Hex | Bytes.Bytes = Hex.Hex> =
+    {
+        /** Token contract */
+        token: Address.Address;
+        /** Token sender */
+        sender: Address.Address;
+        /** Identifiers of the tokens being transferred */
+        tokenIds: readonly bigint[];
+        /** Transfer amounts per token type */
+        values: readonly bigint[];
+        /** Additional data to be interpreted by the base layer */
+        baseLayerData: bytes;
+        /** Additional data to be interpreted by the execution layer */
+        execLayerData: bytes;
+    };
 
 // abi.encode(baseLayerData, execLayerData) tail of ERC-721/1155 deposits
 const dataAbi = [{ type: "bytes" }, { type: "bytes" }] as const;
@@ -142,35 +137,40 @@ const batchDataAbi = [
     { type: "bytes" },
 ] as const;
 
+// `Hex.size` and `Bytes.size` are separate, so measuring a payload of
+// either representation goes through `byteSize`
 const assertMinSize = (
-    payload: Hex | ByteArray,
+    payload: Hex.Hex | Bytes.Bytes,
     min: number,
     what: string,
 ): void => {
-    if (size(payload) < min) {
+    const size = byteSize(payload);
+    if (size < min) {
         throw new Error(
-            `invalid ${what} payload: expected at least ${min} bytes, got ${size(payload)}`,
+            `invalid ${what} payload: expected at least ${min} bytes, got ${size}`,
         );
     }
 };
 
-const sliceFrom = (payload: Hex, start: number): Hex =>
-    size(payload) > start ? slice(payload, start) : "0x";
+// `Hex.slice` rejects a start offset at or past the end of the value, so an
+// exhausted tail has to be returned as "0x" rather than sliced
+const sliceFrom = (payload: Hex.Hex, start: number): Hex.Hex =>
+    Hex.size(payload) > start ? Hex.slice(payload, start) : "0x";
 
 // hand-rolled encoders of the abi.encode'd data tails, filling a
 // preallocated buffer
 
 const dataTailSize = (
-    baseLayerData: ByteArray,
-    execLayerData: ByteArray,
+    baseLayerData: Bytes.Bytes,
+    execLayerData: Bytes.Bytes,
 ): number =>
     2 * WORD + abiBytesSize(baseLayerData) + abiBytesSize(execLayerData);
 
 const writeDataTail = (
     data: Uint8Array,
     offset: number,
-    baseLayerData: ByteArray,
-    execLayerData: ByteArray,
+    baseLayerData: Bytes.Bytes,
+    execLayerData: Bytes.Bytes,
 ): void => {
     const baseLayerDataOffset = 2 * WORD;
     const execLayerDataOffset =
@@ -184,8 +184,8 @@ const writeDataTail = (
 const batchDataTailSize = (
     tokenIds: readonly bigint[],
     values: readonly bigint[],
-    baseLayerData: ByteArray,
-    execLayerData: ByteArray,
+    baseLayerData: Bytes.Bytes,
+    execLayerData: Bytes.Bytes,
 ): number =>
     4 * WORD +
     abiUint256ArraySize(tokenIds) +
@@ -198,8 +198,8 @@ const writeBatchDataTail = (
     offset: number,
     tokenIds: readonly bigint[],
     values: readonly bigint[],
-    baseLayerData: ByteArray,
-    execLayerData: ByteArray,
+    baseLayerData: Bytes.Bytes,
+    execLayerData: Bytes.Bytes,
 ): void => {
     const tokenIdsOffset = 4 * WORD;
     const valuesOffset = tokenIdsOffset + abiUint256ArraySize(tokenIds);
@@ -216,15 +216,15 @@ const writeBatchDataTail = (
     writeAbiBytes(data, next, execLayerData);
 };
 
-const decodeEtherDepositHex = (payload: Hex): EtherDeposit => ({
-    sender: getAddress(slice(payload, 0, 20)),
-    value: hexToBigInt(slice(payload, 20, 52)),
+const decodeEtherDepositHex = (payload: Hex.Hex): EtherDeposit => ({
+    sender: Address.checksum(Hex.slice(payload, 0, 20)),
+    value: Hex.toBigInt(Hex.slice(payload, 20, 52)),
     execLayerData: sliceFrom(payload, 52),
 });
 
 const decodeEtherDepositBytes = (
-    payload: ByteArray,
-): EtherDeposit<ByteArray> => ({
+    payload: Bytes.Bytes,
+): EtherDeposit<Bytes.Bytes> => ({
     sender: readAddress(payload, 0),
     value: readUint256(payload, 20),
     execLayerData: payload.subarray(52),
@@ -238,14 +238,16 @@ const decodeEtherDepositBytes = (
  * of `payload`, and is a zero-copy subarray when `payload` is a byte array
  * @throws if the payload is too short
  */
-export function decodeEtherDeposit(payload: Hex): EtherDeposit;
-export function decodeEtherDeposit(payload: ByteArray): EtherDeposit<ByteArray>;
+export function decodeEtherDeposit(payload: Hex.Hex): EtherDeposit;
 export function decodeEtherDeposit(
-    payload: Hex | ByteArray,
-): EtherDeposit<Hex | ByteArray>;
+    payload: Bytes.Bytes,
+): EtherDeposit<Bytes.Bytes>;
 export function decodeEtherDeposit(
-    payload: Hex | ByteArray,
-): EtherDeposit<Hex | ByteArray> {
+    payload: Hex.Hex | Bytes.Bytes,
+): EtherDeposit<Hex.Hex | Bytes.Bytes>;
+export function decodeEtherDeposit(
+    payload: Hex.Hex | Bytes.Bytes,
+): EtherDeposit<Hex.Hex | Bytes.Bytes> {
     assertMinSize(payload, 52, "Ether deposit");
     return typeof payload === "string"
         ? decodeEtherDepositHex(payload)
@@ -262,21 +264,21 @@ export function decodeEtherDeposit(
  * @returns packed-encoded deposit payload
  */
 export function encodeEtherDeposit(
-    deposit: EtherDeposit<Hex | ByteArray>,
+    deposit: EtherDeposit<Hex.Hex | Bytes.Bytes>,
     to?: "hex",
-): Hex;
+): Hex.Hex;
 export function encodeEtherDeposit(
-    deposit: EtherDeposit<Hex | ByteArray>,
+    deposit: EtherDeposit<Hex.Hex | Bytes.Bytes>,
     to: "bytes",
-): ByteArray;
+): Bytes.Bytes;
 export function encodeEtherDeposit(
-    deposit: EtherDeposit<Hex | ByteArray>,
+    deposit: EtherDeposit<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray;
+): Hex.Hex | Bytes.Bytes;
 export function encodeEtherDeposit(
-    deposit: EtherDeposit<Hex | ByteArray>,
+    deposit: EtherDeposit<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray {
+): Hex.Hex | Bytes.Bytes {
     if (to === "bytes") {
         const execLayerData = asBytes(deposit.execLayerData);
         const data = new Uint8Array(52 + execLayerData.length);
@@ -285,22 +287,22 @@ export function encodeEtherDeposit(
         data.set(execLayerData, offset);
         return data;
     }
-    return encodePacked(
+    return AbiParameters.encodePacked(
         ["address", "uint256", "bytes"],
         [deposit.sender, deposit.value, asHex(deposit.execLayerData)],
     );
 }
 
-const decodeErc20DepositHex = (payload: Hex): Erc20Deposit => ({
-    token: getAddress(slice(payload, 0, 20)),
-    sender: getAddress(slice(payload, 20, 40)),
-    value: hexToBigInt(slice(payload, 40, 72)),
+const decodeErc20DepositHex = (payload: Hex.Hex): Erc20Deposit => ({
+    token: Address.checksum(Hex.slice(payload, 0, 20)),
+    sender: Address.checksum(Hex.slice(payload, 20, 40)),
+    value: Hex.toBigInt(Hex.slice(payload, 40, 72)),
     execLayerData: sliceFrom(payload, 72),
 });
 
 const decodeErc20DepositBytes = (
-    payload: ByteArray,
-): Erc20Deposit<ByteArray> => ({
+    payload: Bytes.Bytes,
+): Erc20Deposit<Bytes.Bytes> => ({
     token: readAddress(payload, 0),
     sender: readAddress(payload, 20),
     value: readUint256(payload, 40),
@@ -315,14 +317,16 @@ const decodeErc20DepositBytes = (
  * of `payload`, and is a zero-copy subarray when `payload` is a byte array
  * @throws if the payload is too short
  */
-export function decodeErc20Deposit(payload: Hex): Erc20Deposit;
-export function decodeErc20Deposit(payload: ByteArray): Erc20Deposit<ByteArray>;
+export function decodeErc20Deposit(payload: Hex.Hex): Erc20Deposit;
 export function decodeErc20Deposit(
-    payload: Hex | ByteArray,
-): Erc20Deposit<Hex | ByteArray>;
+    payload: Bytes.Bytes,
+): Erc20Deposit<Bytes.Bytes>;
 export function decodeErc20Deposit(
-    payload: Hex | ByteArray,
-): Erc20Deposit<Hex | ByteArray> {
+    payload: Hex.Hex | Bytes.Bytes,
+): Erc20Deposit<Hex.Hex | Bytes.Bytes>;
+export function decodeErc20Deposit(
+    payload: Hex.Hex | Bytes.Bytes,
+): Erc20Deposit<Hex.Hex | Bytes.Bytes> {
     assertMinSize(payload, 72, "ERC-20 deposit");
     return typeof payload === "string"
         ? decodeErc20DepositHex(payload)
@@ -339,21 +343,21 @@ export function decodeErc20Deposit(
  * @returns packed-encoded deposit payload
  */
 export function encodeErc20Deposit(
-    deposit: Erc20Deposit<Hex | ByteArray>,
+    deposit: Erc20Deposit<Hex.Hex | Bytes.Bytes>,
     to?: "hex",
-): Hex;
+): Hex.Hex;
 export function encodeErc20Deposit(
-    deposit: Erc20Deposit<Hex | ByteArray>,
+    deposit: Erc20Deposit<Hex.Hex | Bytes.Bytes>,
     to: "bytes",
-): ByteArray;
+): Bytes.Bytes;
 export function encodeErc20Deposit(
-    deposit: Erc20Deposit<Hex | ByteArray>,
+    deposit: Erc20Deposit<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray;
+): Hex.Hex | Bytes.Bytes;
 export function encodeErc20Deposit(
-    deposit: Erc20Deposit<Hex | ByteArray>,
+    deposit: Erc20Deposit<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray {
+): Hex.Hex | Bytes.Bytes {
     if (to === "bytes") {
         const execLayerData = asBytes(deposit.execLayerData);
         const data = new Uint8Array(72 + execLayerData.length);
@@ -363,7 +367,7 @@ export function encodeErc20Deposit(
         data.set(execLayerData, offset);
         return data;
     }
-    return encodePacked(
+    return AbiParameters.encodePacked(
         ["address", "address", "uint256", "bytes"],
         [
             deposit.token,
@@ -374,23 +378,23 @@ export function encodeErc20Deposit(
     );
 }
 
-const decodeErc721DepositHex = (payload: Hex): Erc721Deposit => {
-    const [baseLayerData, execLayerData] = decodeAbiParameters(
+const decodeErc721DepositHex = (payload: Hex.Hex): Erc721Deposit => {
+    const [baseLayerData, execLayerData] = AbiParameters.decode(
         dataAbi,
         sliceFrom(payload, 72),
     );
     return {
-        token: getAddress(slice(payload, 0, 20)),
-        sender: getAddress(slice(payload, 20, 40)),
-        tokenId: hexToBigInt(slice(payload, 40, 72)),
+        token: Address.checksum(Hex.slice(payload, 0, 20)),
+        sender: Address.checksum(Hex.slice(payload, 20, 40)),
+        tokenId: Hex.toBigInt(Hex.slice(payload, 40, 72)),
         baseLayerData,
         execLayerData,
     };
 };
 
 const decodeErc721DepositBytes = (
-    payload: ByteArray,
-): Erc721Deposit<ByteArray> => ({
+    payload: Bytes.Bytes,
+): Erc721Deposit<Bytes.Bytes> => ({
     token: readAddress(payload, 0),
     sender: readAddress(payload, 20),
     tokenId: readUint256(payload, 40),
@@ -406,16 +410,16 @@ const decodeErc721DepositBytes = (
  * of `payload`, and are zero-copy subarrays when `payload` is a byte array
  * @throws if the payload is too short or its data tail is malformed
  */
-export function decodeErc721Deposit(payload: Hex): Erc721Deposit;
+export function decodeErc721Deposit(payload: Hex.Hex): Erc721Deposit;
 export function decodeErc721Deposit(
-    payload: ByteArray,
-): Erc721Deposit<ByteArray>;
+    payload: Bytes.Bytes,
+): Erc721Deposit<Bytes.Bytes>;
 export function decodeErc721Deposit(
-    payload: Hex | ByteArray,
-): Erc721Deposit<Hex | ByteArray>;
+    payload: Hex.Hex | Bytes.Bytes,
+): Erc721Deposit<Hex.Hex | Bytes.Bytes>;
 export function decodeErc721Deposit(
-    payload: Hex | ByteArray,
-): Erc721Deposit<Hex | ByteArray> {
+    payload: Hex.Hex | Bytes.Bytes,
+): Erc721Deposit<Hex.Hex | Bytes.Bytes> {
     assertMinSize(payload, 72, "ERC-721 deposit");
     return typeof payload === "string"
         ? decodeErc721DepositHex(payload)
@@ -432,21 +436,21 @@ export function decodeErc721Deposit(
  * @returns packed-encoded deposit payload
  */
 export function encodeErc721Deposit(
-    deposit: Erc721Deposit<Hex | ByteArray>,
+    deposit: Erc721Deposit<Hex.Hex | Bytes.Bytes>,
     to?: "hex",
-): Hex;
+): Hex.Hex;
 export function encodeErc721Deposit(
-    deposit: Erc721Deposit<Hex | ByteArray>,
+    deposit: Erc721Deposit<Hex.Hex | Bytes.Bytes>,
     to: "bytes",
-): ByteArray;
+): Bytes.Bytes;
 export function encodeErc721Deposit(
-    deposit: Erc721Deposit<Hex | ByteArray>,
+    deposit: Erc721Deposit<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray;
+): Hex.Hex | Bytes.Bytes;
 export function encodeErc721Deposit(
-    deposit: Erc721Deposit<Hex | ByteArray>,
+    deposit: Erc721Deposit<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray {
+): Hex.Hex | Bytes.Bytes {
     if (to === "bytes") {
         const baseLayerData = asBytes(deposit.baseLayerData);
         const execLayerData = asBytes(deposit.execLayerData);
@@ -459,13 +463,13 @@ export function encodeErc721Deposit(
         writeDataTail(data, offset, baseLayerData, execLayerData);
         return data;
     }
-    return encodePacked(
+    return AbiParameters.encodePacked(
         ["address", "address", "uint256", "bytes"],
         [
             deposit.token,
             deposit.sender,
             deposit.tokenId,
-            encodeAbiParameters(dataAbi, [
+            AbiParameters.encode(dataAbi, [
                 asHex(deposit.baseLayerData),
                 asHex(deposit.execLayerData),
             ]),
@@ -473,24 +477,26 @@ export function encodeErc721Deposit(
     );
 }
 
-const decodeErc1155SingleDepositHex = (payload: Hex): Erc1155SingleDeposit => {
-    const [baseLayerData, execLayerData] = decodeAbiParameters(
+const decodeErc1155SingleDepositHex = (
+    payload: Hex.Hex,
+): Erc1155SingleDeposit => {
+    const [baseLayerData, execLayerData] = AbiParameters.decode(
         dataAbi,
         sliceFrom(payload, 104),
     );
     return {
-        token: getAddress(slice(payload, 0, 20)),
-        sender: getAddress(slice(payload, 20, 40)),
-        tokenId: hexToBigInt(slice(payload, 40, 72)),
-        value: hexToBigInt(slice(payload, 72, 104)),
+        token: Address.checksum(Hex.slice(payload, 0, 20)),
+        sender: Address.checksum(Hex.slice(payload, 20, 40)),
+        tokenId: Hex.toBigInt(Hex.slice(payload, 40, 72)),
+        value: Hex.toBigInt(Hex.slice(payload, 72, 104)),
         baseLayerData,
         execLayerData,
     };
 };
 
 const decodeErc1155SingleDepositBytes = (
-    payload: ByteArray,
-): Erc1155SingleDeposit<ByteArray> => ({
+    payload: Bytes.Bytes,
+): Erc1155SingleDeposit<Bytes.Bytes> => ({
     token: readAddress(payload, 0),
     sender: readAddress(payload, 20),
     tokenId: readUint256(payload, 40),
@@ -508,16 +514,18 @@ const decodeErc1155SingleDepositBytes = (
  * a byte array
  * @throws if the payload is too short or its data tail is malformed
  */
-export function decodeErc1155SingleDeposit(payload: Hex): Erc1155SingleDeposit;
 export function decodeErc1155SingleDeposit(
-    payload: ByteArray,
-): Erc1155SingleDeposit<ByteArray>;
+    payload: Hex.Hex,
+): Erc1155SingleDeposit;
 export function decodeErc1155SingleDeposit(
-    payload: Hex | ByteArray,
-): Erc1155SingleDeposit<Hex | ByteArray>;
+    payload: Bytes.Bytes,
+): Erc1155SingleDeposit<Bytes.Bytes>;
 export function decodeErc1155SingleDeposit(
-    payload: Hex | ByteArray,
-): Erc1155SingleDeposit<Hex | ByteArray> {
+    payload: Hex.Hex | Bytes.Bytes,
+): Erc1155SingleDeposit<Hex.Hex | Bytes.Bytes>;
+export function decodeErc1155SingleDeposit(
+    payload: Hex.Hex | Bytes.Bytes,
+): Erc1155SingleDeposit<Hex.Hex | Bytes.Bytes> {
     assertMinSize(payload, 104, "ERC-1155 single deposit");
     return typeof payload === "string"
         ? decodeErc1155SingleDepositHex(payload)
@@ -534,21 +542,21 @@ export function decodeErc1155SingleDeposit(
  * @returns packed-encoded deposit payload
  */
 export function encodeErc1155SingleDeposit(
-    deposit: Erc1155SingleDeposit<Hex | ByteArray>,
+    deposit: Erc1155SingleDeposit<Hex.Hex | Bytes.Bytes>,
     to?: "hex",
-): Hex;
+): Hex.Hex;
 export function encodeErc1155SingleDeposit(
-    deposit: Erc1155SingleDeposit<Hex | ByteArray>,
+    deposit: Erc1155SingleDeposit<Hex.Hex | Bytes.Bytes>,
     to: "bytes",
-): ByteArray;
+): Bytes.Bytes;
 export function encodeErc1155SingleDeposit(
-    deposit: Erc1155SingleDeposit<Hex | ByteArray>,
+    deposit: Erc1155SingleDeposit<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray;
+): Hex.Hex | Bytes.Bytes;
 export function encodeErc1155SingleDeposit(
-    deposit: Erc1155SingleDeposit<Hex | ByteArray>,
+    deposit: Erc1155SingleDeposit<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray {
+): Hex.Hex | Bytes.Bytes {
     if (to === "bytes") {
         const baseLayerData = asBytes(deposit.baseLayerData);
         const execLayerData = asBytes(deposit.execLayerData);
@@ -562,14 +570,14 @@ export function encodeErc1155SingleDeposit(
         writeDataTail(data, offset, baseLayerData, execLayerData);
         return data;
     }
-    return encodePacked(
+    return AbiParameters.encodePacked(
         ["address", "address", "uint256", "uint256", "bytes"],
         [
             deposit.token,
             deposit.sender,
             deposit.tokenId,
             deposit.value,
-            encodeAbiParameters(dataAbi, [
+            AbiParameters.encode(dataAbi, [
                 asHex(deposit.baseLayerData),
                 asHex(deposit.execLayerData),
             ]),
@@ -577,12 +585,14 @@ export function encodeErc1155SingleDeposit(
     );
 }
 
-const decodeErc1155BatchDepositHex = (payload: Hex): Erc1155BatchDeposit => {
+const decodeErc1155BatchDepositHex = (
+    payload: Hex.Hex,
+): Erc1155BatchDeposit => {
     const [tokenIds, values, baseLayerData, execLayerData] =
-        decodeAbiParameters(batchDataAbi, sliceFrom(payload, 40));
+        AbiParameters.decode(batchDataAbi, sliceFrom(payload, 40));
     return {
-        token: getAddress(slice(payload, 0, 20)),
-        sender: getAddress(slice(payload, 20, 40)),
+        token: Address.checksum(Hex.slice(payload, 0, 20)),
+        sender: Address.checksum(Hex.slice(payload, 20, 40)),
         tokenIds,
         values,
         baseLayerData,
@@ -591,8 +601,8 @@ const decodeErc1155BatchDepositHex = (payload: Hex): Erc1155BatchDeposit => {
 };
 
 const decodeErc1155BatchDepositBytes = (
-    payload: ByteArray,
-): Erc1155BatchDeposit<ByteArray> => ({
+    payload: Bytes.Bytes,
+): Erc1155BatchDeposit<Bytes.Bytes> => ({
     token: readAddress(payload, 0),
     sender: readAddress(payload, 20),
     tokenIds: readAbiUint256Array(payload, 40, 40),
@@ -610,16 +620,18 @@ const decodeErc1155BatchDepositBytes = (
  * a byte array
  * @throws if the payload is too short or its data tail is malformed
  */
-export function decodeErc1155BatchDeposit(payload: Hex): Erc1155BatchDeposit;
 export function decodeErc1155BatchDeposit(
-    payload: ByteArray,
-): Erc1155BatchDeposit<ByteArray>;
+    payload: Hex.Hex,
+): Erc1155BatchDeposit;
 export function decodeErc1155BatchDeposit(
-    payload: Hex | ByteArray,
-): Erc1155BatchDeposit<Hex | ByteArray>;
+    payload: Bytes.Bytes,
+): Erc1155BatchDeposit<Bytes.Bytes>;
 export function decodeErc1155BatchDeposit(
-    payload: Hex | ByteArray,
-): Erc1155BatchDeposit<Hex | ByteArray> {
+    payload: Hex.Hex | Bytes.Bytes,
+): Erc1155BatchDeposit<Hex.Hex | Bytes.Bytes>;
+export function decodeErc1155BatchDeposit(
+    payload: Hex.Hex | Bytes.Bytes,
+): Erc1155BatchDeposit<Hex.Hex | Bytes.Bytes> {
     assertMinSize(payload, 40, "ERC-1155 batch deposit");
     return typeof payload === "string"
         ? decodeErc1155BatchDepositHex(payload)
@@ -636,21 +648,21 @@ export function decodeErc1155BatchDeposit(
  * @returns packed-encoded deposit payload
  */
 export function encodeErc1155BatchDeposit(
-    deposit: Erc1155BatchDeposit<Hex | ByteArray>,
+    deposit: Erc1155BatchDeposit<Hex.Hex | Bytes.Bytes>,
     to?: "hex",
-): Hex;
+): Hex.Hex;
 export function encodeErc1155BatchDeposit(
-    deposit: Erc1155BatchDeposit<Hex | ByteArray>,
+    deposit: Erc1155BatchDeposit<Hex.Hex | Bytes.Bytes>,
     to: "bytes",
-): ByteArray;
+): Bytes.Bytes;
 export function encodeErc1155BatchDeposit(
-    deposit: Erc1155BatchDeposit<Hex | ByteArray>,
+    deposit: Erc1155BatchDeposit<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray;
+): Hex.Hex | Bytes.Bytes;
 export function encodeErc1155BatchDeposit(
-    deposit: Erc1155BatchDeposit<Hex | ByteArray>,
+    deposit: Erc1155BatchDeposit<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray {
+): Hex.Hex | Bytes.Bytes {
     if (to === "bytes") {
         const baseLayerData = asBytes(deposit.baseLayerData);
         const execLayerData = asBytes(deposit.execLayerData);
@@ -675,12 +687,12 @@ export function encodeErc1155BatchDeposit(
         );
         return data;
     }
-    return encodePacked(
+    return AbiParameters.encodePacked(
         ["address", "address", "bytes"],
         [
             deposit.token,
             deposit.sender,
-            encodeAbiParameters(batchDataAbi, [
+            AbiParameters.encode(batchDataAbi, [
                 deposit.tokenIds,
                 deposit.values,
                 asHex(deposit.baseLayerData),
@@ -694,7 +706,7 @@ export function encodeErc1155BatchDeposit(
  * Deposit made through one of the rollups portals, discriminated by the
  * `type` field.
  */
-export type Deposit<bytes extends Hex | ByteArray = Hex> = Prettify<
+export type Deposit<bytes extends Hex.Hex | Bytes.Bytes = Hex.Hex> = Prettify<
     | ({ type: "Erc1155BatchDeposit" } & Erc1155BatchDeposit<bytes>)
     | ({ type: "Erc20Deposit" } & Erc20Deposit<bytes>)
     | ({ type: "Erc721Deposit" } & Erc721Deposit<bytes>)
@@ -718,31 +730,31 @@ export function decodeDeposit(
     input: Pick<Input, "msgSender" | "payload">,
 ): Deposit | undefined;
 export function decodeDeposit(
-    input: Pick<Input<ByteArray>, "msgSender" | "payload">,
-): Deposit<ByteArray> | undefined;
+    input: Pick<Input<Bytes.Bytes>, "msgSender" | "payload">,
+): Deposit<Bytes.Bytes> | undefined;
 export function decodeDeposit(
-    input: Pick<Input<Hex | ByteArray>, "msgSender" | "payload">,
-): Deposit<Hex | ByteArray> | undefined;
+    input: Pick<Input<Hex.Hex | Bytes.Bytes>, "msgSender" | "payload">,
+): Deposit<Hex.Hex | Bytes.Bytes> | undefined;
 export function decodeDeposit(
-    input: Pick<Input<Hex | ByteArray>, "msgSender" | "payload">,
-): Deposit<Hex | ByteArray> | undefined {
+    input: Pick<Input<Hex.Hex | Bytes.Bytes>, "msgSender" | "payload">,
+): Deposit<Hex.Hex | Bytes.Bytes> | undefined {
     const { msgSender, payload } = input;
-    if (isAddressEqual(msgSender, etherPortalAddress)) {
+    if (Address.isEqual(msgSender, etherPortalAddress)) {
         return { type: "EtherDeposit", ...decodeEtherDeposit(payload) };
     }
-    if (isAddressEqual(msgSender, erc20PortalAddress)) {
+    if (Address.isEqual(msgSender, erc20PortalAddress)) {
         return { type: "Erc20Deposit", ...decodeErc20Deposit(payload) };
     }
-    if (isAddressEqual(msgSender, erc721PortalAddress)) {
+    if (Address.isEqual(msgSender, erc721PortalAddress)) {
         return { type: "Erc721Deposit", ...decodeErc721Deposit(payload) };
     }
-    if (isAddressEqual(msgSender, erc1155SinglePortalAddress)) {
+    if (Address.isEqual(msgSender, erc1155SinglePortalAddress)) {
         return {
             type: "Erc1155SingleDeposit",
             ...decodeErc1155SingleDeposit(payload),
         };
     }
-    if (isAddressEqual(msgSender, erc1155BatchPortalAddress)) {
+    if (Address.isEqual(msgSender, erc1155BatchPortalAddress)) {
         return {
             type: "Erc1155BatchDeposit",
             ...decodeErc1155BatchDeposit(payload),

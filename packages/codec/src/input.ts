@@ -1,15 +1,6 @@
-import type { ExtractAbiFunction } from "abitype";
-import {
-    AbiFunctionSignatureNotFoundError,
-    type ByteArray,
-    bytesToHex,
-    decodeFunctionData,
-    encodeFunctionData,
-    getAbiItem,
-    type Hex,
-    hexToBytes,
-    toFunctionSelector,
-} from "viem";
+import * as AbiFunction from "ox/AbiFunction";
+import type * as Bytes from "ox/Bytes";
+import * as Hex from "ox/Hex";
 import {
     asBytes,
     asHex,
@@ -18,6 +9,7 @@ import {
     readAbiBytes,
     readAddressWord,
     readUint256,
+    selectorNotFound,
     WORD,
     writeAbiBytes,
     writeAddressWord,
@@ -35,29 +27,35 @@ import type { ParamsToObject, To } from "./types.js";
  * contracts `Inputs` interface. The `bytes` parameter selects the
  * representation of the `payload` field: `Hex` (the default) or `Uint8Array`.
  */
-export type Input<bytes extends Hex | ByteArray = Hex> = ParamsToObject<
-    ExtractAbiFunction<typeof inputsAbi, "EvmAdvance">["inputs"],
-    bytes
->;
+export type Input<bytes extends Hex.Hex | Bytes.Bytes = Hex.Hex> =
+    ParamsToObject<
+        AbiFunction.FromAbi<typeof inputsAbi, "EvmAdvance">["inputs"],
+        bytes
+    >;
 
-const selector = toFunctionSelector(
-    getAbiItem({ abi: inputsAbi, name: "EvmAdvance" }),
-);
-const selectorBytes = hexToBytes(selector);
+// the EvmAdvance ABI item, resolved once. `fromAbi` precomputes its signature
+// hash, so the selector is keccak'd at module load rather than per call, and
+// both representations of it come from the one item.
+const evmAdvance = AbiFunction.fromAbi(inputsAbi, "EvmAdvance");
+const selector = AbiFunction.getSelector(evmAdvance);
+const selectorBytes = Hex.toBytes(selector);
 
-const decodeInputHex = (data: Hex): Input => {
-    const {
-        args: [
-            chainId,
-            appContract,
-            msgSender,
-            blockNumber,
-            blockTimestamp,
-            prevRandao,
-            index,
-            payload,
-        ],
-    } = decodeFunctionData({ abi: inputsAbi, data });
+const decodeInputHex = (data: Hex.Hex): Input => {
+    // `decodeData` does not check the selector when it is handed a resolved
+    // ABI item, so without this guard data for another function would decode
+    // as EvmAdvance arguments instead of being rejected
+    const dataSelector = Hex.slice(data, 0, 4);
+    if (dataSelector !== selector) return selectorNotFound(dataSelector);
+    const [
+        chainId,
+        appContract,
+        msgSender,
+        blockNumber,
+        blockTimestamp,
+        prevRandao,
+        index,
+        payload,
+    ] = AbiFunction.decodeData(evmAdvance, data, { checksumAddress: true });
     return {
         chainId,
         appContract,
@@ -73,12 +71,9 @@ const decodeInputHex = (data: Hex): Input => {
 // hand-rolled decoder over the fixed EvmAdvance calldata layout, so byte
 // array data is decoded without a hex conversion and the payload is a
 // zero-copy subarray of the data
-const decodeInputBytes = (data: ByteArray): Input<ByteArray> => {
+const decodeInputBytes = (data: Bytes.Bytes): Input<Bytes.Bytes> => {
     if (!hasSelector(data, selectorBytes)) {
-        throw new AbiFunctionSignatureNotFoundError(
-            bytesToHex(data.subarray(0, 4)),
-            { docsPath: "/docs/contract/decodeFunctionData" },
-        );
+        return selectorNotFound(data.subarray(0, 4));
     }
     const base = 4;
     return {
@@ -99,19 +94,23 @@ const decodeInputBytes = (data: ByteArray): Input<ByteArray> => {
  * @param data ABI-encoded input data, as a hex string or byte array
  * @returns decoded input; the `payload` follows the representation of `data`,
  * and is a zero-copy subarray when `data` is a byte array
- * @throws viem `AbiFunctionSignatureNotFoundError` if the data does not start
- * with the `EvmAdvance` function selector
+ * @throws ox `AbiItem.NotFoundError` if the data does not start with the
+ * `EvmAdvance` function selector
  */
-export function decodeInput(data: Hex): Input;
-export function decodeInput(data: ByteArray): Input<ByteArray>;
-export function decodeInput(data: Hex | ByteArray): Input<Hex | ByteArray>;
-export function decodeInput(data: Hex | ByteArray): Input<Hex | ByteArray> {
+export function decodeInput(data: Hex.Hex): Input;
+export function decodeInput(data: Bytes.Bytes): Input<Bytes.Bytes>;
+export function decodeInput(
+    data: Hex.Hex | Bytes.Bytes,
+): Input<Hex.Hex | Bytes.Bytes>;
+export function decodeInput(
+    data: Hex.Hex | Bytes.Bytes,
+): Input<Hex.Hex | Bytes.Bytes> {
     return typeof data === "string"
         ? decodeInputHex(data)
         : decodeInputBytes(data);
 }
 
-const encodeInputBytes = (input: Input<Hex | ByteArray>): ByteArray => {
+const encodeInputBytes = (input: Input<Hex.Hex | Bytes.Bytes>): Bytes.Bytes => {
     const payload = asBytes(input.payload);
     const data = new Uint8Array(4 + 9 * WORD + ceilWord(payload.length));
     let offset = writeBytes(data, 0, selectorBytes);
@@ -136,33 +135,32 @@ const encodeInputBytes = (input: Input<Hex | ByteArray>): ByteArray => {
  * `"bytes"`
  * @returns ABI-encoded input data
  */
-export function encodeInput(input: Input<Hex | ByteArray>, to?: "hex"): Hex;
 export function encodeInput(
-    input: Input<Hex | ByteArray>,
+    input: Input<Hex.Hex | Bytes.Bytes>,
+    to?: "hex",
+): Hex.Hex;
+export function encodeInput(
+    input: Input<Hex.Hex | Bytes.Bytes>,
     to: "bytes",
-): ByteArray;
+): Bytes.Bytes;
 export function encodeInput(
-    input: Input<Hex | ByteArray>,
+    input: Input<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray;
+): Hex.Hex | Bytes.Bytes;
 export function encodeInput(
-    input: Input<Hex | ByteArray>,
+    input: Input<Hex.Hex | Bytes.Bytes>,
     to?: To,
-): Hex | ByteArray {
+): Hex.Hex | Bytes.Bytes {
     return to === "bytes"
         ? encodeInputBytes(input)
-        : encodeFunctionData({
-              abi: inputsAbi,
-              functionName: "EvmAdvance",
-              args: [
-                  input.chainId,
-                  input.appContract,
-                  input.msgSender,
-                  input.blockNumber,
-                  input.blockTimestamp,
-                  input.prevRandao,
-                  input.index,
-                  asHex(input.payload),
-              ],
-          });
+        : AbiFunction.encodeData(evmAdvance, [
+              input.chainId,
+              input.appContract,
+              input.msgSender,
+              input.blockNumber,
+              input.blockTimestamp,
+              input.prevRandao,
+              input.index,
+              asHex(input.payload),
+          ]);
 }

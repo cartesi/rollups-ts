@@ -1,12 +1,7 @@
-import {
-    type Address,
-    type ByteArray,
-    bytesToBigInt,
-    bytesToHex,
-    getAddress,
-    type Hex,
-    hexToBytes,
-} from "viem";
+import * as AbiItem from "ox/AbiItem";
+import * as Address from "ox/Address";
+import * as Bytes from "ox/Bytes";
+import * as Hex from "ox/Hex";
 
 // hand-rolled byte-level readers and writers used by the byte array codec
 // paths; readers return zero-copy subarrays for variable-size fields, writers
@@ -20,18 +15,36 @@ export const ceilWord = (length: number): number =>
     Math.ceil(length / WORD) * WORD;
 
 /** Normalize a byte field to a byte array. */
-export const asBytes = (value: Hex | ByteArray): ByteArray =>
-    typeof value === "string" ? hexToBytes(value) : value;
+export const asBytes = (value: Hex.Hex | Bytes.Bytes): Bytes.Bytes =>
+    typeof value === "string" ? Hex.toBytes(value) : value;
 
 /** Normalize a byte field to a hex string. */
-export const asHex = (value: Hex | ByteArray): Hex =>
-    typeof value === "string" ? value : bytesToHex(value);
+export const asHex = (value: Hex.Hex | Bytes.Bytes): Hex.Hex =>
+    typeof value === "string" ? value : Bytes.toHex(value);
+
+/** Size of a byte field in bytes, whichever representation it is in. */
+export const byteSize = (value: Hex.Hex | Bytes.Bytes): number =>
+    typeof value === "string" ? Hex.size(value) : Bytes.size(value);
+
+/**
+ * Throw for data whose leading four bytes match no function of an interface.
+ * Both the hex and the byte array decode paths report an unknown selector
+ * through here, so the two agree on the error by construction.
+ */
+export const selectorNotFound = (selector: Hex.Hex | Bytes.Bytes): never => {
+    throw new AbiItem.NotFoundError({
+        data: asHex(selector),
+        type: "function",
+    });
+};
 
 /** Whether `data` starts with the 4-byte function `selector`. */
-export const hasSelector = (data: ByteArray, selector: ByteArray): boolean =>
-    selector.every((byte, i) => data[i] === byte);
+export const hasSelector = (
+    data: Bytes.Bytes,
+    selector: Bytes.Bytes,
+): boolean => selector.every((byte, i) => data[i] === byte);
 
-const assertReadable = (data: ByteArray, end: number): void => {
+const assertReadable = (data: Bytes.Bytes, end: number): void => {
     if (end > data.length) {
         throw new Error(
             `data out of bounds: expected at least ${end} bytes, got ${data.length}`,
@@ -40,23 +53,28 @@ const assertReadable = (data: ByteArray, end: number): void => {
 };
 
 /** Read the 20-byte address at `offset`, returned checksummed. */
-export const readAddress = (data: ByteArray, offset: number): Address => {
+export const readAddress = (
+    data: Bytes.Bytes,
+    offset: number,
+): Address.Address => {
     assertReadable(data, offset + 20);
-    return getAddress(bytesToHex(data.subarray(offset, offset + 20)));
+    return Address.checksum(Bytes.toHex(data.subarray(offset, offset + 20)));
 };
 
 /** Read the address right-aligned in the ABI word at `offset`. */
-export const readAddressWord = (data: ByteArray, offset: number): Address =>
-    readAddress(data, offset + WORD - 20);
+export const readAddressWord = (
+    data: Bytes.Bytes,
+    offset: number,
+): Address.Address => readAddress(data, offset + WORD - 20);
 
 /** Read the big-endian uint256 at `offset`. */
-export const readUint256 = (data: ByteArray, offset: number): bigint => {
+export const readUint256 = (data: Bytes.Bytes, offset: number): bigint => {
     assertReadable(data, offset + WORD);
-    return bytesToBigInt(data.subarray(offset, offset + WORD));
+    return Bytes.toBigInt(data.subarray(offset, offset + WORD));
 };
 
 // uint256 offset or length that must fit in a JS number
-const readSize = (data: ByteArray, offset: number): number => {
+const readSize = (data: Bytes.Bytes, offset: number): number => {
     const value = readUint256(data, offset);
     if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
         throw new Error(`data offset or size out of bounds: ${value}`);
@@ -69,10 +87,10 @@ const readSize = (data: ByteArray, offset: number): number => {
  * offsets relative to `base`. Returns a zero-copy subarray of `data`.
  */
 export const readAbiBytes = (
-    data: ByteArray,
+    data: Bytes.Bytes,
     base: number,
     pointer: number,
-): ByteArray => {
+): Bytes.Bytes => {
     const offset = base + readSize(data, pointer);
     const length = readSize(data, offset);
     assertReadable(data, offset + WORD + length);
@@ -84,7 +102,7 @@ export const readAbiBytes = (
  * with offsets relative to `base`.
  */
 export const readAbiUint256Array = (
-    data: ByteArray,
+    data: Bytes.Bytes,
     base: number,
     pointer: number,
 ): bigint[] => {
@@ -102,7 +120,7 @@ export const readAbiUint256Array = (
 export const writeBytes = (
     data: Uint8Array,
     offset: number,
-    value: ByteArray,
+    value: Bytes.Bytes,
 ): number => {
     data.set(value, offset);
     return offset + value.length;
@@ -112,7 +130,7 @@ export const writeBytes = (
 export const writePaddedBytes = (
     data: Uint8Array,
     offset: number,
-    value: ByteArray,
+    value: Bytes.Bytes,
 ): number => {
     data.set(value, offset);
     return offset + ceilWord(value.length);
@@ -122,14 +140,14 @@ export const writePaddedBytes = (
 export const writeAddress = (
     data: Uint8Array,
     offset: number,
-    address: Address,
-): number => writeBytes(data, offset, hexToBytes(address));
+    address: Address.Address,
+): number => writeBytes(data, offset, Hex.toBytes(address));
 
 /** Write `address` right-aligned in the ABI word at `offset`. */
 export const writeAddressWord = (
     data: Uint8Array,
     offset: number,
-    address: Address,
+    address: Address.Address,
 ): number => {
     writeAddress(data, offset + WORD - 20, address);
     return offset + WORD;
@@ -158,7 +176,7 @@ export const writeUint256 = (
 export const writeAbiBytes = (
     data: Uint8Array,
     offset: number,
-    value: ByteArray,
+    value: Bytes.Bytes,
 ): number =>
     writePaddedBytes(
         data,
@@ -180,7 +198,7 @@ export const writeAbiUint256Array = (
 };
 
 /** Encoded size of a dynamic ABI `bytes` tail item. */
-export const abiBytesSize = (value: ByteArray): number =>
+export const abiBytesSize = (value: Bytes.Bytes): number =>
     WORD + ceilWord(value.length);
 
 /** Encoded size of a dynamic ABI `uint256[]` tail item. */

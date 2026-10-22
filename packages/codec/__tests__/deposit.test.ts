@@ -1,4 +1,4 @@
-import { getAddress, hexToBytes } from "viem";
+import * as Hex from "ox/Hex";
 import { describe, expect, it } from "vitest";
 import {
     decodeDeposit,
@@ -16,8 +16,8 @@ import {
     etherPortalAddress,
 } from "../src/rollups.js";
 
-const token = getAddress("0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182");
-const sender = getAddress("0x92cc14432c1f82622493abd64d99ea8a3000a7c7");
+const token = "0x67742FF5B2B762503fF0A92738C6FC2ea4a4d182";
+const sender = "0x92cc14432c1F82622493aBd64D99Ea8A3000a7c7";
 
 describe("decodeDeposit", () => {
     it("should decode an Ether deposit input", () => {
@@ -142,7 +142,7 @@ describe("decodeDeposit", () => {
         ).toEqual({
             type: "EtherDeposit",
             ...deposit,
-            execLayerData: hexToBytes("0xdeadbeef"),
+            execLayerData: Hex.toBytes("0xdeadbeef"),
         });
     });
 
@@ -163,8 +163,8 @@ describe("decodeDeposit", () => {
         ).toEqual({
             type: "Erc1155BatchDeposit",
             ...deposit,
-            baseLayerData: hexToBytes("0xabcd"),
-            execLayerData: hexToBytes("0xdeadbeef"),
+            baseLayerData: Hex.toBytes("0xabcd"),
+            execLayerData: Hex.toBytes("0xdeadbeef"),
         });
     });
 
@@ -172,7 +172,7 @@ describe("decodeDeposit", () => {
         expect(
             decodeDeposit({
                 msgSender: sender,
-                payload: hexToBytes("0xdeadbeef"),
+                payload: Hex.toBytes("0xdeadbeef"),
             }),
         ).toBeUndefined();
     });

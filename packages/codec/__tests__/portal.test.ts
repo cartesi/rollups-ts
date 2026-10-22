@@ -1,4 +1,4 @@
-import { hexToBytes } from "viem";
+import * as Hex from "ox/Hex";
 import { describe, expect, it } from "vitest";
 import {
     type Erc1155BatchDeposit,
@@ -124,7 +124,7 @@ describe("ether deposit", () => {
     it("should decode an empty tail at exactly the minimum size", () => {
         expect(decodeEtherDeposit(etherMinPayload).execLayerData).toEqual("0x");
         expect(
-            decodeEtherDeposit(hexToBytes(etherMinPayload)).execLayerData,
+            decodeEtherDeposit(Hex.toBytes(etherMinPayload)).execLayerData,
         ).toEqual(new Uint8Array());
     });
 
@@ -166,7 +166,7 @@ describe("erc20 deposit", () => {
     it("should decode an empty tail at exactly the minimum size", () => {
         expect(decodeErc20Deposit(erc20MinPayload).execLayerData).toEqual("0x");
         expect(
-            decodeErc20Deposit(hexToBytes(erc20MinPayload)).execLayerData,
+            decodeErc20Deposit(Hex.toBytes(erc20MinPayload)).execLayerData,
         ).toEqual(new Uint8Array());
     });
 
@@ -331,8 +331,8 @@ describe("erc1155 batch deposit", () => {
 });
 
 describe("deposits (byte array)", () => {
-    const execLayerData = hexToBytes("0xdeadbeef");
-    const baseLayerData = hexToBytes("0xabcd");
+    const execLayerData = Hex.toBytes("0xdeadbeef");
+    const baseLayerData = Hex.toBytes("0xabcd");
 
     it("should decode and encode an Ether deposit", () => {
         const deposit: EtherDeposit<Uint8Array> = {
@@ -340,9 +340,9 @@ describe("deposits (byte array)", () => {
             value: 123456789n,
             execLayerData,
         };
-        expect(decodeEtherDeposit(hexToBytes(etherPayload))).toEqual(deposit);
+        expect(decodeEtherDeposit(Hex.toBytes(etherPayload))).toEqual(deposit);
         expect(encodeEtherDeposit(deposit, "bytes")).toEqual(
-            hexToBytes(etherPayload),
+            Hex.toBytes(etherPayload),
         );
         expect(encodeEtherDeposit(deposit)).toEqual(etherPayload);
     });
@@ -354,14 +354,14 @@ describe("deposits (byte array)", () => {
             value: 1000000000000000000n,
             execLayerData,
         };
-        expect(decodeErc20Deposit(hexToBytes(erc20Payload))).toEqual(deposit);
+        expect(decodeErc20Deposit(Hex.toBytes(erc20Payload))).toEqual(deposit);
         expect(encodeErc20Deposit(deposit, "bytes")).toEqual(
-            hexToBytes(erc20Payload),
+            Hex.toBytes(erc20Payload),
         );
     });
 
     it("should return execLayerData as a zero-copy view of the payload", () => {
-        const payload = hexToBytes(erc20Payload);
+        const payload = Hex.toBytes(erc20Payload);
         const decoded = decodeErc20Deposit(payload);
         expect(decoded.execLayerData.buffer).toBe(payload.buffer);
         expect(decoded.execLayerData.byteOffset).toBe(72);
@@ -376,9 +376,11 @@ describe("deposits (byte array)", () => {
             baseLayerData,
             execLayerData,
         };
-        expect(decodeErc721Deposit(hexToBytes(erc721Payload))).toEqual(deposit);
+        expect(decodeErc721Deposit(Hex.toBytes(erc721Payload))).toEqual(
+            deposit,
+        );
         expect(encodeErc721Deposit(deposit, "bytes")).toEqual(
-            hexToBytes(erc721Payload),
+            Hex.toBytes(erc721Payload),
         );
         expect(encodeErc721Deposit(deposit)).toEqual(erc721Payload);
     });
@@ -393,10 +395,10 @@ describe("deposits (byte array)", () => {
             execLayerData,
         };
         expect(
-            decodeErc1155SingleDeposit(hexToBytes(erc1155SinglePayload)),
+            decodeErc1155SingleDeposit(Hex.toBytes(erc1155SinglePayload)),
         ).toEqual(deposit);
         expect(encodeErc1155SingleDeposit(deposit, "bytes")).toEqual(
-            hexToBytes(erc1155SinglePayload),
+            Hex.toBytes(erc1155SinglePayload),
         );
     });
 
@@ -410,10 +412,10 @@ describe("deposits (byte array)", () => {
             execLayerData,
         };
         expect(
-            decodeErc1155BatchDeposit(hexToBytes(erc1155BatchPayload)),
+            decodeErc1155BatchDeposit(Hex.toBytes(erc1155BatchPayload)),
         ).toEqual(deposit);
         expect(encodeErc1155BatchDeposit(deposit, "bytes")).toEqual(
-            hexToBytes(erc1155BatchPayload),
+            Hex.toBytes(erc1155BatchPayload),
         );
         expect(encodeErc1155BatchDeposit(deposit)).toEqual(erc1155BatchPayload);
     });
@@ -445,7 +447,7 @@ describe("deposits (byte array)", () => {
     });
 
     it("should throw on a payload that is too short", () => {
-        const short = hexToBytes("0xdeadbeef");
+        const short = Hex.toBytes("0xdeadbeef");
         expect(() => decodeEtherDeposit(short)).toThrow(
             "invalid Ether deposit payload",
         );
@@ -464,8 +466,8 @@ describe("deposits (byte array)", () => {
     });
 
     it("should throw on a payload with a malformed data tail", () => {
-        expect(() => decodeErc721Deposit(hexToBytes(erc721MinPayload))).toThrow(
-            "data out of bounds",
-        );
+        expect(() =>
+            decodeErc721Deposit(Hex.toBytes(erc721MinPayload)),
+        ).toThrow("data out of bounds");
     });
 });
