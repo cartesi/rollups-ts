@@ -1,4 +1,6 @@
-import { bytesToHex, getAddress, hexToBytes, slice } from "viem";
+import * as AbiItem from "ox/AbiItem";
+import * as Bytes from "ox/Bytes";
+import * as Hex from "ox/Hex";
 import { describe, expect, it } from "vitest";
 import { decodeInput, encodeInput, type Input } from "../src/input.js";
 
@@ -17,13 +19,27 @@ const input: Input = {
     payload: "0xdeadbeef",
 };
 
+// Error contract for data whose leading four bytes match no `Inputs`
+// function. The hex path gets this from the decoder and the byte array path
+// throws it by hand, so the two could drift; routing every assertion through
+// one helper is what keeps them honest. Pinned: the error class, and the
+// offending selector quoted in the message. The wording around the selector
+// belongs to whichever decoder raises it, so it is deliberately not pinned.
+const expectUnknownSelector = (
+    decode: () => unknown,
+    selector: Hex.Hex,
+): void => {
+    expect(decode).toThrow(AbiItem.NotFoundError);
+    expect(decode).toThrow(`"${selector}" not found`);
+};
+
 describe("input", () => {
     it("should encode an input as an EvmAdvance call", () => {
         expect(encodeInput(input)).toEqual(encodedInput);
     });
 
     it("should use the EvmAdvance function selector", () => {
-        expect(slice(encodeInput(input), 0, 4)).toEqual("0x415bf363");
+        expect(Hex.slice(encodeInput(input), 0, 4)).toEqual("0x415bf363");
     });
 
     it("should decode an EvmAdvance call", () => {
@@ -33,10 +49,8 @@ describe("input", () => {
     it("should roundtrip an input through encode and decode", () => {
         const original: Input = {
             chainId: 31337n,
-            appContract: getAddress(
-                "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
-            ),
-            msgSender: getAddress("0x92cc14432c1f82622493abd64d99ea8a3000a7c7"),
+            appContract: "0x67742FF5B2B762503fF0A92738C6FC2ea4a4d182",
+            msgSender: "0x92cc14432c1F82622493aBd64D99Ea8A3000a7c7",
             blockNumber: 123456789n,
             blockTimestamp: 1744255407n,
             prevRandao: 2n ** 200n,
@@ -54,20 +68,52 @@ describe("input", () => {
             }),
         );
         expect(decoded.appContract).toEqual(
-            getAddress("0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182"),
+            "0x67742FF5B2B762503fF0A92738C6FC2ea4a4d182",
         );
     });
 
     it("should throw on data with an unknown function selector", () => {
-        expect(() => decodeInput("0xdeadbeef")).toThrow();
+        expectUnknownSelector(() => decodeInput("0xdeadbeef"), "0xdeadbeef");
+    });
+
+    // long enough to decode as an EvmAdvance call, but for the wrong
+    // selector. A decoder that resolves the function from the ABI rejects
+    // this; one handed the EvmAdvance item up front would happily decode the
+    // arguments and return nonsense.
+    it("should throw on well-formed data with the wrong selector", () => {
+        const data = Hex.concat("0xdeadbeef", Hex.slice(encodedInput, 4));
+        expectUnknownSelector(() => decodeInput(data), "0xdeadbeef");
+    });
+
+    // the selector is right but there are no arguments to decode. The class
+    // here belongs to whichever decoder raises it, so it is deliberately not
+    // pinned -- that it throws at all is the contract.
+    it("should throw on data that is too short to decode", () => {
+        expect(() => decodeInput("0x415bf363")).toThrow();
+        expect(() => decodeInput(Hex.slice(encodedInput, 0, 36))).toThrow();
+    });
+
+    it("should roundtrip values at the top of the uint256 range", () => {
+        const max = 2n ** 256n - 1n;
+        const original: Input = {
+            chainId: max,
+            appContract: "0x67742FF5B2B762503fF0A92738C6FC2ea4a4d182",
+            msgSender: "0x92cc14432c1F82622493aBd64D99Ea8A3000a7c7",
+            blockNumber: max,
+            blockTimestamp: max,
+            prevRandao: max,
+            index: max,
+            payload: "0xdeadbeef",
+        };
+        expect(decodeInput(encodeInput(original))).toEqual(original);
     });
 });
 
 describe("input (byte array)", () => {
-    const encodedInputBytes = hexToBytes(encodedInput);
+    const encodedInputBytes = Hex.toBytes(encodedInput);
     const inputBytes: Input<Uint8Array> = {
         ...input,
-        payload: hexToBytes("0xdeadbeef"),
+        payload: Hex.toBytes("0xdeadbeef"),
     };
 
     it("should decode an EvmAdvance call from a byte array", () => {
@@ -83,7 +129,7 @@ describe("input (byte array)", () => {
 
     it("should decode from a Buffer", () => {
         const decoded = decodeInput(Buffer.from(encodedInput.slice(2), "hex"));
-        expect(bytesToHex(decoded.payload)).toEqual("0xdeadbeef");
+        expect(Bytes.toHex(decoded.payload)).toEqual("0xdeadbeef");
         expect(decoded.chainId).toEqual(input.chainId);
         expect(decoded.appContract).toEqual(input.appContract);
     });
@@ -101,10 +147,8 @@ describe("input (byte array)", () => {
     it("should roundtrip an input through encode and decode", () => {
         const original: Input<Uint8Array> = {
             chainId: 31337n,
-            appContract: getAddress(
-                "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
-            ),
-            msgSender: getAddress("0x92cc14432c1f82622493abd64d99ea8a3000a7c7"),
+            appContract: "0x67742FF5B2B762503fF0A92738C6FC2ea4a4d182",
+            msgSender: "0x92cc14432c1F82622493aBd64D99Ea8A3000a7c7",
             blockNumber: 123456789n,
             blockTimestamp: 1744255407n,
             prevRandao: 2n ** 200n,
@@ -115,7 +159,23 @@ describe("input (byte array)", () => {
     });
 
     it("should throw on a byte array with an unknown function selector", () => {
-        expect(() => decodeInput(hexToBytes("0xdeadbeef"))).toThrow();
+        expectUnknownSelector(
+            () => decodeInput(Hex.toBytes("0xdeadbeef")),
+            "0xdeadbeef",
+        );
+    });
+
+    // the checksumming here is readAddressWord's, not an ABI decoder's, so
+    // it needs asserting separately from the hex path's
+    it("should return checksummed addresses", () => {
+        const lowercase = "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182";
+        const decoded = decodeInput(
+            encodeInput({ ...input, appContract: lowercase }, "bytes"),
+        );
+        expect(decoded.appContract).toEqual(
+            "0x67742FF5B2B762503fF0A92738C6FC2ea4a4d182",
+        );
+        expect(decoded.appContract).not.toEqual(lowercase);
     });
 
     it("should throw on values out of uint256 range", () => {
