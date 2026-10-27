@@ -14,17 +14,17 @@ allowBuilds:
 
 catalog:
     "@biomejs/biome": 2.5.12
-    "@types/node": ^26.4.1
-    "@types/react": ^19.2.18
-    "@vitest/coverage-v8": ^5.0.0
+    "@types/node": ^26.6.5
+    "@types/react": ^19.3.0
+    "@vitest/coverage-v8": ^5.0.5
     node-addon-api: ^8.9.2
-    node-gyp: ^13.0.2
+    node-gyp: ^13.1.0
     node-gyp-build: ^4.8.4
-    ox: ^1.8.9
-    tsdown: ^0.23.0
+    ox: ^1.8.10
+    tsdown: ^0.23.2
     typescript: ^6.0.3
     viem: ^2.56.3
-    vitest: ^5.0.0
+    vitest: ^5.0.5
 
 overrides:
     viem: "catalog:"
