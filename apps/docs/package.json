@@ -11,11 +11,11 @@
         "preview": "vocs preview"
     },
     "dependencies": {
-        "react": "^19.2.8",
-        "react-dom": "^19.2.8",
-        "vite": "^8.2.0",
-        "vocs": "^2.8.5",
-        "waku": "1.0.0-beta.8"
+        "react": "^19.3.1",
+        "react-dom": "^19.3.1",
+        "vite": "^8.3.5",
+        "vocs": "^2.11.1",
+        "waku": "1.0.0-rc.4"
     },
     "devDependencies": {
         "@cartesi/client": "workspace:*",
@@ -24,7 +24,7 @@
         "@cartesi/react": "workspace:*",
         "@cartesi/rollup": "workspace:*",
         "@cartesi/rpc": "workspace:*",
-        "@tanstack/react-query": "^5.101.4",
+        "@tanstack/react-query": "^5.105.0",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "typescript": "catalog:",
