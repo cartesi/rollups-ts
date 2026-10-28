@@ -1,5 +1,12 @@
 # @cartesi/client
 
+## 2.0.0-alpha.40
+
+### Patch Changes
+
+- Updated dependencies [2a3b74e]
+  - @cartesi/rpc@2.0.0-alpha.29
+
 ## 2.0.0-alpha.39
 
 ### Patch Changes

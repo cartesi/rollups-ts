@@ -1,5 +1,11 @@
 # @cartesi/codec
 
+## 1.0.0-alpha.7
+
+### Patch Changes
+
+- 2a3b74e: bump dependencies: ox 1.8.10 (codec), json-rpc-2.0 1.8.1 (rpc), modern-tar 0.8.6 (wagmi-plugin)
+
 ## 1.0.0-alpha.6
 
 ### Minor Changes

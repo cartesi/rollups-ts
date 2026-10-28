@@ -1,5 +1,11 @@
 # @cartesi/react
 
+## 2.0.0-alpha.44
+
+### Patch Changes
+
+- @cartesi/client@2.0.0-alpha.40
+
 ## 2.0.0-alpha.43
 
 ### Patch Changes
