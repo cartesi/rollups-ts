@@ -1,0 +1,27 @@
+/*
+ * The Cartesi brand as CSS custom properties: the same values as
+ * src/tokens.ts, which a test keeps in step. Source: the Cartesi Brand Kit,
+ * https://five-bat-d25.notion.site/Brand-Kit-25bc172ea45080d0b1c0dc222702fece
+ *
+ * There are no greys and no semantic aliases (background, surface, border,
+ * muted text) on purpose. The Brand Kit defines neither, and a consumer's UI
+ * framework already ships its own neutrals; what it needs from us is the hues,
+ * the typefaces and a few measurements.
+ */
+:root {
+    --cartesi-cyan: #00f6ff;
+    --cartesi-teal: #008da5;
+    --cartesi-black: #000000;
+    --cartesi-white: #ffffff;
+
+    --cartesi-font-headline:
+        "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --cartesi-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+    --cartesi-weight-headline: 600;
+    --cartesi-weight-body: 400;
+
+    --cartesi-radius-pill: 999px;
+    /* the Kit asks for generous letter-spacing without a number; 0.12em is ours */
+    --cartesi-tracking-eyebrow: 0.12em;
+    --cartesi-hairline: 1px;
+}
