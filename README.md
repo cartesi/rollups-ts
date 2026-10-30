@@ -16,6 +16,8 @@ This repo includes the following packages:
 - [`@cartesi/codec`](packages/codec): isomorphic encoding and decoding of Cartesi Rollups inputs, outputs and portal deposits
 - [`@cartesi/rollup`](packages/rollup): Node.js bindings for libcmt, for applications running inside a Cartesi Machine
 - [`@cartesi/wagmi-plugin`](packages/wagmi-plugin): a [Wagmi CLI](https://wagmi.sh/cli/getting-started) plugin that generates ABIs and deployment addresses from a rollups-contracts release
+- [`@cartesi/brand`](packages/brand): the Cartesi brand colours, typefaces and official logos, as CSS custom properties and typed values for any frontend
+- [`@cartesi/vocs-theme`](packages/vocs-theme): Cartesi branding for [Vocs](https://vocs.dev) documentation sites, built on `@cartesi/brand`
 
 ### Apps
 

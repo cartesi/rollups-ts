@@ -67,6 +67,7 @@
     "files": [
         "LICENSE",
         "NOTICE",
+        "BRAND.md",
         "dist/**",
         "styles/**",
         "assets/generated/**"
