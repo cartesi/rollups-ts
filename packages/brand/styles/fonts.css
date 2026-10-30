@@ -1,0 +1,13 @@
+/*
+ * The two brand typefaces, self-hosted through Fontsource so no page makes a
+ * request to a third-party font CDN. Only the Latin subset, and only the
+ * weights the brand uses: Inter 400 for body text and 600 for emphasis, Plus
+ * Jakarta Sans 600 for headlines. Bold text (700) falls back to the 600 face.
+ *
+ * This is the one stylesheet with network consequences, and the one a consumer
+ * that already loads these fonts some other way will want to leave out: import
+ * styles/tokens.css on its own instead of styles.css.
+ */
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/plus-jakarta-sans/latin-600.css";

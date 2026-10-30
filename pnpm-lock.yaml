@@ -304,6 +304,28 @@ importers:
         specifier: ^2.56.3
         version: 2.56.3(typescript@6.0.3)(zod@4.6.7)
 
+  packages/brand:
+    dependencies:
+      '@fontsource/inter':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/plus-jakarta-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.5.12
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.5
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.23.2(tsx@4.23.15)(typescript@6.0.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+
   packages/client:
     dependencies:
       '@cartesi/rpc':
@@ -1204,6 +1226,12 @@ packages:
     resolution: {integrity: sha512-043dyEKD9TDSfz080YH2vobubgg+NIo/9Fw4RAl7sEMpD8Am1DNrrSTl/GpMBjyGHoD/FbJY2QLawY+HSQsEIA==}
     peerDependencies:
       vue: '>=3.3.0'
+
+  '@fontsource/inter@5.3.0':
+    resolution: {integrity: sha512-RofMylZmjlJEfELXeNHFWBRcSs75rGU/6bV2S2jfnvv/3rPXPGe0LgUJTklcHZ9lM4OZmAVFhcJPnACfb91A3g==}
+
+  '@fontsource/plus-jakarta-sans@5.3.0':
+    resolution: {integrity: sha512-9WRw3G74Ve4cyPApAZSXLPY5DiLOZXDn7Q7dIBjFBpA0Pj56ljDItEdy2UUajjJxRuTg2HkMLO5C3K2nAQORWg==}
 
   '@headlessui/tailwindcss@0.2.2':
     resolution: {integrity: sha512-xNe42KjdyA4kfUKLLPGzME9zkH7Q3rOZ5huFihWNWOQFxnItxPB3/67yBI8/qBfY8nwBRx5GHn4VprsoluVMGw==}
@@ -6477,6 +6505,10 @@ snapshots:
       '@floating-ui/dom': 1.8.0
       '@floating-ui/utils': 0.2.12
       vue: 3.5.44(typescript@6.0.3)
+
+  '@fontsource/inter@5.3.0': {}
+
+  '@fontsource/plus-jakarta-sans@5.3.0': {}
 
   '@headlessui/tailwindcss@0.2.2(tailwindcss@4.3.3)':
     dependencies:
