@@ -14,9 +14,11 @@
     "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@types/node": "catalog:",
+        "@vitest/coverage-v8": "catalog:",
         "svgo": "4.1.0",
         "tsdown": "catalog:",
-        "typescript": "catalog:"
+        "typescript": "catalog:",
+        "vitest": "catalog:"
     },
     "type": "module",
     "sideEffects": [
@@ -78,6 +80,9 @@
         "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
         "dev": "tsdown --watch",
         "generate:assets": "node scripts/generate-assets.ts",
-        "lint": "biome check"
+        "lint": "biome check",
+        "test": "vitest",
+        "test:run": "vitest run",
+        "test:coverage": "vitest run --coverage"
     }
 }
