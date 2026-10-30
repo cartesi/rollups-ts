@@ -13,6 +13,8 @@
     "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@types/node": "catalog:",
+        "@types/react": "catalog:",
+        "react": "^19.3.1",
         "tsdown": "catalog:",
         "typescript": "catalog:",
         "vocs": "^2.11.1"
@@ -35,8 +37,19 @@
                 "require": "./dist/index.cjs"
             }
         },
+        "./slots": {
+            "import": {
+                "types": "./dist/slots/index.d.ts",
+                "import": "./dist/slots/index.js"
+            },
+            "require": {
+                "types": "./dist/slots/index.d.cts",
+                "require": "./dist/slots/index.cjs"
+            }
+        },
         "./styles.css": "./styles/index.css",
         "./styles/vocs.css": "./styles/vocs.css",
+        "./styles/slots.css": "./styles/slots.css",
         "./package.json": "./package.json"
     },
     "files": [
@@ -46,6 +59,7 @@
         "styles/**"
     ],
     "peerDependencies": {
+        "react": "^19.0.0",
         "vocs": "^2.11.0"
     },
     "publishConfig": {
