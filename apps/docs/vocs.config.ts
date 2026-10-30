@@ -1,3 +1,4 @@
+import { cartesiTheme } from "@cartesi/vocs-theme";
 import { type Config, defineConfig } from "vocs/config";
 
 /** Minimal structural view of the hast nodes this plugin walks. */
@@ -43,6 +44,8 @@ const rehypeViemDocLinks = () => (tree: HastNode) => {
 };
 
 const config: Config = defineConfig({
+    // first, so that every key below wins over the theme's
+    ...cartesiTheme(),
     rootDir: ".",
     srcDir: ".",
     // dead links are reported but do not fail the build; set to `true` (vocs'
@@ -57,7 +60,6 @@ const config: Config = defineConfig({
     description: "Documentation for Cartesi TypeScript libraries",
     baseUrl: "https://cartesi.github.io",
     basePath: "/rollups-ts",
-    logoUrl: "https://cartesi.io/favicon.svg",
     editLink: {
         pattern:
             "https://github.com/cartesi/rollups-ts/edit/main/apps/docs/pages/:path",
