@@ -1,5 +1,7 @@
 # Cartesi Machine Playground
 
+The look is the Cartesi brand, from [`@cartesi/brand`](../../packages/brand): its colours, typefaces and marks, with the greys this app needs derived from them in `src/app/globals.css`.
+
 A page that builds a Cartesi Machine from a form and boots it in the tab —
 kernel, filesystems, drives, entrypoint, environment, console — with the
 guest's terminal on the other half of the screen. The emulator is

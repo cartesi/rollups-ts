@@ -116,11 +116,13 @@ jobs:
               run: pnpm --filter @cartesi/machine test:wasm
 
             # The playground depends on the published @cartesi/machine, not on
-            # this workspace's, so it needs nothing built first — and what it
-            # covers is the app, not the module built above. It runs here
-            # because this job is the one that already exists on a single
-            # platform; the wasm suites are what exercise the fresh module.
+            # this workspace's, so the module built above is not what it
+            # covers: it covers the app. It does depend on the workspace
+            # @cartesi/brand, whose built declarations its type check needs,
+            # which is why both steps go through turbo. It runs here because
+            # this job is the one that already exists on a single platform;
+            # the wasm suites are what exercise the fresh module.
             - name: Build the playground
               run: |
-                  pnpm --filter @cartesi/cm-playground check-types
-                  pnpm --filter @cartesi/cm-playground build
+                  pnpm run check-types --filter @cartesi/cm-playground
+                  pnpm run build --filter @cartesi/cm-playground

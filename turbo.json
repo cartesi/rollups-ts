@@ -25,6 +25,9 @@
         "@cartesi/vocs-theme#check-types": {
             "dependsOn": ["^build"]
         },
+        "@cartesi/cm-playground#check-types": {
+            "dependsOn": ["^build"]
+        },
         "test:run": {
             "dependsOn": ["build"],
             "outputs": []
