@@ -1,11 +1,28 @@
+/*
+ * The palette is the Cartesi brand, which layout.tsx loads from @cartesi/brand
+ * ahead of this file: black and white for the page and its text, cyan as the
+ * accent. The brand defines no greys, so the panels, rows, borders and muted
+ * text this layout needs are mixed here from brand black and white, at the
+ * lightness each one had when the layout was drawn. The two status colours
+ * are not brand either: a running machine is green and a failed one red
+ * because that is what those mean everywhere.
+ */
 :root {
-    --bg: #0b0d11;
-    --panel: #14171d;
-    --panel-2: #191d25;
-    --line: #262b35;
-    --fg: #d7dae0;
-    --dim: #8b93a1;
-    --accent: #63b3ed;
+    --bg: var(--cartesi-black);
+    --panel: color-mix(
+        in oklab,
+        var(--cartesi-white) 20%,
+        var(--cartesi-black)
+    );
+    --panel-2: color-mix(
+        in oklab,
+        var(--cartesi-white) 23%,
+        var(--cartesi-black)
+    );
+    --line: color-mix(in oklab, var(--cartesi-white) 29%, var(--cartesi-black));
+    --fg: var(--cartesi-white);
+    --dim: color-mix(in oklab, var(--cartesi-white) 66%, var(--cartesi-black));
+    --accent: var(--cartesi-cyan);
     --danger: #f08a8a;
     --ok: #7fd18b;
     color-scheme: dark;
@@ -25,11 +42,7 @@ body {
     margin: 0;
     background: var(--bg);
     color: var(--fg);
-    font:
-        13px / 1.5 ui-sans-serif,
-        system-ui,
-        -apple-system,
-        sans-serif;
+    font: var(--cartesi-weight-body) 13px / 1.5 var(--cartesi-font-body);
 }
 
 .app {
@@ -40,13 +53,18 @@ body {
 
 .masthead {
     padding: 14px 20px;
-    border-bottom: 1px solid var(--line);
+    /* the brand's hairline under its mark, in the headline colour */
+    border-bottom: var(--cartesi-hairline) solid var(--accent);
 }
 
 .masthead h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin: 0;
+    font-family: var(--cartesi-font-headline);
     font-size: 16px;
-    font-weight: 600;
+    font-weight: var(--cartesi-weight-headline);
 }
 
 .masthead h1 span {
@@ -106,7 +124,7 @@ body {
     margin: 0;
     font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: var(--cartesi-tracking-eyebrow);
     text-transform: uppercase;
     color: var(--dim);
 }
@@ -220,7 +238,7 @@ textarea.input {
     text-decoration: none;
     background: var(--panel-2);
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: var(--cartesi-radius-pill);
     color: var(--fg);
     cursor: pointer;
     font: inherit;
@@ -240,8 +258,19 @@ textarea.input {
 .button-primary {
     background: var(--accent);
     border-color: transparent;
-    color: #0b0d11;
+    color: var(--cartesi-black);
     font-weight: 600;
+}
+
+/*
+ * A disabled primary button gives up its fill rather than fading it: cyan at
+ * 45% over black is a dark teal, which reads as a second brand colour rather
+ * than as "disabled". Without the fill it dims like the buttons beside it.
+ */
+.button-primary:disabled {
+    background: var(--panel-2);
+    border-color: var(--line);
+    color: var(--fg);
 }
 
 .button-danger:not(:disabled) {
@@ -282,6 +311,7 @@ textarea.input {
     font-size: 11px;
     font-weight: 500;
     text-align: left;
+    letter-spacing: var(--cartesi-tracking-eyebrow);
     text-transform: uppercase;
     padding: 4px 6px;
     border-bottom: 1px solid var(--line);
@@ -331,7 +361,7 @@ textarea.input {
     color: var(--dim);
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: var(--cartesi-tracking-eyebrow);
     text-transform: uppercase;
 }
 
@@ -415,7 +445,7 @@ textarea.input {
 
 .badge {
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: var(--cartesi-radius-pill);
     padding: 1px 10px;
     text-transform: lowercase;
 }
@@ -443,7 +473,7 @@ textarea.input {
     flex: 1;
     min-height: 240px;
     padding: 8px 10px;
-    background: #0b0d11;
+    background: var(--bg);
 }
 
 /* responsive — last, so these override the rules above rather than losing to

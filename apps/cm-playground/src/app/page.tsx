@@ -5,7 +5,9 @@
 // there is nothing here a server could usefully render first.
 "use client";
 
+import { cartesiIconWhiteDataUri } from "@cartesi/brand/logos";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -137,6 +139,12 @@ const Playground = () => {
         <div className="app">
             <header className="masthead">
                 <h1>
+                    <Image
+                        alt=""
+                        height={24}
+                        src={cartesiIconWhiteDataUri}
+                        width={24}
+                    />
                     Cartesi Machine <span>Playground</span>
                 </h1>
                 <p>

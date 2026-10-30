@@ -3,6 +3,7 @@
 // Nothing sits between the two: no echo, no line editing, no interpretation of
 // Ctrl+C. The guest is running Linux and has a terminal driver of its own;
 // anything done here would be done twice.
+import { cartesiColors } from "@cartesi/brand/tokens";
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { useEffect, useImperativeHandle, useRef, type RefObject } from "react";
@@ -57,7 +58,18 @@ export const Terminal = ({
             convertEol: true,
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
             fontSize: 13,
-            theme: { background: "#0b0d11", foreground: "#d7dae0" },
+            // The brand's "on black" pairing. Of the sixteen ANSI colours a
+            // guest may write with, only the cyan pair is a brand colour; the
+            // rest keep their defaults, so that coloured output stays telling.
+            theme: {
+                background: cartesiColors.black,
+                foreground: cartesiColors.white,
+                cursor: cartesiColors.cyan,
+                cursorAccent: cartesiColors.black,
+                selectionBackground: `${cartesiColors.cyan}40`,
+                cyan: cartesiColors.cyan,
+                brightCyan: cartesiColors.cyan,
+            },
             cursorBlink: true,
             scrollback: 10000,
         });

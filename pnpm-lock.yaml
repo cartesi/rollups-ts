@@ -220,6 +220,9 @@ importers:
 
   apps/cm-playground:
     dependencies:
+      '@cartesi/brand':
+        specifier: workspace:*
+        version: link:../../packages/brand
       '@cartesi/machine':
         specifier: 1.0.0-alpha.3
         version: 1.0.0-alpha.3
