@@ -548,6 +548,28 @@ importers:
         specifier: 'catalog:'
         version: 6.0.3
 
+  packages/vocs-theme:
+    dependencies:
+      '@cartesi/brand':
+        specifier: workspace:*
+        version: link:../brand
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.5.12
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.5
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.23.2(tsx@4.23.15)(typescript@6.0.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vocs:
+        specifier: ^2.11.1
+        version: 2.11.1(c9c58ddf537d7c3377d4bdaaaf79ecd2)
+
   packages/wagmi-plugin:
     dependencies:
       abitype:

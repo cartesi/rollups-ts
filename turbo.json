@@ -22,6 +22,9 @@
         "@cartesi/rollup#check-types": {
             "dependsOn": ["^build"]
         },
+        "@cartesi/vocs-theme#check-types": {
+            "dependsOn": ["^build"]
+        },
         "test:run": {
             "dependsOn": ["build"],
             "outputs": []
