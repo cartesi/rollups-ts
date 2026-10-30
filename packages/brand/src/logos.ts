@@ -1,4 +1,4 @@
-import dataUris from "../assets/generated/data-uris.json" with { type: "json" };
+import dataUris from "../assets/data-uris.json" with { type: "json" };
 
 /**
  * The official logos as `data:` URIs, so a site can use them without serving
@@ -14,3 +14,15 @@ export const cartesiLogoLightDataUri: string = dataUris.logoLight;
 
 /** The horizontal lockup in white, for dark backgrounds. */
 export const cartesiLogoDarkDataUri: string = dataUris.logoDark;
+
+/** The icon alone, in black, for light backgrounds. */
+export const cartesiIconBlackDataUri: string = dataUris.iconBlack;
+
+/** The icon alone, in white, for dark backgrounds. */
+export const cartesiIconWhiteDataUri: string = dataUris.iconWhite;
+
+/** The icon alone, in cyan, for black backgrounds. */
+export const cartesiIconCyanDataUri: string = dataUris.iconCyan;
+
+/** The icon alone, in teal, for white backgrounds. */
+export const cartesiIconTealDataUri: string = dataUris.iconTeal;
