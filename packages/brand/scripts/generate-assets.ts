@@ -1,5 +1,7 @@
 /*
- * Builds assets/generated/ from the official Brand Kit SVGs in assets/source/.
+ * Builds the published logos from the official Brand Kit SVGs in
+ * assets/source/: the optimised files in assets/generated/, and the same files
+ * as data URIs in assets/data-uris.json, which src/logos.ts exports.
  *
  * Run by hand with `pnpm generate:assets` when a source file or svgo changes;
  * the output is committed, so nobody installing the package runs this. It never
@@ -7,7 +9,7 @@
  * export (their coordinates differ in precision, so they are not recolours of
  * one master), and the icon on a cyan tile is the Kit's own listing asset. All
  * this does is check the sources, optimise the ones the package publishes, and
- * encode three of them as data URIs.
+ * encode those.
  *
  * svgo is pinned to an exact version because its output is committed: bumping
  * it means re-running this and reviewing the SVG diff in the same change.
@@ -17,24 +19,46 @@ import { type CustomPlugin, optimize, type XastElement } from "svgo";
 
 const source = new URL("../assets/source/", import.meta.url);
 const generated = new URL("../assets/generated/", import.meta.url);
+const dataUrisFile = new URL("../assets/data-uris.json", import.meta.url);
 
-const brandColors: Record<string, string> = {
+const brandColors = {
     black: "#000000",
     cyan: "#00f6ff",
     teal: "#008da5",
     white: "#ffffff",
-};
+} as const;
 
-/** Published file name, and the source file it is optimised from. */
-const outputs: Record<string, string> = {
-    "logo-light.svg": "cartesi-lockup-black.svg",
-    "logo-dark.svg": "cartesi-lockup-white.svg",
-    "icon.svg": "ctsi-icon.svg",
-    "icon-black.svg": "cartesi-icon-black.svg",
-    "icon-white.svg": "cartesi-icon-white.svg",
-    "icon-cyan.svg": "cartesi-icon-cyan.svg",
-    "icon-teal.svg": "cartesi-icon-teal.svg",
-};
+type BrandColor = keyof typeof brandColors;
+
+/**
+ * What the package publishes: each asset as a file under assets/generated/,
+ * and as a data URI under the same key in assets/data-uris.json.
+ */
+const assets = [
+    { key: "icon", file: "icon.svg", source: "ctsi-icon.svg" },
+    {
+        key: "logoLight",
+        file: "logo-light.svg",
+        source: "cartesi-lockup-black.svg",
+    },
+    {
+        key: "logoDark",
+        file: "logo-dark.svg",
+        source: "cartesi-lockup-white.svg",
+    },
+    {
+        key: "iconBlack",
+        file: "icon-black.svg",
+        source: "cartesi-icon-black.svg",
+    },
+    {
+        key: "iconWhite",
+        file: "icon-white.svg",
+        source: "cartesi-icon-white.svg",
+    },
+    { key: "iconCyan", file: "icon-cyan.svg", source: "cartesi-icon-cyan.svg" },
+    { key: "iconTeal", file: "icon-teal.svg", source: "cartesi-icon-teal.svg" },
+] as const;
 
 const normalise = (hex: string): string => {
     const h = hex.toLowerCase();
@@ -54,7 +78,7 @@ const fillsOf = (svg: string): string[] =>
  */
 const check = (name: string, svg: string): void => {
     const fills = fillsOf(svg);
-    const brand = Object.values(brandColors);
+    const brand: readonly string[] = Object.values(brandColors);
     if (name === "ctsi-icon.svg") {
         const stray = fills.filter((fill) => !brand.includes(fill));
         if (stray.length > 0) {
@@ -68,9 +92,12 @@ const check = (name: string, svg: string): void => {
     if (!match) {
         throw new Error(`${name}: not a file the Brand Kit ships`);
     }
-    const color = brandColors[match[1] as string] as string;
+    const color = brandColors[match[1] as BrandColor];
     const wrong = fills.filter((fill) => fill !== color);
-    if (wrong.length > 0 || (color !== "#000000" && fills.length === 0)) {
+    if (
+        wrong.length > 0 ||
+        (color !== brandColors.black && fills.length === 0)
+    ) {
         throw new Error(
             `${name}: expected only ${color}, found ${fills.join(", ") || "no fill"}`,
         );
@@ -155,27 +182,16 @@ for (const name of names) {
 }
 
 await mkdir(generated, { recursive: true });
-const optimised = new Map<string, string>();
-for (const [output, input] of Object.entries(outputs)) {
+const dataUris: Record<string, string> = {};
+for (const { key, file, source: input } of assets) {
     const svg = sources.get(input);
     if (svg === undefined) {
         throw new Error(`${input}: missing from assets/source/`);
     }
     const data = optimise(svg);
-    optimised.set(output, data);
-    await writeFile(new URL(output, generated), `${data}\n`);
+    await writeFile(new URL(file, generated), `${data}\n`);
+    dataUris[key] = toDataUri(data);
 }
+await writeFile(dataUrisFile, `${JSON.stringify(dataUris, null, 4)}\n`);
 
-const dataUris = {
-    icon: toDataUri(optimised.get("icon.svg") as string),
-    logoLight: toDataUri(optimised.get("logo-light.svg") as string),
-    logoDark: toDataUri(optimised.get("logo-dark.svg") as string),
-};
-await writeFile(
-    new URL("data-uris.json", generated),
-    `${JSON.stringify(dataUris, null, 4)}\n`,
-);
-
-console.log(
-    `checked ${names.length} sources, wrote ${Object.keys(outputs).length} SVGs`,
-);
+console.log(`checked ${names.length} sources, wrote ${assets.length} assets`);

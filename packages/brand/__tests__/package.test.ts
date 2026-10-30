@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import pkg from "../package.json" with { type: "json" };
-import dataUris from "../assets/generated/data-uris.json" with { type: "json" };
+import dataUris from "../assets/data-uris.json" with { type: "json" };
 
 // The export map is the package's public API and nothing else checks it: a
 // renamed stylesheet or a dropped `files` entry still builds, and only fails
@@ -39,16 +39,23 @@ describe("package", () => {
         ).toBe(false);
     });
 
-    it("should encode the data URIs from the published SVG files", () => {
+    // Every published SVG is also a data URI under the same name, so a site
+    // can use either; this is what ties the two together.
+    it("should encode every published SVG as a data URI, and nothing else", () => {
+        const generated = new URL("assets/generated/", root);
+        const files = readdirSync(generated).filter((name) =>
+            name.endsWith(".svg"),
+        );
         const decode = (uri: string) =>
             decodeURIComponent(uri.replace("data:image/svg+xml,", ""));
-        const file = (name: string) =>
-            readFileSync(
-                new URL(`assets/generated/${name}`, root),
-                "utf8",
-            ).trim();
-        expect(decode(dataUris.icon)).toBe(file("icon.svg"));
-        expect(decode(dataUris.logoLight)).toBe(file("logo-light.svg"));
-        expect(decode(dataUris.logoDark)).toBe(file("logo-dark.svg"));
+        // iconBlack -> icon-black.svg
+        const fileOf = (key: string) =>
+            `${key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}.svg`;
+        expect(Object.keys(dataUris).map(fileOf).sort()).toEqual(files.sort());
+        for (const [key, uri] of Object.entries(dataUris)) {
+            expect(decode(uri), key).toBe(
+                readFileSync(new URL(fileOf(key), generated), "utf8").trim(),
+            );
+        }
     });
 });
