@@ -1,0 +1,91 @@
+/* every value below is a brand token; a bundler drops the repeat import */
+@import "@cartesi/brand/styles/tokens.css";
+
+/*
+ * The Cartesi brand on Vocs' theme tokens.
+ *
+ * Nothing here is wrapped in @layer, on purpose: Vocs imports its own theme
+ * into the lowest of its cascade layers, and an unlayered declaration beats
+ * every layered one whatever the order or specificity. So these override Vocs
+ * without !important, and without depending on where Vocs injects this file.
+ *
+ * Only what the brand dictates is overridden. Vocs' greys are achromatic
+ * already, its callout hues keep a warning distinct from a tip, and its
+ * accent ramp is derived from the accent colour, which cartesiTheme() sets in
+ * the site config: Vocs writes that inline on <html>, out of a stylesheet's
+ * reach.
+ */
+:root {
+    --vocs-font-family: var(--cartesi-font-body);
+
+    /*
+     * Vocs paints its chrome (the sidebar and top bar) with the primary
+     * background, and the column a page is read in with the surface
+     * background. The Brand Kit's backgrounds are pure white and pure black,
+     * so both take them, and Vocs' hairline borders separate the two.
+     */
+    --vocs-background-color-primary: light-dark(
+        var(--cartesi-white),
+        var(--cartesi-black)
+    );
+    --vocs-background-color-surface: light-dark(
+        var(--cartesi-white),
+        var(--cartesi-black)
+    );
+    --vocs-text-color-primary: light-dark(
+        var(--cartesi-black),
+        var(--cartesi-white)
+    );
+    --vocs-text-color-link: light-dark(
+        var(--cartesi-black),
+        var(--cartesi-cyan)
+    );
+}
+
+/*
+ * Vocs has no token for the heading typeface, and its heading colour token
+ * also colours inline code and navigation hovers, so headlines are styled as
+ * elements. [data-v-content] is the attribute Vocs puts on the article a page
+ * is rendered in.
+ */
+article[data-v-content] :is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--cartesi-font-headline);
+    font-weight: var(--cartesi-weight-headline);
+    /*
+     * Vocs tightens its headings by up to -0.04em, tuned for its own typeface.
+     * Plus Jakarta Sans has a much narrower word space, and at that tracking
+     * the words of a headline run together. -0.02em keeps headlines as tight
+     * as the Brand Kit asks while the words stay apart.
+     */
+    letter-spacing: -0.02em;
+}
+
+/*
+ * Teal headlines on white and cyan on black, as the Brand Kit pairs them, for
+ * the page title and section headings. Smaller headings keep the body colour:
+ * teal on white is 3.92:1, AA only for large text, and a page of cyan
+ * subheadings on black reads as noise.
+ */
+article[data-v-content] :is(h1, h2) {
+    color: light-dark(var(--cartesi-teal), var(--cartesi-cyan));
+}
+
+/*
+ * Links in prose. Teal text on white is below AA at body size, so in light
+ * mode the text stays black and the brand colour moves to the underline; in
+ * dark mode links are cyan, at 15.6:1. A link inside a callout keeps the
+ * callout's own underline colour, and hovering thickens the underline instead
+ * of dotting it.
+ */
+article[data-v-content] a[data-v] {
+    text-decoration-color: light-dark(var(--cartesi-teal), currentcolor);
+}
+
+article[data-v-content] [data-v-context] a[data-v] {
+    text-decoration-color: revert-layer;
+}
+
+article[data-v-content] a[data-v]:hover {
+    text-decoration-style: solid;
+    text-decoration-thickness: 2px;
+}

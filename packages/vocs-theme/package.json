@@ -1,0 +1,61 @@
+{
+    "name": "@cartesi/vocs-theme",
+    "description": "Cartesi branding for Vocs documentation sites",
+    "version": "0.0.0",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cartesi/rollups-ts"
+    },
+    "dependencies": {
+        "@cartesi/brand": "workspace:*"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@types/node": "catalog:",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "vocs": "^2.11.1"
+    },
+    "type": "module",
+    "sideEffects": [
+        "**/*.css"
+    ],
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "require": "./dist/index.cjs"
+            }
+        },
+        "./styles.css": "./styles/index.css",
+        "./styles/vocs.css": "./styles/vocs.css",
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "LICENSE",
+        "NOTICE",
+        "dist/**",
+        "styles/**"
+    ],
+    "peerDependencies": {
+        "vocs": "^2.11.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "tsdown",
+        "check-types": "tsc --noEmit",
+        "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+        "dev": "tsdown --watch",
+        "lint": "biome check"
+    }
+}
