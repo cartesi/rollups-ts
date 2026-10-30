@@ -14,9 +14,13 @@
         "@biomejs/biome": "catalog:",
         "@types/node": "catalog:",
         "@types/react": "catalog:",
+        "@types/react-dom": "^19.3.0",
+        "@vitest/coverage-v8": "catalog:",
         "react": "^19.3.1",
+        "react-dom": "^19.3.1",
         "tsdown": "catalog:",
         "typescript": "catalog:",
+        "vitest": "catalog:",
         "vocs": "^2.11.1"
     },
     "type": "module",
@@ -70,6 +74,9 @@
         "check-types": "tsc --noEmit",
         "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
         "dev": "tsdown --watch",
-        "lint": "biome check"
+        "lint": "biome check",
+        "test": "vitest",
+        "test:run": "vitest run",
+        "test:coverage": "vitest run --coverage"
     }
 }
