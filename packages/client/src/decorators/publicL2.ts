@@ -30,6 +30,8 @@ import type {
     GetProcessedInputCountReturnType as GetProcessedInputCountReturnTypeRpc,
     GetReportParams as GetReportParamsRpc,
     GetReportReturnType as GetReportReturnTypeRpc,
+    GetStandingChangeParams as GetStandingChangeParamsRpc,
+    GetStandingChangeReturnType as GetStandingChangeReturnTypeRpc,
     GetTournamentParams as GetTournamentParamsRpc,
     GetTournamentReturnType as GetTournamentReturnTypeRpc,
     GetWithdrawalParams as GetWithdrawalParamsRpc,
@@ -52,6 +54,8 @@ import type {
     ListOutputsReturnType as ListOutputsReturnTypeRpc,
     ListReportsParams as ListReportsParamsRpc,
     ListReportsReturnType as ListReportsReturnTypeRpc,
+    ListStandingChangesParams as ListStandingChangesParamsRpc,
+    ListStandingChangesReturnType as ListStandingChangesReturnTypeRpc,
     ListTournamentsParams as ListTournamentsParamsRpc,
     ListTournamentsReturnType as ListTournamentsReturnTypeRpc,
     ListWithdrawalsParams as ListWithdrawalsParamsRpc,
@@ -77,6 +81,7 @@ import {
     getPendingExecutableOutputCount,
     getProcessedInputCount,
     getReport,
+    getStandingChange,
     getTournament,
     getWithdrawal,
     listApplications,
@@ -88,6 +93,7 @@ import {
     listMatches,
     listOutputs,
     listReports,
+    listStandingChanges,
     listTournaments,
     listWithdrawals,
     waitForInput,
@@ -124,6 +130,8 @@ import type {
     GetProcessedInputCountReturnType,
     GetReportParams,
     GetReportReturnType,
+    GetStandingChangeParams,
+    GetStandingChangeReturnType,
     GetTournamentParams,
     GetTournamentReturnType,
     GetWithdrawalParams,
@@ -146,6 +154,8 @@ import type {
     ListOutputsReturnType,
     ListReportsParams,
     ListReportsReturnType,
+    ListStandingChangesParams,
+    ListStandingChangesReturnType,
     ListTournamentsParams,
     ListTournamentsReturnType,
     ListWithdrawalsParams,
@@ -229,6 +239,16 @@ export type PublicCartesiRpcSchema = [
         Method: "cartesi_getBondEvent";
         Parameters: GetBondEventParamsRpc;
         ReturnType: GetBondEventReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_listStandingChanges";
+        Parameters: ListStandingChangesParamsRpc;
+        ReturnType: ListStandingChangesReturnTypeRpc;
+    },
+    {
+        Method: "cartesi_getStandingChange";
+        Parameters: GetStandingChangeParamsRpc;
+        ReturnType: GetStandingChangeReturnTypeRpc;
     },
     {
         Method: "cartesi_getLastAcceptedEpochIndex";
@@ -322,6 +342,9 @@ export type PublicActionsL2 = {
     listBondEvents: (
         params: ListBondEventsParams,
     ) => Promise<ListBondEventsReturnType>;
+    listStandingChanges: (
+        params: ListStandingChangesParams,
+    ) => Promise<ListStandingChangesReturnType>;
     listInputs: (params: ListInputsParams) => Promise<ListInputsReturnType>;
     listOutputs: (params: ListOutputsParams) => Promise<ListOutputsReturnType>;
     listReports: (params: ListReportsParams) => Promise<ListReportsReturnType>;
@@ -351,6 +374,9 @@ export type PublicActionsL2 = {
     getBondEvent: (
         params: GetBondEventParams,
     ) => Promise<GetBondEventReturnType>;
+    getStandingChange: (
+        params: GetStandingChangeParams,
+    ) => Promise<GetStandingChangeReturnType>;
     /** @deprecated use `getNodeInfo` instead. */
     getNodeVersion: () => Promise<GetNodeVersionReturnType>;
     getInput: (params: GetInputParams) => Promise<GetInputReturnType>;
@@ -403,6 +429,8 @@ export const publicActionsL2 =
         getMatchAdvance: (params) => getMatchAdvance(client, params),
         listBondEvents: (params) => listBondEvents(client, params),
         getBondEvent: (params) => getBondEvent(client, params),
+        listStandingChanges: (params) => listStandingChanges(client, params),
+        getStandingChange: (params) => getStandingChange(client, params),
         getNodeInfo: () => getNodeInfo(client),
         getChainId: () => getChainId(client),
         getNodeVersion: () => getNodeVersion(client),
