@@ -1,0 +1,30 @@
+# cartesi_listStandingChanges
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data, pagination } = await client.request("cartesi_listStandingChanges", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    epoch_index: "0x2A",
+    tournament_address: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    limit: 50,
+    offset: 0,
+});
+```
+
+Records are ordered by block number, block-global log index, then transaction
+hash, and `descending` reverses all three, so `descending: true` with `limit: 1`
+returns the latest event. `result_at` and `winner_expires_at` are prospective
+instants: an event does not assert that the tournament has already finished.
+
+## Return Type
+
+The `data` is an array of `StandingChanged`:
+
+```ts twoslash
+import { type StandingChanged, type ListStandingChangesReturnType } from "@cartesi/rpc";
+```
+
+For more information about pagination refer to the [pagination section](/rpc#pagination).

@@ -432,7 +432,11 @@ export type TournamentCreationEvent = {
 export type TournamentInnerResult = {
     disposition: InnerTournamentDisposition;
     parent_commitment: Hash | null;
-    /** Remaining carryover allowance, in blocks, at `as_of_block`. */
+    /**
+     * The child winner's remaining paused allowance, in blocks, before the
+     * parent refills it, after deducting the time elapsed since the child's
+     * result.
+     */
     paused_allowance: HexNumber;
 };
 
@@ -488,6 +492,14 @@ export type Tournament = {
     allowance: HexNumber;
     creation_event: TournamentCreationEvent | null;
     snapshot: TournamentSnapshot;
+    /** The bond a commitment pays to join the tournament. */
+    bond_value: Uint256;
+    /**
+     * The final states contested in the parent match, in commitment-side
+     * order; null for a root tournament.
+     */
+    contested_final_state_one: Hash | null;
+    contested_final_state_two: Hash | null;
 };
 
 export type ListTournamentsReturnType = PaginatedReturnType<Tournament>;
@@ -557,12 +569,23 @@ export type ListMatchesParams = PaginationParams & {
     tournament_address?: Address;
 };
 
+/**
+ * Durable `LeafMatchSealed` divergence record. It stays present after the match
+ * is deleted, even once `snapshot.sealed` is null. The two final states and the
+ * two deadlines are independent of each other.
+ */
 export type LeafMatchSeal = {
     /** The immutable deadline from `LeafMatchSealed`. */
     eliminable_at: HexNumber;
     block_number: HexNumber;
     tx_hash: Hash;
     log_index: HexNumber;
+    agree_state: Hash;
+    divergence_position: Uint256;
+    final_state_one: Hash;
+    final_state_two: Hash;
+    deadline_one: HexNumber;
+    deadline_two: HexNumber;
 };
 
 type MatchBisectionSnapshotBase = {
@@ -639,6 +662,11 @@ export type Match = {
     leaf_seal: LeafMatchSeal | null;
     deletion_log_index: HexNumber | null;
     snapshot: MatchSnapshot;
+    /**
+     * The immutable `MatchCreated` responder deadline. A later advance or seal
+     * supersedes it, and creating a child tournament ends its use.
+     */
+    responder_deadline: HexNumber;
 };
 
 export type ListMatchesReturnType = PaginatedReturnType<Match>;
@@ -679,6 +707,12 @@ export type MatchAdvanced = {
     segment_start_position: Uint256;
     /** The immutable both-sides elimination deadline this advance reports. */
     eliminable_at: HexNumber;
+    current_height: HexNumber;
+    /**
+     * The post-advance responder deadline; at a `current_height` of one, the
+     * seal deadline.
+     */
+    responder_deadline: HexNumber;
 };
 
 export type ListMatchAdvancesReturnType = PaginatedReturnType<MatchAdvanced>;
@@ -749,6 +783,71 @@ export type GetBondEventParams = {
 
 export type GetBondEventReturnType = {
     data: BondEvent;
+};
+
+/**
+ * Immutable `StandingChanged` event of one tournament, emitted after every join
+ * and match deletion. Read the latest one in log order. `result_at` and
+ * `winner_expires_at` are prospective: they do not assert that the tournament
+ * has already finished.
+ */
+export type StandingChanged = {
+    epoch_index: HexNumber;
+    tournament_address: Address;
+    /** Number of live matches. */
+    match_count: Uint256;
+    /** Unpaired commitment, or null when absent; a zero hash is still a value. */
+    dangling: Hash | null;
+    /**
+     * Contested parent commitment an inner dangling winner defends, or null
+     * when absent.
+     */
+    parent_commitment: Hash | null;
+    /**
+     * First inclusive instant the tournament finishes at once no match is
+     * live; zero otherwise.
+     */
+    result_at: HexNumber;
+    /**
+     * First inclusive expiry instant of an inner dangling winner once no match
+     * is live; zero otherwise.
+     */
+    winner_expires_at: HexNumber;
+    block_number: HexNumber;
+    tx_hash: Hash;
+    log_index: HexNumber;
+    created_at: DateTime;
+    updated_at: DateTime;
+};
+
+/**
+ * `descending` reverses the block-number, log-index and transaction-hash
+ * ordering of the results, so `descending: true` with `limit: 1` returns the
+ * latest event.
+ */
+export type ListStandingChangesParams = PaginationParams & {
+    application: string | Address;
+    epoch_index: HexNumber;
+    tournament_address: Address;
+};
+
+export type ListStandingChangesReturnType =
+    PaginatedReturnType<StandingChanged>;
+
+/**
+ * A standing change is keyed by the transaction hash and block-global log index
+ * of its event, both of which `cartesi_listStandingChanges` returns.
+ */
+export type GetStandingChangeParams = {
+    application: string | Address;
+    epoch_index: HexNumber;
+    tournament_address: Address;
+    tx_hash: Hash;
+    log_index: HexNumber;
+};
+
+export type GetStandingChangeReturnType = {
+    data: StandingChanged;
 };
 
 export type ListInputsParams = PaginationParams &

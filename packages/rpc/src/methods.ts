@@ -30,6 +30,8 @@ import type {
     GetProcessedInputCountReturnType,
     GetReportParams,
     GetReportReturnType,
+    GetStandingChangeParams,
+    GetStandingChangeReturnType,
     GetTournamentParams,
     GetTournamentReturnType,
     GetWithdrawalParams,
@@ -52,6 +54,8 @@ import type {
     ListOutputsReturnType,
     ListReportsParams,
     ListReportsReturnType,
+    ListStandingChangesParams,
+    ListStandingChangesReturnType,
     ListTournamentsParams,
     ListTournamentsReturnType,
     ListWithdrawalsParams,
@@ -93,6 +97,12 @@ export type Methods = {
         params: ListBondEventsParams,
     ): ListBondEventsReturnType;
     cartesi_getBondEvent(params: GetBondEventParams): GetBondEventReturnType;
+    cartesi_listStandingChanges(
+        params: ListStandingChangesParams,
+    ): ListStandingChangesReturnType;
+    cartesi_getStandingChange(
+        params: GetStandingChangeParams,
+    ): GetStandingChangeReturnType;
     cartesi_listInputs(params: ListInputsParams): ListInputsReturnType;
     cartesi_getInput(params: GetInputParams): GetInputReturnType;
     cartesi_getProcessedInputCount(
