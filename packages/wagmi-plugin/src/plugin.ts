@@ -52,7 +52,7 @@ export const DEFAULT_ANVIL: TarballSource = {
  * dave version used by default when `artifacts`, `deployments` and `anvil`
  * are omitted from the `prt` option of `rollupsContracts`.
  */
-export const PRT_DEFAULT_VERSION = "3.0.0-alpha.5";
+export const PRT_DEFAULT_VERSION = "3.0.0-alpha.6";
 
 const prtDefaultReleaseUrl = `https://github.com/cartesi/dave/releases/download/v${PRT_DEFAULT_VERSION}`;
 
@@ -62,7 +62,7 @@ const prtDefaultReleaseUrl = `https://github.com/cartesi/dave/releases/download/
  */
 export const PRT_DEFAULT_ARTIFACTS: TarballSource = {
     url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-contract-artifacts.tar.gz`,
-    sha256: "10673f0d8cf83988e172b1b4baebb9c74a0dda0d6b3f77c89950638b63dae4ee",
+    sha256: "6938b679cddeef51becc5ca512fa9e2d0dfb0a55686985b2803e1ce7ba004ad4",
 };
 
 /**
@@ -71,7 +71,19 @@ export const PRT_DEFAULT_ARTIFACTS: TarballSource = {
  */
 export const PRT_DEFAULT_DEPLOYMENTS: TarballSource = {
     url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-deployment-addresses.tar.gz`,
-    sha256: "435c11b8d6c6cfe864e4a3eb5c311ea02492cb976db757394f7da7084af90efa",
+    sha256: "eba0406121de5009551504785bdaecfd99526bc62a2afc7a06298ba573100e52",
+};
+
+/**
+ * Default source of the PRT experimental deployment addresses tarball: the
+ * dave `PRT_DEFAULT_VERSION` GitHub release, hash-verified. It covers the
+ * chains dave deploys to but does not validate the node on (OP Mainnet, Base,
+ * their Sepolia testnets and the Arbitrum chains), which `PRT_DEFAULT_DEPLOYMENTS`
+ * leaves out.
+ */
+export const PRT_DEFAULT_EXPERIMENTAL_DEPLOYMENTS: TarballSource = {
+    url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-deployment-addresses-experimental.tar.gz`,
+    sha256: "bd56b8fbaf6645c86a0423a9bcfa36f968ecdd41ef05d0b44222045319948126",
 };
 
 /**
@@ -90,7 +102,7 @@ export const PRT_DEFAULT_ANVIL_VERSION = "1.5.1";
  */
 export const PRT_DEFAULT_ANVIL: TarballSource = {
     url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-anvil-${PRT_DEFAULT_ANVIL_VERSION}.tar.gz`,
-    sha256: "7e6b6a402b5e384fd6aa56387726cf4cc08783b6350b1c16a71a2e6ff454e583",
+    sha256: "62500dc3558fbb1f289d99584cd8989d7b42d0c0e7e7a13b8f2d309746e9163e",
 };
 
 /**
@@ -118,6 +130,7 @@ export const prtInternals: ContractFilter[] = [
     "IApplicationChecker",
     "IApplicationFactoryErrors",
     "BinaryMerkleTreeErrors",
+    "ClockBudgets",
     "Clones",
     "Create2",
     "Errors",
@@ -221,6 +234,18 @@ export interface PrtOptions {
      */
     deployments?: TarballSource;
     /**
+     * URL of the PRT experimental deployment addresses tarball, i.e.
+     * `cartesi-rollups-prt-<version>-deployment-addresses-experimental.tar.gz`,
+     * which dave publishes since 3.0.0-alpha.6 for the chains it deploys to
+     * but does not validate the node on. Optionally with an expected SHA-256
+     * hash for integrity verification.
+     * Defaults to `PRT_DEFAULT_EXPERIMENTAL_DEPLOYMENTS`, the tarball of the
+     * dave `PRT_DEFAULT_VERSION` GitHub release. Pass `false` to generate only
+     * the addresses of the chains the `deployments` tarball covers, as for a
+     * dave release that publishes no such tarball.
+     */
+    experimentalDeployments?: TarballSource | false;
+    /**
      * URL of the PRT anvil devnet tarball, i.e.
      * `cartesi-rollups-prt-<version>-anvil-<anvilVersion>.tar.gz`, whose
      * deployment addresses cover the devnet (chain 31337). Optionally with an
@@ -272,6 +297,11 @@ export const rollupsContracts = (
     const prtAnvil =
         prtOptions &&
         (prtOptions.anvil === undefined ? PRT_DEFAULT_ANVIL : prtOptions.anvil);
+    const prtExperimentalDeployments =
+        prtOptions &&
+        (prtOptions.experimentalDeployments === undefined
+            ? PRT_DEFAULT_EXPERIMENTAL_DEPLOYMENTS
+            : prtOptions.experimentalDeployments);
     return {
         name: "rollupsContracts",
         contracts: () =>
@@ -293,6 +323,10 @@ export const rollupsContracts = (
                     ...(prtOptions
                         ? [prtOptions.deployments ?? PRT_DEFAULT_DEPLOYMENTS]
                         : []),
+                    ...(prtExperimentalDeployments === undefined ||
+                    prtExperimentalDeployments === false
+                        ? []
+                        : [prtExperimentalDeployments]),
                 ],
                 anvil:
                     anvil === false
