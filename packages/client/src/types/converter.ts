@@ -16,6 +16,7 @@ import type {
     Output as OutputRpc,
     Pagination as PaginationRpc,
     Report as ReportRpc,
+    StandingChanged as StandingChangedRpc,
     TournamentCreationEvent as TournamentCreationEventRpc,
     TournamentSnapshot as TournamentSnapshotRpc,
     Tournament as TournamentRpc,
@@ -40,6 +41,7 @@ import type {
     Output,
     Pagination,
     Report,
+    StandingChanged,
     Tournament,
     TournamentCreationEvent,
     TournamentSnapshot,
@@ -252,6 +254,9 @@ export const tournamentConverter = (tournament: TournamentRpc): Tournament => {
             ? tournamentCreationEventConverter(tournament.creation_event)
             : null,
         snapshot: tournamentSnapshotConverter(tournament.snapshot),
+        bondValue: hexToBigInt(tournament.bond_value),
+        contestedFinalStateOne: tournament.contested_final_state_one,
+        contestedFinalStateTwo: tournament.contested_final_state_two,
     };
 };
 
@@ -289,6 +294,12 @@ const leafMatchSealConverter = (seal: LeafMatchSealRpc): LeafMatchSeal => {
         blockNumber: hexToBigInt(seal.block_number),
         txHash: seal.tx_hash,
         logIndex: hexToBigInt(seal.log_index),
+        agreeState: seal.agree_state,
+        divergencePosition: hexToBigInt(seal.divergence_position),
+        finalStateOne: seal.final_state_one,
+        finalStateTwo: seal.final_state_two,
+        deadlineOne: hexToBigInt(seal.deadline_one),
+        deadlineTwo: hexToBigInt(seal.deadline_two),
     };
 };
 
@@ -390,6 +401,7 @@ export const matchConverter = (match: MatchRpc): Match => {
             ? hexToBigInt(match.deletion_log_index)
             : null,
         snapshot: matchSnapshotConverter(match.snapshot),
+        responderDeadline: hexToBigInt(match.responder_deadline),
     };
 };
 
@@ -409,6 +421,8 @@ export const matchAdvancedConverter = (
         logIndex: hexToBigInt(matchAdvanced.log_index),
         segmentStartPosition: hexToBigInt(matchAdvanced.segment_start_position),
         eliminableAt: hexToBigInt(matchAdvanced.eliminable_at),
+        currentHeight: hexToBigInt(matchAdvanced.current_height),
+        responderDeadline: hexToBigInt(matchAdvanced.responder_deadline),
     };
 };
 
@@ -449,6 +463,25 @@ export const bondEventConverter = (bondEvent: BondEventRpc): BondEvent => {
             };
         }
     }
+};
+
+export const standingChangedConverter = (
+    standingChanged: StandingChangedRpc,
+): StandingChanged => {
+    return {
+        epochIndex: hexToBigInt(standingChanged.epoch_index),
+        tournamentAddress: getAddress(standingChanged.tournament_address),
+        matchCount: hexToBigInt(standingChanged.match_count),
+        dangling: standingChanged.dangling,
+        parentCommitment: standingChanged.parent_commitment,
+        resultAt: hexToBigInt(standingChanged.result_at),
+        winnerExpiresAt: hexToBigInt(standingChanged.winner_expires_at),
+        blockNumber: hexToBigInt(standingChanged.block_number),
+        txHash: standingChanged.tx_hash,
+        logIndex: hexToBigInt(standingChanged.log_index),
+        createdAt: new Date(standingChanged.created_at),
+        updatedAt: new Date(standingChanged.updated_at),
+    };
 };
 
 export const inputConverter = (input: InputRpc): Input => {

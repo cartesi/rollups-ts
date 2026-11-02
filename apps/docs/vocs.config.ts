@@ -147,6 +147,14 @@ const config: Config = defineConfig({
                             text: "getBondEvent",
                             link: "/client/getBondEvent",
                         },
+                        {
+                            text: "listStandingChanges",
+                            link: "/client/listStandingChanges",
+                        },
+                        {
+                            text: "getStandingChange",
+                            link: "/client/getStandingChange",
+                        },
                         { text: "listInputs", link: "/client/listInputs" },
                         { text: "getInput", link: "/client/getInput" },
                         { text: "listOutputs", link: "/client/listOutputs" },
