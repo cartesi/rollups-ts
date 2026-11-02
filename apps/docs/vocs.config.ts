@@ -244,6 +244,14 @@ const config: Config = defineConfig({
                             text: "useBondEvent",
                             link: "/react/useBondEvent",
                         },
+                        {
+                            text: "useStandingChanges",
+                            link: "/react/useStandingChanges",
+                        },
+                        {
+                            text: "useStandingChange",
+                            link: "/react/useStandingChange",
+                        },
                         { text: "useInput", link: "/react/useInput" },
                         { text: "useInputs", link: "/react/useInputs" },
                         {

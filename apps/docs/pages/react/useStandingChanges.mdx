@@ -1,0 +1,50 @@
+# useStandingChanges
+
+## Usage
+
+```tsx twoslash
+import { useStandingChanges } from "@cartesi/react";
+
+function Example() {
+  const { data, isLoading } = useStandingChanges({
+    application: "0x...",
+    epochIndex: 1n,
+    tournamentAddress: "0x...",
+    descending: true,
+    limit: 1,
+  });
+  const { data: standingChanges, pagination } = data || {};
+  // render logic
+}
+```
+
+## Parameters
+
+The query runs once `application`, `epochIndex` and `tournamentAddress` are all
+set:
+
+```ts twoslash
+import type {
+  ListStandingChangesParams,
+} from "@cartesi/client";
+// {
+//   application: Address | string;
+//   epochIndex: bigint;
+//   tournamentAddress: Address;
+//   limit?: number;
+//   offset?: number;
+//   descending?: boolean;
+// }
+```
+
+## Return Type
+
+The `data` is an array of `StandingChanged`:
+
+```ts twoslash
+import type {
+  StandingChanged,
+  ListStandingChangesReturnType,
+  Pagination,
+} from "@cartesi/client";
+```
