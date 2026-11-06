@@ -1,0 +1,25 @@
+# cartesi_getStandingChange
+
+## Usage
+
+```ts twoslash
+// [!include ~/snippets/rpc/createClient.ts]
+
+const { data: standingChange } = await client.request("cartesi_getStandingChange", {
+    application: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    epoch_index: "0x2A",
+    tournament_address: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    tx_hash: "0x0974CC873dF893B302f6be7ecf4F9D4b1A15C366",
+    log_index: "0x0",
+});
+```
+
+A standing change is keyed by the transaction hash and block-global log index of
+its event, both of which `cartesi_listStandingChanges` returns. A log index of
+zero is valid.
+
+## Return Type
+
+```ts twoslash
+import { type StandingChanged } from "@cartesi/rpc";
+```

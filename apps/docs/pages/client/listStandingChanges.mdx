@@ -1,0 +1,50 @@
+# listStandingChanges
+
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+// the latest standing of the tournament
+const { data, pagination } = await publicClientL2.listStandingChanges({
+  application: "0x...",
+  epochIndex: 1n,
+  tournamentAddress: "0x...",
+  descending: true,
+  limit: 1,
+});
+```
+
+Events are ordered by block number, block-global log index, then transaction
+hash; `descending` reverses all three. `resultAt` and `winnerExpiresAt` are
+prospective instants: an event does not assert that the tournament has already
+finished.
+
+## Parameters
+
+```ts twoslash
+import type { ListStandingChangesParams } from "@cartesi/client";
+// {
+//   application: Address | string;
+//   epochIndex: bigint;
+//   tournamentAddress: Address;
+//   limit?: number;
+//   offset?: number;
+//   descending?: boolean;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { ListStandingChangesReturnType, StandingChanged, Pagination } from "@cartesi/client";
+// ListStandingChangesReturnType = {
+//   data: StandingChanged[];
+//   pagination: Pagination;
+// }
+```

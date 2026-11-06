@@ -147,6 +147,14 @@ const config: Config = defineConfig({
                             text: "getBondEvent",
                             link: "/client/getBondEvent",
                         },
+                        {
+                            text: "listStandingChanges",
+                            link: "/client/listStandingChanges",
+                        },
+                        {
+                            text: "getStandingChange",
+                            link: "/client/getStandingChange",
+                        },
                         { text: "listInputs", link: "/client/listInputs" },
                         { text: "getInput", link: "/client/getInput" },
                         { text: "listOutputs", link: "/client/listOutputs" },
@@ -235,6 +243,14 @@ const config: Config = defineConfig({
                         {
                             text: "useBondEvent",
                             link: "/react/useBondEvent",
+                        },
+                        {
+                            text: "useStandingChanges",
+                            link: "/react/useStandingChanges",
+                        },
+                        {
+                            text: "useStandingChange",
+                            link: "/react/useStandingChange",
                         },
                         { text: "useInput", link: "/react/useInput" },
                         { text: "useInputs", link: "/react/useInputs" },
@@ -327,6 +343,10 @@ const config: Config = defineConfig({
                             link: "/rpc/cartesi_listBondEvents",
                         },
                         {
+                            text: "cartesi_listStandingChanges",
+                            link: "/rpc/cartesi_listStandingChanges",
+                        },
+                        {
                             text: "cartesi_listInputs",
                             link: "/rpc/cartesi_listInputs",
                         },
@@ -369,6 +389,10 @@ const config: Config = defineConfig({
                         {
                             text: "cartesi_getBondEvent",
                             link: "/rpc/cartesi_getBondEvent",
+                        },
+                        {
+                            text: "cartesi_getStandingChange",
+                            link: "/rpc/cartesi_getStandingChange",
                         },
                         {
                             text: "cartesi_getLastAcceptedEpochIndex",

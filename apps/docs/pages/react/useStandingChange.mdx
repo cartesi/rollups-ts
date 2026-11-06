@@ -1,0 +1,29 @@
+# useStandingChange
+
+## Usage
+
+```tsx twoslash
+import { useStandingChange } from "@cartesi/react";
+
+function Example() {
+  const { data, isLoading } = useStandingChange({
+    application: "0x...",
+    epochIndex: 1n,
+    tournamentAddress: "0x...",
+    txHash: "0x...",
+    logIndex: 0n,
+  });
+  // render logic
+}
+```
+
+## Return Type
+
+The `data` is a `StandingChanged`:
+
+```ts twoslash
+import {
+  type StandingChanged,
+  type GetStandingChangeReturnType,
+} from "@cartesi/client";
+```

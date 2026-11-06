@@ -10,6 +10,7 @@ import type {
     NodeInfo,
     Output,
     Report,
+    StandingChanged,
     Tournament,
     Withdrawal,
 } from "@cartesi/rpc";
@@ -26,6 +27,7 @@ import {
     nodeInfoConverter,
     outputConverter,
     reportConverter,
+    standingChangedConverter,
     tournamentConverter,
     withdrawalConverter,
 } from "../src/types/converter.js";
@@ -67,6 +69,9 @@ const baseTournament: Tournament = {
             payment: null,
         },
     },
+    bond_value: "0x5031002f4a1e000",
+    contested_final_state_one: null,
+    contested_final_state_two: null,
 };
 
 const bisection = {
@@ -137,6 +142,7 @@ const baseMatch: MatchRpc = {
     leaf_seal: null,
     deletion_log_index: null,
     snapshot: snapshotOfPhase("BISECTING"),
+    responder_deadline: "0x258",
 };
 
 describe("converter", () => {
@@ -842,6 +848,9 @@ describe("converter", () => {
                     payment: null,
                 },
             },
+            bond_value: "0x71d4c75781aa000",
+            contested_final_state_one: hash("e1"),
+            contested_final_state_two: hash("e2"),
         };
 
         const tournament = tournamentConverter(rpcTournament);
@@ -890,7 +899,19 @@ describe("converter", () => {
                     payment: null,
                 },
             },
+            bondValue: 512650000000000000n,
+            contestedFinalStateOne: hash("e1"),
+            contestedFinalStateTwo: hash("e2"),
         });
+    });
+
+    // a root tournament has no parent match, so nothing was contested in one
+    it("should leave the contested final states of a root tournament null", () => {
+        const tournament = tournamentConverter(baseTournament);
+
+        expect(tournament.bondValue).toBe(361150000000000000n);
+        expect(tournament.contestedFinalStateOne).toBeNull();
+        expect(tournament.contestedFinalStateTwo).toBeNull();
     });
 
     // a recoverable bond carries a claimer and a payment, and a zero payment is
@@ -1002,6 +1023,38 @@ describe("converter", () => {
                 timeoutOutcome: "NONE",
                 deferredCharge: 0n,
             },
+            responderDeadline: 600n,
+        });
+    });
+
+    it("should convert the leaf seal of a match", () => {
+        const match = matchConverter({
+            ...baseMatch,
+            leaf_seal: {
+                eliminable_at: "0x2bc",
+                block_number: "0x96",
+                tx_hash: hash("c1"),
+                log_index: "0x2",
+                agree_state: hash("c2"),
+                divergence_position: "0x10",
+                final_state_one: hash("c3"),
+                final_state_two: hash("c4"),
+                deadline_one: "0x320",
+                deadline_two: "0x384",
+            },
+        });
+
+        expect(match.leafSeal).toStrictEqual({
+            eliminableAt: 700n,
+            blockNumber: 150n,
+            txHash: hash("c1"),
+            logIndex: 2n,
+            agreeState: hash("c2"),
+            divergencePosition: 16n,
+            finalStateOne: hash("c3"),
+            finalStateTwo: hash("c4"),
+            deadlineOne: 800n,
+            deadlineTwo: 900n,
         });
     });
 
@@ -1049,6 +1102,8 @@ describe("converter", () => {
             log_index: "0x0",
             segment_start_position: "0x0",
             eliminable_at: "0x1f4",
+            current_height: "0x3e",
+            responder_deadline: "0x258",
         };
 
         const matchAdvanced = matchAdvancedConverter(rpcMatchAdvanced);
@@ -1066,6 +1121,8 @@ describe("converter", () => {
             logIndex: 0n,
             segmentStartPosition: 0n,
             eliminableAt: 500n,
+            currentHeight: 62n,
+            responderDeadline: 600n,
         });
     });
 
@@ -1138,5 +1195,65 @@ describe("converter", () => {
             payment: 1000000000000000000n,
             burned: 0n,
         });
+    });
+
+    it("should convert the standing change", () => {
+        const rpcStandingChanged: StandingChanged = {
+            epoch_index: "0x2",
+            tournament_address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+            match_count: "0x0",
+            dangling: hash("aa"),
+            parent_commitment: hash("bb"),
+            result_at: "0x3e8",
+            winner_expires_at: "0x44c",
+            block_number: "0x64",
+            tx_hash: hash("cc"),
+            log_index: "0x3",
+            created_at: "2025-04-10T03:23:27.450183Z",
+            updated_at: "2025-04-10T04:03:28.755635Z",
+        };
+
+        const standingChanged = standingChangedConverter(rpcStandingChanged);
+
+        expect(standingChanged).toStrictEqual({
+            epochIndex: 2n,
+            tournamentAddress: getAddress(
+                rpcStandingChanged.tournament_address,
+            ),
+            matchCount: 0n,
+            dangling: hash("aa"),
+            parentCommitment: hash("bb"),
+            resultAt: 1000n,
+            winnerExpiresAt: 1100n,
+            blockNumber: 100n,
+            txHash: hash("cc"),
+            logIndex: 3n,
+            createdAt: new Date(rpcStandingChanged.created_at),
+            updatedAt: new Date(rpcStandingChanged.updated_at),
+        });
+    });
+
+    // a zero hash is a dangling commitment like any other, while null is the
+    // absence of one, so the two must not collapse into each other
+    it("should keep a zero dangling hash apart from a null one", () => {
+        const base: StandingChanged = {
+            epoch_index: "0x2",
+            tournament_address: "0x67742ff5b2b762503ff0a92738c6fc2ea4a4d182",
+            match_count: "0x1",
+            dangling: hash("00"),
+            parent_commitment: null,
+            result_at: "0x0",
+            winner_expires_at: "0x0",
+            block_number: "0x64",
+            tx_hash: hash("cc"),
+            log_index: "0x0",
+            created_at: "2025-04-10T03:23:27.450183Z",
+            updated_at: "2025-04-10T04:03:28.755635Z",
+        };
+
+        expect(standingChangedConverter(base).dangling).toBe(hash("00"));
+        expect(
+            standingChangedConverter({ ...base, dangling: null }).dangling,
+        ).toBeNull();
     });
 });

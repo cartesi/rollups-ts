@@ -1,0 +1,44 @@
+# getStandingChange
+
+## Usage
+
+```ts twoslash
+import { http } from "viem";
+import { createCartesiPublicClient } from "@cartesi/client";
+
+const publicClientL2 = createCartesiPublicClient({
+  transport: http("http://127.0.0.1:6751/rpc"),
+});
+
+const standingChange = await publicClientL2.getStandingChange({
+  application: "0x...",
+  epochIndex: 1n,
+  tournamentAddress: "0x...",
+  txHash: "0x...",
+  logIndex: 0n,
+});
+```
+
+A standing change is keyed by the transaction hash and block-global log index of
+its event, both of which `listStandingChanges` returns. A log index of zero is
+valid.
+
+## Parameters
+
+```ts twoslash
+import type { GetStandingChangeParams } from "@cartesi/client";
+// {
+//   application: Address | string;
+//   epochIndex: bigint;
+//   tournamentAddress: Address;
+//   txHash: Hash;
+//   logIndex: bigint;
+// }
+```
+
+## Return Type
+
+```ts twoslash
+import type { GetStandingChangeReturnType, StandingChanged } from "@cartesi/client";
+// GetStandingChangeReturnType = StandingChanged;
+```

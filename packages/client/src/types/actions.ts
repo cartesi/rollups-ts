@@ -220,7 +220,11 @@ export type TournamentCreationEvent = {
 export type TournamentInnerResult = {
     disposition: InnerTournamentDisposition;
     parentCommitment: Hash | null;
-    /** Remaining carryover allowance, in blocks, at `asOfBlock`. */
+    /**
+     * The child winner's remaining paused allowance, in blocks, before the
+     * parent refills it, after deducting the time elapsed since the child's
+     * result.
+     */
     pausedAllowance: bigint;
 };
 
@@ -276,6 +280,14 @@ export type Tournament = {
     allowance: bigint;
     creationEvent: TournamentCreationEvent | null;
     snapshot: TournamentSnapshot;
+    /** The bond a commitment pays to join the tournament. */
+    bondValue: bigint;
+    /**
+     * The final states contested in the parent match, in commitment-side
+     * order; null for a root tournament.
+     */
+    contestedFinalStateOne: Hash | null;
+    contestedFinalStateTwo: Hash | null;
 };
 
 export type GetTournamentReturnType = Tournament;
@@ -320,12 +332,23 @@ export type GetCommitmentParams = {
 
 export type GetCommitmentReturnType = Commitment;
 
+/**
+ * Durable `LeafMatchSealed` divergence record. It stays present after the match
+ * is deleted, even once `snapshot.sealed` is null. The two final states and the
+ * two deadlines are independent of each other.
+ */
 export type LeafMatchSeal = {
     /** The immutable deadline from `LeafMatchSealed`. */
     eliminableAt: bigint;
     blockNumber: bigint;
     txHash: Hash;
     logIndex: bigint;
+    agreeState: Hash;
+    divergencePosition: bigint;
+    finalStateOne: Hash;
+    finalStateTwo: Hash;
+    deadlineOne: bigint;
+    deadlineTwo: bigint;
 };
 
 type MatchBisectionSnapshotBase = {
@@ -402,6 +425,11 @@ export type Match = {
     leafSeal: LeafMatchSeal | null;
     deletionLogIndex: bigint | null;
     snapshot: MatchSnapshot;
+    /**
+     * The immutable `MatchCreated` responder deadline. A later advance or seal
+     * supersedes it, and creating a child tournament ends its use.
+     */
+    responderDeadline: bigint;
 };
 
 export type GetMatchParams = {
@@ -427,6 +455,12 @@ export type MatchAdvanced = {
     segmentStartPosition: bigint;
     /** The immutable both-sides elimination deadline this advance reports. */
     eliminableAt: bigint;
+    currentHeight: bigint;
+    /**
+     * The post-advance responder deadline; at a `currentHeight` of one, the
+     * seal deadline.
+     */
+    responderDeadline: bigint;
 };
 
 /**
@@ -479,6 +513,55 @@ export type GetBondEventParams = {
 };
 
 export type GetBondEventReturnType = BondEvent;
+
+/**
+ * Immutable `StandingChanged` event of one tournament, emitted after every join
+ * and match deletion. Read the latest one in log order. `resultAt` and
+ * `winnerExpiresAt` are prospective: they do not assert that the tournament has
+ * already finished.
+ */
+export type StandingChanged = {
+    epochIndex: bigint;
+    tournamentAddress: Address;
+    /** Number of live matches. */
+    matchCount: bigint;
+    /** Unpaired commitment, or null when absent; a zero hash is still a value. */
+    dangling: Hash | null;
+    /**
+     * Contested parent commitment an inner dangling winner defends, or null
+     * when absent.
+     */
+    parentCommitment: Hash | null;
+    /**
+     * First inclusive instant the tournament finishes at once no match is
+     * live; zero otherwise.
+     */
+    resultAt: bigint;
+    /**
+     * First inclusive expiry instant of an inner dangling winner once no match
+     * is live; zero otherwise.
+     */
+    winnerExpiresAt: bigint;
+    blockNumber: bigint;
+    txHash: Hash;
+    logIndex: bigint;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+/**
+ * A standing change is keyed by the transaction hash and block-global log index
+ * of its event, both of which `listStandingChanges` returns.
+ */
+export type GetStandingChangeParams = {
+    application: Address | string;
+    epochIndex: bigint;
+    tournamentAddress: Address;
+    txHash: Hash;
+    logIndex: bigint;
+};
+
+export type GetStandingChangeReturnType = StandingChanged;
 
 export type GetInputParams = {
     application: Address | string;
@@ -681,6 +764,22 @@ export type ListBondEventsParams = PaginationParams & {
 
 export type ListBondEventsReturnType = {
     data: BondEvent[];
+    pagination: Pagination;
+};
+
+/**
+ * `descending` reverses the block-number, log-index and transaction-hash
+ * ordering of the results, so `descending: true` with `limit: 1` returns the
+ * latest event.
+ */
+export type ListStandingChangesParams = PaginationParams & {
+    application: Address | string;
+    epochIndex: bigint;
+    tournamentAddress: Address;
+};
+
+export type ListStandingChangesReturnType = {
+    data: StandingChanged[];
     pagination: Pagination;
 };
 
