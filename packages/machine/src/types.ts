@@ -53,6 +53,9 @@ export interface MachineRuntimeConfig {
     skip_version_check?: boolean;
     soft_yield?: boolean;
     no_reserve?: boolean;
+    // clear all cached hash tree data once the machine is created or loaded
+    // (only then: setRuntimeConfig ignores it; see clearHashTree)
+    clear_hash_tree?: boolean;
 }
 
 // Backing store of a memory or device range

@@ -117,8 +117,9 @@ export class RemoteCartesiMachineImpl extends CartesiMachineImpl {
         config: MachineConfig,
         runtimeConfig?: MachineRuntimeConfig,
         dir?: string,
+        sharing?: SharingMode,
     ): RemoteCartesiMachineImpl {
-        super.create(config, runtimeConfig, dir);
+        super.create(config, runtimeConfig, dir, sharing);
         return this;
     }
 

@@ -268,6 +268,7 @@ private:
     Napi::Value VerifyStepUarch(const Napi::CallbackInfo &info);
     Napi::Value VerifyResetUarch(const Napi::CallbackInfo &info);
     Napi::Value VerifySendCmioResponse(const Napi::CallbackInfo &info);
+    Napi::Value ClearHashTree(const Napi::CallbackInfo &info);
     Napi::Value VerifyHashTree(const Napi::CallbackInfo &info);
     Napi::Value GetHashTreeStats(const Napi::CallbackInfo &info);
     Napi::Value WriteWord(const Napi::CallbackInfo &info);
@@ -346,13 +347,17 @@ Napi::Value Machine::Create(const Napi::CallbackInfo &info) {
     bool has_runtime_config = false;
     std::string dir;
     bool has_dir = false;
+    // how an on-disk machine shares its directory; the emulator's own default,
+    // and what 0.22 did before the parameter existed. Ignored without a dir.
+    int32_t sharing = CM_SHARING_ALL;
     if (!get_string(env, info[0], "config", &config) ||
         !get_optional_string(env, info[1], "runtimeConfig", &runtime_config, &has_runtime_config) ||
-        !get_optional_string(env, info[2], "dir", &dir, &has_dir)) {
+        !get_optional_string(env, info[2], "dir", &dir, &has_dir) ||
+        (!info[3].IsUndefined() && !get_i32(env, info[3], "sharing", &sharing))) {
         return env.Undefined();
     }
     CHECK_CM(env, cm_create(machine_, config.c_str(), has_runtime_config ? runtime_config.c_str() : nullptr,
-                      has_dir ? dir.c_str() : nullptr));
+                      has_dir ? dir.c_str() : nullptr, static_cast<cm_sharing_mode>(sharing)));
     return env.Undefined();
 }
 
@@ -913,6 +918,12 @@ Napi::Value Machine::VerifySendCmioResponse(const Napi::CallbackInfo &info) {
     return verify_send_cmio_response(info.Env(), machine_, info, 0);
 }
 
+Napi::Value Machine::ClearHashTree(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    CHECK_CM(env, cm_clear_hash_tree(machine_));
+    return env.Undefined();
+}
+
 Napi::Value Machine::VerifyHashTree(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     bool result = false;
@@ -976,10 +987,11 @@ Napi::Value Machine::RenameStored(const Napi::CallbackInfo &info) {
 Napi::Value Machine::RemoveStored(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     std::string dir;
-    if (!get_string(env, info[0], "dir", &dir)) {
+    int32_t mode = CM_REMOVE_STORED;
+    if (!get_string(env, info[0], "dir", &dir) || (!info[1].IsUndefined() && !get_i32(env, info[1], "mode", &mode))) {
         return env.Undefined();
     }
-    CHECK_CM(env, cm_remove_stored(machine_, dir.c_str()));
+    CHECK_CM(env, cm_remove_stored(machine_, dir.c_str(), static_cast<cm_remove_mode>(mode)));
     return env.Undefined();
 }
 
@@ -1136,6 +1148,7 @@ Napi::Object Machine::Init(Napi::Env env, Napi::Object exports) {
             InstanceMethod<&Machine::VerifyStepUarch>("verifyStepUarch"),
             InstanceMethod<&Machine::VerifyResetUarch>("verifyResetUarch"),
             InstanceMethod<&Machine::VerifySendCmioResponse>("verifySendCmioResponse"),
+            InstanceMethod<&Machine::ClearHashTree>("clearHashTree"),
             InstanceMethod<&Machine::VerifyHashTree>("verifyHashTree"),
             InstanceMethod<&Machine::GetHashTreeStats>("getHashTreeStats"),
             InstanceMethod<&Machine::WriteWord>("writeWord"),
@@ -1208,12 +1221,14 @@ Napi::Value MachineCreateNew(const Napi::CallbackInfo &info) {
     }
     std::string dir;
     bool has_dir = false;
-    if (!get_optional_string(env, info[2], "dir", &dir, &has_dir)) {
+    int32_t sharing = CM_SHARING_ALL; // see Machine::Create
+    if (!get_optional_string(env, info[2], "dir", &dir, &has_dir) ||
+        (!info[3].IsUndefined() && !get_i32(env, info[3], "sharing", &sharing))) {
         return env.Undefined();
     }
     cm_machine *new_m = nullptr;
     CHECK_CM(env, cm_create_new(config.c_str(), has_runtime_config ? runtime_config.c_str() : nullptr,
-                      has_dir ? dir.c_str() : nullptr, &new_m));
+                      has_dir ? dir.c_str() : nullptr, static_cast<cm_sharing_mode>(sharing), &new_m));
     return Machine::NewInstance(env, new_m);
 }
 

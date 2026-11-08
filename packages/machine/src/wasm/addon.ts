@@ -207,10 +207,13 @@ const createBinding = (module: CartesiMachineModule) => {
             return this.boolOut(module._cm_is_jsonrpc_machine);
         }
 
+        // sharing defaults to CM_SHARING_ALL, as in the addon and the emulator
+        // itself; it is ignored without a dir
         create(
             config: string,
             runtimeConfig: string | null,
             dir: string | null,
+            sharing: number = 2,
         ): void {
             withFrame((frame) => {
                 check(
@@ -219,6 +222,7 @@ const createBinding = (module: CartesiMachineModule) => {
                         frame.string(config),
                         frame.string(runtimeConfig),
                         frame.string(dir),
+                        int32(sharing, "sharing"),
                     ),
                 );
             });
@@ -249,7 +253,10 @@ const createBinding = (module: CartesiMachineModule) => {
             });
         }
 
-        store(dir: string, sharing: number = 0): void {
+        // CM_SHARING_ALL, the documented default and the addon's: the whole
+        // state goes to the directory, not just the backing stores the
+        // configuration marks shared
+        store(dir: string, sharing: number = 2): void {
             withFrame((frame) => {
                 check(
                     module._cm_store(
@@ -285,10 +292,14 @@ const createBinding = (module: CartesiMachineModule) => {
             });
         }
 
-        removeStored(dir: string): void {
+        removeStored(dir: string, mode: number = 0): void {
             withFrame((frame) => {
                 check(
-                    module._cm_remove_stored(this.pointer, frame.string(dir)),
+                    module._cm_remove_stored(
+                        this.pointer,
+                        frame.string(dir),
+                        int32(mode, "mode"),
+                    ),
                 );
             });
         }
@@ -423,6 +434,10 @@ const createBinding = (module: CartesiMachineModule) => {
                 );
                 return frame.readStringAt(out);
             });
+        }
+
+        clearHashTree(): void {
+            check(module._cm_clear_hash_tree(this.pointer));
         }
 
         verifyHashTree(): boolean {
@@ -983,6 +998,7 @@ const createBinding = (module: CartesiMachineModule) => {
             config: string,
             runtimeConfig: string | null,
             dir: string | null,
+            sharing: number = 2,
         ): NativeMachine {
             return withFrame((frame) => {
                 const out = frame.out(4);
@@ -991,6 +1007,7 @@ const createBinding = (module: CartesiMachineModule) => {
                         frame.string(config),
                         frame.string(runtimeConfig),
                         frame.string(dir),
+                        int32(sharing, "sharing"),
                         out,
                     ),
                 );

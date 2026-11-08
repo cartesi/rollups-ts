@@ -166,11 +166,17 @@ export enum UarchBreakReason {
     Failed,
 }
 
-/// Backing stores sharing mode for load/store operations
+/// Backing stores sharing mode for create/load/store operations
 export enum SharingMode {
     None = 0, ///< Machine state fully in-memory
     Config = 1, ///< On-disk for backing stores marked shared in the config
     All = 2, ///< Machine state fully on-disk
+}
+
+/// What removeStored agrees to remove (cm_remove_mode)
+export enum RemoveMode {
+    Stored = 0, ///< An empty directory, or a loadable stored machine and nothing else
+    Forced = 1, ///< A directory holding any regular files, such as an interrupted store
 }
 
 /// HTIF device identifiers (DEV field of tohost/fromhost)
@@ -416,6 +422,7 @@ export interface CartesiMachine {
         config: MachineConfig,
         runtimeConfig?: MachineRuntimeConfig,
         dir?: string,
+        sharing?: SharingMode,
     ): CartesiMachine;
     load(
         dir: string,
@@ -426,7 +433,7 @@ export interface CartesiMachine {
     store(dir: string, sharing?: SharingMode): CartesiMachine;
     cloneStored(fromDir: string, toDir: string): void;
     renameStored(fromDir: string, toDir: string): void;
-    removeStored(dir: string): void;
+    removeStored(dir: string, mode?: RemoveMode): void;
     syncStored(dir: string): void;
     destroy(): void;
     getDefaultConfig(): MachineConfig;
@@ -500,6 +507,7 @@ export interface CartesiMachine {
     ): string;
     verifyStepUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array;
     verifyResetUarch(rootHashBefore: Uint8Array, log: AccessLog): Uint8Array;
+    clearHashTree(): void;
     verifyHashTree(): boolean;
     getHashTreeStats(clear?: boolean): HashTreeStats;
 }

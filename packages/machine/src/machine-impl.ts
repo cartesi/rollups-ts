@@ -8,6 +8,7 @@ import type {
     HtifYieldCommand,
     McycleRootHashes,
     Reg,
+    RemoveMode,
     SharingMode,
     UarchBreakReason,
     UarchCycleRootHashes,
@@ -135,18 +136,22 @@ export class CartesiMachineImpl implements CartesiMachine {
     }
 
     /**
-     * Creates a new machine instance from configuration
+     * Creates a new machine instance from configuration. With `dir` the
+     * machine is created on disk — as if created in memory, stored there and
+     * loaded back with `sharing`, which defaults to `SharingMode.All`.
      */
     create(
         config: MachineConfig,
         runtimeConfig?: MachineRuntimeConfig,
         dir?: string,
+        sharing?: SharingMode,
     ): CartesiMachine {
         call(() =>
             this.machine.create(
                 JSON.stringify(config),
                 runtimeConfig ? JSON.stringify(runtimeConfig) : null,
                 dir ?? null,
+                sharing,
             ),
         );
         return this;
@@ -193,10 +198,13 @@ export class CartesiMachineImpl implements CartesiMachine {
     }
 
     /**
-     * Removes a stored machine directory
+     * Removes a stored machine directory. By default only an empty directory
+     * or a loadable stored machine holding nothing else is removed;
+     * `RemoveMode.Forced` also takes a directory of arbitrary regular files,
+     * which is what an interrupted store or clone leaves behind.
      */
-    removeStored(dir: string): void {
-        call(() => this.machine.removeStored(dir));
+    removeStored(dir: string, mode?: RemoveMode): void {
+        call(() => this.machine.removeStored(dir, mode));
     }
 
     /**
@@ -630,7 +638,19 @@ export class CartesiMachineImpl implements CartesiMachine {
     }
 
     /**
-     * Verifies hash tree integrity
+     * Clears all cached hash tree data — page hashes, the page cache and
+     * dirty page tracking — without changing the machine state. Hashes are
+     * rebuilt on the next root hash or proof request, which is how a hash
+     * tree gets back to being trustworthy.
+     */
+    clearHashTree(): void {
+        call(() => this.machine.clearHashTree());
+    }
+
+    /**
+     * Checks the page hashes and dirty page tracking of the hash tree against
+     * the machine state (not the inner nodes or the root hash); for tests
+     * and debugging
      */
     verifyHashTree(): boolean {
         return call(() => this.machine.verifyHashTree());
@@ -664,12 +684,14 @@ export const createMachineApi = (addon: NativeAddon) => ({
     },
 
     /**
-     * Creates a new machine from a configuration
+     * Creates a new machine from a configuration, on disk when given a
+     * directory (see CartesiMachine.create)
      */
     create(
         config: MachineConfig,
         runtimeConfig?: MachineRuntimeConfig,
         dir?: string,
+        sharing?: SharingMode,
     ): CartesiMachine {
         return new CartesiMachineImpl(
             addon,
@@ -678,6 +700,7 @@ export const createMachineApi = (addon: NativeAddon) => ({
                     JSON.stringify(config),
                     runtimeConfig ? JSON.stringify(runtimeConfig) : null,
                     dir ?? null,
+                    sharing,
                 ),
             ),
         );
