@@ -23,6 +23,7 @@ import {
     Reg,
     type HtifYieldCommand,
     type McycleRootHashes,
+    type RemoveMode,
     type SharingMode,
     type UarchCycleRootHashes,
 } from "../cartesi-machine.js";
@@ -66,6 +67,7 @@ const stringify = (value: unknown): string =>
     ).replace(new RegExp(`"${BIGINT_TAG}(-?\\d+)"`, "g"), "$1");
 
 const SHARING_MODES = ["none", "config", "all"] as const;
+const REMOVE_MODES = ["stored", "forced"] as const;
 
 /**
  * Registers cross as names, not numbers. The names are the enum keys in snake
@@ -132,6 +134,7 @@ export interface RemoteMachineClient {
         config: MachineConfig,
         runtimeConfig?: MachineRuntimeConfig,
         dir?: string,
+        sharing?: SharingMode,
     ): Promise<void>;
     load(
         dir: string,
@@ -141,7 +144,7 @@ export interface RemoteMachineClient {
     store(dir: string, sharing?: SharingMode): Promise<void>;
     cloneStored(fromDir: string, toDir: string): Promise<void>;
     renameStored(fromDir: string, toDir: string): Promise<void>;
-    removeStored(dir: string): Promise<void>;
+    removeStored(dir: string, mode?: RemoveMode): Promise<void>;
     syncStored(dir: string): Promise<void>;
     destroy(): Promise<void>;
 
@@ -164,6 +167,7 @@ export interface RemoteMachineClient {
         log2Size: number,
         log2RootSize?: number,
     ): Promise<Proof>;
+    clearHashTree(): Promise<void>;
     verifyHashTree(): Promise<boolean>;
     getHashTreeStats(clear?: boolean): Promise<HashTreeStats>;
 
@@ -303,6 +307,8 @@ export const connect = (
 
     const sharingName = (sharing?: SharingMode): string | undefined =>
         sharing === undefined ? undefined : SHARING_MODES[sharing];
+    const removeModeName = (mode?: RemoveMode): string | undefined =>
+        mode === undefined ? undefined : REMOVE_MODES[mode];
 
     const client: RemoteMachineClient = {
         url,
@@ -340,8 +346,11 @@ export const connect = (
             return (await rpc("machine.is_empty")) as boolean;
         },
 
-        async create(config, runtimeConfig, dir) {
-            await rpc("machine.create", params(config, runtimeConfig, dir));
+        async create(config, runtimeConfig, dir, sharing) {
+            await rpc(
+                "machine.create",
+                params(config, runtimeConfig, dir, sharingName(sharing)),
+            );
         },
 
         async load(dir, runtimeConfig, sharing) {
@@ -352,7 +361,8 @@ export const connect = (
         },
 
         async store(dir, sharing) {
-            await rpc("machine.store", [dir, sharingName(sharing) ?? "none"]);
+            // the server has no default for sharing; "all" is the binding's
+            await rpc("machine.store", [dir, sharingName(sharing) ?? "all"]);
         },
 
         async cloneStored(fromDir, toDir) {
@@ -363,8 +373,11 @@ export const connect = (
             await rpc("machine.rename_stored", [fromDir, toDir]);
         },
 
-        async removeStored(dir) {
-            await rpc("machine.remove_stored", [dir]);
+        async removeStored(dir, mode) {
+            await rpc(
+                "machine.remove_stored",
+                params(dir, removeModeName(mode)),
+            );
         },
 
         async syncStored(dir) {
@@ -447,6 +460,10 @@ export const connect = (
                 "machine.get_proof",
                 params(address, log2Size, log2RootSize),
             )) as Proof;
+        },
+
+        async clearHashTree() {
+            await rpc("machine.clear_hash_tree");
         },
 
         async verifyHashTree() {

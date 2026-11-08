@@ -6,6 +6,8 @@
 // come back as MachineError. A machine driven this way has to end up in the
 // same state as one driven through the binding, so the root hashes are
 // compared against the local one.
+import fs from "node:fs";
+import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
     BreakReason,
@@ -14,10 +16,16 @@ import {
     getUarchPristineHash,
     MachineError,
     Reg,
+    RemoveMode,
+    SharingMode,
     spawn,
     type RemoteCartesiMachine,
     type RemoteMachineClient,
 } from "../src";
+
+// stored machines go here rather than in the package root (gitignored)
+const artifacts = path.join(import.meta.dirname, "artifacts");
+fs.mkdirSync(artifacts, { recursive: true });
 
 const RAM_LENGTH = 0x4000000;
 
@@ -87,6 +95,56 @@ describe("JSON-RPC client", () => {
         await expect(machine.load("/nonexistent")).rejects.toBeInstanceOf(
             MachineError,
         );
+    });
+
+    it("clears the hash tree and rebuilds the same root hash", async () => {
+        const before = await machine.getRootHash();
+        await machine.clearHashTree();
+        expect(await machine.getRootHash()).toEqual(before);
+        expect(await machine.verifyHashTree()).toBe(true);
+    });
+
+    it("stores, creates on disk and removes with the named modes", async () => {
+        // the server runs on this host, so its directories are visible here
+        const dir = path.join(artifacts, "http-stored");
+        fs.rmSync(dir, { recursive: true, force: true });
+
+        // store defaults to sharing "all": the whole state is in the files,
+        // which is what a machine created from a configuration needs
+        await machine.store(dir);
+        expect(fs.existsSync(dir)).toBe(true);
+        await machine.removeStored(dir);
+        expect(fs.existsSync(dir)).toBe(false);
+
+        // sharing crosses the wire by name, for create as for load
+        const other = spawn();
+        try {
+            const client = connectHttp(`http://${other.getBoundAddress()}`);
+            await client.create(
+                { ram: { length: RAM_LENGTH } },
+                undefined,
+                dir,
+                SharingMode.All,
+            );
+            await client.run(1000n);
+            await client.destroy();
+            await client.load(dir);
+            expect(await client.readReg(Reg.Mcycle)).toBe(1000n);
+            await client.destroy();
+
+            // and so does the removal mode
+            fs.writeFileSync(path.join(dir, "stray"), "left over");
+            await expect(client.removeStored(dir)).rejects.toBeInstanceOf(
+                MachineError,
+            );
+            await expect(
+                client.removeStored(dir, RemoveMode.Stored),
+            ).rejects.toBeInstanceOf(MachineError);
+            await client.removeStored(dir, RemoveMode.Forced);
+            expect(fs.existsSync(dir)).toBe(false);
+        } finally {
+            other.shutdown();
+        }
     });
 
     it("collects root hashes the way the local binding does", async () => {

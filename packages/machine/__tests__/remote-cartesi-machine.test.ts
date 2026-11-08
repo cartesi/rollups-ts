@@ -1,14 +1,22 @@
+import fs from "node:fs";
+import path from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
 import {
     type CartesiMachine,
     CleanupCall,
+    MachineError,
     type RemoteCartesiMachine,
     Reg,
+    RemoveMode,
     connect,
     create,
     getUarchPristineHash,
     spawn,
 } from "../src";
+
+// stored machines go here rather than in the package root (gitignored)
+const artifacts = path.join(import.meta.dirname, "artifacts");
+fs.mkdirSync(artifacts, { recursive: true });
 
 // These tests need a working cartesi-jsonrpc-machine executable: either on the
 // PATH from an emulator installation, or the one bundled in the platform
@@ -99,6 +107,30 @@ describe("Cartesi JSON-RPC Machine API", () => {
     test("delayNextRequest: success", () => {
         const machine = spawnServer();
         expect(() => machine.delayNextRequest(100)).not.toThrow();
+    });
+
+    test("clearHashTree: rebuilds the same root hash", () => {
+        const config = { ram: { length: 0x4000000 } };
+        const remote = spawnServer();
+        remote.create(config);
+        remote.run(1000n);
+        const before = remote.getRootHash();
+        remote.clearHashTree();
+        expect(remote.getRootHash()).toEqual(before);
+        expect(remote.verifyHashTree()).toBe(true);
+    });
+
+    test("removeStored: forced mode takes a directory with other files", () => {
+        // the server runs on this host, so the directory is visible here
+        const dir = path.join(artifacts, "remote-to-remove");
+        fs.rmSync(dir, { recursive: true, force: true });
+        const remote = spawnServer();
+        remote.create({ ram: { length: 0x4000000 } });
+        remote.store(dir);
+        fs.writeFileSync(path.join(dir, "stray"), "left over");
+        expect(() => remote.removeStored(dir)).toThrow(MachineError);
+        remote.removeStored(dir, RemoveMode.Forced);
+        expect(fs.existsSync(dir)).toBe(false);
     });
 
     test("getUarchPristineHash: same as a local machine", () => {

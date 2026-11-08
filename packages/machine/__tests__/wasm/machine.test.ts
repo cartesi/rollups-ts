@@ -12,6 +12,8 @@ import {
     MachineError,
     PmaConstant,
     Reg,
+    RemoveMode,
+    SharingMode,
 } from "../../src/browser";
 
 // A 64 MiB machine with nothing loaded, run for 100k cycles: the state is
@@ -19,7 +21,7 @@ import {
 // what the native build produces for the same steps, which is the property
 // worth pinning — a WebAssembly machine has to be the same machine.
 const PRISTINE_ROOT_HASH =
-    "64c47761e7e0ecbf3c9e0346f43f1da8fbe086d0760615c703d66fa3c30bf569";
+    "a6bb1fc7e7c0058b379d760391fe26dbecdd4be58888d588b0b3eb1f44234c87";
 
 const RAM_LENGTH = 0x4000000;
 
@@ -40,7 +42,7 @@ describe("WebAssembly binding", () => {
             // major * 1000000 + minor * 1000 + patch
             const version = cartesi.getVersion();
             expect(version / 1000000n).toBe(0n);
-            expect((version / 1000n) % 1000n).toBe(22n);
+            expect((version / 1000n) % 1000n).toBe(23n);
         });
 
         it("exposes a filesystem for stored machines", () => {
@@ -103,14 +105,22 @@ describe("WebAssembly binding", () => {
             expect(proof.sibling_hashes.length).toBeGreaterThan(0);
         });
 
+        it("clears the hash tree and rebuilds the same root hash", () => {
+            const before = machine.getRootHash();
+            machine.clearHashTree();
+            expect(machine.getRootHash()).toEqual(before);
+            expect(machine.verifyHashTree()).toBe(true);
+        });
+
         it("names addresses", () => {
             expect(cartesi.getAddressName(0x80000000n)).toBe("memory");
         });
     });
 
-    // The calls whose signatures 0.22 added or changed: the collect calls
+    // The calls whose signatures 0.22 added or changed (the collect calls
     // answer in JSON, and CMIO response lengths are a uint32_t, which crosses
-    // into the module as a Number where 0.21's uint64_t took a BigInt.
+    // into the module as a Number where 0.21's uint64_t took a BigInt); the
+    // ones 0.23 changed are under "snapshots".
     describe("root hashes and cmio", () => {
         const fresh = () => cartesi.create({ ram: { length: RAM_LENGTH } });
 
@@ -280,6 +290,9 @@ describe("WebAssembly binding", () => {
         });
     });
 
+    // Stored machines in the module's filesystem. 0.23 gave cm_create a
+    // sharing mode and cm_remove_stored a removal mode, both of which cross
+    // as one more i32 (module ABI 3).
     describe("snapshots", () => {
         it("stores and loads a machine through the module filesystem", () => {
             const machine = cartesi.create({ ram: { length: RAM_LENGTH } });
@@ -290,10 +303,10 @@ describe("WebAssembly binding", () => {
             // path leading to it
             cartesi.fs.mkdirTree("/snapshots");
 
-            // sharing "all" writes the memory ranges out as files; the default
-            // copies the backing files of the machine's own configuration,
-            // which a machine created from scratch does not have
-            machine.store("/snapshots/pristine", 2);
+            // store defaults to sharing "all", which writes the memory ranges
+            // out as files — what a machine created from scratch needs, having
+            // no backing files of its own for the other modes to copy
+            machine.store("/snapshots/pristine");
             machine.destroy();
 
             const loaded = cartesi.load("/snapshots/pristine");
@@ -302,6 +315,64 @@ describe("WebAssembly binding", () => {
             // and it is a machine, not just a hash: it keeps running
             expect(loaded.run(200000n)).toBe(BreakReason.ReachedTargetMcycle);
             loaded.destroy();
+
+            // an empty machine object is enough to remove a stored one
+            machine.removeStored("/snapshots/pristine");
+            expect(cartesi.fs.analyzePath("/snapshots/pristine").exists).toBe(
+                false,
+            );
+        });
+
+        it("creates a machine on disk with a sharing mode", () => {
+            cartesi.fs.mkdirTree("/snapshots");
+            // sharing "all": the directory is the machine, so a later load
+            // finds what it computed
+            const onDisk = cartesi.create(
+                { ram: { length: RAM_LENGTH } },
+                undefined,
+                "/snapshots/on-disk",
+                SharingMode.All,
+            );
+            onDisk.run(1000n);
+            const after = onDisk.getRootHash();
+            onDisk.destroy();
+            const loaded = cartesi.load("/snapshots/on-disk");
+            expect(loaded.readReg(Reg.Mcycle)).toBe(1000n);
+            expect(loaded.getRootHash()).toEqual(after);
+            loaded.destroy();
+            onDisk.removeStored("/snapshots/on-disk");
+
+            // sharing "none": the directory keeps the state it was created in
+            const detached = cartesi.create(
+                { ram: { length: RAM_LENGTH } },
+                undefined,
+                "/snapshots/detached",
+                SharingMode.None,
+            );
+            detached.run(1000n);
+            detached.destroy();
+            const pristine = cartesi.load("/snapshots/detached");
+            expect(pristine.readReg(Reg.Mcycle)).toBe(0n);
+            pristine.destroy();
+            detached.removeStored("/snapshots/detached");
+        });
+
+        it("removes a directory holding other files only when forced", () => {
+            const machine = cartesi.create({ ram: { length: RAM_LENGTH } });
+            cartesi.fs.mkdirTree("/snapshots");
+            machine.store("/snapshots/stray");
+            cartesi.fs.writeFile("/snapshots/stray/stray", "left over");
+            expect(() => machine.removeStored("/snapshots/stray")).toThrow(
+                MachineError,
+            );
+            expect(() =>
+                machine.removeStored("/snapshots/stray", RemoveMode.Stored),
+            ).toThrow(MachineError);
+            machine.removeStored("/snapshots/stray", RemoveMode.Forced);
+            expect(cartesi.fs.analyzePath("/snapshots/stray").exists).toBe(
+                false,
+            );
+            machine.destroy();
         });
     });
 
