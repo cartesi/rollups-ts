@@ -20,6 +20,8 @@ import {
     NET_USER,
     PmaConstant,
     Reg,
+    RemoveMode,
+    SharingMode,
     verifySendCmioResponse,
     verifyStep,
 } from "../src";
@@ -113,6 +115,67 @@ describe("CartesiMachine", () => {
 
             // Clean up
             fs.rmSync(testDir, { recursive: true, force: true });
+        });
+
+        it("should create a machine on disk", () => {
+            const dir = path.join(artifacts, "created-on-disk");
+            fs.rmSync(dir, { recursive: true, force: true });
+
+            // sharing "all": the machine lives in the directory, so what it
+            // computes is what a later load finds there
+            const onDisk = create(
+                { ram: { length: 0x4000000 } },
+                undefined,
+                dir,
+                SharingMode.All,
+            );
+            onDisk.run(1000n);
+            const after = onDisk.getRootHash();
+            onDisk.destroy();
+
+            const loaded = load(dir);
+            expect(loaded.readReg(Reg.Mcycle)).toBe(1000n);
+            expect(loaded.getRootHash()).toEqual(after);
+            loaded.destroy();
+
+            // the same machine, in memory, agrees
+            const reference = create({ ram: { length: 0x4000000 } });
+            reference.run(1000n);
+            expect(reference.getRootHash()).toEqual(after);
+
+            // without sharing, the directory keeps the pristine state
+            fs.rmSync(dir, { recursive: true, force: true });
+            const detached = create(
+                { ram: { length: 0x4000000 } },
+                undefined,
+                dir,
+                SharingMode.None,
+            );
+            detached.run(1000n);
+            detached.destroy();
+            expect(load(dir).readReg(Reg.Mcycle)).toBe(0n);
+            machine.removeStored(dir);
+            expect(fs.existsSync(dir)).toBe(false);
+        });
+
+        it("should remove a stored machine, and other files only when forced", () => {
+            const dir = path.join(artifacts, "to-remove");
+            fs.rmSync(dir, { recursive: true, force: true });
+            machine.store(dir);
+            machine.removeStored(dir);
+            expect(fs.existsSync(dir)).toBe(false);
+
+            // an interrupted store leaves a directory that is not a loadable
+            // machine: the default mode refuses it, forced takes it
+            machine.store(dir);
+            fs.writeFileSync(path.join(dir, "stray"), "not a machine file");
+            expect(() => machine.removeStored(dir)).toThrow(MachineError);
+            expect(() => machine.removeStored(dir, RemoveMode.Stored)).toThrow(
+                MachineError,
+            );
+            expect(fs.existsSync(dir)).toBe(true);
+            machine.removeStored(dir, RemoveMode.Forced);
+            expect(fs.existsSync(dir)).toBe(false);
         });
     });
 
@@ -216,6 +279,25 @@ describe("CartesiMachine", () => {
         it("should verify hash tree integrity", () => {
             const isIntegrityValid = machine.verifyHashTree();
             expect(typeof isIntegrityValid).toBe("boolean");
+        });
+
+        it("should clear the hash tree and rebuild the same hashes", () => {
+            machine.run(1000n);
+            const before = machine.getRootHash();
+            machine.clearHashTree();
+            // the state is untouched, so the rebuilt tree agrees
+            expect(machine.readReg(Reg.Mcycle)).toBe(1000n);
+            expect(machine.getRootHash()).toEqual(before);
+            expect(machine.verifyHashTree()).toBe(true);
+
+            // the runtime option does the same once, on creation
+            const cleared = create(
+                { ram: { length: 128 * 1024 * 1024 } },
+                { clear_hash_tree: true },
+            );
+            cleared.run(1000n);
+            expect(cleared.getRootHash()).toEqual(before);
+            expect(cleared.getRuntimeConfig().clear_hash_tree).toBe(true);
         });
 
         it("should get hash tree stats", () => {

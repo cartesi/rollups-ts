@@ -57,11 +57,13 @@ export interface CartesiMachineModule {
         config: number,
         runtimeConfig: number,
         dir: number,
+        sharing: number,
     ): number;
     _cm_create_new(
         config: number,
         runtimeConfig: number,
         dir: number,
+        sharing: number,
         newMachine: number,
     ): number;
     _cm_load(
@@ -79,7 +81,7 @@ export interface CartesiMachineModule {
     _cm_store(machine: number, dir: number, sharing: number): number;
     _cm_clone_stored(machine: number, fromDir: number, toDir: number): number;
     _cm_rename_stored(machine: number, fromDir: number, toDir: number): number;
-    _cm_remove_stored(machine: number, dir: number): number;
+    _cm_remove_stored(machine: number, dir: number, mode: number): number;
     _cm_sync_stored(machine: number, dir: number): number;
     _cm_destroy(machine: number): number;
 
@@ -113,6 +115,7 @@ export interface CartesiMachineModule {
         log2RootSize: number,
         out: number,
     ): number;
+    _cm_clear_hash_tree(machine: number): number;
     _cm_verify_hash_tree(machine: number, out: number): number;
     _cm_get_hash_tree_stats(
         machine: number,
@@ -277,8 +280,8 @@ export type CartesiMachineModuleFactory = (
     options?: Record<string, unknown>,
 ) => Promise<CartesiMachineModule>;
 
-/** The ABI wasm/entry.c reports; bumped when the module's shape changes. */
-export const EXPECTED_ABI_VERSION = 2;
+/** The ABI wasm/entry.cpp reports; bumped when the module's shape changes. */
+export const EXPECTED_ABI_VERSION = 3;
 
 export interface LoadModuleOptions {
     /**

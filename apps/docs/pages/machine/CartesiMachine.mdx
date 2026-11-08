@@ -14,6 +14,7 @@ export interface CartesiMachine {
         config: MachineConfig,
         runtimeConfig?: MachineRuntimeConfig,
         dir?: string,
+        sharing?: SharingMode,
     ): void;
     load(
         dir: string,
@@ -24,7 +25,7 @@ export interface CartesiMachine {
     store(dir: string, sharing?: SharingMode): void;
     cloneStored(fromDir: string, toDir: string): void;
     renameStored(fromDir: string, toDir: string): void;
-    removeStored(dir: string): void;
+    removeStored(dir: string, mode?: RemoveMode): void;
     syncStored(dir: string): void;
     destroy(): void;
     
@@ -90,6 +91,7 @@ export interface CartesiMachine {
     writeRevertRootHash(hash: Uint8Array): void;
     getNodeHash(address: bigint, log2Size: number): Uint8Array;
     getProof(address: bigint, log2Size: number, log2RootSize?: number): Proof;
+    clearHashTree(): void;
     verifyHashTree(): boolean;
     getHashTreeStats(clear?: boolean): HashTreeStats;
 
@@ -143,13 +145,14 @@ isJsonrpcMachine(): boolean;
 
 ## create
 
-Creates a new machine instance from the given configuration and optional runtime configuration. The machine object must be empty. The optional `dir` sets the directory for on-disk backing stores.
+Creates a new machine instance from the given configuration and optional runtime configuration. The machine object must be empty. With `dir` the machine is created on disk, which is the same as creating it in memory, storing it to `dir` and loading it back with `sharing` — `SharingMode.All` by default, so every change lands in the directory. `sharing` is ignored without a `dir`.
 
 ```ts
 create(
     config: MachineConfig,
     runtimeConfig?: MachineRuntimeConfig,
     dir?: string,
+    sharing?: SharingMode,
 ): void;
 ```
 
@@ -175,7 +178,7 @@ cloneEmpty(): CartesiMachine;
 
 ## store
 
-Stores the current machine instance to a directory, serializing its entire state. Will not overwrite an existing directory. The `sharing` mode defaults to `SharingMode.All` (store the full current state).
+Stores the current machine instance to a directory, serializing its entire state. Will not overwrite an existing directory. The `sharing` mode defaults to `SharingMode.All` (store the full current state). An interrupted store leaves a directory that cannot be loaded; remove it with [removeStored](#removestored) in `RemoveMode.Forced`. The stored files are durable only once [syncStored](#syncstored) succeeds.
 
 ```ts
 store(dir: string, sharing?: SharingMode): void;
@@ -199,15 +202,15 @@ renameStored(fromDir: string, toDir: string): void;
 
 ## removeStored
 
-Removes a stored machine directory.
+Removes a stored machine directory, durably. In `RemoveMode.Stored`, the default, the directory must be empty or hold a loadable stored machine and nothing else; `RemoveMode.Forced` also removes a directory holding any regular files, such as the incomplete machine an interrupted `store` or `cloneStored` leaves behind. In both modes nothing is removed if the directory holds anything but regular files, and an interrupted removal is completed by calling again with the same mode.
 
 ```ts
-removeStored(dir: string): void;
+removeStored(dir: string, mode?: RemoveMode): void;
 ```
 
 ## syncStored
 
-Flushes all files of a previously stored machine to permanent storage. The expected usage is to sync after the machine using the stored files has been closed.
+Flushes all files of a previously stored machine to permanent storage, either after the machine using them has been closed, or while a machine loaded from them with `SharingMode.All` is still using them — such a machine changes the files on any call, so the stored machine is durable only as of the last sync.
 
 ```ts
 syncStored(dir: string): void;
@@ -263,7 +266,7 @@ getAddressRanges(): AddressRangeDescription[];
 
 ## replaceMemoryRange
 
-Replaces a memory range in the machine. The new range must match an existing range's start and length.
+Replaces the backing store of a memory range. The range is identified by `label`, or by `start` and `length`: a flash drive or NVRAM answers to its own label and to its automatic one (`flashdrive0`, `nvram0`, ...), and the other ranges to `.ram`, `.dtb`, `.cmio-rx-buffer`, `.cmio-tx-buffer` and `.uarch-ram`, which no user label can take. A later `store` writes the new backing store.
 
 ```ts
 replaceMemoryRange(rangeConfig: MemoryRangeConfig): void;
@@ -493,9 +496,17 @@ Obtains a Merkle proof for a range in the machine state. `log2RootSize` defaults
 getProof(address: bigint, log2Size: number, log2RootSize?: number): Proof;
 ```
 
+## clearHashTree
+
+Clears all cached hash tree data — page hashes, the page cache and dirty page tracking — without changing the machine state or its statistics. Shared hash tree backing stores are reset in place, and hashes are rebuilt on the next root hash or proof request. This is how a hash tree that may have gone stale is made trustworthy again; the `clear_hash_tree` runtime option does the same once, when a machine is created or loaded.
+
+```ts
+clearHashTree(): void;
+```
+
 ## verifyHashTree
 
-Verifies the integrity of the hash tree against the current machine state.
+Checks the page hashes and dirty page tracking of the hash tree against the current machine state: true when every page is either marked dirty or carries the hash of its contents. Inner nodes and the root hash are not checked, which would cost more than rebuilding the tree; to get one that can be trusted, call [clearHashTree](#clearhashtree). Meant for tests and debugging.
 
 ```ts
 verifyHashTree(): boolean;

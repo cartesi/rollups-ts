@@ -17,13 +17,14 @@ export interface NativeMachine {
         config: string,
         runtimeConfig: string | null,
         dir: string | null,
+        sharing?: number,
     ): void;
     load(dir: string, runtimeConfig: string | null, sharing?: number): void;
     cloneEmpty(): NativeMachine;
     store(dir: string, sharing?: number): void;
     cloneStored(fromDir: string, toDir: string): void;
     renameStored(fromDir: string, toDir: string): void;
-    removeStored(dir: string): void;
+    removeStored(dir: string, mode?: number): void;
     syncStored(dir: string): void;
     destroy(): void;
     getDefaultConfig(): string;
@@ -102,6 +103,7 @@ export interface NativeMachine {
         log: string,
         revertRootHash: Uint8Array,
     ): Uint8Array;
+    clearHashTree(): void;
     verifyHashTree(): boolean;
     getHashTreeStats(clear: boolean): string;
     jsonrpcFork(): { machine: NativeMachine; address: string; pid: number };
@@ -133,6 +135,7 @@ export interface NativeAddon {
         config: string,
         runtimeConfig: string | null,
         dir: string | null,
+        sharing?: number,
     ): NativeMachine;
     machineLoadNew(
         dir: string,
