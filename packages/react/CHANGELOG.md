@@ -1,5 +1,14 @@
 # @cartesi/react
 
+## 2.0.0-alpha.45
+
+### Patch Changes
+
+- 5cbe472: Add `useStandingChanges` and `useStandingChange`, the hooks for the new
+  `listStandingChanges` and `getStandingChange` actions.
+- Updated dependencies [be1d592]
+  - @cartesi/client@2.0.0-alpha.41
+
 ## 2.0.0-alpha.44
 
 ### Patch Changes

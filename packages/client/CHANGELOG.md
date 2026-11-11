@@ -1,5 +1,20 @@
 # @cartesi/client
 
+## 2.0.0-alpha.41
+
+### Patch Changes
+
+- be1d592: Add `listStandingChanges` and `getStandingChange`, and the dave 3.0.0-alpha.6 PRT fields.
+  
+  `listStandingChanges` lists a tournament's `StandingChanged` events in log order;
+  pass `descending: true` and `limit: 1` for the latest one. Its `resultAt` and
+  `winnerExpiresAt` are prospective instants, not proof that the tournament has
+  finished. `Tournament` gains `bondValue` and `contestedFinalStateOne`/`Two`,
+  `Match` and `MatchAdvanced` gain `responderDeadline` (plus `currentHeight` on the
+  advance), and `LeafMatchSeal` gains the sealed divergence and both deadlines.
+- Updated dependencies [88324e8]
+  - @cartesi/rpc@2.0.0-alpha.30
+
 ## 2.0.0-alpha.40
 
 ### Patch Changes
