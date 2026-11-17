@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { keccak256 } from "viem";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
     type CartesiMachine,
@@ -433,6 +434,46 @@ describe("CartesiMachine", () => {
                 hex(samples.slice(2)),
             );
             expect(machine.readReg(Reg.Mcycle)).toBe(1024n);
+        });
+
+        it("should prove the last leaf of a bundle it completes", () => {
+            // four samples, at 256..1024, complete one bundle of 2^2 leaves
+            const machine = create(config);
+            const bundled = machine.collectMcycleRootHashes(1024n, 8, 0n, 2);
+            expect(bundled.hashes).toHaveLength(1);
+            expect(bundled.partialBundle).toBeUndefined();
+            expect(bundled.finalBundleSiblingHashes).toHaveLength(2);
+
+            // the proven leaf is the state root hash at the final sampling
+            // point, the rightmost of the bundle, so every sibling on the way
+            // up to the bundle root is on the left
+            let node: Uint8Array = machine.getRootHash();
+            for (const sibling of bundled.finalBundleSiblingHashes ?? []) {
+                node = keccak256(Buffer.concat([sibling, node]), "bytes");
+            }
+            expect(hex([node])).toEqual(hex(bundled.hashes));
+
+            // half a bundle in there is no proof; it comes from the call that
+            // completes the bundle, and proves the leaf that call sampled last
+            const first = create(config).collectMcycleRootHashes(
+                512n,
+                8,
+                0n,
+                2,
+            );
+            expect(first.finalBundleSiblingHashes).toBeUndefined();
+            const rest = create(config);
+            rest.run(512n);
+            const completed = rest.collectMcycleRootHashes(
+                1024n,
+                8,
+                first.mcyclePhase,
+                2,
+                first.partialBundle,
+            );
+            expect(hex(completed.finalBundleSiblingHashes ?? [])).toEqual(
+                hex(bundled.finalBundleSiblingHashes ?? []),
+            );
         });
 
         it("should collect uarch cycle root hashes against a revert tail", () => {

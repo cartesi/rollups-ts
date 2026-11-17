@@ -75,6 +75,7 @@ export const toMcycleRootHashes = (value: unknown): McycleRootHashes => {
         mcycle_phase: number | string;
         break_reason: string;
         partial_bundle?: PartialBundle;
+        final_bundle_sibling_hashes?: Base64Hash[];
         console_io_error?: string;
     };
     return {
@@ -83,6 +84,11 @@ export const toMcycleRootHashes = (value: unknown): McycleRootHashes => {
         breakReason: toBreakReason(result.break_reason),
         ...(result.partial_bundle !== undefined && {
             partialBundle: result.partial_bundle,
+        }),
+        ...(result.final_bundle_sibling_hashes !== undefined && {
+            finalBundleSiblingHashes: fromBase64Hashes(
+                result.final_bundle_sibling_hashes,
+            ),
         }),
         ...(result.console_io_error !== undefined && {
             consoleIoError: result.console_io_error,

@@ -1,6 +1,7 @@
 // The WebAssembly binding, exercised through the public browser entry point.
 // It runs under Node here — the module targets web, worker and node — so the
 // suite needs no browser and no installed emulator distribution.
+import { keccak256 } from "viem";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
     type CartesiMachine,
@@ -21,7 +22,7 @@ import {
 // what the native build produces for the same steps, which is the property
 // worth pinning — a WebAssembly machine has to be the same machine.
 const PRISTINE_ROOT_HASH =
-    "a6bb1fc7e7c0058b379d760391fe26dbecdd4be58888d588b0b3eb1f44234c87";
+    "884a6fa0abab2405f4aaad6594acb5e99bd2ec522bd1031c56ea4008b256aac7";
 
 const RAM_LENGTH = 0x4000000;
 
@@ -138,6 +139,21 @@ describe("WebAssembly binding", () => {
             expect(fresh().collectMcycleBundle(0n, 8, 2).map(hex)).toEqual(
                 references,
             );
+
+            // a bundle completed at the final sampling point comes with the
+            // sibling hashes proving its last leaf, the state root hash there
+            const machine = fresh();
+            const bundled = machine.collectMcycleRootHashes(1024n, 8, 0n, 2);
+            expect(bundled.hashes).toHaveLength(1);
+            expect(bundled.finalBundleSiblingHashes).toHaveLength(2);
+            let node: Uint8Array = machine.getRootHash();
+            for (const sibling of bundled.finalBundleSiblingHashes ?? []) {
+                const pair = new Uint8Array(64);
+                pair.set(sibling);
+                pair.set(node, 32);
+                node = keccak256(pair, "bytes");
+            }
+            expect(hex(node)).toBe(hex(bundled.hashes[0] as Uint8Array));
         });
 
         it("collects uarch cycle root hashes against a revert tail", () => {

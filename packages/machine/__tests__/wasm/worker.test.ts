@@ -17,7 +17,7 @@ import {
 const RAM_LENGTH = 0x4000000;
 
 const PRISTINE_ROOT_HASH =
-    "a6bb1fc7e7c0058b379d760391fe26dbecdd4be58888d588b0b3eb1f44234c87";
+    "884a6fa0abab2405f4aaad6594acb5e99bd2ec522bd1031c56ea4008b256aac7";
 
 const hex = (bytes: Uint8Array): string =>
     Array.from(bytes)
