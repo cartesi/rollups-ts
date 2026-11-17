@@ -166,8 +166,14 @@ describe("JSON-RPC client", () => {
                 first.partialBundle,
             );
             expect(rest.breakReason).toBe(BreakReason.ReachedTargetMcycle);
-            expect(rest.hashes.map(hex)).toEqual(
-                local.collectMcycleRootHashes(1024n, 8, 0n, 2).hashes.map(hex),
+            const localRest = local.collectMcycleRootHashes(1024n, 8, 0n, 2);
+            expect(rest.hashes.map(hex)).toEqual(localRest.hashes.map(hex));
+            // the bundle the second call completes comes with the proof of
+            // its last leaf; the first call, half a bundle in, has none
+            expect(first.finalBundleSiblingHashes).toBeUndefined();
+            expect(rest.finalBundleSiblingHashes).toHaveLength(2);
+            expect(rest.finalBundleSiblingHashes?.map(hex)).toEqual(
+                localRest.finalBundleSiblingHashes?.map(hex),
             );
 
             expect(

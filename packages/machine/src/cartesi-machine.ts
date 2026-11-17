@@ -70,6 +70,16 @@ export const PmaConstant = {
     UarchStateLength: 0x400000n,
 } as const;
 
+/// Shadow TLB layout (cm_tlb_constant)
+export const TlbConstant = {
+    Code: 0, ///< Index of the TLB set for instruction fetches
+    Read: 1, ///< Index of the TLB set for loads
+    Write: 2, ///< Index of the TLB set for stores
+    NumSets: 3, ///< Number of TLB sets
+    SetSize: 256, ///< Number of slots in each TLB set
+    ShadowTlbSlotSize: 32, ///< Size in bytes of each slot of the shadow TLB
+} as const;
+
 /// Driver IDs for PMA entries
 export enum PmaDriverId {
     Empty = 0,
@@ -398,6 +408,14 @@ export interface McycleRootHashes {
     breakReason: BreakReason;
     /** The bundle in progress, for the next call; absent when none remains. */
     partialBundle?: PartialBundle;
+    /**
+     * When bundling and the call stopped on a sampling point that completed
+     * a bundle, or at a fixed point: the `log2BundleMcycleCount` sibling
+     * hashes, leaf to root, proving the rightmost leaf of the last bundle in
+     * `hashes` — the state root hash at the final sampling point, or at a
+     * fixed point the final one (the revert root hash for a rejected input).
+     */
+    finalBundleSiblingHashes?: Uint8Array[];
     /** A console I/O error met along the way, which does not stop collection. */
     consoleIoError?: string;
 }
