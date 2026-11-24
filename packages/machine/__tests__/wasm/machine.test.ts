@@ -410,6 +410,12 @@ describe("WebAssembly binding", () => {
             expect(machineError.description).toContain("/nonexistent");
         });
 
+        it("destroys an empty machine as a no-op", () => {
+            const machine = cartesi.empty();
+            expect(() => machine.destroy()).not.toThrow();
+            expect(machine.isEmpty()).toBe(true);
+        });
+
         it("explains what the WebAssembly build cannot do", () => {
             const machine = cartesi.create({ ram: { length: RAM_LENGTH } });
             expect(() => machine.isJsonrpcMachine()).not.toThrow();

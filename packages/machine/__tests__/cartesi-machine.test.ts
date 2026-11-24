@@ -805,6 +805,19 @@ describe("CartesiMachine", () => {
                 emptyMachine.getRootHash();
             }).toThrow();
         });
+
+        it("should destroy an empty machine as a no-op", () => {
+            const emptyMachine = empty();
+            expect(() => emptyMachine.destroy()).not.toThrow();
+            expect(emptyMachine.isEmpty()).toBe(true);
+
+            // which makes destroy idempotent, and leaves the object reusable
+            machine.destroy();
+            expect(() => machine.destroy()).not.toThrow();
+            expect(machine.isEmpty()).toBe(true);
+            machine.create({ ram: { length: 0x4000000 } });
+            expect(machine.isEmpty()).toBe(false);
+        });
     });
 
     describe("Constants and Enums", () => {

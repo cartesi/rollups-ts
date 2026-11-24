@@ -13,6 +13,8 @@ spawn(address?: string, timeout?: number): RemoteCartesiMachine
 - `address` (optional): The address (`host:port`) to bind the new remote machine server, where `host` must be `127.0.0.1`. Port can be `0` to request an ephemeral port. Defaults to `"127.0.0.1:0"`.
 - `timeout` (optional): Maximum time in milliseconds to wait for the remote server to spawn before giving up and returning an error. Use `-1` for no timeout.
 
+The server inherits the standard input, output and error streams of the calling process, and writes its log to standard error. All three must be open in the caller, which matters for a process started with its standard streams closed.
+
 ## Example
 
 ```ts twoslash

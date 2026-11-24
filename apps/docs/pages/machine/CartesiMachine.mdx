@@ -145,7 +145,7 @@ isJsonrpcMachine(): boolean;
 
 ## create
 
-Creates a new machine instance from the given configuration and optional runtime configuration. The machine object must be empty. With `dir` the machine is created on disk, which is the same as creating it in memory, storing it to `dir` and loading it back with `sharing` — `SharingMode.All` by default, so every change lands in the directory. `sharing` is ignored without a `dir`.
+Creates a new machine instance from the given configuration and optional runtime configuration. The machine object must be empty. With `dir` the machine is created on disk, which is the same as creating it in memory, storing it to `dir` and loading it back with `sharing` — `SharingMode.All` by default, so every change lands in the directory. With `SharingMode.All` the machine is in fact built directly in `dir`: it is the same machine, but the backing stores the configuration names are only read, so their `create` and `truncate` flags neither create nor truncate files outside `dir`. `sharing` is ignored without a `dir`.
 
 ```ts
 create(
@@ -158,7 +158,7 @@ create(
 
 ## load
 
-Loads a machine instance from a previously stored directory, with optional runtime configuration. The machine object must be empty. The `sharing` mode controls whether machine changes stay in-memory (`SharingMode.None`, the default) or are reflected on-disk. With `SharingMode.Config` or `SharingMode.All` the machine changes the shared backing store files in `dir`, and the directory holds a valid machine again only once `destroy` and then [syncStored](#syncstored) have succeeded; if the process stops before that, discard the directory.
+Loads a machine instance from a previously stored directory, with optional runtime configuration. The machine object must be empty. The `sharing` mode controls whether machine changes stay in-memory (`SharingMode.None`, the default) or are reflected on-disk. With `SharingMode.Config` or `SharingMode.All` the machine changes the shared backing store files in `dir`. Once [destroy](#destroy) succeeds, processes on the same host see a valid machine there, but the files are durable only after [syncStored](#syncstored) then succeeds. Discard the directory if the process stops before `destroy` succeeds, or if the system stops — a crash, a power loss — before the sync does.
 
 ```ts
 load(
@@ -194,7 +194,7 @@ cloneStored(fromDir: string, toDir: string): void;
 
 ## renameStored
 
-Renames a stored machine directory and makes the rename durable. The source and destination must be on the same filesystem.
+Renames a stored machine directory and makes the rename durable. The source and destination must be on the same filesystem, and the source cannot be a symbolic link.
 
 ```ts
 renameStored(fromDir: string, toDir: string): void;
@@ -202,7 +202,7 @@ renameStored(fromDir: string, toDir: string): void;
 
 ## removeStored
 
-Removes a stored machine directory, durably. In `RemoveMode.Stored`, the default, the directory must be empty or hold a loadable stored machine and nothing else; `RemoveMode.Forced` also removes a directory holding any regular files, such as the incomplete machine an interrupted `store` or `cloneStored` leaves behind. In both modes nothing is removed if the directory holds anything but regular files, and an interrupted removal is completed by calling again with the same mode.
+Removes a stored machine directory, durably. In `RemoveMode.Stored`, the default, the directory must be empty or hold a loadable stored machine and nothing else; `RemoveMode.Forced` also removes a directory holding any regular files, such as the incomplete machine an interrupted `store` or `cloneStored` leaves behind. In both modes nothing is removed if the directory is a symbolic link or holds anything but regular files, and an interrupted removal is completed by calling again with the same mode.
 
 ```ts
 removeStored(dir: string, mode?: RemoveMode): void;
@@ -218,7 +218,7 @@ syncStored(dir: string): void;
 
 ## destroy
 
-Destroys the current machine instance and removes it from the object. Does not delete the machine object itself.
+Destroys the current machine instance and removes it from the object. Does not delete the machine object itself, which can be created or loaded into again. Destroying an empty machine object does nothing and succeeds. The machine saves its pending dirty page marks on the way out; if that fails it is destroyed all the same, and the failure is thrown.
 
 ```ts
 destroy(): void;
