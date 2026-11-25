@@ -8,7 +8,7 @@ export type { ContractFilter };
  * rollups-contracts version used by default when `artifacts` and
  * `deployments` are omitted.
  */
-export const DEFAULT_VERSION = "3.0.0-alpha.10";
+export const DEFAULT_VERSION = "3.0.0-beta.1";
 
 const defaultReleaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${DEFAULT_VERSION}`;
 
@@ -18,7 +18,7 @@ const defaultReleaseUrl = `https://github.com/cartesi/rollups-contracts/releases
  */
 export const DEFAULT_ARTIFACTS: TarballSource = {
     url: `${defaultReleaseUrl}/cartesi-rollups-contracts-${DEFAULT_VERSION}-artifacts.tar.gz`,
-    sha256: "5213ce59d0f5a1c4fef4ebf17b6ef999be709c32b4b94511c320729bb2afa959",
+    sha256: "fef35c40f30805301c1e5ca238e7c54f2ca585b539c692d88c640b3aee6f639d",
 };
 
 /**
@@ -27,7 +27,7 @@ export const DEFAULT_ARTIFACTS: TarballSource = {
  */
 export const DEFAULT_DEPLOYMENTS: TarballSource = {
     url: `${defaultReleaseUrl}/cartesi-rollups-contracts-${DEFAULT_VERSION}-deployment-addresses.tar.gz`,
-    sha256: "ba92d98c5f1ccbc3edf3b05e3717dc7292f56187b363f86d2569d00b6eedf4b5",
+    sha256: "a73388630483740a55c08ee06be0e41303b20621a65b6dbc7d7e3b61ccb3f93e",
 };
 
 /**
@@ -45,7 +45,7 @@ export const DEFAULT_ANVIL_VERSION = "1.5.1";
  */
 export const DEFAULT_ANVIL: TarballSource = {
     url: `${defaultReleaseUrl}/cartesi-rollups-contracts-${DEFAULT_VERSION}-anvil-${DEFAULT_ANVIL_VERSION}.tar.gz`,
-    sha256: "fb38dc6e1faf238a152453dfd351ae5899d99fd35e9c675b4dce97cd6b05a68b",
+    sha256: "e33bd8d641533667257046ca5c7626fdf265d3e617fabdd44ba589653e6fadc0",
 };
 
 /**
