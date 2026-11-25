@@ -12,7 +12,7 @@ While in pre-release, the plugin is published under the `alpha` npm tag. The `@a
 
 ## Usage
 
-Add `rollupsContracts` to your `wagmi.config.ts`. By default it uses the tarballs of the rollups-contracts `v3.0.0-alpha.10` GitHub release, verified against known SHA-256 hashes.
+Add `rollupsContracts` to your `wagmi.config.ts`. By default it uses the tarballs of the rollups-contracts `v3.0.0-beta.1` GitHub release, verified against known SHA-256 hashes.
 
 ```ts
 import { rollupsContracts } from "@cartesi/wagmi-plugin";
@@ -35,17 +35,17 @@ pnpm wagmi generate
 Point `artifacts` and `deployments` at the tarballs of another rollups-contracts release, optionally with an expected SHA-256 hash for integrity verification:
 
 ```ts
-const version = "3.0.0-alpha.10";
+const version = "3.0.0-beta.1";
 const releaseUrl = `https://github.com/cartesi/rollups-contracts/releases/download/v${version}`;
 
 rollupsContracts({
     artifacts: {
         url: `${releaseUrl}/cartesi-rollups-contracts-${version}-artifacts.tar.gz`,
-        sha256: "5213ce59d0f5a1c4fef4ebf17b6ef999be709c32b4b94511c320729bb2afa959",
+        sha256: "fef35c40f30805301c1e5ca238e7c54f2ca585b539c692d88c640b3aee6f639d",
     },
     deployments: {
         url: `${releaseUrl}/cartesi-rollups-contracts-${version}-deployment-addresses.tar.gz`,
-        sha256: "ba92d98c5f1ccbc3edf3b05e3717dc7292f56187b363f86d2569d00b6eedf4b5",
+        sha256: "a73388630483740a55c08ee06be0e41303b20621a65b6dbc7d7e3b61ccb3f93e",
     },
 });
 ```
