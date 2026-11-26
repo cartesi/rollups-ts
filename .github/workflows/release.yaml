@@ -195,6 +195,12 @@ jobs:
                   wget -O /tmp/machine-emulator.deb "https://github.com/cartesi/machine-emulator/releases/download/v${CARTESI_MACHINE_VERSION}/machine-emulator_$(dpkg --print-architecture).deb"
                   sudo apt-get update && sudo apt-get install -y /tmp/machine-emulator.deb
 
+            # the macos-15-intel image is frozen on Homebrew 6.0.18, which
+            # cannot read the tap's bottle blocks (manifest_sha256 needs 7.0.14+)
+            - name: Update Homebrew (macos x64)
+              if: runner.os == 'macOS' && runner.arch == 'X64'
+              run: brew update
+
             - name: Install cartesi-machine emulator (macos)
               if: runner.os == 'macOS'
               run: brew install cartesi/tap/cartesi-machine-emulator
