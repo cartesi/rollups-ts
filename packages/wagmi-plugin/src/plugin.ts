@@ -52,7 +52,7 @@ export const DEFAULT_ANVIL: TarballSource = {
  * dave version used by default when `artifacts`, `deployments` and `anvil`
  * are omitted from the `prt` option of `rollupsContracts`.
  */
-export const PRT_DEFAULT_VERSION = "3.0.0-alpha.6";
+export const PRT_DEFAULT_VERSION = "3.0.0-beta.1";
 
 const prtDefaultReleaseUrl = `https://github.com/cartesi/dave/releases/download/v${PRT_DEFAULT_VERSION}`;
 
@@ -62,7 +62,7 @@ const prtDefaultReleaseUrl = `https://github.com/cartesi/dave/releases/download/
  */
 export const PRT_DEFAULT_ARTIFACTS: TarballSource = {
     url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-contract-artifacts.tar.gz`,
-    sha256: "6938b679cddeef51becc5ca512fa9e2d0dfb0a55686985b2803e1ce7ba004ad4",
+    sha256: "efcb9dacb5785455d0f17e3fb8be14406edec0c141b67b70ee8b4b3a5c49a10c",
 };
 
 /**
@@ -71,7 +71,7 @@ export const PRT_DEFAULT_ARTIFACTS: TarballSource = {
  */
 export const PRT_DEFAULT_DEPLOYMENTS: TarballSource = {
     url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-deployment-addresses.tar.gz`,
-    sha256: "eba0406121de5009551504785bdaecfd99526bc62a2afc7a06298ba573100e52",
+    sha256: "238cd16a337a459b91cdea67fc91b33ca0af71241fcc7970f8bbc523c6b20f1b",
 };
 
 /**
@@ -83,7 +83,7 @@ export const PRT_DEFAULT_DEPLOYMENTS: TarballSource = {
  */
 export const PRT_DEFAULT_EXPERIMENTAL_DEPLOYMENTS: TarballSource = {
     url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-deployment-addresses-experimental.tar.gz`,
-    sha256: "bd56b8fbaf6645c86a0423a9bcfa36f968ecdd41ef05d0b44222045319948126",
+    sha256: "bf10c218088f2a8b8051cd8514571df852ed941add0e7ce43734dbc726b91f4f",
 };
 
 /**
@@ -102,7 +102,7 @@ export const PRT_DEFAULT_ANVIL_VERSION = "1.5.1";
  */
 export const PRT_DEFAULT_ANVIL: TarballSource = {
     url: `${prtDefaultReleaseUrl}/cartesi-rollups-prt-${PRT_DEFAULT_VERSION}-anvil-${PRT_DEFAULT_ANVIL_VERSION}.tar.gz`,
-    sha256: "62500dc3558fbb1f289d99584cd8989d7b42d0c0e7e7a13b8f2d309746e9163e",
+    sha256: "a5e80094ee1556be95685227d07e7d4188a04dd55cc9762bf93e5ea1730c58c2",
 };
 
 /**
