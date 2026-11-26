@@ -5,10 +5,10 @@ Cartesi branding for [Vocs](https://vocs.dev) v2 documentation sites: the brand 
 ## Installation
 
 ```sh
-npm install @cartesi/vocs-theme@alpha
+npm install @cartesi/vocs-theme@beta
 ```
 
-While in pre-release, the library is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
+While in pre-release, the library is published under the `beta` npm tag. The `@beta` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
 
 It needs `vocs` 2.11 or later and React 19, which a Vocs site already has.
 

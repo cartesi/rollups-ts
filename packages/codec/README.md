@@ -7,10 +7,10 @@ Inputs delivered to a Cartesi application and outputs produced by it are ABI-enc
 ## Installation
 
 ```sh
-npm install @cartesi/codec@alpha
+npm install @cartesi/codec@beta
 ```
 
-While in pre-release, the library is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
+While in pre-release, the library is published under the `beta` npm tag. The `@beta` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
 
 The CommonJS entry point requires Node.js 22.12 or newer, where `require()` of an ES module is unflagged; ox publishes no CommonJS build of its own. The ESM entry point has no such requirement.
 

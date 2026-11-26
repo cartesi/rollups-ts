@@ -5,10 +5,10 @@ The Cartesi visual identity as a package: the four brand colours, the two typefa
 ## Installation
 
 ```sh
-npm install @cartesi/brand@alpha
+npm install @cartesi/brand@beta
 ```
 
-While in pre-release, the library is published under the `alpha` npm tag. The `@alpha` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
+While in pre-release, the library is published under the `beta` npm tag. The `@beta` suffix is required: without it npm resolves the `latest` tag, which does not point to the version documented here.
 
 ## Usage
 
