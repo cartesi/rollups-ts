@@ -1,5 +1,17 @@
 # @cartesi/wagmi-plugin
 
+## 1.0.0-alpha.10
+
+### Minor Changes
+
+- a45ceeb: move the default rollups-contracts to 3.0.0-beta.1, with new SHA-256 hashes for the artifacts, deployment addresses and anvil devnet tarballs. The release is additive: the application and authority factories gain reserved deterministic deployments (`newReservedApplication`, `calculateReservedApplicationAddress`, `newReservedAuthority`, `calculateReservedAuthorityAddress`), and no existing ABI changed.
+
+### Patch Changes
+
+- 0afccf1: Move the default dave release to 3.0.0-beta.1.
+  
+  It is a new deployment generation built against rollups-contracts 3.0.0-beta.1, so every PRT address moves along with the rollups contracts it shares. dave's own `IApplicationFactory` gains the reserved deployment functions, and no other ABI changed.
+
 ## 1.0.0-alpha.9
 
 ### Patch Changes

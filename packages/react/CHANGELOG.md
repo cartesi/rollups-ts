@@ -1,5 +1,18 @@
 # @cartesi/react
 
+## 2.0.0-alpha.46
+
+### Major Changes
+
+- 0afccf1: regenerate the PRT contracts from dave 3.0.0-beta.1. Every PRT address changed, `DaveAppFactory`, `CartesiStateTransition` and `MultiLevelTournamentFactory` among them, and `calculateDaveAppAddress` returns other addresses than before for the same arguments. The state transition now qualifies Cartesi Machine v0.23, so templates built with v0.22 are refused.
+- a45ceeb: regenerate the contracts from rollups-contracts 3.0.0-beta.1. Every deployment address changed, on the livenets and the devnet alike, so any address read from these packages must be taken again — `inputBoxAddress`, the portal addresses `decodeDeposit` dispatches on, and the factory addresses among them. No existing ABI changed. `@cartesi/client` and `@cartesi/react` additionally generate the reserved deployment functions the application and authority factories gain (`newReservedApplication`, `calculateReservedApplicationAddress`, `newReservedAuthority`, `calculateReservedAuthorityAddress`).
+
+### Patch Changes
+
+- Updated dependencies [0afccf1]
+- Updated dependencies [a45ceeb]
+  - @cartesi/client@2.0.0-alpha.42
+
 ## 2.0.0-alpha.45
 
 ### Patch Changes

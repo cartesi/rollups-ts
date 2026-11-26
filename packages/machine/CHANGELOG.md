@@ -1,5 +1,11 @@
 # @cartesi/machine
 
+## 1.0.0-alpha.4
+
+### Minor Changes
+
+- 3d704a4: target cartesi-machine emulator 0.23: `create` takes the sharing mode of a machine created on disk (`SharingMode.All` by default, as before), `removeStored` takes a `RemoveMode` so that the directory an interrupted store leaves behind can be removed (`RemoveMode.Forced`), `clearHashTree` and the `clear_hash_tree` runtime option rebuild the hash tree from scratch, `collectMcycleRootHashes` returns the `finalBundleSiblingHashes` proving the last state root hash of a bundle it completes, `TlbConstant` names the shadow TLB layout, `destroy` on an empty machine is a no-op instead of an error, and the WebAssembly module ABI goes to 3. The WebAssembly and HTTP bindings now default `store` to `SharingMode.All`, as the Node binding and the documentation already did
+
 ## 1.0.0-alpha.3
 
 ### Minor Changes
